@@ -12,7 +12,7 @@ const logger = require('../lib/logger')
 const errorHelper = require('./helpers/error')
 
 const constantsDefine = require('../constants')
-const contractInformationnewOrder = require('../orderTemplate/contractInformationnewOrder.json')
+const newOrderTemplate = require('../orderTemplate/contractInformationnewOrder.json')
 
 // CSR対策
 const csrf = require('csurf')
@@ -130,6 +130,9 @@ const cbPostRegister = async (req, res, next) => {
 
   if (req.body?.termsCheck !== 'on') return next(errorHelper.create(400))
 
+  // オーダーテンプレート情報の取得
+  const contractInformationnewOrder = JSON.parse(JSON.stringify(newOrderTemplate))
+
   // contractBasicInfo 設定
   contractInformationnewOrder.contractBasicInfo.tradeshiftId = req.user.tenantId
   contractInformationnewOrder.contractBasicInfo.orderType = constantsDefine.statusConstants.orderTypeNewOrder
@@ -154,6 +157,21 @@ const cbPostRegister = async (req, res, next) => {
   contractInformationnewOrder.contactList[0].contactPersonName = req.body.contactPersonName
   contractInformationnewOrder.contactList[0].contactPhoneNumber = req.body.contactPhoneNumber
   contractInformationnewOrder.contactList[0].contactMail = req.body.contactMail
+  // 請求情報
+  contractInformationnewOrder.contactList[0].billMailingPostalNumber = req.body.postalNumber
+  contractInformationnewOrder.contactList[0].billMailingAddress = req.body.contractAddressVal
+  contractInformationnewOrder.contactList[0].billMailingAddressBanchi1 = req.body.banch1
+  contractInformationnewOrder.contactList[0].billMailingAddressBuilding1 = req.body.tatemono1
+  contractInformationnewOrder.contactList[0].billMailingKanaName = req.body.contractorKanaName
+    ? req.body.contractorKanaName.substring(0, 40)
+    : ''
+  contractInformationnewOrder.contactList[0].billMailingName = req.body.contractorName
+    ? req.body.contractorName.substring(0, 35)
+    : ''
+  // 請求連絡先情報
+  contractInformationnewOrder.contactList[0].billMailingPersonName = req.body.contactPersonName
+  contractInformationnewOrder.contactList[0].billMailingPhoneNumber = req.body.contactPhoneNumber
+  contractInformationnewOrder.contactList[0].billMailingMailAddress = req.body.contactMail
 
   // ユーザ登録と同時にテナント登録も行われる
   const user = await userController.create(req.user.accessToken, req.user.refreshToken, contractInformationnewOrder)

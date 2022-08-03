@@ -10,6 +10,8 @@ const constantsDefine = require('../constants')
 const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
 const uploadFormatController = require('../controllers/uploadFormatController')
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -54,7 +56,8 @@ const cbGetIndex = async (req, res, next) => {
     ...getDataForUploadFormat,
     csvTax: csvTax,
     csvUnit: csvUnit,
-    uploadFormatId: req.params.uploadFormatId
+    uploadFormatId: req.params.uploadFormatId,
+    csrfToken: req.csrfToken()
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
@@ -116,8 +119,8 @@ const cbPostIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
 }
 
-router.get('/:uploadFormatId', helper.isAuthenticated, cbGetIndex)
-router.post('/:uploadFormatId', helper.isAuthenticated, cbPostIndex)
+router.get('/:uploadFormatId', helper.isAuthenticated, csrfProtection, cbGetIndex)
+router.post('/:uploadFormatId', helper.isAuthenticated, csrfProtection, cbPostIndex)
 
 module.exports = {
   router: router,

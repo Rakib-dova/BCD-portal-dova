@@ -15,16 +15,17 @@ block content
           if itemCount === 0
             p 現在、PDF請求書はありません。新規登録するボタンから登録を行ってください。
           else
+            p ※出力された請求書は一覧から削除されますので、出力後はご自身でPDF請求書の保管をお願いいたします。
+            p 　
             table.table.is-fullwidth.is-hoverable.table-fixed
               thead
                 tr
                   th.width-5.text-center No
                   th.width-13.text-center 請求書番号
-                  th.width-13.text-center 宛先
+                  th.width-23.text-center 宛先
                   th.width-10.text-center 金額
+                  th.width-10.text-center 支払期限日
                   th.width-10.text-center 更新日
-                  th.width-10.text-center 期限日
-                  th.width-10.text-center ステータス
                   th.width-10.text-center 
               tbody#item-list
 
@@ -34,9 +35,8 @@ block content
                   td.text-center.td-overflow.invoiceNo
                   td.text-center.td-overflow.recCompany
                   td.has-text-right.td-overflow.total
-                  td.text-center.td-overflow.updatedAt
                   td.text-center.td-overflow.paymentDate
-                  td.text-center.td-overflow.status
+                  td.text-center.td-overflow.updatedAt
                   td.text-center.link-btn
 
             nav.pagination.is-centered(role='navigation' aria-label='pagination')

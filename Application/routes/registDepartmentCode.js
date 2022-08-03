@@ -11,6 +11,8 @@ const contractController = require('../controllers/contractController.js')
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
 const departmentCodeController = require('../controllers/departmentCodeController')
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
 
 const cbGetRegistDepartmentCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetRegistDepartmentCode')
@@ -60,7 +62,8 @@ const cbGetRegistDepartmentCode = async (req, res, next) => {
     pTagForcheckInput1: 'checksetDepartmentCodeInputId',
     pTagForcheckInput2: 'checksetDepartmentCodeNameInputId',
     checkModalLabel1: '部門コード',
-    checkModalLabel2: '部門名'
+    checkModalLabel2: '部門名',
+    csrfToken: req.csrfToken()
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetRegistDepartmentCode')
@@ -121,8 +124,8 @@ const cbPostRegistDepartmentCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostRegistDepartmentCode')
 }
 
-router.get('/', helper.isAuthenticated, cbGetRegistDepartmentCode)
-router.post('/', helper.isAuthenticated, cbPostRegistDepartmentCode)
+router.get('/', helper.isAuthenticated, csrfProtection, cbGetRegistDepartmentCode)
+router.post('/', helper.isAuthenticated, csrfProtection, cbPostRegistDepartmentCode)
 
 module.exports = {
   router: router,

@@ -11,6 +11,8 @@ const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
 const inboxController = require('../controllers/inboxController')
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -29,25 +31,46 @@ const cbGetIndex = async (req, res, next) => {
   if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
 
   // DBから契約情報取得
-  const contract = await contractController.findOne(req.user.tenantId)
+  // const contract = await contractController.findOne(req.user.tenantId)
   // データベースエラーは、エラーオブジェクトが返る
-  // 契約情報未登録の場合もエラーを上げる
-  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+  // // 契約情報未登録の場合もエラーを上げる
+  // if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
 
   req.session.userContext = 'LoggedIn'
 
   // ユーザ権限を取得
   req.session.userRole = user.dataValues?.userRole
-  const deleteFlag = contract.dataValues.deleteFlag
-  const contractStatus = contract.dataValues.contractStatus
-  const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
+  // const deleteFlag = contract.dataValues.deleteFlag
+  // const contractStatus = contract.dataValues.contractStatus
+  // const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
 
-  if (checkContractStatus === null || checkContractStatus === 999) {
-    return next(errorHelper.create(500))
-  }
+  // if (checkContractStatus === null || checkContractStatus === 999) {
+  //   return next(errorHelper.create(500))
+  // }
 
-  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
-    return next(noticeHelper.create('cancelprocedure'))
+  // if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
+  //   return next(noticeHelper.create('cancelprocedure'))
+  // }
+
+  // テナントIDに紐付いている全ての契約情報を取得
+  const contracts = await contractController.findContractsBytenantId(req.user.tenantId)
+  if (!contracts || !Array.isArray(contracts) || contracts.length === 0) return next(errorHelper.create(500))
+
+  // BCD無料アプリの契約情報確認
+  const bcdContract = contracts.find((contract) => contract.serviceType === '010' && contract.deleteFlag === false)
+  if (!bcdContract || !bcdContract.contractStatus) return next(errorHelper.create(500))
+
+  // 現在解約中か確認
+  if (validate.isBcdCancelling(bcdContract)) return next(noticeHelper.create('cancelprocedure'))
+
+  // bcdAuthenticateを利用して、ユーザー権限確認すると決めた場合
+  // const user = req.dbUser
+  // const contracts = req.contracts
+
+  let presentation = 'inboxList'
+  const lightPlan = await contractController.findLightPlan(req.user.tenantId)
+  if (lightPlan) {
+    presentation = 'inboxList_light_plan'
   }
 
   // ページ取得
@@ -55,12 +78,12 @@ const cbGetIndex = async (req, res, next) => {
   const refreshToken = req.user.refreshToken
   const pageId = ~~req.params.page
   const tenantId = user.tenantId
-  const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId)
+  const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId, presentation)
 
   // 請求書の承認依頼検索
   for (let i = 0; i < result.list.length; i++) {
     const requestApproval = await requestApprovalController.findOneRequestApproval(
-      contract.contractId,
+      bcdContract.contractId,
       result.list[i].documentId
     )
 
@@ -71,19 +94,17 @@ const cbGetIndex = async (req, res, next) => {
     }
   }
 
-  let rejectedFlag = false
-
-  if (req.session.waitingApprovalList) {
-    rejectedFlag = true
-    delete req.session.waitingApprovalList
-  }
+  const rejectedFlag = false
 
   // 受領した請求書一覧レンダリング
-  res.render('inboxList', {
+  res.render(presentation, {
     listArr: result.list,
     numPages: result.numPages,
     currPage: result.currPage,
-    rejectedFlag: rejectedFlag
+    rejectedFlag: rejectedFlag,
+    csrfToken: req.csrfToken(),
+    userRole: req.session.userRole,
+    contractPlan: req.contractPlan
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
@@ -135,7 +156,13 @@ const cbGetWorkflow = async (req, res, next) => {
     user.tenantId
   )
 
-  const workflow = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO)
+  let presentation
+  const lightPlan = await contractController.findLightPlan(req.user.tenantId)
+  if (lightPlan) {
+    presentation = 'inboxList_light_plan'
+  }
+
+  const workflow = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO, presentation)
 
   if (workflow instanceof Error === true) res.status(500).send('サーバーエラーが発生しました。')
 
@@ -181,12 +208,18 @@ const cbGetApprovals = async (req, res, next) => {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
+  let presentation = 'inboxList'
+  const lightPlan = await contractController.findLightPlan(req.user.tenantId)
+  if (lightPlan) {
+    presentation = 'inboxList_light_plan'
+  }
+
   // ページ取得
   const accessToken = req.user.accessToken
   const refreshToken = req.user.refreshToken
   const pageId = 1
   const tenantId = user.tenantId
-  const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId)
+  const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId, presentation)
 
   // 請求書の承認依頼検索
   for (let i = 0; i < result.list.length; i++) {
@@ -202,19 +235,17 @@ const cbGetApprovals = async (req, res, next) => {
     }
   }
 
-  let rejectedFlag = true
-
-  if (req.session.waitingApprovalList) {
-    rejectedFlag = true
-    delete req.session.waitingApprovalList
-  }
+  const rejectedFlag = true
 
   // 受領した請求書一覧レンダリング
-  res.render('inboxList', {
+  res.render(presentation, {
     listArr: result.list,
     numPages: result.numPages,
     currPage: result.currPage,
-    rejectedFlag: rejectedFlag
+    rejectedFlag: rejectedFlag,
+    csrfToken: req.csrfToken(),
+    userRole: req.session.userRole,
+    contractPlan: req.contractPlan
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetApprovals')
@@ -237,27 +268,48 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
   if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
 
-  // DBから契約情報取得
-  const contract = await contractController.findOne(req.user.tenantId)
-  // データベースエラーは、エラーオブジェクトが返る
-  // 契約情報未登録の場合もエラーを上げる
-  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+  // // DBから契約情報取得
+  // const contract = await contractController.findOne(req.user.tenantId)
+  // // データベースエラーは、エラーオブジェクトが返る
+  // // 契約情報未登録の場合もエラーを上げる
+  // if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
 
   req.session.userContext = 'LoggedIn'
 
   // ユーザ権限を取得
   req.session.userRole = user.dataValues?.userRole
-  const deleteFlag = contract.dataValues.deleteFlag
-  const contractStatus = contract.dataValues.contractStatus
-  const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
+  // const deleteFlag = contract.dataValues.deleteFlag
+  // const contractStatus = contract.dataValues.contractStatus
+  // const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
 
-  if (checkContractStatus === null || checkContractStatus === 999) {
-    return next(errorHelper.create(500))
-  }
+  // if (checkContractStatus === null || checkContractStatus === 999) {
+  //   return next(errorHelper.create(500))
+  // }
 
-  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
-    return next(noticeHelper.create('cancelprocedure'))
+  // if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
+  //   return next(noticeHelper.create('cancelprocedure'))
+  // }
+
+  // テナントIDに紐付いている全ての契約情報を取得
+  const contracts = await contractController.findContractsBytenantId(req.user.tenantId)
+  if (!contracts || !Array.isArray(contracts) || contracts.length === 0) return next(errorHelper.create(500))
+
+  // BCD無料アプリの契約情報確認
+  const bcdContract = contracts.find((contract) => contract.serviceType === '010' && contract.deleteFlag === false)
+  if (!bcdContract || !bcdContract.contractStatus) return next(errorHelper.create(500))
+
+  // 現在解約中か確認
+  if (validate.isBcdCancelling(bcdContract)) return next(noticeHelper.create('cancelprocedure'))
+
+  // bcdAuthenticateを利用して、ユーザー権限確認すると決めた場合
+  // const user = req.dbUser
+  // const contracts = req.contracts
+
+  const lightPlan = await contractController.findLightPlan(req.user.tenantId)
+  if (!lightPlan) {
+    return res.redirect('/inboxList/1')
   }
+  const presentation = 'inboxList_light_plan'
 
   // ページ取得
   const accessToken = req.user.accessToken
@@ -270,10 +322,36 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
   const sentBy = req.body.sentBy || []
   const status = req.body.status || []
   const contactEmail = req.body.managerAddress
+  const unKnownManager = req.body.unKnownManager
+
+  switch (validate.isContactEmail(contactEmail)) {
+    case -1:
+      logger.info(
+        `contractId:${bcdContract.contractId}, msg: ${constantsDefine.statusConstants.INBOXLIST_CONTACT_EMAIL_NOT_VERIFY_TYPE}`
+      )
+      req.flash('noti', ['支払依頼一覧', constantsDefine.statusConstants.INBOXLIST_CONTACT_EMAIL_NOT_VERIFY_TYPE])
+      return res.redirect('/inboxList/1')
+    case -2:
+      logger.info(
+        `contractId:${bcdContract.contractId}, msg: ${constantsDefine.statusConstants.INBOXLIST_CONTACT_EMAIL_NOT_VERIFY_SPACE}`
+      )
+      req.flash('noti', ['支払依頼一覧', constantsDefine.statusConstants.INBOXLIST_CONTACT_EMAIL_NOT_VERIFY_SPACE])
+      return res.redirect('/inboxList/1')
+    default:
+      // 成功の場合
+      break
+  }
 
   const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(accessToken, refreshToken, tenantId)
-  const keyword = { invoiceNumber, issueDate: [minIssuedate, maxIssuedate], sentBy, status, contactEmail }
-  const resultList = await inboxController.getSearchResult(tradeshiftDTO, keyword, contract.contractId)
+  const keyword = {
+    invoiceNumber,
+    issueDate: [minIssuedate, maxIssuedate],
+    sentBy,
+    status,
+    contactEmail,
+    unKnownManager
+  }
+  const resultList = await inboxController.getSearchResult(tradeshiftDTO, keyword, bcdContract.contractId, tenantId)
 
   if (resultList instanceof Error) {
     if (String(resultList.response?.status).slice(0, 1) === '4') {
@@ -288,28 +366,34 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
 
   // 支払一覧画面レンダリング
   if (resultList.length !== 0) {
-    res.render('inboxList', {
-      listArr: resultList,
-      numPages: 1,
-      currPage: 1,
-      rejectedFlag: false
-    })
-  } else {
-    res.render('inboxList', {
+    res.render(presentation, {
       listArr: resultList,
       numPages: 1,
       currPage: 1,
       rejectedFlag: false,
-      message: '条件に合致する支払依頼が見つかりませんでした。'
+      csrfToken: req.csrfToken(),
+      userRole: req.session.userRole,
+      contractPlan: req.contractPlan
+    })
+  } else {
+    res.render(presentation, {
+      listArr: resultList,
+      numPages: 1,
+      currPage: 1,
+      rejectedFlag: false,
+      message: '条件に合致する支払依頼が見つかりませんでした。',
+      csrfToken: req.csrfToken(),
+      userRole: req.session.userRole,
+      contractPlan: req.contractPlan
     })
   }
   logger.info(constantsDefine.logMessage.INF001 + 'cbSearchApprovedInvoice')
 }
 
 router.get('/getWorkflow', cbGetWorkflow)
-router.get('/approvals', helper.isAuthenticated, cbGetApprovals)
-router.get('/:page', helper.isAuthenticated, cbGetIndex)
-router.post('/:page', helper.isAuthenticated, cbSearchApprovedInvoice)
+router.get('/approvals', helper.isAuthenticated, helper.getContractPlan, csrfProtection, cbGetApprovals)
+router.get('/:page', csrfProtection, helper.bcdAuthenticate, helper.getContractPlan, cbGetIndex)
+router.post('/:page', csrfProtection, helper.bcdAuthenticate, helper.getContractPlan, cbSearchApprovedInvoice)
 
 module.exports = {
   router: router,

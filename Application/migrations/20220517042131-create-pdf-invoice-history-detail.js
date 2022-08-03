@@ -11,7 +11,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.UUID,
         references: {
-          model: { tableName: 'pdfInvoiceHistorys' },
+          model: { tableName: 'pdfInvoiceHistories' },
           key: 'historyId'
         },
         onUpdate: 'cascade',

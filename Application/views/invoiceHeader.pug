@@ -2,12 +2,12 @@
   .columns.m-0
     .column-header.is-2-header.text-inbox.text-inbox-subtitle.text-inbox-common
       | 請求書番号 
-    .column-header.text-inbox-common
+    .column-header.text-inbox-common#InvoiceNumber
       | #{invoiceId}
   .columns.m-0
     .column
   .columns.m-0.wraper-columns
-    .column-header
+    .column-header#invoiceRecipient
       p.text-inbox.text-inbox-subtitle.text-inbox-common 宛先
         if customer
           if customer.name !== 0
@@ -52,7 +52,7 @@
               .column.p-0
                 | 法人番号：#{id.value}
 
-    .column-header
+    .column-header#invoiceSender
       p.text-inbox.text-inbox-subtitle.text-inbox-common 差出人
       if supplier
         if customer !== 0

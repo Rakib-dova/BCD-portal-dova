@@ -11,6 +11,9 @@ const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
 const departmentCodeController = require('../controllers/departmentCodeController')
 
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
+
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
   // 認証情報取得処理
@@ -71,12 +74,13 @@ const cbGetIndex = async (req, res, next) => {
     prevLocation: '/uploadDepartment',
     prevLocationName: '←部門データ一括作成',
     // 削除モーダル表示
-    deleteModalTitle: '部門データ削除'
+    deleteModalTitle: '部門データ削除',
+    csrfToken: req.csrfToken()
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
-router.get('/', helper.isAuthenticated, cbGetIndex)
+router.get('/', helper.isAuthenticated, csrfProtection, cbGetIndex)
 
 module.exports = {
   router: router,

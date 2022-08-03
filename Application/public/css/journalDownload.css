@@ -1,0 +1,146 @@
+.lockBorder {
+  border-left: 1px solid;
+  padding-block: 12px;
+  margin: 16px;
+}
+
+.lockText {
+  font-size: 15px;
+  font-weight: normal;
+}
+
+.midSpace {
+  margin: 16px;
+}
+
+.select select:not([multiple]) {
+  padding-right: 8.5em !important;
+}
+
+/* For lock-select options */
+
+.ms-pr {
+  position: relative;
+}
+
+.ms-dd {
+  background: #fff;
+  display: inline-block;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  vertical-align: top;
+  min-width: 450px;
+}
+
+.ms-dd .ms-value-input {
+  border: 0;
+  left: 20px;
+  position: absolute;
+  top: 10px;
+  width: 50%;
+}
+
+.ms-dd .ms-dd-header {
+  border: 1px solid #dbdbdb;
+  border-radius: 4px;
+  cursor: pointer;
+  min-height: 35px;
+  position: relative;
+  width: 100%;
+}
+
+.ms-dd .ms-dd-header .option-selected {
+  display: block;
+  overflow: hidden;
+  border-radius: 4px;
+  box-shadow: inset 0 0.0625em 0.125em rgb(10 10 10 / 5%);
+  pointer-events: none;
+}
+
+.ms-dd .ms-dd-header .ms-filter-box input,
+.ms-dd .ms-dd-header .ms-filter-box input:focus,
+.ms-dd .ms-dd-header .ms-filter-box input:focus-visible {
+  border: 1px solid #dbdbdb;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  padding-left: 6px;
+  width: 100%;
+}
+
+.ms-dd .ms-dd-option-image,
+.ms-dd .ms-dd-selected-img {
+  margin-right: 5px;
+  margin-top: 4px;
+  vertical-align: middle;
+  width: 15px;
+  height: 15px;
+  opacity: 0.7;
+}
+
+.ms-dd .ms-options {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-top: none;
+  box-shadow: 0 1px 5px #ddd;
+  display: none;
+  list-style: none;
+  margin: 0;
+  overflow: auto;
+  padding: 0;
+  position: absolute;
+  width: 100%;
+  z-index: 9999;
+}
+
+.ms-dd .ms-list-option,
+.ms-dd .ms-optgroup ul .ms-list-option {
+  align-items: center;
+  color: #4a4a4a;
+  cursor: pointer;
+  display: flex;
+  justify-content: flex-start;
+  overflow: hidden;
+  padding: 8px 10px;
+  position: relative;
+  text-decoration: none;
+}
+
+.ms-dd .ms-list-option:hover,
+.ms-dd .ms-optgroup ul .ms-list-option:hover,
+li.ms-list-option.enabled.option-selected {
+  background: #1e90ff;
+  color: #fff;
+}
+
+.ms-dd .ms-list-option.option-selected {
+  background: #fff;
+}
+
+.ms-dd .ms-optgroup ul .ms-list-option.option-selected {
+  background: #1e90ff;
+}
+
+.ms-dd .ms-list-option.ico-align-right .ms-dd-option-image,
+.ms-dd .ms-list-option.ico-align-right .ms-dd-selected-img,
+.ms-dd .ms-optgroup ul .ms-list-option.ico-align-right .ms-dd-option-image,
+.ms-dd .ms-optgroup ul .ms-list-option.ico-align-right .ms-dd-selected-img {
+  order: 2;
+}
+
+.ms-dd .ms-list-option.disabled,
+.ms-dd .ms-list-option:disabled,
+.ms-dd .ms-optgroup ul .ms-list-option.disabled,
+.ms-dd .ms-optgroup ul .ms-list-option:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.ms-dd .ms-header-middle-content,
+.ms-dd .ms-middle {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+}

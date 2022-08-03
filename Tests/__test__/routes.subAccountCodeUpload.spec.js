@@ -83,12 +83,14 @@ describe('accountCodeUploadのテスト', () => {
       expect(subAccountCodeUpload.router.get).toBeCalledWith(
         '/',
         helper.isAuthenticated,
+        expect.any(Function),
         subAccountCodeUpload.cbGetIndex
       )
 
       expect(subAccountCodeUpload.router.post).toBeCalledWith(
         '/',
         helper.isAuthenticated,
+        expect.any(Function),
         expect.any(Function),
         subAccountCodeUpload.cbPostIndex
       )
@@ -110,6 +112,11 @@ describe('accountCodeUploadのテスト', () => {
       tenatnsFindOneSpy.mockReturnValue(Tenants[0])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await subAccountCodeUpload.cbGetIndex(request, response, next)
@@ -144,7 +151,8 @@ describe('accountCodeUploadのテスト', () => {
           procedureComment3: '3.「ファイル選択」ボタンをクリックし、記入したCSVファイルを選択',
           procedureComment4: '4.「アップロード開始」ボタンをクリック',
           procedureTitle: '(手順)'
-        }
+        },
+        csrfToken: dummyToken
       })
     })
 

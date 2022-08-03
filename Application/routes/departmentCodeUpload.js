@@ -12,6 +12,9 @@ const constantsDefine = require('../constants')
 const upload = require('multer')({ dest: process.env.INVOICE_UPLOAD_PATH })
 const departmentCodeUploadController = require('../controllers/departmentCodeUploadController')
 
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
+
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
   // 認証情報取得処理
@@ -75,7 +78,8 @@ const cbGetIndex = async (req, res, next) => {
     accountCodeUpload: '/uploadDepartment',
     procedureContents: procedureContents,
     formatFileLocation: '../html/部門データ一括作成フォーマット.csv',
-    formatFileLinkText: 'アップロード用CSVファイルダウンロード'
+    formatFileLinkText: 'アップロード用CSVファイルダウンロード',
+    csrfToken: req.csrfToken()
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
@@ -164,8 +168,8 @@ const cbPostIndex = async (req, res, next) => {
   res.redirect('/uploadDepartment')
 }
 
-router.get('/', helper.isAuthenticated, cbGetIndex)
-router.post('/', helper.isAuthenticated, upload.single('bulkDepartmentCode'), cbPostIndex)
+router.get('/', helper.isAuthenticated, csrfProtection, cbGetIndex)
+router.post('/', helper.isAuthenticated, upload.single('bulkDepartmentCode'), csrfProtection, cbPostIndex)
 
 module.exports = {
   router: router,

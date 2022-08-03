@@ -82,11 +82,13 @@ describe('registAccountCodeのテスト', () => {
       expect(registAccountCode.router.get).toBeCalledWith(
         '/',
         helper.isAuthenticated,
+        expect.any(Function),
         registAccountCode.cbGetRegistAccountCode
       )
       expect(registAccountCode.router.post).toBeCalledWith(
         '/',
         helper.isAuthenticated,
+        expect.any(Function),
         registAccountCode.cbPostRegistAccountCode
       )
     })
@@ -106,6 +108,11 @@ describe('registAccountCodeのテスト', () => {
 
       // ユーザ権限チェック結果設定
       checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await registAccountCode.cbGetRegistAccountCode(request, response, next)
@@ -127,7 +134,8 @@ describe('registAccountCodeのテスト', () => {
         idForNameInput: 'setAccountCodeNameInputId',
         logTitle: '勘定科目登録',
         logTitleEng: 'REGIST ACCOUNT CODE',
-        modalTitle: '勘定科目設定確認'
+        modalTitle: '勘定科目設定確認',
+        csrfToken: dummyToken
       })
     })
 

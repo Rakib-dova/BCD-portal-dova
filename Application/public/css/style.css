@@ -323,6 +323,11 @@ img.logo-ncom {
 .width-20 {
   width: 20%;
 }
+
+.width-23 {
+  width: 23%;
+}
+
 .width-25 {
   width: 25%;
 }
@@ -520,7 +525,28 @@ img.logo-ncom {
   white-space: pre-line;
 }
 
+.tooltip .tooltiptext-table {
+  visibility: hidden;
+  width: 600px;
+  background-color: white;
+  color: black;
+  text-align: left;
+  border-color: black;
+  border-style: solid;
+  border-width: 3px;
+  border-radius: 6px;
+  padding: 5px 5px 5px 5px;
+  position: absolute;
+  z-index: 1;
+  top: -300px;
+  left: 150%;
+  white-space: pre-line;
+}
+
 .tip-title.tooltip .tooltiptext {
+  top: 5px;
+}
+.tip-title.tooltip .tooltiptext-table {
   top: 5px;
 }
 
@@ -529,7 +555,16 @@ img.logo-ncom {
   position: absolute;
 }
 
+.tooltip .tooltiptext-table::after {
+  content: '';
+  position: absolute;
+}
+
 .tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
+.tooltip:hover .tooltiptext-table {
   visibility: visible;
 }
 
@@ -630,12 +665,14 @@ img.logo-ncom {
   text-overflow: ellipsis;
 }
 
-#accountCodeUpload > div > label > span.file-cta > span.file-label {
+#accountCodeUpload > div > label > span.file-cta > span.file-label,
+#usersUpload > div > label > span.file-cta > span.file-label {
   overflow: hidden;
   width: 100%;
 }
 
-#accountCodeUpload > div > label > span.file-name {
+#accountCodeUpload > div > label > span.file-name,
+#usersUpload > div > label > span.file-name {
   max-width: 100% !important;
   border: unset;
 }
@@ -649,12 +686,14 @@ img.logo-ncom {
   background-color: #454cad;
 }
 
-#accountCodeUpload > div > label > input {
+#accountCodeUpload > div > label > input,
+#usersUpload > div > label > input {
   max-width: 100%;
   box-sizing: border-box;
 }
 
-#accountCodeUpload > div > label > span.file-cta {
+#accountCodeUpload > div > label > span.file-cta,
+#usersUpload > div > label > span.file-cta {
   border: #eee solid 3px !important;
   border-radius: 7px 7px 0px 0px !important;
   max-width: 100%;
@@ -662,7 +701,8 @@ img.logo-ncom {
   box-sizing: content-box;
 }
 
-#accountCodeUpload > div > label > span.file-cta > span:nth-child(3) > a {
+#accountCodeUpload > div > label > span.file-cta > span:nth-child(3) > a,
+#usersUpload > div > label > span.file-cta > span:nth-child(3) > a {
   line-height: 36px;
   background-color: #454cad;
   border: #454cad;
@@ -672,11 +712,13 @@ img.logo-ncom {
   margin-top: 8px;
 }
 
-#accountCodeUpload > div > label {
+#accountCodeUpload > div > label,
+#usersUpload > div > label {
   min-width: 100%;
 }
 
-#accountCodeUpload > div > label > span.file-name {
+#accountCodeUpload > div > label > span.file-name,
+#usersUpload > div > label > span.file-name {
   border: #eee solid 3px !important;
   border-radius: 0px 0px 7px 7px;
   margin-top: -3px;
@@ -935,7 +977,12 @@ body > div.hero.is-small {
   left: -11px;
 }
 
-/* .modal-card-subTitle {
+.input-label-pl10 {
+  float: left;
+  padding-left: 10px;
+}
+
+.modal-card-subTitle {
   color: #363636;
   flex-grow: 1;
   flex-shrink: 0;
@@ -959,4 +1006,57 @@ body > div.hero.is-small {
   color: #363636;
   font-size: 1.25rem;
   font-weight: 600;
-} */
+}
+
+/* button */
+.btn-status{
+  border-radius:30px ;
+  display: block;
+  padding: .5em;
+  width: 155px;
+  margin: auto;
+  }
+  /* 契約中*/
+  .btn-status.st-navy{
+    background-color: #0065A3;
+    color: #fff;
+  }
+  /* 設定準備中、変更処理中*/
+  .btn-status.st-white{
+    background-color: #fff;
+    border: 2px solid #0065A3;
+    color: #0065A3;
+  }
+  /* 申込処理中*/
+  .btn-status.st-yellow{
+    background-color: #fff;
+    border: 2px solid #FFA800;
+  }
+  /* 解約処理中*/
+  .btn-status.st-red{
+    background-color: #fff;
+    border: 2px solid #F14668;
+    color:#F14668 ;
+  }
+
+  /* 解約申請 */
+  .button.is-can{
+    background-color: #ccc;
+    color: #fff;
+  }
+
+  .btn-contract{
+    max-width: 120px;
+    margin: auto;
+  }
+  /* アイコンをリンクと同じ色にする */
+  .iconLink .fas{
+    color: #3273dc;
+  }
+  .iconLink :hover{
+    color: #363636;
+  }
+  /* ボタン非活性 */
+  .button[disabled]{
+    opacity:1 ;
+  }

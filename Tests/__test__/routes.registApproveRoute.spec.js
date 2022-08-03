@@ -87,12 +87,14 @@ describe('registApproveRouteのテスト', () => {
       expect(registerApproveRoute.router.get).toBeCalledWith(
         '/',
         helper.isAuthenticated,
+        expect.any(Function),
         registerApproveRoute.cbGetRegistApproveRoute
       )
 
       expect(registerApproveRoute.router.post).toBeCalledWith(
         '/',
         helper.isAuthenticated,
+        expect.any(Function),
         registerApproveRoute.cbPostRegistApproveRoute
       )
     })
@@ -112,6 +114,11 @@ describe('registApproveRouteのテスト', () => {
 
       // ユーザ権限チェック結果設定
       checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await registerApproveRoute.cbGetRegistApproveRoute(request, response, next)
@@ -126,7 +133,8 @@ describe('registApproveRouteのテスト', () => {
         modalTitle: '承認者検索',
         backUrl: '/approveRouteList',
         logTitle: '承認ルート登録',
-        logTitleEng: 'REGIST APPROVE ROUTE'
+        logTitleEng: 'REGIST APPROVE ROUTE',
+        csrfToken: dummyToken
       })
     })
 
@@ -352,6 +360,11 @@ describe('registApproveRouteのテスト', () => {
         id: '2c15aaf5-8b75-4b85-97ef-418948ed6f9b',
         memberships: [{ GroupId: null }]
       })
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await registerApproveRoute.cbGetRegistApproveRoute(request, response, next)
@@ -370,7 +383,8 @@ describe('registApproveRouteのテスト', () => {
         logTitleEng: 'REGIST APPROVE ROUTE',
         valueForApproveRouteNameInput: body.setApproveRouteNameInputId,
         approveUsers: approverUsers,
-        lastApprover: lastApprover
+        lastApprover: lastApprover,
+        csrfToken: dummyToken
       })
     })
   })

@@ -1,6 +1,6 @@
 /* global
 
- taxDatabase, $, addEvent, validate, getSubTotal, getTaxGroups, getTaxTotal,
+ taxDatabase, $, addEvent, validate, getSubTotal, getTaxGroups, getTaxTotal, getDiscountTypeIndex, getDiscountLinePriceTotal, functionDiscountCalcs, getLineDiscountPrice,
  savePdfInvoice, outputPdfInvoice, formatDate, isNumberString, saveRules, outputRules, getTaxTypeName, setPaymentRequired
 
 */
@@ -14,6 +14,49 @@ let imageFile
 let saved = false
 const reqTimeout = 30000
 const linesTbody = document.getElementById('lines')
+const discountsTbody = document.getElementById('discounts')
+
+const discountId = [
+  {
+    description: '.line-discountDescription1',
+    amount: '.line-discountAmount1',
+    unit: '.line-discountUnit1',
+    total: '.line-discounttotal1'
+  },
+  {
+    description: '.line-discountDescription2',
+    amount: '.line-discountAmount2',
+    unit: '.line-discountUnit2',
+    total: '.line-discounttotal2'
+  },
+  {
+    description: '.line-discountDescription3',
+    amount: '.line-discountAmount3',
+    unit: '.line-discountUnit3',
+    total: '.line-discounttotal3'
+  }
+]
+
+const invoicediscountId = [
+  {
+    description: '.invoice-discountDescription1',
+    amount: '.invoice-discountAmount1',
+    unit: '.invoice-discountUnit1',
+    total: '.invoice-discounttotal1'
+  },
+  {
+    description: '.invoice-discountDescription2',
+    amount: '.invoice-discountAmount2',
+    unit: '.invoice-discountUnit2',
+    total: '.invoice-discounttotal2'
+  },
+  {
+    description: '.invoice-discountDescription3',
+    amount: '.invoice-discountAmount3',
+    unit: '.invoice-discountUnit3',
+    total: '.invoice-discounttotal3'
+  }
+]
 
 // 初期化
 function init() {
@@ -44,6 +87,7 @@ function init() {
 
   if (location.pathname.match(/register/)) {
     addLine()
+    renderInvoicecDiscount()
   } else if (location.pathname.match(/edit/)) {
     renderLines()
     renderInvoice()
@@ -74,6 +118,8 @@ function setStaticProp(invoice, lines) {
     $('#invoice-recAddr1').textContent = invoice.recAddr1
     $('#invoice-recAddr2').textContent = invoice.recAddr2
     $('#invoice-recAddr3').textContent = invoice.recAddr3
+
+    $('#invoice-sendRegistrationNo').textContent = invoice.sendRegistrationNo
 
     $('#invoice-invoiceNo').textContent = invoice.invoiceNo
     $('#invoice-billingDate').textContent = formatDate(new Date(invoice.billingDate), 'YYYY年MM月DD日')
@@ -115,10 +161,53 @@ function setStaticProp(invoice, lines) {
       taxType.textContent = getTaxTypeName(line.taxType)
       // 小計設定
       const subtotal = clone.querySelector('.line-subtotal')
-      subtotal.textContent = Math.floor(line.unitPrice * line.quantity).toLocaleString()
+      let subTotalDiscount = 0
+      for (let i = 1; i <= line.discounts; i++) {
+        subTotalDiscount += functionDiscountCalcs[i](line, Math.floor(line.unitPrice * line.quantity))
+      }
+      subtotal.textContent = Math.floor(line.unitPrice * line.quantity - subTotalDiscount).toLocaleString()
 
       linesTbody.appendChild(tr)
+
+      for (let i = 1; i <= line.discounts; i++) {
+        if (i >= 4) break
+        const trDiscount = clone.querySelector('tr')
+        trDiscount.setAttribute('id', line.lineIndex)
+        const DescriptionInput = clone.querySelector(discountId[i - 1].description)
+        DescriptionInput.textContent = line['discountDescription' + i]
+        const AmountInput = clone.querySelector(discountId[i - 1].amount)
+        AmountInput.textContent = line['discountAmount' + i]
+        const TypeSelect = clone.querySelector(discountId[i - 1].unit)
+        if (!getDiscountTypeIndex(line['discountUnit' + i])) TypeSelect.textContent = '%'
+        else TypeSelect.textContent = 'JPY'
+        const DiscountTd = clone.querySelector(discountId[i - 1].total)
+        DiscountTd.textContent = Math.floor(
+          functionDiscountCalcs[i](line, Math.floor(line.unitPrice * line.quantity))
+        ).toLocaleString()
+        linesTbody.appendChild(trDiscount)
+      }
     })
+
+    const discounttemplate = document.getElementById('invoice-discount')
+    const clone = discounttemplate.content.cloneNode(true)
+
+    for (let i = 1; i <= invoice.discounts; i++) {
+      if (i >= 4) break
+      const trDiscount = clone.querySelector('tr')
+      const DescriptionInput = clone.querySelector(invoicediscountId[i - 1].description)
+      DescriptionInput.textContent = invoice['discountDescription' + i]
+      const AmountInput = clone.querySelector(invoicediscountId[i - 1].amount)
+      AmountInput.textContent = invoice['discountAmount' + i]
+      const TypeSelect = clone.querySelector(invoicediscountId[i - 1].unit)
+      if (!getDiscountTypeIndex(invoice['discountUnit' + i])) TypeSelect.textContent = '%'
+      else TypeSelect.textContent = 'JPY'
+      const DiscountTd = clone.querySelector(invoicediscountId[i - 1].total)
+      DiscountTd.textContent = Math.floor(
+        functionDiscountCalcs[i](invoice, getSubTotal(lines) - getDiscountLinePriceTotal(lines))
+      ).toLocaleString()
+
+      discountsTbody.appendChild(trDiscount)
+    }
   }
 }
 
@@ -134,6 +223,7 @@ addEvent(document, 'change', (e, target) => {
   if (e.target.className.match(/line/)) {
     updateLineValues(e, target)
     renderLines()
+    if (invoice.discounts >= 1) renderInvoicecDiscount()
     renderTotals()
   }
 
@@ -177,10 +267,22 @@ function updateLineValues(e, target) {
   const prop = target.getAttribute('data-prop')
   const updatedLine = lines.find((line) => parseInt(line.lineIndex) === parseInt(id))
   if (updatedLine) {
-    if (prop === 'quantity' || prop === 'unitPrice') {
-      if (isNumberString(target.value)) updatedLine[prop] = target.value
-      else updatedLine[prop] = ''
-    } else if (prop === 'lineDescription') {
+    if (
+      prop === 'quantity' ||
+      prop === 'unitPrice' ||
+      prop === 'discountAmount1' ||
+      prop === 'discountAmount2' ||
+      prop === 'discountAmount3'
+    ) {
+      if (isNumberString(target.value)) {
+        updatedLine[prop] = target.value
+      } else updatedLine[prop] = ''
+    } else if (
+      prop === 'lineDescription' ||
+      prop === 'discountDescription1' ||
+      prop === 'discountDescription2' ||
+      prop === 'discountDescription3'
+    ) {
       updatedLine[prop] = target.value.replace(/\r\n|\r|\n| /g, '')
     } else {
       updatedLine[prop] = target.value
@@ -206,6 +308,14 @@ function renderInvoice(target) {
       $('#msgCount').innerText = '(' + element.value.length + '/400)'
     }
   }
+  if (
+    Object.keys(invoice).some(function (value) {
+      return value.match(/^discount/)
+    })
+  ) {
+    renderInvoicecDiscount()
+    renderTotals()
+  }
 }
 
 // 明細のレンダリング
@@ -216,6 +326,11 @@ function renderLines() {
   while (linesTbody.firstChild) {
     const deleteBtn = linesTbody.firstChild.querySelector('.delete-btn')
     document.removeEventListener('click', deleteBtn) // メモリーリークしないように不要になったイベントを削除
+    const discountaddBtn = linesTbody.firstChild.querySelector('.discount-line-action')
+    document.removeEventListener('click', discountaddBtn)
+
+    const discountdelBtn = linesTbody.firstChild.querySelector('.discount-line-del-action')
+    document.removeEventListener('click', discountdelBtn)
     linesTbody.removeChild(linesTbody.firstChild)
   }
 
@@ -246,7 +361,7 @@ function renderLines() {
     taxTypeSelect.selectedIndex = getTaxTypeIndex(line.taxType)
     // 小計設定
     const subtotalTd = clone.querySelector('.line-subtotal')
-    subtotalTd.textContent = Math.floor(line.unitPrice * line.quantity).toLocaleString()
+    subtotalTd.textContent = Math.floor(line.unitPrice * line.quantity - getLineDiscountPrice(line)).toLocaleString()
     // 削除ボタンの作成&追加
     const actionTd = clone.querySelector('.line-action')
     const deleteBtn = document.createElement('a')
@@ -262,11 +377,35 @@ function renderLines() {
         return line
       })
       renderLines()
+      renderInvoicecDiscount()
       renderTotals()
     })
 
+    if (typeof line.discounts === 'undefined' || line.discounts < 3) {
+      const discountaddBtn = clone.querySelector('.discount-line-action')
+      discountaddBtn.addEventListener('click', () => {
+        addDiscountLine(line)
+      })
+    } else {
+      clone.querySelector('.discount-line-action').style.display = 'none'
+    }
     actionTd.appendChild(deleteBtn)
     linesTbody.appendChild(tr)
+
+    for (let i = 1; i <= line.discounts; i++) {
+      if (i >= 4) break
+      const trDiscount = clone.querySelector('tr')
+      trDiscount.setAttribute('id', line.lineIndex)
+      renderDiscountLine(
+        clone,
+        line,
+        i,
+        line['discountDescription' + i],
+        line['discountAmount' + i],
+        line['discountUnit' + i]
+      )
+      linesTbody.appendChild(trDiscount)
+    }
   })
 
   if (lines.length < 20) {
@@ -279,20 +418,128 @@ function renderLines() {
   }
 }
 
+// 請求書全体の割引レンダリング
+function renderInvoicecDiscount() {
+  while (discountsTbody.firstChild) {
+    const adddiscountBtn = discountsTbody.firstChild.querySelector('.invoice-discount-action')
+    document.removeEventListener('click', adddiscountBtn) // メモリーリークしないように不要になったイベントを削除
+    const discountdelBtn = linesTbody.firstChild.querySelector('.discount-line-del-action')
+    document.removeEventListener('click', discountdelBtn)
+    discountsTbody.removeChild(discountsTbody.firstChild)
+  }
+  const discounttemplate = document.getElementById('invoice-discount')
+  const clone = discounttemplate.content.cloneNode(true)
+  if (typeof invoice.discounts === 'undefined') invoice.discounts = 0
+  if (lines.length > 0) {
+    for (let i = 1; i <= invoice.discounts; i++) {
+      if (i >= 4) break
+      const trDiscount = clone.querySelector('tr')
+      renderInvoiceDiscount(
+        clone,
+        i,
+        invoice['discountDescription' + i],
+        invoice['discountAmount' + i],
+        invoice['discountUnit' + i]
+      )
+      discountsTbody.appendChild(trDiscount)
+    }
+    if (lines.length > 0 && (invoice.discounts < 3 || typeof invoice.discounts === 'undefined')) {
+      const discounttemplate = document.getElementById('invoice-discount-add-btn')
+      const clone = discounttemplate.content.cloneNode(true)
+      const space = clone.querySelector('td')
+      const totaldiscount = clone.querySelector('.invoice-discount-action')
+      totaldiscount.addEventListener('click', () => {
+        addDiscountLine(invoice)
+      })
+      discountsTbody.appendChild(space)
+      discountsTbody.appendChild(totaldiscount)
+    }
+  } else {
+    for (let i = 1; i <= invoice.discounts; i++) initDiscountLine(invoice, i)
+    invoice.discounts = 0
+  }
+}
+
+// 割引の共通項目のレンダリング
+function renderDiscount(clone, id, description, amount, unit, array) {
+  // 割引内容設定
+  const DescriptionInput = clone.querySelector(array[id].description)
+  DescriptionInput.value = description
+  // 割引数値設定
+  const AmountInput = clone.querySelector(array[id].amount)
+  AmountInput.value = amount
+  // 単位設定
+  const TypeSelect = clone.querySelector(array[id].unit)
+  if (!unit) TypeSelect.selectedIndex = 0
+  else TypeSelect.selectedIndex = getDiscountTypeIndex(unit)
+}
+
+// 項目ごとの割引行レンダリング
+function renderDiscountLine(clone, line, num, description, amount, unit) {
+  const id = num - 1
+  renderDiscount(clone, id, description, amount, unit, discountId)
+  // 割引額
+  const DiscountTd = clone.querySelector(discountId[id].total)
+  DiscountTd.textContent = Math.floor(
+    functionDiscountCalcs[num](line, Math.floor(line.unitPrice * line.quantity))
+  ).toLocaleString()
+  // 割引行削除ボタン
+  const discountdelBtn = clone.querySelector('.discount-line-del-action')
+  discountdelBtn.addEventListener('click', () => {
+    delDiscountLine(line, num)
+  })
+}
+
+// 請求書全体の割引行レンダリング
+function renderInvoiceDiscount(clone, num, description, amount, unit) {
+  const id = num - 1
+  renderDiscount(clone, id, description, amount, unit, invoicediscountId)
+  // 割引額
+  subTotal = getSubTotal(lines) - getDiscountLinePriceTotal(lines)
+  const DiscountTd = clone.querySelector(invoicediscountId[id].total)
+  DiscountTd.textContent = Math.floor(functionDiscountCalcs[num](invoice, subTotal)).toLocaleString()
+
+  // 全体割引- 行削除ボタン
+  if (num <= 3) {
+    const discountdelBtn = clone.querySelector('.discount-line-del-action')
+    discountdelBtn.addEventListener('click', () => {
+      delDiscountLine(invoice, num)
+    })
+  }
+}
+
 // 合計関連のレンダリング
 function renderTotals() {
-  subTotal = getSubTotal(lines)
+  subTotal = getSubTotal(lines) - getDiscountLinePriceTotal(lines)
   taxGroups = getTaxGroups(lines, taxDatabase)
   taxTotal = getTaxTotal(taxGroups)
 
   // 小計 (税抜)
   const subTotalDiv = $('#subTotal')
-  subTotalDiv.textContent = subTotal.toLocaleString()
+  subTotalDiv.textContent = Math.floor(subTotal).toLocaleString()
 
   // 税区分を全部削除
   const totalParentDiv = $('#total').parentNode
   const taxGroupDivs = $('.taxGroup')
   taxGroupDivs.forEach((node) => node.remove())
+
+  let invoiceDiscountTotal = 0.0
+  for (let i = 1; i <= invoice.discounts; i++) {
+    const template = document.getElementById('taxGroup-template')
+    const clone = template.content.cloneNode(true)
+    const taxGroupDiv = clone.querySelector('.taxGroup')
+
+    const taxGroupLabel = clone.querySelector('.taxGroupLabel')
+    taxGroupLabel.textContent = `割引 ${invoice['discountDescription' + i] ? invoice['discountDescription' + i] : ''}`
+    taxGroupDiv.appendChild(taxGroupLabel)
+
+    const taxGroupValue = clone.querySelector('.taxGroupValue')
+    const invoicediscount = functionDiscountCalcs[i](invoice, subTotal)
+    taxGroupValue.textContent = `- ${Math.floor(invoicediscount).toLocaleString()}`
+    invoiceDiscountTotal += invoicediscount
+    taxGroupDiv.appendChild(taxGroupValue)
+    totalParentDiv.before(taxGroupDiv)
+  }
 
   taxGroups.forEach((taxGroup) => {
     if (taxGroup.taxGroupTotal === 0) return
@@ -313,7 +560,7 @@ function renderTotals() {
 
   // 合計
   const totalDiv = $('#total')
-  totalDiv.textContent = (subTotal + taxTotal).toLocaleString()
+  totalDiv.textContent = Math.floor(subTotal + taxTotal - invoiceDiscountTotal).toLocaleString()
 
   // 税額合計
   const taxTotalDiv = $('#taxTotal')
@@ -334,6 +581,45 @@ function addLine() {
     taxType: ''
   })
   renderLines()
+  renderInvoicecDiscount()
+  renderTotals()
+}
+
+// 割引行初期化
+function initDiscountLine(line, linenum = 0) {
+  line['discountDescription' + linenum] = null
+  line['discountAmount' + linenum] = null
+  line['discountUnit' + linenum] = null
+}
+
+// 割引行追加
+function addDiscountLine(line) {
+  if (typeof line.discounts === 'undefined' || line.discounts === 0) line.discounts = 1
+  else if (line.discounts === 1) line.discounts = 2
+  else if (line.discounts === 2) line.discounts = 3
+  initDiscountLine(line, line.discounts)
+  renderLines()
+  renderInvoicecDiscount()
+  renderTotals()
+}
+
+// 割引行削除
+function delDiscountLine(line, linenum) {
+  if (linenum === 1 && line.discounts >= 2) {
+    line.discountDescription1 = line.discountDescription2
+    line.discountAmount1 = line.discountAmount2
+    line.discountUnit1 = line.discountUnit2
+  }
+  if (linenum <= 2 && line.discounts >= 3) {
+    line.discountDescription2 = line.discountDescription3
+    line.discountAmount2 = line.discountAmount3
+    line.discountUnit2 = line.discountUnit3
+  }
+  // 該当行削除
+  initDiscountLine(line, line.discounts)
+  line.discounts = line.discounts - 1
+  renderLines()
+  renderInvoicecDiscount()
   renderTotals()
 }
 
@@ -342,19 +628,17 @@ $('#output-modal-btn')?.addEventListener('click', async () => {
   if (
     !location.pathname.match(/show/) &&
     !validate(invoice, lines, outputRules, { lineLength: String(lines.length), fileSize: imageFile?.size })
-  )
+  ) {
     return alert('入力項目に不備があります。')
+  }
 
   $('#output-modal').classList.add('is-active')
 })
 
 $('#save-btn')?.addEventListener('click', async () => {
-  if (!location.pathname.match(/show/) && !validate(
-    invoice,
-    lines,
-    saveRules,
-    { fileSize: imageFile?.size }
-  )) return alert('入力項目に不備があります。')
+  if (!location.pathname.match(/show/) && !validate(invoice, lines, saveRules, { fileSize: imageFile?.size })) {
+    return alert('入力項目に不備があります。')
+  }
 
   const modal = document.getElementById('request-progress-modal')
   modal.classList.add('is-active')

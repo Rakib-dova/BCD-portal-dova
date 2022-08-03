@@ -12,6 +12,9 @@ const departmentCodeController = require('../controllers/departmentCodeControlle
 const errorHelper = require('./helpers/error')
 const noticeHelper = require('./helpers/notice')
 
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
+
 const cbDeleteDepartmentCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbDeleteDepartmentCode')
 
@@ -139,8 +142,8 @@ const cbGetCheckDepartmentCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetCheckDepartmentCode')
 }
 
-router.delete('/:departmentCodeId', cbDeleteDepartmentCode)
-router.get('/:checkDepartmentCode', cbGetCheckDepartmentCode)
+router.delete('/:departmentCodeId', csrfProtection, cbDeleteDepartmentCode)
+router.get('/:checkDepartmentCode', csrfProtection, cbGetCheckDepartmentCode)
 
 module.exports = {
   router: router,

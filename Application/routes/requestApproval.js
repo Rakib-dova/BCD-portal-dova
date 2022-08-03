@@ -22,12 +22,18 @@ router.use(
     limit: '6826KB'
   })
 )
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
 
 const cbGetRequestApproval = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetRequestApproval')
 
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
+
+  // 仕訳情報設定画面から接続すること確認
+  const referer = req.header('Referer') ?? ''
+  if (referer.length === 0 || !referer.match(`/inbox/${req.params.invoiceId}`)) return next(errorHelper.create(404))
 
   // DBからuserデータ取得
   const user = await userController.findOne(req.user.userId)
@@ -211,7 +217,8 @@ const cbGetRequestApproval = async (req, res, next) => {
     documentId: invoiceId,
     message: message,
     approveRoute: approveRoute,
-    rejectedUser: rejectedUser
+    rejectedUser: rejectedUser,
+    csrfToken: req.csrfToken()
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetRequestApproval')
@@ -460,10 +467,10 @@ const cbPostApproval = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostApproval')
 }
 
-router.get('/:invoiceId', helper.isAuthenticated, cbGetRequestApproval)
-router.post('/approveRoute', helper.isAuthenticated, cbPostGetApproveRoute)
-router.post('/detailApproveRoute', helper.isAuthenticated, cbPostGetDetailApproveRoute)
-router.post('/:invoiceId', helper.isAuthenticated, cbPostApproval)
+router.get('/:invoiceId', helper.isAuthenticated, csrfProtection, cbGetRequestApproval)
+router.post('/approveRoute', helper.isAuthenticated, csrfProtection, cbPostGetApproveRoute)
+router.post('/detailApproveRoute', helper.isAuthenticated, csrfProtection, cbPostGetDetailApproveRoute)
+router.post('/:invoiceId', helper.isAuthenticated, csrfProtection, cbPostApproval)
 
 module.exports = {
   router: router,

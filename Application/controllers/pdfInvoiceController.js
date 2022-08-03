@@ -33,7 +33,7 @@ module.exports = {
   },
   findAllRawInvoices: async (tenantId) => {
     try {
-      return await PdfInvoice.findAll({ raw: true })
+      return await PdfInvoice.findAll({ where: { sendTenantId: tenantId }, raw: true })
     } catch (error) {
       logger.error({ stack: error.stack, status: 0 }, error.name)
       throw error
@@ -70,7 +70,7 @@ module.exports = {
       throw error
     }
   },
-  createInvoicesAndLines: async (invoices, lines, image = null, transaction = null) => {
+  createInvoicesAndLines: async (invoices, lines, transaction = null) => {
     if (!Array.isArray(invoices) || !Array.isArray(lines)) return null
 
     try {

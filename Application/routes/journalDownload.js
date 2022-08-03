@@ -21,8 +21,11 @@ const serviceDataFormatName = [
   '既定フォーマット（デジタルトレードフォーマット）',
   '弥生会計',
   '勘定奉行クラウド',
-  'PCA hyper'
+  'PCA hyper',
+  '大蔵大臣NX'
 ]
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -40,39 +43,59 @@ const cbGetIndex = async (req, res, next) => {
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
   if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
 
-  // DBから契約情報取得
-  const contract = await contractController.findOne(req.user.tenantId)
-  // データベースエラーは、エラーオブジェクトが返る
-  // 契約情報未登録の場合もエラーを上げる
-  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+  // // DBから契約情報取得
+  // const contract = await contractController.findOne(req.user.tenantId)
+  // // データベースエラーは、エラーオブジェクトが返る
+  // // 契約情報未登録の場合もエラーを上げる
+  // if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
 
   req.session.userContext = 'LoggedIn'
 
   // ユーザ権限を取得
   req.session.userRole = user.dataValues?.userRole
-  const deleteFlag = contract.dataValues.deleteFlag
-  const contractStatus = contract.dataValues.contractStatus
-  const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
+  // const deleteFlag = contract.dataValues.deleteFlag
+  // const contractStatus = contract.dataValues.contractStatus
+  // const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
 
-  if (checkContractStatus === null || checkContractStatus === 999) {
-    return next(errorHelper.create(500))
-  }
+  // if (checkContractStatus === null || checkContractStatus === 999) {
+  //   return next(errorHelper.create(500))
+  // }
 
-  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
-    return next(noticeHelper.create('cancelprocedure'))
-  }
+  // if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
+  //   return next(noticeHelper.create('cancelprocedure'))
+  // }
+
+  // テナントIDに紐付いている全ての契約情報を取得
+  const contracts = await contractController.findContractsBytenantId(req.user.tenantId)
+  if (!contracts || !Array.isArray(contracts) || contracts.length === 0) return next(errorHelper.create(500))
+
+  // BCD無料アプリの契約情報確認
+  const bcdContract = contracts.find((contract) => contract.serviceType === '010' && contract.deleteFlag === false)
+  if (!bcdContract || !bcdContract.contractStatus) return next(errorHelper.create(500))
+
+  // 現在解約中か確認
+  if (validate.isBcdCancelling(bcdContract)) return next(noticeHelper.create('cancelprocedure'))
 
   // 発行日開始日と終了日の算定(今日の日付の月 - 1)
   const today = new Date()
   const minissuedate = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate()).toISOString().split('T')[0]
   const maxissuedate = today.toISOString().split('T')[0]
 
+  let presentation = 'journalDownload'
+  const lightPlan = await contractController.findLightPlan(req.user.tenantId)
+  if (lightPlan) {
+    presentation = 'journalDownload_light_plan'
+  }
+
   // 仕訳情報ダウンロード画面表示
-  res.render('journalDownload', {
+  res.render(presentation, {
     title: '仕訳情報ダウンロード',
     minissuedate: minissuedate,
     maxissuedate: maxissuedate, // 発行日、作成日、支払期日の日付をyyyy-mm-dd表示を今日の日付に表示
-    serviceDataFormatName: serviceDataFormatName
+    serviceDataFormatName: serviceDataFormatName,
+    csrfToken: req.csrfToken(),
+    userRole: req.session.userRole,
+    contractPlan: req.contractPlan
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
@@ -165,12 +188,19 @@ const cbPostIndex = async (req, res, next) => {
     req.body.serviceDataFormat = Number(req.body.serviceDataFormat)
   }
 
+  const lightPlan = await contractController.findLightPlan(req.user.tenantId)
+
   switch (req.body.serviceDataFormat) {
     case 0:
       break
     case 1:
     case 2:
     case 3:
+    case 4:
+      if (!lightPlan) {
+        req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR])
+        return res.redirect(303, '/journalDownload')
+      }
       req.body.sentBy = req.body.sentBy ?? []
       if (typeof req.body.sentBy === 'string') {
         req.body.sentBy = [req.body.sentBy]
@@ -181,7 +211,6 @@ const cbPostIndex = async (req, res, next) => {
 
       {
         const isCloedApproval = req.body.chkFinalapproval === 'finalapproval'
-
         try {
           const result = await journalDownloadController.dowonloadKaikei(
             req.user,
@@ -334,7 +363,7 @@ const cbPostIndex = async (req, res, next) => {
           invoicesForDownload = await journalDownloadController.createInvoiceDataForDownload(
             req.user.accessToken,
             req.user.refreshToken,
-            invoiceDocument,
+            invoiceDocument[0],
             contract.contractId,
             chkFinalapproval,
             req.user.userId
@@ -345,63 +374,131 @@ const cbPostIndex = async (req, res, next) => {
             return errorHandle(invoicesForDownload, res, req)
           }
 
+          // アプリ効果測定用ログ出力
           if (invoicesForDownload.length !== 0) {
             jsonLog = {
               tenantId: req.user.tenantId,
               action: 'downloadedJournalInfo',
               downloadedJournalCount: 1,
+              dataFormat: getServiceNameForDataFormat(req.body.serviceDataFormat),
               finalApproved: chkFinalapproval
             }
             logger.info(jsonLog)
 
+            // CSVファイルをまとめる変数
+            let fileData = ''
+            // 取得した文書データをCSVファイルにまとめる
+            const invoice = invoicesForDownload[0]
+            const journalizeInvoice = invoicesForDownload[0]
+            // 最初の請求書の場合
+            if (invoice.length !== 0) {
+              fileData += jsonToCsv(dataToJson(invoice.invoice, journalizeInvoice.journalizeInvoiceFinal))
+              fileData += String.fromCharCode(0x0d) + String.fromCharCode(0x0a) // 改行の追加
+            }
+
             filename = encodeURIComponent(`${today}_${invoiceNumber}.csv`)
             res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
-            res.status(200).send(`${String.fromCharCode(0xfeff)}${invoicesForDownload}`)
+            res.status(200).send(`${String.fromCharCode(0xfeff)}${fileData}`)
           } else {
             chkInvoice = true
           }
         } else {
           chkInvoice = true
         }
+
         // 条件に合わせるデータがない場合、お知らせを表示する。
         if (chkInvoice) {
           req.flash('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
           res.redirect(303, '/journalDownload')
         }
       } else {
-        invoicesForDownload = await journalDownloadController.createInvoiceDataForDownload(
-          req.user.accessToken,
-          req.user.refreshToken,
-          documentsResult.Document,
-          contract.contractId,
-          chkFinalapproval,
-          req.user.userId
-        )
+        let invoicesForDownload
+        await Promise.all(
+          documentsResult.Document.map(async (key) => {
+            return journalDownloadController.createInvoiceDataForDownload(
+              req.user.accessToken,
+              req.user.refreshToken,
+              key,
+              contract.contractId,
+              chkFinalapproval,
+              req.user.userId
+            )
+          })
+        ).then(function (result) {
+          invoicesForDownload = result
+        })
 
         // エラーを確認する
-        if (invoicesForDownload instanceof Error) {
-          return errorHandle(invoicesForDownload, res, req)
+        for (let i = 0; invoicesForDownload.length > i; i++) {
+          if (invoicesForDownload[i] instanceof Error) {
+            return errorHandle(invoicesForDownload[i], res, req)
+          }
         }
 
-        if (invoicesForDownload.length === 0) {
+        const arrDownload = []
+        invoicesForDownload.forEach((item) => {
+          if (item.length !== 0) {
+            arrDownload.push(item)
+          }
+        })
+
+        if (arrDownload.length > 100) {
+          // 請求書検索結果、100件以上の場合ポップを表示
+          req.flash('noti', [
+            notiTitle,
+            `ダウンロード対象の請求書が100件を超えています。（ダウンロード対象：${arrDownload.length}件）<br>検索条件を絞り込んでください。`
+          ])
+          res.redirect(303, '/journalDownload')
+        }
+
+        // CSVファイルをまとめる変数
+        let fileData = ''
+        // 取得した文書データをCSVファイルにまとめる
+        for (let idx = 0; idx < arrDownload.length; idx++) {
+          const invoice = arrDownload[idx]
+          const journalizeInvoice = arrDownload[idx]
+          // 最初の請求書の場合
+          if (invoice.length !== 0) {
+            if (idx === 0) {
+              fileData += jsonToCsv(dataToJson(invoice[0].invoice, journalizeInvoice[0].journalizeInvoiceFinal))
+              fileData += String.fromCharCode(0x0d) + String.fromCharCode(0x0a) // 改行の追加
+              // 最初以外の請求書の場合
+            } else {
+              const rows = jsonToCsv(dataToJson(invoice[0].invoice, journalizeInvoice[0].journalizeInvoiceFinal)).split(
+                /\r?\n|\r/
+              )
+              for (let row = 0; row < rows.length; row++) {
+                // ヘッダ除外したもののみ追加
+                if (row !== 0) {
+                  fileData += rows[row]
+                  fileData += String.fromCharCode(0x0d) + String.fromCharCode(0x0a) // 改行の追加
+                }
+              }
+            }
+          }
+        }
+
+        if (fileData.length === 0) {
           req.flash('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
           logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
           return res.redirect(303, '/journalDownload')
         }
 
         // アプリ効果測定用ログ出力
-        const invoiceArray = invoicesForDownload.split(/\r?\n|\r/)
+        const invoiceArray = fileData.split(/\r?\n|\r/)
+
         jsonLog = {
           tenantId: req.user.tenantId,
           action: 'downloadedJournalInfo',
-          downloadedJournalCount: invoiceArray.length - 2 > 0 ? invoiceArray.length - 2 : undefined,
+          downloadedJournalCount: (invoiceArray.length - 2) > 0 ? (invoiceArray.length - 2) : undefined,
+          dataFormat: getServiceNameForDataFormat(req.body.serviceDataFormat),
           finalApproved: chkFinalapproval
         }
         logger.info(jsonLog)
 
         filename = encodeURIComponent(`${today}_請求書.csv`)
         res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
-        res.status(200).send(`${String.fromCharCode(0xfeff)}${invoicesForDownload}`)
+        res.status(200).send(`${String.fromCharCode(0xfeff)}${fileData}`)
       }
     }
   }
@@ -2171,8 +2268,23 @@ const paymentExtraPush = async (paymentExtra, data) => {
   return paymentExtra
 }
 
-router.get('/', helper.isAuthenticated, cbGetIndex)
-router.post('/', helper.isAuthenticated, cbPostIndex)
+const getServiceNameForDataFormat = (magicNumber) => {
+  switch (magicNumber) {
+    case 0:
+      return 'デフォルト'
+    case 1:
+      return '弥生会計'
+    case 2:
+      return '勘定奉行'
+    case 3:
+      return 'PCA'
+    default:
+      return null
+  }
+}
+
+router.get('/', helper.isAuthenticated, helper.getContractPlan, csrfProtection, cbGetIndex)
+router.post('/', helper.isAuthenticated, csrfProtection, cbPostIndex)
 
 module.exports = {
   router: router,
@@ -2180,5 +2292,6 @@ module.exports = {
   cbPostIndex: cbPostIndex,
   errorHandle: errorHandle,
   dataToJson: dataToJson,
-  jsonToCsv: jsonToCsv
+  jsonToCsv: jsonToCsv,
+  getServiceNameForDataFormat
 }

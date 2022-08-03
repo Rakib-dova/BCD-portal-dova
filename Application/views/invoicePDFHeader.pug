@@ -34,6 +34,11 @@ div.margin-top-20#header-error
       p.width-250px#invoice-sendAddr1
       p.width-250px#invoice-sendAddr2
       p.width-250px#invoice-sendAddr3
+      if editing 
+        input.input.width-330px(data-prop='sendRegistrationNo' id='invoice-sendRegistrationNo' type='text' placeholder='登録番号("T"+数字13桁)')
+      else
+        p.width-250px#invoice-sendRegistrationNo
+
   .column 
     p.font-bold 請求書番号
     if editing

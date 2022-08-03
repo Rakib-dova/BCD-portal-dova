@@ -18,6 +18,9 @@ const filePath = process.env.INVOICE_UPLOAD_PATH
 const constantsDefine = require('../constants')
 const { v4: uuidv4 } = require('uuid')
 
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
+
 const bodyParser = require('body-parser')
 router.use(
   bodyParser.json({
@@ -71,7 +74,8 @@ const cbGetIndex = async (req, res, next) => {
 
   // ユーザ権限も画面に送る
   res.render('csvupload', {
-    formatkindsArr: formatkindsArr
+    formatkindsArr: formatkindsArr,
+    csrfToken: req.csrfToken()
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
@@ -319,7 +323,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
         itemRowNumber
       )
     } else {
-      const defaultCsvPath = path.resolve('./public/html/請求書一括作成フォーマット.csv')
+      const defaultCsvPath = path.resolve('./public/html/請求書一括作成フォーマット_v1.1.csv')
       uploadData = uploadData ?? fs.readFileSync(defaultCsvPath)
       csvObj = new BconCsv(extractFullpathFile, formatFlag, uploadFormatDetail, uploadFormatIdentifier, uploadData)
     }
@@ -520,8 +524,6 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
           failCount += invoiceList[idx].failCount
           break
       }
-
-      // == TS にアップロード済み ========================================
 
       const invoiceLines = invoiceList[idx].INVOICE.getDocument().InvoiceLine
       const invoiceId = invoiceList[idx].invoiceId
@@ -745,8 +747,8 @@ const setErrorLog = async (req, errorCode) => {
   logger.error(logMessage, err.name)
 }
 
-router.get('/', helper.isAuthenticated, cbGetIndex)
-router.post('/', helper.isAuthenticated, cbPostUpload)
+router.get('/', helper.isAuthenticated, csrfProtection, cbGetIndex)
+router.post('/', helper.isAuthenticated, csrfProtection, cbPostUpload)
 
 module.exports = {
   router: router,

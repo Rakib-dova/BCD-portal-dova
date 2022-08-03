@@ -15,18 +15,17 @@ block content
     //-     p.title.mb-4 Apps
     columns.is-centered
       .column.is-12.menu
-        if Number.isInteger(requestNoticeCnt) && requestNoticeCnt > 0
-          .approvalNotification
-            .approvalNotificationMessage 支払依頼が
-              .approvalNotificationCnt #{requestNoticeCnt}
-              | 件あります。
-            a.approvalNotificationLink(href='/inboxList/approvals') 確認
-        if Number.isInteger(rejectedNoticeCnt) && rejectedNoticeCnt > 0
-          .approvalNotification
-            .approvalNotificationMessage 差し戻しされた支払依頼が
-              .approvalNotificationCnt #{rejectedNoticeCnt}
-              | 件あります。
-            a.approvalNotificationLink(href='/inboxList/approvals') 確認
+        .is-justify-content-start.planStatus
+          .planTitle
+            span ご利用中プラン
+          - var planName = 'フリープラン'
+          if (contractPlan.isLightPlan === true)
+            - planName = 'スタンダードプラン'
+          div
+            a.show-modal(data-target='information-lightplan')=planName
+      .column.is-12.menu
+        .approvalNotification
+          .approvalNotificationMessage 承認・差し戻し件数を取得しています。
       .column.is-12.menu
         .box
           .media-content
@@ -108,6 +107,16 @@ block content
                     p 請求書情報を商奉行クラウド間で連携できます。
           .column.hvr-float
             .box.iconBox.textOverflow
+              a.href(href="/pdfInvoices/list") 
+                .media.appdesc
+                  .media-left
+                    img.app-icon(src='../image/ts-app-digitaltrade-func-icon-pdf_invoices.svg')
+                  .media-content
+                    p.title.is-5 PDF請求書作成
+                    p Tradeshift非導入企業へ送付可能なPDFを出力できます。
+                    p.content-coution-font-size ※この機能で作成した請求書はTradeshiftの文書管理アプリの管理外となります。
+          .column.hvr-float
+            .box.iconBox.textOverflow
               a.show-modal(data-target='support-modal')
                 .media.appdesc
                   .media-left
@@ -115,6 +124,8 @@ block content
                   .media-content
                     p.title.is-5 サポート
                     p 設定方法、利用方法に関するお問い合わせが無料で利用できます。その他FAQを参照できます。
+
+        .columns.is-desktop.is-family-noto-sans
           .column.hvr-float
             if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
               .box.iconBox.textOverflow
@@ -126,34 +137,20 @@ block content
                       p.title.is-5 設定
                       p 契約情報変更と解約を行うことができます。
                       p 解約の場合は取り消しはできません。
-
-      .column.is-12.menu
-       p.olta-title-font-size PoC
-        .columns.is-desktop.is-family-noto-sans
-          .column.hvr-float
-            .box.iconBox.textOverflow
-              a.href(href="/pdfInvoices/list") 
-                .media.appdesc
-                  .media-left
-                    img.app-icon(src='../image/ts-app-digitaltrade-func-icon-pdf_invoices.svg')
-                  .media-content
-                    p.title.is-5 PDF請求書作成
-                    p Tradeshift非導入企業へ送付可能なPDFを出力できます。
-                    p.content-coution-font-size ※この機能で作成した請求書はTradeshiftの文書管理アプリの管理外となります。
           .column.hvr-float
             if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
               .box.iconBox.textOverflow
-                a.href(href="/pdfInvoiceCsvUpload")
+                a.show-modal(data-target='information-lightplan')
                   .media.appdesc
                     .media-left
-                      img.app-icon(src='../image/ts-app-digitaltrade-func-icon-pdf_invoices.svg')
+                      img.app-icon(src='../image/ts-app-digitaltrade-func-icon-add.svg')
                     .media-content
-                      p.title.is-5 PDF請求書一括作成 (Debug用)
-                      p PDF請求書一括作成動作確認用ボタン。
+                      p.title-law 追加オプション申込
+                      p オプションサービスの新規申し込みを行うことができます。
           .column.hvr-float
 
       .column.is-12.menu
-       p.olta-title-font-size 提携サービス
+      p.olta-title-font-size 提携サービス
         .columns.is-desktop.is-family-noto-sans
           .column.hvr-float
             .box.iconBox.textOverflow
@@ -166,16 +163,16 @@ block content
                     p 請求書（売掛金）を買い取らせていただくことで素早く簡単に現金化ができるサービスです。
           .column.hvr-float
             .box.iconBox.textOverflow
-              //-  a.show-modal(data-target='law-modal')
-              //-    .media.appdesc
-              //-      .media-left
-              //-        img.app-icon(src='../image/ben.svg')
-              //-      .media-content
-              //-        p.title-law 法律・会計税務の
-              //-        p.title.is-5.margin-bottom-02rem サポート
-              //-        p 企業の法律や会計税務に関する悩みについて、専門家に相談することから、最適な方をご紹介することまで可能。                     
-              //- .column.hvr-float
-              //-   .box.iconBox.textOverflow
+              a.show-modal(data-target='law-modal')
+                .media.appdesc
+                  .media-left
+                    img.app-icon(src='../image/ben.svg')
+                  .media-content
+                    p.title-law 法律・会計税務の
+                    p.title.is-5.margin-bottom-02rem サポート
+                    p 企業の法律や会計税務に関する悩みについて、専門家に相談することから、最適な方をご紹介することまで可能。                     
+          .column.hvr-float
+            .box.iconBox.textOverflow
               a.show-modal(data-target='settlement-modal')
                 .media.appdesc
                   .media-left
@@ -183,7 +180,6 @@ block content
                   .media-content
                     p.title.is-5 銀行振込消込
                     p 専用の振込口座をご利用いただくことで振込名義人によらず請求先を特定できるサービスです。
-          .column.hvr-float
 
     .modal#support-modal
       .modal-background.cancel-button(data-target='support-modal')
@@ -219,7 +215,7 @@ block content
               span.panel-icon
                 i.fas.fa-file
               p 請求書アップロードフォーマット一覧
-            a.panel-block(download href="../html/請求書一括作成フォーマット.csv")
+            a.panel-block(download href="../html/請求書一括作成フォーマット_v1.1.csv")
               span.panel-icon
                 i.fas.fa-file
               p アップロード用請求書フォーマットcsvダウンロード
@@ -271,7 +267,7 @@ block content
               span.panel-icon
                 i.fas.fa-file
               p 部門データ設定 
-            a.panel-block(href='/inboxList/1')
+            a.panel-block(id='moveInboxList' href='/inboxList/1')
               span.panel-icon
                 i.fas.fa-file
               p 支払依頼一覧
@@ -307,75 +303,85 @@ block content
           button.delete(data-target="config-modal")
         section.modal-card-body
           nav.panel
-            a.panel-block(href='/change')
+            a.panel-block(href='/contractDetail')
               span.panel-icon
                 i.fas.fa-file
-              p 契約情報変更
-            a.panel-block(href='/cancellation') 
+              p ご契約内容
+            a.panel-block(href='/uploadUsers') 
               span.panel-icon
                 i.fas.fa-file
-              p 解約
+              p ユーザー一括登録
         footer.modal-card-foot
+    
+    .modal.modal-fx-fadeInscale#loading-progress-modal
+          .modal-background
+          .modal-card
+            header.modal-card-head
+              p.modal-card-title
+            section.modal-card-body
+              center
+                p.modal-card-result#modal-card-result 処理中
+            footer.modal-card-foot
 
-    //- .modal#law-modal
-    //-   .modal-background.cancel-button(data-target='law-modal')
-    //-   .modal-card#olta-modal-card
-    //-     header.modal-card-head
-    //-       p.modal-card-title 法律・会計税務のサポート
-    //-       p.modal-card-subTitle 弁護士ドットコムの提供するサービスとなります
-    //-       button.delete(data-target='law-modal')
-    //-     section.modal-card-body
-    //-       .media
-    //-         .media-left
-    //-           img.app-icon(src='../image/ben.svg')  
-    //-         div      
-    //-           p.modal-card-body-media-p みんなの法律相談
-    //-       br
-    //-       p  弁護士が法律トラブルの相談について回答してくれるQAサービス。
-    //-       p  自分にあった弁護士を検索することも可能。
-    //-       br
-    //-       p  『みんなの法律相談』で公開されている、
-    //-       p  同じような法律トラブルにあった他者が投稿した相談に対する。
-    //-       p  弁護士の有益な回答内容を閲覧することもできます。
-    //-       br
-    //-       a.olta-link-underline(href='https://www.bengo4.com/bbs/?utm_source=alliance&utm_medium=link&utm_campaign=nc202110' target='_blank') みんなの法律相談：相談の投稿と投稿した質問への弁護士回答内容の閲覧は無料
-    //-       br
-    //-       br
-    //-       a.olta-link-underline(href='https://www.bengo4.com/search/?utm_source=alliance&utm_medium=link&utm_campaign=nc202109' target='_blank') 弁護士の検索：無料
-    //-       br
-    //-       br
-    //-       .media
-    //-         .media-left
-    //-           img.app-icon(src='../image/zei.svg')        
-    //-         p.modal-card-body-media-p 税理士紹介
-    //-       br
-    //-       p ご要望にあった最適な税理士を経験豊富なコーディネーターがご紹介します。
-    //-       p ご利用手数料は一切いただきません。
-    //-       br
-    //-       p 全国6000名以上の日本最大級のネットワークから、適切な税理士をご紹介します。
-    //-       p 面談設定や価格交渉、依頼の可否連絡など全てコーディネーターが行います。
-    //-       p 初めての顧問税理士探しから、顧問税理士の変更検討、決算申告や相続税申告などの単発でのご依頼など、
-    //-       p どのような業務依頼でも適した税理士をご紹介します。
-    //-       br
-    //-       a.olta-link-underline(href='https://www.zeiri4.com/shoukai/promotion/external-cooperation/503/' target='_blank') 税理士紹介：無料
-    //-       br
-    //-       br
-    //-       .media
-    //-         .media-left
-    //-           img.app-icon(src='../image/cloudzei.svg')        
-    //-         p.modal-card-body-media-p クラウド税務相談
-    //-       br
-    //-       p オンライン上かつ『非公開』な環境で、会計・経理・税務についての
-    //-       p 相談すれば、税理士が回答してくれます。
-    //-       br
-    //-       p 自分で税理士を探す手間や予定調整は一切不要で、24時間お好きなタイミングで
-    //-       p 相談を投稿できます。対面だと1万円以上が相場ですが、
-    //-       p 1相談3000円（税抜）の超低価格で利用可能です。※料金は2022/5時点
-    //-       p そのまま業務依頼したい場合は回答した税理士に連絡が取れますし、
-    //-       p 会計・経理・税務など多岐に渡る経営相談や最新の税制改正についての知見など
-    //-       p どのようなお悩みにでも対応してくれます。
-    //-       br
-    //-       a.olta-link-underline(href='https://httpslink.com/nttcom-cloud-tax' target='_blank') クラウド税務相談：3,000円／1相談成立（税抜）
+    .modal#law-modal
+      .modal-background.cancel-button(data-target='law-modal')
+      .modal-card#olta-modal-card
+        header.modal-card-head
+          p.modal-card-title 法律・会計税務のサポート
+          p.modal-card-subTitle 弁護士ドットコムの提供するサービスとなります
+          button.delete(data-target='law-modal')
+        section.modal-card-body
+          .media
+            .media-left
+              img.app-icon(src='../image/ben.svg')  
+            div      
+              p.modal-card-body-media-p みんなの法律相談
+          br
+          p  弁護士が法律トラブルの相談について回答してくれるQAサービス。
+          p  自分にあった弁護士を検索することも可能。
+          br
+          p  『みんなの法律相談』で公開されている、
+          p  同じような法律トラブルにあった他者が投稿した相談に対する。
+          p  弁護士の有益な回答内容を閲覧することもできます。
+          br
+          a.olta-link-underline(href='https://www.bengo4.com/bbs/?utm_source=alliance&utm_medium=link&utm_campaign=nc202110' target='_blank') みんなの法律相談：相談の投稿と投稿した質問への弁護士回答内容の閲覧は無料
+          br
+          br
+          a.olta-link-underline(href='https://www.bengo4.com/search/?utm_source=alliance&utm_medium=link&utm_campaign=nc202109' target='_blank') 弁護士の検索：無料
+          br
+          br
+          .media
+            .media-left
+              img.app-icon(src='../image/zei.svg')        
+            p.modal-card-body-media-p 税理士紹介
+          br
+          p ご要望にあった最適な税理士を経験豊富なコーディネーターがご紹介します。
+          p ご利用手数料は一切いただきません。
+          br
+          p 全国6000名以上の日本最大級のネットワークから、適切な税理士をご紹介します。
+          p 面談設定や価格交渉、依頼の可否連絡など全てコーディネーターが行います。
+          p 初めての顧問税理士探しから、顧問税理士の変更検討、決算申告や相続税申告などの単発でのご依頼など、
+          p どのような業務依頼でも適した税理士をご紹介します。
+          br
+          a.olta-link-underline(href='https://www.zeiri4.com/shoukai/promotion/external-cooperation/503/' target='_blank') 税理士紹介：無料
+          br
+          br
+          .media
+            .media-left
+              img.app-icon(src='../image/cloudzei.svg')        
+            p.modal-card-body-media-p クラウド税務相談
+          br
+          p オンライン上かつ『非公開』な環境で、会計・経理・税務についての
+          p 相談すれば、税理士が回答してくれます。
+          br
+          p 自分で税理士を探す手間や予定調整は一切不要で、24時間お好きなタイミングで
+          p 相談を投稿できます。対面だと1万円以上が相場ですが、
+          p 1相談3000円（税抜）の超低価格で利用可能です。※料金は2022/5時点
+          p そのまま業務依頼したい場合は回答した税理士に連絡が取れますし、
+          p 会計・経理・税務など多岐に渡る経営相談や最新の税制改正についての知見など
+          p どのようなお悩みにでも対応してくれます。
+          br
+          a.olta-link-underline(href='https://httpslink.com/nttcom-cloud-tax' target='_blank') クラウド税務相談：3,000円／1相談成立（税抜）
 
     .modal#factoring-modal
       .modal-background.cancel-button(data-target='factoring-modal')
@@ -436,13 +442,18 @@ block content
                 i.fas.fa-file
               p 操作マニュアルダウンロード
         footer.modal-card-foot
+
+    include informationLightplanModal
   include footer
 
 block append scripts
-  script(src="/js/portal-page.js")
+  script(type='module' src="/js/portal-page.js")
   //- 会員サイト連携開発追加 fingerpirnt未検証の場合、fingerprint値をXHRで送信する。
   //- TODO:ポータル画面表示時に紐づけを実施するように修正
   if (memberSiteFlg)
     script(src="/js/portal-page-memberSite.js")
   //- 会員サイト連携開発追加
   // End of DigitalTrade Portal Page
+  //- 画面のcssファイル
+  link(rel='stylesheet', type='text/css', href='/css/portal.css')
+  

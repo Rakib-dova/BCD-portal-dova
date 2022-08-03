@@ -348,24 +348,28 @@ describe('requestApprovalのテスト', () => {
       expect(requestApproval.router.get).toBeCalledWith(
         '/:invoiceId',
         helper.isAuthenticated,
+        expect.any(Function),
         requestApproval.cbGetRequestApproval
       )
 
       expect(requestApproval.router.post).toBeCalledWith(
         '/approveRoute',
         helper.isAuthenticated,
+        expect.any(Function),
         requestApproval.cbPostGetApproveRoute
       )
 
       expect(requestApproval.router.post).toBeCalledWith(
         '/detailApproveRoute',
         helper.isAuthenticated,
+        expect.any(Function),
         requestApproval.cbPostGetDetailApproveRoute
       )
 
       expect(requestApproval.router.post).toBeCalledWith(
         '/:invoiceId',
         helper.isAuthenticated,
+        expect.any(Function),
         requestApproval.cbPostApproval
       )
     })
@@ -380,6 +384,7 @@ describe('requestApprovalのテスト', () => {
         requestApproval: { message: 'test', approveRouteId: '', isSaved: true },
         isSaved: true
       }
+      request.headers = { referer: '/inbox/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904' }
       request.user = { ...user[0] }
       request.params = {
         invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
@@ -395,6 +400,11 @@ describe('requestApprovalのテスト', () => {
 
       inboxControllerGetInvoiceDetail.mockReturnValue(inboxControllerGetInvoiceDetailResult)
       // approverControllerReadApproval.mockReturnValue(null)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await requestApproval.cbGetRequestApproval(request, response, next)
@@ -414,7 +424,8 @@ describe('requestApprovalのテスト', () => {
         documentId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904',
         message: 'test',
         approveRoute: null,
-        rejectedUser: null
+        rejectedUser: null,
+        csrfToken: dummyToken
       })
     })
 
@@ -423,6 +434,7 @@ describe('requestApprovalのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session, isSaved: false }
       request.user = { ...user[0] }
+      request.headers = { referer: '/inbox/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904' }
       request.params = {
         invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
       }
@@ -439,6 +451,12 @@ describe('requestApprovalのテスト', () => {
       approverControllerReadApproval.mockReturnValue(readApprovalResult)
 
       approverControllerGetApproveRoute.mockReturnValue(searchResult2)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await requestApproval.cbGetRequestApproval(request, response, next)
 
@@ -457,7 +475,8 @@ describe('requestApprovalのテスト', () => {
         documentId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904',
         message: readApprovalResult.message,
         approveRoute: searchResult2,
-        rejectedUser: null
+        rejectedUser: null,
+        csrfToken: dummyToken
       })
     })
 
@@ -466,6 +485,7 @@ describe('requestApprovalのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session, isSaved: false }
       request.user = { ...user[3] }
+      request.headers = { referer: '/inbox/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904' }
       request.params = {
         invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
       }
@@ -482,6 +502,11 @@ describe('requestApprovalのテスト', () => {
       approverControllerReadApproval.mockReturnValue(readApprovalResult2)
 
       approverControllerGetApproveRoute.mockReturnValue(searchResult2)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
       // 試験実施
       await requestApproval.cbGetRequestApproval(request, response, next)
 
@@ -500,7 +525,8 @@ describe('requestApprovalのテスト', () => {
         documentId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904',
         message: null,
         approveRoute: null,
-        rejectedUser: false
+        rejectedUser: false,
+        csrfToken: dummyToken
       })
     })
 
@@ -509,6 +535,10 @@ describe('requestApprovalのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[1] }
+      request.headers = { referer: '/inbox/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904' }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[1])
@@ -537,6 +567,7 @@ describe('requestApprovalのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session, isSaved: false }
       request.user = { ...user[3] }
+      request.headers = { referer: '/inbox/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904' }
       request.params = {
         invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
       }
@@ -568,6 +599,10 @@ describe('requestApprovalのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...notLoggedInsession }
       request.user = { ...user[1] }
+      request.headers = { referer: '/inbox/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904' }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[1])
@@ -585,11 +620,31 @@ describe('requestApprovalのテスト', () => {
       expect(next).toHaveBeenCalledWith(errorHelper.create(400))
     })
 
+    test('400エラー:inboxページから移動しなかった場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...notLoggedInsession }
+      request.user = { ...user[1] }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
+
+      await requestApproval.cbGetRequestApproval(request, response, next)
+
+      // 結果確認
+      // 404エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(error404)
+    })
+
     test('500エラー:不正なContractデータの場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[1] }
+      request.headers = { referer: '/inbox/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904' }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[1])
@@ -625,6 +680,10 @@ describe('requestApprovalのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[2] }
+      request.headers = { referer: '/inbox/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904' }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       const userDbError = new Error('User Table Error')
@@ -645,6 +704,10 @@ describe('requestApprovalのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[2] }
+      request.headers = { referer: '/inbox/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904' }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[8])
@@ -661,6 +724,10 @@ describe('requestApprovalのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.headers = { referer: '/inbox/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904' }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -679,6 +746,10 @@ describe('requestApprovalのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.headers = { referer: '/inbox/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904' }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[1])
@@ -702,6 +773,10 @@ describe('requestApprovalのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.headers = { referer: '/inbox/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904' }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[1])
@@ -725,6 +800,10 @@ describe('requestApprovalのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.headers = { referer: '/inbox/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904' }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])

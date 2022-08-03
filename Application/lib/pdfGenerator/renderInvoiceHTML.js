@@ -12,6 +12,7 @@ const requiredProps = [
   'sendAddr1',
   'sendAddr2',
   'sendAddr3',
+  'sendRegistrationNo',
 
   'invoiceNo',
   'currency',
@@ -287,6 +288,7 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
         <p class="p width-250px" id="invoice-sendAddr1">${input.sendAddr1}</p>
         <p class="p width-250px" id="invoice-sendAddr2">${input.sendAddr2}</p>
         <p class="p width-250px" id="invoice-sendAddr3">${input.sendAddr3}</p>
+        <p class="p width-250px" id="invoice-sendAddr3">${input.sendRegistrationNo}</p>
       </div>
     </div>
     <div class="columns">
@@ -304,6 +306,7 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
         </thead>
         <tbody id="lines">
           ${setLines(input.lines)}
+          ${setDiscountLines(input)}
         </tbody>
       </table>
     </div>
@@ -312,12 +315,15 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
       <div class="column width-50">
         <div class="flex">
           <p class="text-l width-50">小計（税抜）</p>
-          <p class="text-r width-50" id="subTotal">${input.subTotal.toLocaleString()}</p>
+          <p class="text-r width-50" id="subTotal">${Math.floor(input.subTotal).toLocaleString()}</p>
         </div>
+        ${setDiscountInvoice(input)}
         ${setTaxGroup(input.taxGroups)}
         <div class="flex">
           <p class="text-l width-50 font-bold">合計 ￥</p>
-          <p class="text-r width-50 font-bold" id="total">${input.total.toLocaleString()}</p>
+          <p class="text-r width-50 font-bold" id="total">${Math.floor(
+            input.total - getDiscountInvoiceTotal(input)
+          ).toLocaleString()}</p>
         </div>
         <div class="flex">
           <p class="text-l">税額合計 ￥</p>
@@ -354,7 +360,8 @@ const validateInvoiceInput = (input) => {
   if (!input || !(Object.prototype.toString.call(input) === '[object Object]')) return false
 
   for (let i = 0; i < requiredProps.length; i++) {
-    if (!input.hasOwnProperty(requiredProps[i])) return false // eslint-disable-line
+    // eslint-disable-next-line no-prototype-builtins
+    if (!input.hasOwnProperty(requiredProps[i])) return false
   }
 
   return true
@@ -362,8 +369,8 @@ const validateInvoiceInput = (input) => {
 
 const padOptionProps = (input) => {
   for (let i = 0; i < optionProps.length; i++) {
+    // eslint-disable-next-line no-prototype-builtins
     if (!input.hasOwnProperty(optionProps[i]) || !input[optionProps[i]]) {
-      // eslint-disable-line
       input[optionProps[i]] = ''
     }
   }
@@ -407,7 +414,12 @@ const setPayment = (input) => {
 const setLines = (lines) => {
   let tags = ''
   lines.forEach((line) => {
-    const subTotal = Math.floor(line.unitPrice * line.quantity)
+    let discountPrices = 0
+    for (let i = 1; i <= line.discounts; i++) {
+      if (i >= 4) break
+      discountPrices += functionDiscountCalcs[i](line, Math.floor(line.unitPrice * line.quantity))
+    }
+    const subTotal = Math.floor(line.unitPrice * line.quantity - discountPrices)
     tags += `
       <tr>
         <td class="text-center">
@@ -426,8 +438,103 @@ const setLines = (lines) => {
         <td class="text-center"><p class="line-taxType" data-prop="taxType">${getTaxTypeName(line.taxType)}</p></td>
         <td class="text-right line-subtotal"><p class="line-subtotal" data-prop="subtotal">${subTotal.toLocaleString()}</p></td>
       </tr>`
+    for (let i = 1; i <= line.discounts; i++) {
+      if (i >= 4) break
+      tags += `
+      <tr>
+        <td class="text-center">
+          <p class="line-lineId" data-prop="lineId">項目割引</p>
+        </td>
+        <td class="text-center">
+          <p class="line-lineDescription" data-prop="lineDescription">${line['discountDescription' + i]}</p>
+        </td>
+        <td class="text-center"><p class="line-quantity" data-prop="quantity">${line[
+          'discountAmount' + i
+        ].toLocaleString()}</p></td>
+        <td class="text-center"><p class="line-unit" data-prop="unit">${getUnitTypeName(
+          line['discountUnit' + i]
+        )}</p></td>
+        <td class="text-center"><p class="line-unitPrice" data-prop="unitPrice">- ${Math.floor(
+          functionDiscountCalcs[i](line, Math.floor(line.unitPrice * line.quantity))
+        ).toLocaleString()}</p></td>
+        <td></td>
+        <td></td>
+      </tr>`
+    }
   })
   return tags
+}
+
+/**
+ * 割引行タグ生成
+ *
+ * @param {object} input 請求書に埋め込む変数リスト
+ * @return {string} 割引行タグ
+ */
+const setDiscountLines = (input) => {
+  let tags = ''
+  for (let i = 1; i <= input.discounts; i++) {
+    if (i >= 4) break
+    tags += `
+    <tr>
+      <td class="text-center">
+        <p class="line-lineId" data-prop="lineId">割引</p>
+      </td>
+      <td class="text-center">
+        <p class="line-lineDescription" data-prop="lineDescription">${input[
+          'discountDescription' + i
+        ].toLocaleString()}</p>
+      </td>
+      <td class="text-center"><p class="line-quantity" data-prop="quantity">${input[
+        'discountAmount' + i
+      ].toLocaleString()}</p></td>
+      <td class="text-center"><p class="line-unit" data-prop="unit">${getUnitTypeName(
+        input['discountUnit' + i]
+      )} </p></td>
+      <td></td>
+      <td></td>
+      <td class="text-right line-subtotal"><p class="line-unitPrice" data-prop="unitPrice">- ${Math.floor(
+        functionDiscountCalcs[i](input, input.subTotal)
+      ).toLocaleString()}</p></td>
+    </tr>`
+  }
+  return tags
+}
+
+/**
+ * 小計割引タグ生成
+ *
+ * @param {object} input 請求書に埋め込む変数リスト
+ * @return {string} 小計割引タグ
+ */
+const setDiscountInvoice = (input) => {
+  let tags = ''
+  for (let i = 1; i <= input.discounts; i++) {
+    if (i >= 4) break
+    tags += `
+    <div class="flex">
+      <p class="text-l width-50">割引 ${input['discountDescription' + i]}</p>
+      <p class="text-r width-50" id="subTotal">- ${Math.floor(
+        functionDiscountCalcs[i](input, input.subTotal)
+      ).toLocaleString()}</p>
+    </div>`
+  }
+  return tags
+}
+
+/**
+ * 割引金額合計を取得
+ *
+ * @param {object} input 請求書に埋め込む変数リスト
+ * @return let discounttotal 合計割引金額
+ */
+const getDiscountInvoiceTotal = (input) => {
+  let discounttotal = 0
+  for (let i = 1; i <= input.discounts; i++) {
+    if (i >= 4) break
+    discounttotal += functionDiscountCalcs[i](input, input.subTotal)
+  }
+  return discounttotal
 }
 
 /**
@@ -488,6 +595,45 @@ const getTaxTypeName = (taxType) => {
       return 'その他の消費税'
     default:
       return ''
+  }
+}
+
+/**
+ * 割引タイプ取得
+ *
+ * @param {string} unitType 割引区分文字列
+ * @returns {string} 割引区分名
+ */
+const getUnitTypeName = (unitType) => {
+  switch (unitType) {
+    case 'percent':
+      return '%'
+    case 'jpy':
+      return 'jpy'
+    default:
+      return '%'
+  }
+}
+
+/**
+ * 割引額取得
+ *
+ * @param {string} objects 請求書に埋め込む変数リスト
+ * @param {number} subTotal 小計
+ * @returns {number} 割引額
+ */
+const functionDiscountCalcs = {
+  1: function (objects, subTotal) {
+    if (objects.discountUnit1 === 'jpy') return Math.floor(objects.discountAmount1)
+    else return subTotal * objects.discountAmount1 * 0.01
+  },
+  2: function (objects, subTotal) {
+    if (objects.discountUnit2 === 'jpy') return Math.floor(objects.discountAmount2)
+    else return subTotal * objects.discountAmount2 * 0.01
+  },
+  3: function (objects, subTotal) {
+    if (objects.discountUnit3 === 'jpy') return Math.floor(objects.discountAmount3)
+    else return subTotal * objects.discountAmount3 * 0.01
   }
 }
 

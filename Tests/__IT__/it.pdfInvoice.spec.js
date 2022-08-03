@@ -38,7 +38,7 @@ jest.mock('../../Application/routes/helpers/middleware', () => {
   }
 })
 jest.mock('../../Application/node_modules/multer', () => {
-  const multer = function() {
+  const multer = function () {
     return {
       single: () => (req, res, next) => next(),
       array: () => () => (req, res, next) => next()
@@ -50,7 +50,7 @@ jest.mock('../../Application/node_modules/multer', () => {
 jest.mock('../../Application/node_modules/csurf', () => () => (req, res, next) => next())
 
 let apiManagerSpy
-let findAllInvoicesSpy, findInvoiceSpy, createInvoiceSpy, updateInvoiceSpy
+let findAllInvoicesSpy, findInvoiceSpy, createInvoiceSpy, updateInvoiceSpy, deleteInvoiceSpy
 
 const listData = {
   success: [
@@ -423,6 +423,7 @@ describe('pdfInvocie.js ITテスト', () => {
     findInvoiceSpy = jest.spyOn(pdfInvoiceController, 'findInvoice')
     createInvoiceSpy = jest.spyOn(pdfInvoiceController, 'createInvoice')
     updateInvoiceSpy = jest.spyOn(pdfInvoiceController, 'updateInvoice')
+    deleteInvoiceSpy = jest.spyOn(pdfInvoiceController, 'deleteInvoice')
     defaultParams.invoiceId = ''
     defaultBody.invoice = ''
     defaultBody.lines = ''
@@ -433,15 +434,14 @@ describe('pdfInvocie.js ITテスト', () => {
     findInvoiceSpy.mockRestore()
     createInvoiceSpy.mockRestore()
     updateInvoiceSpy.mockRestore()
+    deleteInvoiceSpy.mockRestore()
   })
 
   describe('get /list リクエスト', () => {
     test('正常: ', async () => {
       findAllInvoicesSpy.mockReturnValue(listData.success)
 
-      const res = await request(app)
-        .get('/pdfInvoices/list')
-        .set('Accept', 'application/json')
+      const res = await request(app).get('/pdfInvoices/list').set('Accept', 'application/json')
 
       expect(res.text).toMatch(/2160/i)
       expect(res.text).toMatch(/内容１/i)
@@ -449,11 +449,11 @@ describe('pdfInvocie.js ITテスト', () => {
       expect(res.text).toMatch(/2022年5月16日/i)
     })
     test('準正常: PDF請求書情報取得時、DBエラー', async () => {
-      findAllInvoicesSpy.mockImplementation(() => { throw new Error('DB Error') })
+      findAllInvoicesSpy.mockImplementation(() => {
+        throw new Error('DB Error')
+      })
 
-      const res = await request(app)
-        .get('/pdfInvoices/list')
-        .set('Accept', 'application/json')
+      const res = await request(app).get('/pdfInvoices/list').set('Accept', 'application/json')
 
       expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
       expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、トップページへお戻りください。/i)
@@ -464,9 +464,7 @@ describe('pdfInvocie.js ITテスト', () => {
     test('正常', async () => {
       apiManagerSpy.mockReturnValue(accountInfoTestData.noLogo) // ユーザ情報正常取得を想定する
 
-      const res = await request(app)
-        .get('/pdfInvoices/register')
-        .set('Accept', 'application/json')
+      const res = await request(app).get('/pdfInvoices/register').set('Accept', 'application/json')
 
       expect(res.text).toMatch(/送信先ダミー企業/i)
       expect(res.text).toMatch(/100-8019/i)
@@ -478,9 +476,7 @@ describe('pdfInvocie.js ITテスト', () => {
     test('準正常: ユーザ情報取得APIエラー', async () => {
       apiManagerSpy.mockReturnValue(new Error('API Error'))
 
-      const res = await request(app)
-        .get('/pdfInvoices/register')
-        .set('Accept', 'application/json')
+      const res = await request(app).get('/pdfInvoices/register').set('Accept', 'application/json')
 
       expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
       expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、トップページへお戻りください。/i)
@@ -493,9 +489,7 @@ describe('pdfInvocie.js ITテスト', () => {
       apiManagerSpy.mockReturnValue(accountInfoTestData.noLogo) // ユーザ情報正常取得を想定する
       findInvoiceSpy.mockReturnValue(pdfInvoiceTestData.noSealImp) // DBからの正常なPDF請求書情報の取得を想定する
 
-      const res = await request(app)
-        .get('/pdfInvoices/edit/dummyId')
-        .set('Accept', 'application/json')
+      const res = await request(app).get('/pdfInvoices/edit/dummyId').set('Accept', 'application/json')
 
       expect(res.text).toMatch(/111111/i)
       expect(res.text).toMatch(/銀行名/i)
@@ -512,9 +506,7 @@ describe('pdfInvocie.js ITテスト', () => {
     })
 
     test('準正常: 請求書IDなしの不正リクエスト', async () => {
-      const res = await request(app)
-        .get('/pdfInvoices/edit/dummyId')
-        .set('Accept', 'application/json')
+      const res = await request(app).get('/pdfInvoices/edit/dummyId').set('Accept', 'application/json')
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
       expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、再度操作をやり直してください。/i)
@@ -524,9 +516,7 @@ describe('pdfInvocie.js ITテスト', () => {
       defaultParams.invoiceId = 'dummyId'
       apiManagerSpy.mockReturnValue(new Error('API Error'))
 
-      const res = await request(app)
-        .get('/pdfInvoices/edit/dummyId')
-        .set('Accept', 'application/json')
+      const res = await request(app).get('/pdfInvoices/edit/dummyId').set('Accept', 'application/json')
 
       expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
       expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、トップページへお戻りください。/i)
@@ -535,68 +525,11 @@ describe('pdfInvocie.js ITテスト', () => {
     test('準正常: PDF請求書情報取得時、DBエラー', async () => {
       defaultParams.invoiceId = 'dummyId'
       apiManagerSpy.mockReturnValue(accountInfoTestData.noLogo) // ユーザ情報正常取得を想定する
-      findInvoiceSpy.mockImplementation(() => { throw new Error('DB Error') })
+      findInvoiceSpy.mockImplementation(() => {
+        throw new Error('DB Error')
+      })
 
-      const res = await request(app)
-        .get('/pdfInvoices/edit/dummyId')
-        .set('Accept', 'application/json')
-
-      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
-      expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、トップページへお戻りください。/i)
-    })
-  })
-
-  describe('get /show/:invoiceId リクエスト', () => {
-    test('正常', async () => {
-      defaultParams.invoiceId = 'dummyId'
-      apiManagerSpy.mockReturnValue(accountInfoTestData.noLogo) // ユーザ情報正常取得を想定する
-      findInvoiceSpy.mockReturnValue(pdfInvoiceTestData.noSealImp) // DBからの正常なPDF請求書情報の取得を想定する
-
-      const res = await request(app)
-        .get('/pdfInvoices/show/dummyId')
-        .set('Accept', 'application/json')
-
-      expect(res.text).toMatch(/111111/i)
-      expect(res.text).toMatch(/銀行名/i)
-      expect(res.text).toMatch(/支店/i)
-      expect(res.text).toMatch(/科目/i)
-      expect(res.text).toMatch(/あああ/i)
-      expect(res.text).toMatch(/1234567/i)
-      expect(res.text).toMatch(/備考備考備考/i)
-      expect(res.text).toMatch(/送信先ダミー企業/i)
-      expect(res.text).toMatch(/100-8019/i)
-      expect(res.text).toMatch(/東京都/i)
-      expect(res.text).toMatch(/大手町/i)
-      expect(res.text).toMatch(/大手町プレイスウエスト/i)
-    })
-    test('準正常: 請求書IDなしの不正リクエスト', async () => {
-      const res = await request(app)
-        .get('/pdfInvoices/show/dummyId')
-        .set('Accept', 'application/json')
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
-      expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、再度操作をやり直してください。/i)
-    })
-    test('準正常: ユーザ情報取得APIエラー', async () => {
-      defaultParams.invoiceId = 'dummyId'
-      apiManagerSpy.mockReturnValue(new Error('API Error'))
-
-      const res = await request(app)
-        .get('/pdfInvoices/show/dummyId')
-        .set('Accept', 'application/json')
-
-      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
-      expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、トップページへお戻りください。/i)
-    })
-
-    test('準正常: PDF請求書情報取得時、DBエラー', async () => {
-      defaultParams.invoiceId = 'dummyId'
-      apiManagerSpy.mockReturnValue(accountInfoTestData.noLogo) // ユーザ情報正常取得を想定する
-      findInvoiceSpy.mockImplementation(() => { throw new Error('DB Error') })
-
-      const res = await request(app)
-        .get('/pdfInvoices/show/dummyId')
-        .set('Accept', 'application/json')
+      const res = await request(app).get('/pdfInvoices/edit/dummyId').set('Accept', 'application/json')
 
       expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
       expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、トップページへお戻りください。/i)
@@ -642,7 +575,9 @@ describe('pdfInvocie.js ITテスト', () => {
     test('準正常: PDF請求書作成時 DBエラー', async () => {
       defaultBody.invoice = JSON.stringify({}) // supertest の関数でテータ送信を定義していないことに注意
       defaultBody.lines = JSON.stringify([]) // supertest の関数でテータ送信を定義していないことに注意
-      createInvoiceSpy.mockImplementation(() => { throw new Error('DB Error') })
+      createInvoiceSpy.mockImplementation(() => {
+        throw new Error('DB Error')
+      })
 
       const res = await request(app).post('/pdfInvoices')
 
@@ -692,7 +627,9 @@ describe('pdfInvocie.js ITテスト', () => {
       defaultParams.invoiceId = 'dummyId' // supertest の関数でテータ送信を定義していないことに注意
       defaultBody.invoice = JSON.stringify({}) // supertest の関数でテータ送信を定義していないことに注意
       defaultBody.lines = JSON.stringify([]) // supertest の関数でテータ送信を定義していないことに注意
-      findInvoiceSpy.mockImplementation(() => { throw new Error('DB Error') })
+      findInvoiceSpy.mockImplementation(() => {
+        throw new Error('DB Error')
+      })
 
       const res = await request(app).put('/pdfInvoices/dummyId')
 
@@ -715,7 +652,9 @@ describe('pdfInvocie.js ITテスト', () => {
       defaultBody.invoice = JSON.stringify({}) // supertest の関数でテータ送信を定義していないことに注意
       defaultBody.lines = JSON.stringify([]) // supertest の関数でテータ送信を定義していないことに注意
       findInvoiceSpy.mockReturnValue(pdfInvoiceTestData.noSealImp)
-      updateInvoiceSpy.mockImplementation(() => { throw new Error('DB Error') })
+      updateInvoiceSpy.mockImplementation(() => {
+        throw new Error('DB Error')
+      })
 
       const res = await request(app).put('/pdfInvoices/dummyId')
 
@@ -724,7 +663,7 @@ describe('pdfInvocie.js ITテスト', () => {
     })
   })
 
-  describe('post /createAndOutput リクエスト', () => {
+  describe('post /output リクエスト', () => {
     test('正常', async () => {
       defaultBody.invoice = JSON.stringify({}) // supertest の関数でテータ送信を定義していないことに注意
       defaultBody.lines = JSON.stringify([]) // supertest の関数でテータ送信を定義していないことに注意
@@ -732,14 +671,13 @@ describe('pdfInvocie.js ITテスト', () => {
       defaultFile.mimetype = 'image/png' // supertest の関数でテータ送信を定義していないことに注意
       pdfGenerator.renderInvoiceHTML.mockReturnValue('<html></html>')
       pdfGenerator.generatePdf.mockResolvedValue('dummyBuffer')
-      createInvoiceSpy.mockResolvedValue('dummyInvoiceRecord')
 
-      const res = await request(app).post('/pdfInvoices/createAndOutput')
+      const res = await request(app).post('/pdfInvoices/output')
 
       expect(res.text).toBe('dummyBuffer')
     })
     test('準正常: 入力データが存在しない', async () => {
-      const res = await request(app).post('/pdfInvoices/createAndOutput')
+      const res = await request(app).post('/pdfInvoices/output')
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
       expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、再度操作をやり直してください。/i)
@@ -748,7 +686,7 @@ describe('pdfInvocie.js ITテスト', () => {
       defaultBody.invoice = JSON.stringify({}) // supertest の関数でテータ送信を定義していないことに注意
       defaultBody.lines = JSON.stringify({}) // supertest の関数でテータ送信を定義していないことに注意
 
-      const res = await request(app).post('/pdfInvoices/createAndOutput')
+      const res = await request(app).post('/pdfInvoices/output')
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
       expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、再度操作をやり直してください。/i)
@@ -758,7 +696,7 @@ describe('pdfInvocie.js ITテスト', () => {
       defaultBody.lines = JSON.stringify([]) // supertest の関数でテータ送信を定義していないことに注意
       apiManagerSpy.mockReturnValue(new Error('API Error'))
 
-      const res = await request(app).post('/pdfInvoices/createAndOutput')
+      const res = await request(app).post('/pdfInvoices/output')
 
       expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
       expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、トップページへお戻りください。/i)
@@ -770,7 +708,7 @@ describe('pdfInvocie.js ITテスト', () => {
       defaultFile.mimetype = 'image/png' // supertest の関数でテータ送信を定義していないことに注意
       pdfGenerator.renderInvoiceHTML.mockReturnValue(null)
 
-      const res = await request(app).post('/pdfInvoices/createAndOutput')
+      const res = await request(app).post('/pdfInvoices/output')
 
       expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
       expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、トップページへお戻りください。/i)
@@ -781,30 +719,18 @@ describe('pdfInvocie.js ITテスト', () => {
       apiManagerSpy.mockReturnValue(accountInfoTestData.noLogo) // ユーザ情報正常取得を想定する
       defaultFile.mimetype = 'image/png' // supertest の関数でテータ送信を定義していないことに注意
       pdfGenerator.renderInvoiceHTML.mockReturnValue('<html></html>')
-      pdfGenerator.generatePdf.mockImplementation(() => { throw new Error('pdf generate failed') })
+      pdfGenerator.generatePdf.mockImplementation(() => {
+        throw new Error('pdf generate failed')
+      })
 
-      const res = await request(app).post('/pdfInvoices/createAndOutput')
-
-      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
-      expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、トップページへお戻りください。/i)
-    })
-    test('準正常: PDF請求書作成時 DBエラー', async () => {
-      defaultBody.invoice = JSON.stringify({}) // supertest の関数でテータ送信を定義していないことに注意
-      defaultBody.lines = JSON.stringify([]) // supertest の関数でテータ送信を定義していないことに注意
-      apiManagerSpy.mockReturnValue(accountInfoTestData.noLogo) // ユーザ情報正常取得を想定する
-      defaultFile.mimetype = 'image/png' // supertest の関数でテータ送信を定義していないことに注意
-      pdfGenerator.renderInvoiceHTML.mockReturnValue('<html></html>')
-      pdfGenerator.generatePdf.mockResolvedValue('dummyBuffer')
-      createInvoiceSpy.mockImplementation(() => { throw new Error('DB Error') })
-
-      const res = await request(app).post('/pdfInvoices/createAndOutput')
+      const res = await request(app).post('/pdfInvoices/output')
 
       expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
       expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、トップページへお戻りください。/i)
     })
   })
 
-  describe('post /updateAndOutput/:invoiceId リクエスト', () => {
+  describe('post /deleteAndOutput/:invoiceId リクエスト', () => {
     test('正常: 初出力', async () => {
       defaultParams.invoiceId = 'dummyId' // supertest の関数でテータ送信を定義していないことに注意
       defaultBody.invoice = JSON.stringify({}) // supertest の関数でテータ送信を定義していないことに注意
@@ -814,9 +740,9 @@ describe('pdfInvocie.js ITテスト', () => {
       defaultFile.mimetype = 'image/png' // supertest の関数でテータ送信を定義していないことに注意
       pdfGenerator.renderInvoiceHTML.mockReturnValue('<html></html>')
       pdfGenerator.generatePdf.mockResolvedValue('dummyBuffer')
-      updateInvoiceSpy.mockReturnValue([1])
+      deleteInvoiceSpy.mockReturnValue(1)
 
-      const res = await request(app).post('/pdfInvoices/updateAndOutput/:invoiceId')
+      const res = await request(app).post('/pdfInvoices/deleteAndOutput/:invoiceId')
 
       expect(res.text).toBe('dummyBuffer')
     })
@@ -829,14 +755,14 @@ describe('pdfInvocie.js ITテスト', () => {
       defaultFile.mimetype = 'image/png' // supertest の関数でテータ送信を定義していないことに注意
       pdfGenerator.renderInvoiceHTML.mockReturnValue('<html></html>')
       pdfGenerator.generatePdf.mockResolvedValue('dummyBuffer')
-      updateInvoiceSpy.mockReturnValue([1])
+      deleteInvoiceSpy.mockReturnValue(1)
 
-      const res = await request(app).post('/pdfInvoices/updateAndOutput/:invoiceId')
+      const res = await request(app).post('/pdfInvoices/deleteAndOutput/:invoiceId')
 
       expect(res.text).toBe('dummyBuffer')
     })
     test('準正常: 請求書IDなしの不正リクエスト', async () => {
-      const res = await request(app).post('/pdfInvoices/updateAndOutput/:invoiceId')
+      const res = await request(app).post('/pdfInvoices/deleteAndOutput/:invoiceId')
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
       expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、再度操作をやり直してください。/i)
@@ -844,7 +770,7 @@ describe('pdfInvocie.js ITテスト', () => {
     test('準正常: 入力データが存在しない', async () => {
       defaultParams.invoiceId = 'dummyId'
 
-      const res = await request(app).post('/pdfInvoices/updateAndOutput/:invoiceId')
+      const res = await request(app).post('/pdfInvoices/deleteAndOutput/:invoiceId')
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
       expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、再度操作をやり直してください。/i)
@@ -854,7 +780,7 @@ describe('pdfInvocie.js ITテスト', () => {
       defaultBody.invoice = JSON.stringify({}) // supertest の関数でテータ送信を定義していないことに注意
       defaultBody.lines = JSON.stringify({}) // supertest の関数でテータ送信を定義していないことに注意
 
-      const res = await request(app).post('/pdfInvoices/updateAndOutput/:invoiceId')
+      const res = await request(app).post('/pdfInvoices/deleteAndOutput/:invoiceId')
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
       expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、再度操作をやり直してください。/i)
@@ -863,9 +789,11 @@ describe('pdfInvocie.js ITテスト', () => {
       defaultParams.invoiceId = 'dummyId' // supertest の関数でテータ送信を定義していないことに注意
       defaultBody.invoice = JSON.stringify({}) // supertest の関数でテータ送信を定義していないことに注意
       defaultBody.lines = JSON.stringify([]) // supertest の関数でテータ送信を定義していないことに注意
-      findInvoiceSpy.mockImplementation(() => { throw new Error('DB Error') })
+      findInvoiceSpy.mockImplementation(() => {
+        throw new Error('DB Error')
+      })
 
-      const res = await request(app).post('/pdfInvoices/updateAndOutput/:invoiceId')
+      const res = await request(app).post('/pdfInvoices/deleteAndOutput/:invoiceId')
 
       expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
       expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、トップページへお戻りください。/i)
@@ -877,7 +805,7 @@ describe('pdfInvocie.js ITテスト', () => {
       findInvoiceSpy.mockReturnValue(pdfInvoiceTestData.tmpFlgIstrue)
       apiManagerSpy.mockReturnValue(new Error('API Error'))
 
-      const res = await request(app).post('/pdfInvoices/updateAndOutput/:invoiceId')
+      const res = await request(app).post('/pdfInvoices/deleteAndOutput/:invoiceId')
 
       expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
       expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、トップページへお戻りください。/i)
@@ -891,7 +819,7 @@ describe('pdfInvocie.js ITテスト', () => {
       defaultFile.mimetype = 'image/png' // supertest の関数でテータ送信を定義していないことに注意
       pdfGenerator.renderInvoiceHTML.mockReturnValue(null)
 
-      const res = await request(app).post('/pdfInvoices/updateAndOutput/:invoiceId')
+      const res = await request(app).post('/pdfInvoices/deleteAndOutput/:invoiceId')
 
       expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
       expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、トップページへお戻りください。/i)
@@ -904,9 +832,11 @@ describe('pdfInvocie.js ITテスト', () => {
       apiManagerSpy.mockReturnValue(accountInfoTestData.noLogo) // ユーザ情報正常取得を想定する
       defaultFile.mimetype = 'image/png' // supertest の関数でテータ送信を定義していないことに注意
       pdfGenerator.renderInvoiceHTML.mockReturnValue('<html></html>')
-      pdfGenerator.generatePdf.mockImplementation(() => { throw new Error('pdf generate failed') })
+      pdfGenerator.generatePdf.mockImplementation(() => {
+        throw new Error('pdf generate failed')
+      })
 
-      const res = await request(app).post('/pdfInvoices/updateAndOutput/:invoiceId')
+      const res = await request(app).post('/pdfInvoices/deleteAndOutput/:invoiceId')
 
       expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
       expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、トップページへお戻りください。/i)
@@ -920,9 +850,11 @@ describe('pdfInvocie.js ITテスト', () => {
       defaultFile.mimetype = 'image/png' // supertest の関数でテータ送信を定義していないことに注意
       pdfGenerator.renderInvoiceHTML.mockReturnValue('<html></html>')
       pdfGenerator.generatePdf.mockResolvedValue('dummyBuffer')
-      createInvoiceSpy.mockImplementation(() => { throw new Error('DB Error') })
+      deleteInvoiceSpy.mockImplementation(() => {
+        throw new Error('DB Error')
+      })
 
-      const res = await request(app).post('/pdfInvoices/updateAndOutput/:invoiceId')
+      const res = await request(app).post('/pdfInvoices/deleteAndOutput/:invoiceId')
 
       expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
       expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、トップページへお戻りください。/i)

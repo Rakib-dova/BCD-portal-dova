@@ -61,6 +61,7 @@ describe('accountCodeUploadのテスト', () => {
     checkContractStatusSpy = jest.spyOn(helper, 'checkContractStatus')
     updatedAccountCodeSpy = jest.spyOn(accountCodeController, 'updatedAccountCode')
     accountUploadControllerUploadSpy = jest.spyOn(accountUploadController, 'upload')
+    request.csrfToken = jest.fn()
   })
   afterEach(() => {
     request.resetMocked()
@@ -80,11 +81,17 @@ describe('accountCodeUploadのテスト', () => {
 
   describe('ルーティング', () => {
     test('accountCodeのルーティングを確認', async () => {
-      expect(accountCodeUpload.router.get).toBeCalledWith('/', helper.isAuthenticated, accountCodeUpload.cbGetIndex)
+      expect(accountCodeUpload.router.get).toBeCalledWith(
+        '/',
+        helper.isAuthenticated,
+        expect.anything(),
+        accountCodeUpload.cbGetIndex
+      )
 
       expect(accountCodeUpload.router.post).toBeCalledWith(
         '/',
         helper.isAuthenticated,
+        expect.anything(),
         expect.any(Function),
         accountCodeUpload.cbPostIndex
       )

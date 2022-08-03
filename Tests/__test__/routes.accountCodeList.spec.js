@@ -98,8 +98,13 @@ describe('routes.accountListのテスト', () => {
   ]
 
   describe('ルーティング', () => {
-    test('uploadFormatListのルーティングを確認', async () => {
-      expect(accountCodeList.router.get).toBeCalledWith('/', helper.isAuthenticated, accountCodeList.cbGetIndex)
+    test('accountCodeListのルーティングを確認', async () => {
+      expect(accountCodeList.router.get).toBeCalledWith(
+        '/',
+        helper.isAuthenticated,
+        expect.anything(),
+        accountCodeList.cbGetIndex
+      )
     })
   })
 
@@ -120,6 +125,12 @@ describe('routes.accountListのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(tenantsMock[0])
       contractControllerFindContractSpy.mockReturnValue(contractMock[0])
       getAccountCodeListSpy.mockReturnValue([])
+
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await accountCodeList.cbGetIndex(request, response, next)
@@ -144,7 +155,8 @@ describe('routes.accountListのテスト', () => {
         setClassDeleteBtn: 'deleteAccountCodeBtn',
         prevLocation: '/uploadAccount',
         prevLocationName: '←勘定科目一括作成',
-        deleteModalTitle: '勘定科目削除'
+        deleteModalTitle: '勘定科目削除',
+        csrfToken: dummyToken
       })
     })
 
@@ -165,6 +177,12 @@ describe('routes.accountListのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(tenantsMock[0])
       contractControllerFindContractSpy.mockReturnValue(contractMock[0])
       getAccountCodeListSpy.mockReturnValue(accountCodeListArrFour)
+
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await accountCodeList.cbGetIndex(request, response, next)
@@ -189,7 +207,8 @@ describe('routes.accountListのテスト', () => {
         setClassDeleteBtn: 'deleteAccountCodeBtn',
         prevLocation: '/uploadAccount',
         prevLocationName: '←勘定科目一括作成',
-        deleteModalTitle: '勘定科目削除'
+        deleteModalTitle: '勘定科目削除',
+        csrfToken: dummyToken
       })
     })
 
@@ -210,6 +229,12 @@ describe('routes.accountListのテスト', () => {
       contractControllerFindContractSpy.mockReturnValue(contractMock[1])
       getAccountCodeListSpy.mockReturnValue([])
 
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await accountCodeList.cbGetIndex(request, response, next)
 
@@ -233,7 +258,8 @@ describe('routes.accountListのテスト', () => {
         setClassDeleteBtn: 'deleteAccountCodeBtn',
         prevLocation: '/uploadAccount',
         prevLocationName: '←勘定科目一括作成',
-        deleteModalTitle: '勘定科目削除'
+        deleteModalTitle: '勘定科目削除',
+        csrfToken: dummyToken
       })
     })
 
@@ -254,6 +280,12 @@ describe('routes.accountListのテスト', () => {
       contractControllerFindContractSpy.mockReturnValue(contractMock[2])
       getAccountCodeListSpy.mockReturnValue([])
 
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await accountCodeList.cbGetIndex(request, response, next)
 
@@ -277,7 +309,8 @@ describe('routes.accountListのテスト', () => {
         setClassDeleteBtn: 'deleteAccountCodeBtn',
         prevLocation: '/uploadAccount',
         prevLocationName: '←勘定科目一括作成',
-        deleteModalTitle: '勘定科目削除'
+        deleteModalTitle: '勘定科目削除',
+        csrfToken: dummyToken
       })
     })
 
@@ -298,6 +331,12 @@ describe('routes.accountListのテスト', () => {
       contractControllerFindContractSpy.mockReturnValue(contractMock[3])
       getAccountCodeListSpy.mockReturnValue([])
 
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await accountCodeList.cbGetIndex(request, response, next)
 
@@ -321,7 +360,8 @@ describe('routes.accountListのテスト', () => {
         setClassDeleteBtn: 'deleteAccountCodeBtn',
         prevLocation: '/uploadAccount',
         prevLocationName: '←勘定科目一括作成',
-        deleteModalTitle: '勘定科目削除'
+        deleteModalTitle: '勘定科目削除',
+        csrfToken: dummyToken
       })
     })
 
@@ -342,6 +382,12 @@ describe('routes.accountListのテスト', () => {
       contractControllerFindContractSpy.mockReturnValue(contractMock[4])
       getAccountCodeListSpy.mockReturnValue([])
 
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await accountCodeList.cbGetIndex(request, response, next)
 
@@ -365,7 +411,8 @@ describe('routes.accountListのテスト', () => {
         setClassDeleteBtn: 'deleteAccountCodeBtn',
         prevLocation: '/uploadAccount',
         prevLocationName: '←勘定科目一括作成',
-        deleteModalTitle: '勘定科目削除'
+        deleteModalTitle: '勘定科目削除',
+        csrfToken: dummyToken
       })
     })
 
@@ -386,6 +433,12 @@ describe('routes.accountListのテスト', () => {
       contractControllerFindContractSpy.mockReturnValue(contractMock[0])
       getAccountCodeListSpy.mockReturnValue([])
 
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await accountCodeList.cbGetIndex(request, response, next)
 
@@ -409,7 +462,8 @@ describe('routes.accountListのテスト', () => {
         setClassDeleteBtn: 'deleteAccountCodeBtn',
         prevLocation: '/uploadAccount',
         prevLocationName: '←勘定科目一括作成',
-        deleteModalTitle: '勘定科目削除'
+        deleteModalTitle: '勘定科目削除',
+        csrfToken: dummyToken
       })
     })
 

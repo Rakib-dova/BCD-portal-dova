@@ -1,5 +1,6 @@
 // See https://qiita.com/standard-software/items/0b2617062b2e4c7f1abb
 const constantsDefine = require('../constants')
+const contractStatuses = constantsDefine.statusConstants.contractStatuses
 
 const assert = function (value, message) {
   if (typeof message === 'undefined' || message === null) {
@@ -137,6 +138,24 @@ const isStatusForSimpleChange = function (contractStatus, deleteFlag) {
     return false
   }
   return true
+}
+
+/**
+ * デジトレ契約が解約手続き中か判定する
+ * @param {*} contract デジトレ契約情報
+ * @returns
+ */
+const isBcdCancelling = (bcdContract) => {
+  // deleteFlag: false & 契約ステータスが解約着手待ち(30)or解約対応中(31) の場合
+  if (
+    !bcdContract.deleteFlag &&
+    (bcdContract.contractStatus === contractStatuses.cancellationOrder ||
+      bcdContract.contractStatus === contractStatuses.cancellationReceive)
+  ) {
+    return true
+  } else {
+    return false
+  }
 }
 
 // CSVファイルのバリデーションチェック（現在行～）
@@ -455,6 +474,219 @@ const isName = function (name, prefix) {
   }
 }
 
+const isContactEmail = function (contactEmail) {
+  const contactEmailType = typeof contactEmail
+
+  if (contactEmailType === 'undefined' || contactEmail.length === 0) return 0
+
+  let quoteCnt = 0
+  let spaceCnt = 0
+
+  const getCharCode = function (character) {
+    return character.charCodeAt()
+  }
+
+  // 取引担当者メールアドレスが配列形式で受け取った場合
+  if (contactEmailType !== 'string') return -1
+
+  const local = contactEmail.split('@')[0]
+  const domain = contactEmail.split('@')[1]
+
+  // 取引担当者メールアドレスがメール形式ではない場合
+  if (typeof domain === 'undefined') return -1
+
+  // 取引担当者メールアドレスが128超過の場合
+  if (contactEmail.length > 128) return -1
+
+  // 取引担当者メールアドレスのローカル部のサイズが超えた場合
+  if (local.length > 64) return -1
+
+  // 取引担当者メールアドレスのローカル部チェック
+  for (const character of local) {
+    const code = getCharCode(character)
+    // 半角英数字以外場合エラー発生
+    if (code > 127) {
+      return -1
+    }
+
+    // 「"」のチェック
+    if (code === 34) {
+      quoteCnt++
+    }
+
+    // 引用符号の外に半角スペースがあるかをチェック
+    if (code === 32) {
+      if (quoteCnt === 0) return -2
+      if (quoteCnt > 0 && quoteCnt % 2 === 0) return -2
+      spaceCnt++
+    }
+  }
+
+  if (spaceCnt > 0 && quoteCnt > 0) {
+    if (quoteCnt % 2 === 1) return -2
+  }
+
+  // 取引担当者メールアドレスのドメイン部チェック
+  const doaminPattern = '^(?!://)(?=.{1,255}$)((.{1,63}.){1,127}(?![0-9]*$)[a-z0-9-]+.?)$'
+  const domainReg = new RegExp(doaminPattern)
+  if (!domainReg.test(domain)) return -1
+  if (domain[0] === '-') return -1
+
+  return 0
+}
+
+const isValidEmail = function (emailAddress) {
+  const emailType = typeof emailAddress
+
+  if (emailType === 'undefined' || emailAddress.length === 0) return false
+
+  let quoteCnt = 0
+  let spaceCnt = 0
+
+  const getCharCode = function (character) {
+    return character.charCodeAt()
+  }
+
+  // 取引担当者メールアドレスが配列形式で受け取った場合
+  if (emailType !== 'string') return false
+
+  if (emailAddress.match(/@/g) === null || emailAddress.match(/@/g).length !== 1) return false
+  const emailParty = emailAddress.split('@')
+
+  let local = null
+  let domain = null
+
+  if (emailParty.length === 1) return false
+
+  if (emailParty.length === 2) {
+    local = emailParty[0]
+    domain = emailParty[1]
+  } else {
+    local = ''
+    for (let idx = emailParty.length - 1; idx >= 0; idx--) {
+      if ((idx = emailParty.length - 1)) {
+        domain = emailParty[idx]
+      } else {
+        if (emailParty[idx].length === 0) return false
+        local += emailParty[idx]
+      }
+    }
+  }
+
+  if (typeof domain === 'undefined') return false
+
+  if (local.length > 64) return false
+
+  for (const character of local) {
+    const code = getCharCode(character)
+    // 半角英数字以外場合エラー発生
+    // 利用不可の特殊文字コード設定("<>():,@;)
+    const disabledCharacterCode = [34, 60, 62, 40, 41, 58, 44, 59]
+    if (code > 127 || disabledCharacterCode.indexOf(code) > -1) {
+      return false
+    }
+
+    // 「"」のチェック
+    if (code === 34) {
+      quoteCnt++
+    }
+
+    // 引用符号の外に半角スペースがあるかをチェック
+    if (code === 32) {
+      if (quoteCnt === 0) return -2
+      if (quoteCnt > 0 && quoteCnt % 2 === 0) return false
+      spaceCnt++
+    }
+  }
+
+  if (spaceCnt > 0 && quoteCnt > 0) {
+    if (quoteCnt % 2 === 1) return false
+  }
+
+  const domainPart = domain.split('.')
+  for (let idx = domainPart.length - 1; idx >= 0; idx--) {
+    if (domainPart[idx].length === 0) {
+      return false
+    } else {
+      const pattern = /^[A-Za-z0-9.-]{1,63}$/
+      if (!pattern.test(domainPart[idx])) return false
+    }
+  }
+
+  return true
+}
+
+// トレードシフトのユーザアカウント用に使用するメールアドレスの形式チェック
+const isValidEmailTsUser = function (emailAddress) {
+  const emailType = typeof emailAddress
+
+  if (emailType === 'undefined' || emailAddress.length === 0) return false
+  // 255文字まで
+  if (emailAddress.length > 255) return false
+
+  const getCharCode = function (character) {
+    return character.charCodeAt()
+  }
+
+  // 取引担当者メールアドレスが配列形式で受け取った場合
+  if (emailType !== 'string') return false
+
+  if (emailAddress.match(/@/g) === null || emailAddress.match(/@/g).length !== 1) return false
+  const emailParty = emailAddress.split('@')
+
+  let local = null
+  let domain = null
+
+  if (emailParty.length === 1) return false
+
+  if (emailParty.length === 2) {
+    local = emailParty[0]
+    domain = emailParty[1]
+  } else {
+    local = ''
+    for (let idx = emailParty.length - 1; idx >= 0; idx--) {
+      if ((idx = emailParty.length - 1)) {
+        domain = emailParty[idx]
+      } else {
+        if (emailParty[idx].length === 0) return false
+        local += emailParty[idx]
+      }
+    }
+  }
+
+  if (typeof domain === 'undefined') return false
+
+  // @より前：64文字以下、後：190文字以下
+  if (local.length > 64) return false
+  if (domain.length > 190) return false
+
+  // @より前のチェック
+  for (const character of local) {
+    const code = getCharCode(character)
+    // 半角英数字以外場合エラー発生
+    // 利用不可の特殊文字コード設定("<>():,@;)
+    const disabledCharacterCode = [34, 60, 62, 40, 41, 58, 44, 59]
+    if (code > 127 || disabledCharacterCode.indexOf(code) > -1) {
+      return false
+    }
+  }
+
+  // @より後のチェック
+  // 「.」が存在しない場合、エラー
+  if (domain.indexOf('.') === -1) return false
+  // 文字種チェック
+  const pattern = /^[A-Za-z0-9.]{1,190}$/
+  if (!pattern.test(domain)) return false
+
+  // 先頭、末尾のドットはNG
+  if (local.indexOf('.') === 0) return false
+  if (local.lastIndexOf('.') === local.length - 1) return false
+  if (domain.indexOf('.') === 0) return false
+  if (domain.lastIndexOf('.') === domain.length - 1) return false
+
+  return true
+}
+
 module.exports = {
   isArray: isArray,
   isNumber: isNumber,
@@ -469,6 +701,7 @@ module.exports = {
   isStatusForRegister: isStatusForRegister,
   isStatusForCancel: isStatusForCancel,
   isStatusForSimpleChange: isStatusForSimpleChange,
+  isBcdCancelling: isBcdCancelling,
   isInvoiceId: isInvoiceId,
   isBankName: isBankName,
   isDate: isDate,
@@ -492,5 +725,8 @@ module.exports = {
   isNumberRegular: isNumberRegular,
   isCode: isCode,
   isName: isName,
-  isDepartmentCode: isDepartmentCode
+  isDepartmentCode: isDepartmentCode,
+  isContactEmail: isContactEmail,
+  isValidEmail: isValidEmail,
+  isValidEmailTsUser: isValidEmailTsUser
 }

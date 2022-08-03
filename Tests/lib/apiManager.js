@@ -343,6 +343,19 @@ const axios = {
             pageId: 0,
             Document: [dcouments.Document[0], dcouments.Document[8]]
           }
+        } else if (paramateter.minissuedate === '1995-10-01') {
+          const documents101 = []
+          for (let i = 0; i < 101; i++) {
+            documents101.push(dcouments.Document[0])
+          }
+          this.result.data = {
+            itemPerPage: 25,
+            itemCount: 101,
+            indexing: false,
+            numPages: 1,
+            pageId: 0,
+            Document: documents101
+          }
         } else if (
           paramateter.state &&
           paramateter.state.join('') === 'DELIVEREDACCEPTEDPAID_UNCONFIRMEDPAID_CONFIRMED' &&

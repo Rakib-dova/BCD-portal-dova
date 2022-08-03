@@ -11,6 +11,7 @@ block content
       .column.is-11
         .container.is-max-widescreen.is-family-noto-sans
           form#form(action="#")
+            input(type='hidden' name='_csrf' value=csrfToken)
             article.panel.is-info
               h2.panel-heading 解約
               .panel-block
@@ -25,7 +26,7 @@ block content
                       .control
                         div.button-area
                           a.button.is-link.mr-6#cancelltion-button(type="submit") 次へ
-                          a.button#return-btn.cancel-button(href='portal') 戻る
+                          a.button#return-btn.cancel-button(href='contractDetail') 戻る
 
             .modal.modal-fx-fadeInScale#cancellation-modal
               .modal-background.cancel-button(data-target='cancellation-modal')

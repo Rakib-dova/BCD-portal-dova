@@ -59,5 +59,9 @@ class SupportMenuPage {
     await this.frame.waitForTimeout(1000);
   }
 
+  // 警告が表示されているか否か
+  async isModalShown() {
+    return await this.actionUtils.isExist(this.frame, '//div[contains(@class, "modal is-active")]//button[@class="delete"]');
+  }
 }
 exports.SupportMenuPage = SupportMenuPage;

@@ -7,6 +7,9 @@ const contractController = require('../../controllers/contractController')
 const noticeHelper = require('./notice')
 const errorHelper = require('./error')
 const validate = require('../../lib/validate')
+const constantsDefine = require('../../constants')
+const serviceTypes = constantsDefine.statusConstants.serviceTypes
+const contractStatuses = constantsDefine.statusConstants.contractStatuses
 
 exports.isAuthenticated = async (req, res, next) => {
   if (req.user?.userId) {
@@ -82,7 +85,10 @@ exports.isUserRegistered = async (req, res, next) => {
 }
 
 exports.checkContractStatus = async (tenantId) => {
-  const contracts = await contractController.findContract({ tenantId: tenantId, deleteFlag: false }, 'createdAt DESC')
+  const contracts = await contractController.findContract(
+    { tenantId: tenantId, serviceType: '010', deleteFlag: false },
+    'createdAt DESC'
+  )
 
   // DB検索エラーの場合
   if (contracts instanceof Error) {
@@ -155,20 +161,10 @@ exports.bcdAuthenticate = async (req, res, next) => {
   // ==========================================================================
   // DBの契約情報確認
   // ==========================================================================
-  const contract = await contractController.findOne(req.user.tenantId)
-  // データベースエラーは、エラーオブジェクトが返る
-  // 契約情報未登録の場合もエラーを上げる
-  if (contract instanceof Error || contract === null) {
-    if (req.method === 'DELETE') {
-      return res.send({ result: 0 })
-    } else {
-      return next(errorHelper.create(500))
-    }
-  }
-  // 契約情報の確認
-  const deleteFlag = contract.dataValues.deleteFlag
-  const contractStatus = contract.dataValues.contractStatus
-  if (!contractStatus) {
+
+  // テナントIDに紐付いている全ての契約情報を取得
+  const contracts = await contractController.findContractsBytenantId(req.user.tenantId)
+  if (!contracts || !Array.isArray(contracts) || contracts.length === 0) {
     if (req.method === 'DELETE') {
       return res.send({ result: 0 })
     } else {
@@ -176,8 +172,20 @@ exports.bcdAuthenticate = async (req, res, next) => {
     }
   }
 
-  // 解約受付中か確認
-  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
+  // BCD無料アプリの契約情報確認
+  const bcdContract = contracts.find(
+    (contract) => contract.serviceType === serviceTypes.bcd && contract.deleteFlag === false
+  )
+  if (!bcdContract || !bcdContract.contractStatus) {
+    if (req.method === 'DELETE') {
+      return res.send({ result: 0 })
+    } else {
+      return next(errorHelper.create(500))
+    }
+  }
+
+  // 現在解約中か確認
+  if (validate.isBcdCancelling(bcdContract)) {
     if (req.method === 'DELETE') {
       return res.send({ result: 0 })
     } else {
@@ -185,20 +193,110 @@ exports.bcdAuthenticate = async (req, res, next) => {
     }
   }
 
-  // 契約変更 or 解約 場合は追加のバリデーションをする
-  if (req.originalUrl === '/change' || req.originalUrl === '/cancellation') {
-    if (!validate.isTenantManager(user.dataValues?.userRole, deleteFlag)) {
-      return next(noticeHelper.create('generaluser'))
-    }
-    if (!validate.isStatusForRegister(contractStatus, deleteFlag)) {
-      return next(noticeHelper.create('registerprocedure'))
-    }
-    if (!validate.isStatusForSimpleChange(contractStatus, deleteFlag)) {
-      return next(noticeHelper.create('changeprocedure'))
-    }
+  req.dbUser = user
+  req.contracts = contracts
+  next()
+}
+
+/**
+ * 無償契約が契約中、または、簡易変更中ことのチェック
+ * @param {object} req リクエスト
+ * @param {object} res レスポンス
+ * @param {function} next 次の処理
+ */
+exports.isOnOrChangeContract = async (req, res, next) => {
+  // テナントIDに紐付いている未解約無償契約情報を取得
+  const contract = await contractController.findOne(req.user?.tenantId)
+  const contractStatus = contract?.dataValues?.contractStatus
+  if (contract instanceof Error || !contractStatus) return next(errorHelper.create(500))
+
+  if (
+    contractStatus === contractStatuses.onContract ||
+    contractStatus === contractStatuses.simpleChangeContractOrder ||
+    contractStatus === contractStatuses.simpleChangeContractReceive
+  ) {
+    return next()
+  } else if (
+    contractStatus === contractStatuses.newContractOrder ||
+    contractStatus === contractStatuses.newContractReceive
+  ) {
+    return next(noticeHelper.create('registerprocedure'))
+  } else if (
+    contractStatus === contractStatuses.cancellationOrder ||
+    contractStatus === contractStatuses.cancellationReceive
+  ) {
+    return next(noticeHelper.create('cancelprocedure'))
+  } else {
+    return next(errorHelper.create(500))
+  }
+}
+
+/**
+ * 契約プランのチェック結果を取得
+ * @param {object} req リクエスト
+ * @param {object} res レスポンス
+ * @param {function} next 次の処理
+ */
+exports.getContractPlan = async (req, res, next) => {
+  // 有償契約チェック
+  let isLightPlan = false
+  let isIntroductionSupportPlan = false
+  let isLightPlanForEntry = false
+  let isIntroductionSupportPlanForEntry = false
+
+  const lightPlan = await contractController.findLightPlan(req.user.tenantId)
+  if (lightPlan) {
+    isLightPlan = true
+  }
+  const introductionSupportPlan = await contractController.findIntroductionSupportPlan(req.user.tenantId)
+  if (introductionSupportPlan) {
+    isIntroductionSupportPlan = true
   }
 
-  req.dbUser = user
-  req.contract = contract
+  // スタンダードプランの申し込み
+  const lightPlanForEntry = await contractController.findLightPlanForEntry(req.user.tenantId)
+  if (lightPlanForEntry) {
+    isLightPlanForEntry = true
+  }
+
+  // 導入支援プランの申し込み
+  const introductionSupportPlanForEntry = await contractController.findIntroductionSupportPlanForEntry(
+    req.user.tenantId
+  )
+  if (introductionSupportPlanForEntry) {
+    isIntroductionSupportPlanForEntry = true
+  }
+
+  /*
+   isLightPlan : スタンダードプラン利用有無（status:12,00）
+   isLightPlanForEntry : スタンダードプラン申し込み有無（status:10,11）
+   isIntroductionSupportPlan : 導入支援サービス利用有無（status:00）
+   isIntroductionSupportPlanForEntry : 導入支援サービス申し込み有無（status:10,11,12）
+   */
+  const contractPlan = {
+    isLightPlan: isLightPlan,
+    isIntroductionSupportPlan: isIntroductionSupportPlan,
+    isLightPlanForEntry: isLightPlanForEntry,
+    isIntroductionSupportPlanForEntry: isIntroductionSupportPlanForEntry
+  }
+
+  req.contractPlan = contractPlan
   next()
+}
+
+/**
+ * 管理者権限のチェック
+ * @param {object} req リクエスト
+ * @param {object} res レスポンス
+ * @param {function} next 次の処理
+ */
+exports.isTenantManager = async (req, res, next) => {
+  const user = await userController.findOne(req.user?.userId)
+  // データベースエラー、または、ユーザ未登録の場合もエラーを上げる
+  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+
+  if (user.dataValues?.userRole !== constantsDefine.userRoleConstants.tenantManager) {
+    return next(noticeHelper.create('generaluser'))
+  }
+  return next()
 }

@@ -73,5 +73,18 @@ class TopPage {
   async openSettlementDialog() {
     await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[text()="銀行振込消込"]')
   }
+
+  // メッセージが表示されるまで待機する
+  async waitPopup() {
+    await this.actionUtils.waitForLoading('//*[@class="notification is-info animate__animated animate__faster"]');
+    await this.frame.waitForTimeout(500);
+  }
+
+  // メッセージを閉じる
+  async closePopup() {
+    await this.addComment('メッセージを閉じる');
+    await this.actionUtils.click(this.frame, '//*[@class="notification is-info animate__animated animate__faster"]/button');
+    await this.frame.waitForTimeout(500);
+  }
 }
 exports.TopPage = TopPage;
