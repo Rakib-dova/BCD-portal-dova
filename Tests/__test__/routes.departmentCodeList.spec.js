@@ -99,7 +99,12 @@ describe('routes.departmentListのテスト', () => {
 
   describe('ルーティング', () => {
     test('departmentListのルーティングを確認', async () => {
-      expect(departmentCodeList.router.get).toBeCalledWith('/', helper.isAuthenticated, departmentCodeList.cbGetIndex)
+      expect(departmentCodeList.router.get).toBeCalledWith(
+        '/',
+        helper.isAuthenticated,
+        expect.any(Function),
+        departmentCodeList.cbGetIndex
+      )
     })
   })
 
@@ -120,6 +125,12 @@ describe('routes.departmentListのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(tenantsMock[0])
       contractControllerFindContractSpy.mockReturnValue(contractMock[0])
       getDepartmentCodeListSpy.mockReturnValue([])
+
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await departmentCodeList.cbGetIndex(request, response, next)
@@ -145,7 +156,8 @@ describe('routes.departmentListのテスト', () => {
         prevLocation: '/uploadDepartment',
         prevLocationName: '←部門データ一括作成',
         // 削除モーダル表示
-        deleteModalTitle: '部門データ削除'
+        deleteModalTitle: '部門データ削除',
+        csrfToken: dummyToken
       })
     })
 
@@ -166,6 +178,12 @@ describe('routes.departmentListのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(tenantsMock[0])
       contractControllerFindContractSpy.mockReturnValue(contractMock[0])
       getDepartmentCodeListSpy.mockReturnValue(departmentCodeListArrFour)
+
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await departmentCodeList.cbGetIndex(request, response, next)
@@ -191,7 +209,8 @@ describe('routes.departmentListのテスト', () => {
         prevLocation: '/uploadDepartment',
         prevLocationName: '←部門データ一括作成',
         // 削除モーダル表示
-        deleteModalTitle: '部門データ削除'
+        deleteModalTitle: '部門データ削除',
+        csrfToken: dummyToken
       })
     })
 
@@ -212,6 +231,12 @@ describe('routes.departmentListのテスト', () => {
       contractControllerFindContractSpy.mockReturnValue(contractMock[1])
       getDepartmentCodeListSpy.mockReturnValue([])
 
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await departmentCodeList.cbGetIndex(request, response, next)
 
@@ -236,7 +261,8 @@ describe('routes.departmentListのテスト', () => {
         prevLocation: '/uploadDepartment',
         prevLocationName: '←部門データ一括作成',
         // 削除モーダル表示
-        deleteModalTitle: '部門データ削除'
+        deleteModalTitle: '部門データ削除',
+        csrfToken: dummyToken
       })
     })
 
@@ -257,6 +283,12 @@ describe('routes.departmentListのテスト', () => {
       contractControllerFindContractSpy.mockReturnValue(contractMock[2])
       getDepartmentCodeListSpy.mockReturnValue([])
 
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await departmentCodeList.cbGetIndex(request, response, next)
 
@@ -281,7 +313,8 @@ describe('routes.departmentListのテスト', () => {
         prevLocation: '/uploadDepartment',
         prevLocationName: '←部門データ一括作成',
         // 削除モーダル表示
-        deleteModalTitle: '部門データ削除'
+        deleteModalTitle: '部門データ削除',
+        csrfToken: dummyToken
       })
     })
 
@@ -302,6 +335,12 @@ describe('routes.departmentListのテスト', () => {
       contractControllerFindContractSpy.mockReturnValue(contractMock[3])
       getDepartmentCodeListSpy.mockReturnValue([])
 
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await departmentCodeList.cbGetIndex(request, response, next)
 
@@ -326,7 +365,8 @@ describe('routes.departmentListのテスト', () => {
         prevLocation: '/uploadDepartment',
         prevLocationName: '←部門データ一括作成',
         // 削除モーダル表示
-        deleteModalTitle: '部門データ削除'
+        deleteModalTitle: '部門データ削除',
+        csrfToken: dummyToken
       })
     })
 
@@ -347,6 +387,12 @@ describe('routes.departmentListのテスト', () => {
       contractControllerFindContractSpy.mockReturnValue(contractMock[4])
       getDepartmentCodeListSpy.mockReturnValue([])
 
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await departmentCodeList.cbGetIndex(request, response, next)
 
@@ -371,7 +417,8 @@ describe('routes.departmentListのテスト', () => {
         prevLocation: '/uploadDepartment',
         prevLocationName: '←部門データ一括作成',
         // 削除モーダル表示
-        deleteModalTitle: '部門データ削除'
+        deleteModalTitle: '部門データ削除',
+        csrfToken: dummyToken
       })
     })
 
@@ -392,6 +439,12 @@ describe('routes.departmentListのテスト', () => {
       contractControllerFindContractSpy.mockReturnValue(contractMock[0])
       getDepartmentCodeListSpy.mockReturnValue([])
 
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await departmentCodeList.cbGetIndex(request, response, next)
 
@@ -416,7 +469,8 @@ describe('routes.departmentListのテスト', () => {
         prevLocation: '/uploadDepartment',
         prevLocationName: '←部門データ一括作成',
         // 削除モーダル表示
-        deleteModalTitle: '部門データ削除'
+        deleteModalTitle: '部門データ削除',
+        csrfToken: dummyToken
       })
     })
 

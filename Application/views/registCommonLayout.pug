@@ -9,6 +9,7 @@ block content
       .column.is-11
         .container.is-max-widescreen.is-family-noto-sans
           form#form(method="POST")
+            input(type='hidden' name='_csrf' value=csrfToken)
             article.panel.is-info
               h2.panel-heading #{codeName}
               .panel-block

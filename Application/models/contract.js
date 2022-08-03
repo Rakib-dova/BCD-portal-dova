@@ -34,16 +34,20 @@ module.exports = (sequelize, DataTypes) => {
         })
       ).code
 
-      if (isCloedApproval) {
-        const resultOfClosedApproval = await sequelize.models.RequestApproval.findOne({
-          where: {
-            status: closedStatus,
-            invoiceId: documentId,
-            contractId: contractId
-          }
-        })
+      const resultOfClosedApproval = await sequelize.models.RequestApproval.findOne({
+        where: {
+          status: closedStatus,
+          invoiceId: documentId,
+          contractId: contractId
+        }
+      })
 
+      if (isCloedApproval) {
         if (!resultOfClosedApproval) {
+          return null
+        }
+      } else {
+        if (resultOfClosedApproval) {
           return null
         }
       }

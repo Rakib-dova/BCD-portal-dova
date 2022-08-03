@@ -146,7 +146,13 @@ describe('deleteAccountCodeのテスト', () => {
     test('deleteAccountCodeのルーティングを確認', async () => {
       expect(deleteAccountCode.router.delete).toHaveBeenLastCalledWith(
         '/:accountCodeId',
+        expect.any(Function),
         deleteAccountCode.cbDeleteAccountCode
+      )
+      expect(deleteAccountCode.router.get).toHaveBeenLastCalledWith(
+        '/:checkAccountCode',
+        expect.any(Function),
+        deleteAccountCode.cbGetCheckAccountCode
       )
     })
   })
