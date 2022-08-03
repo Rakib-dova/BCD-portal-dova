@@ -607,9 +607,7 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith(
-        '{"message":"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
-      )
+      expect(response.send).toHaveBeenCalledWith('{"message":"システムエラーです。（後程、接続してください）"}')
       expect(response.status).toHaveBeenCalledWith(400)
     })
     test('準正常: 文字コードがUTF-8以外', async () => {
@@ -620,6 +618,17 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
       expect(response.send).toHaveBeenCalledWith(
         '{"message":"文字コードはUTF-8 BOM付で作成してください。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
+      )
+      expect(response.status).toHaveBeenCalledWith(400)
+    })
+    test('準正常: CSV内容チェック', async () => {
+      request.file = { buffer: Buffer.from(new Uint8Array([0xef, 0xbb, 0xbf])) }
+      encodingSpy.mockReturnValue(true)
+
+      await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
+
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
       )
       expect(response.status).toHaveBeenCalledWith(400)
     })
