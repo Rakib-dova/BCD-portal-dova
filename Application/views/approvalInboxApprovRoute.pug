@@ -13,11 +13,13 @@
             .column.is-one-fifth.text-left.is-border-right 承認順
             .column.is-one-third.text-left.is-border-right 担当者名
             .column.text-left.is-border-right 承認状況
+            .column.is-one-fifth.text-left.is-border-right メッセージ
           - const userLen = approveRoute.users.length
           .columns.m-0.p-0.is-border-left-top
             .column.is-one-fifth.text-left.is-border-right #{requester.no}
             .column.is-one-third.text-left.is-border-right #{requester.name}
             .column.text-left.is-border-right #{requester.status} #{requester.requestedAt}
+            .column.is-one-fifth.text-left.is-border-right #{requester.message}
           each user, idx in approveRoute.users            
             if idx < userLen - 1
               .columns.m-0.p-0.is-border-left-top
@@ -30,6 +32,7 @@
                   .column.is-align-content-center.is-border-right.is-family-noto-sans-bold #{user.status} #{user.approvedAt}
                 else
                   .column.is-align-content-center.is-border-right #{user.status} #{user.approvedAt}
+                .column.is-one-fifth.text-left.is-border-right #{user.message}
             else
               .columns.m-0.p-0.is-border-left-top-bottom
                 .column.is-one-fifth.text-left.is-border-right #{approvalNo.slice(-1)}
@@ -38,3 +41,4 @@
                   .column.is-align-content-center.is-border-right.is-family-noto-sans-bold #{user.status} #{user.approvedAt}
                 else
                   .column.is-align-content-center.is-border-right #{user.status} #{user.approvedAt}
+                .column.is-one-fifth.text-left.is-border-right #{user.message}
