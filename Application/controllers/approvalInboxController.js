@@ -96,6 +96,7 @@ const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId
         no: '支払依頼',
         name: requester.getName(),
         status: '依頼済み',
+        message: requestApproval.message,
         requestedAt: `${requestApproval.create.getFullYear()}-${
           requestApproval.create.getMonth() + 1
         }-${requestApproval.create.getDate()} ${requestApproval.create.getHours()}:${requestApproval.create.getMinutes()}:${requestApproval.create.getSeconds()}`
