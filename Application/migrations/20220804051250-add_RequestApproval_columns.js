@@ -5,7 +5,8 @@ module.exports = {
     await queryInterface.removeColumn('RequestApproval', 'isSaved')
     await queryInterface.addColumn('RequestApproval', 'version', {
       type: Sequelize.INTEGER,
-      defaultValue: 0
+      allowNull: false,
+      defaultValue: 1
     })
     await queryInterface.addColumn('RequestApproval', 'rejectedFlag', {
       type: Sequelize.DataTypes.BOOLEAN,
