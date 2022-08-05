@@ -127,7 +127,13 @@ describe('approvalInboxControllerのテスト', () => {
         invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
         message: 'dummyData',
         status: '10',
-        requester: 'dummyUserUUID',
+        requester: {
+          no: '支払依頼',
+          name: '名前',
+          status: '依頼済み',
+          message: 'メッセージテスト',
+          requestedAt: null
+        },
         approveRoute: {
           users: [
             {
@@ -237,6 +243,7 @@ describe('approvalInboxControllerのテスト', () => {
       expect(result.contractId).toEqual(expectResult.contractId)
       expect(result.invoiceId).toEqual(expectResult.invoiceId)
       expect(result.message).toEqual(expectResult.message)
+      expect(result.requester.message).toEqual(expectResult.requester.message)
       expect(result.status).toEqual(expectResult.status)
       expect(result.prevUser).toEqual(expectResult.prevUser)
     })
@@ -273,7 +280,13 @@ describe('approvalInboxControllerのテスト', () => {
         invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
         message: 'dummyData',
         status: '11',
-        requester: 'dummyUserUUID',
+        requester: {
+          no: '支払依頼',
+          name: '名前',
+          status: '依頼済み',
+          message: 'メッセージテスト',
+          requestedAt: null
+        },
         approveRoute: {
           users: [
             {
@@ -383,6 +396,7 @@ describe('approvalInboxControllerのテスト', () => {
       expect(result.contractId).toEqual(expectResult.contractId)
       expect(result.invoiceId).toEqual(expectResult.invoiceId)
       expect(result.message).toEqual(expectResult.message)
+      expect(result.requester.message).toEqual(expectResult.requester.message)
       expect(result.status).toEqual(expectResult.status)
       expect(result.prevUser).toEqual(expectResult.prevUser)
     })
@@ -396,7 +410,13 @@ describe('approvalInboxControllerのテスト', () => {
         contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
         approveRouteId: '22155dd0-1111-44a2-ab29-0c4a6cb02bde',
         invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
-        requester: '221559d0-f4db-484e-b822-0c4a6cb02bde',
+        requester: {
+          no: '支払依頼',
+          name: '名前',
+          status: '依頼済み',
+          message: 'メッセージテスト',
+          requestedAt: null
+        },
         status: '15',
         message: '支払依頼します。',
         create: new Date('2022-03-17 00:59:59'),
@@ -442,6 +462,7 @@ describe('approvalInboxControllerのテスト', () => {
       expect(result.contractId).toEqual(expectResult.contractId)
       expect(result.invoiceId).toEqual(expectResult.invoiceId)
       expect(result.message).toEqual(expectResult.message)
+      expect(result.requester.message).toEqual(expectResult.requester.message)
       expect(result.status).toEqual(expectResult.status)
       expect(result.prevUser).toEqual(expectResult.prevUser)
     })
@@ -455,7 +476,13 @@ describe('approvalInboxControllerのテスト', () => {
         contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
         approveRouteId: '22155dd0-1111-44a2-ab29-0c4a6cb02bde',
         invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
-        requester: '221559d0-f4db-484e-b822-0c4a6cb02bde',
+        requester: {
+          no: '支払依頼',
+          name: '名前',
+          status: '依頼済み',
+          message: 'メッセージテスト',
+          requestedAt: null
+        },
         status: '20',
         message: '支払依頼します。',
         create: new Date('2022-03-17 00:59:59'),
@@ -501,6 +528,7 @@ describe('approvalInboxControllerのテスト', () => {
       expect(result.contractId).toEqual(expectResult.contractId)
       expect(result.invoiceId).toEqual(expectResult.invoiceId)
       expect(result.message).toEqual(expectResult.message)
+      expect(result.requester.message).toEqual(expectResult.requester.message)
       expect(result.status).toEqual(expectResult.status)
       expect(result.prevUser).toEqual(expectResult.prevUser)
     })
