@@ -13,6 +13,7 @@ const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
 const inboxController = require('../controllers/inboxController')
 const notiTitle = '支払依頼'
+const approvalInboxController = require('../controllers/approvalInboxController')
 
 const bodyParser = require('body-parser')
 const approverController = require('../controllers/approverController')
@@ -178,25 +179,27 @@ const cbGetRequestApproval = async (req, res, next) => {
   let approveRouteId = null
   let message = null
   let approveRoute = null
-  let rejectedUser = null
   if (req.session.requestApproval) {
     message = req.session.requestApproval.message
     approveRouteId = req.session.requestApproval.approveRouteId
   }
+
+  let requestApproval = []
+
   const approval = await approverController.readApproval(contractId, invoiceId)
   if (approval && approval.status === '80') {
     approveRouteId = approval.approveRouteId
     message = approval.message
   } else if (approval && approval.status === '90' && approval.requester === req.user.userId) {
-    rejectedUser = await approverController.getApprovalFromRejected(
+    requestApproval = await approvalInboxController.getRequestApproval(
       accessToken,
       refreshToken,
-      tenantId,
       contractId,
-      approval.requestId
+      invoiceId,
+      tenantId
     )
 
-    if (rejectedUser instanceof Error) return next(errorHelper.create(500))
+    if (requestApproval === null) return next(errorHelper.create(500))
   }
 
   if (approveRouteId) {
@@ -217,7 +220,7 @@ const cbGetRequestApproval = async (req, res, next) => {
     documentId: invoiceId,
     message: message,
     approveRoute: approveRoute,
-    rejectedUser: rejectedUser,
+    requestApprovals: requestApproval,
     csrfToken: req.csrfToken()
   })
 

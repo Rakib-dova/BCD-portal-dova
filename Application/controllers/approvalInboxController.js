@@ -16,114 +16,105 @@ const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId
     for (let id = 10; id < 21; id++) {
       requestStatus.push({ status: `${id}` })
     }
-    const requestApproval = await RequestApproval.findOne({
+
+    requestStatus.push({ status: '90' })
+
+    const requestApproval = await RequestApproval.findAll({
       where: {
         contractId: contract,
         invoiceId: invoiceId,
         [Op.or]: requestStatus
-      }
-    })
-    if (requestApproval instanceof RequestApproval === false) return null
-
-    const approval = await DbApproval.findOne({
-      where: {
-        requestId: requestApproval.requestId
-      }
+      },
+      order: [['version', 'ASC']]
     })
 
-    const approvalData = approval.dataValues
-    const approveUserCount = approval.dataValues.approveUserCount
+    if (requestApproval instanceof Array === false) return null
 
-    const userList = []
-    const keys = Object.keys(approvalData)
+    const request = []
 
-    for (let i = 0; i < keys.length; i++) {
-      const approveUser = {}
-      let userAccounts
-      if (keys[i].includes('approveUser') && !keys[i].includes('approveUserCount')) {
-        const no = keys[i].replace('approveUser', '')
-        switch (approvalData[keys[i]]) {
-          case null:
-            break
+    for (let i = 0; i < requestApproval.length; i++) {
+      const approval = await DbApproval.findOne({
+        where: {
+          requestId: requestApproval[i].requestId
+        }
+      })
 
-          default:
-            approveUser[`${keys[i]}`] = approvalData[keys[i]]
-            userAccounts = await tradeshiftDTO.findUser(approvalData[keys[i]])
-            userAccounts.message = approvalData[`message${no}`]
-            if (approvalData[`approvalAt${no}`] !== null) {
-              userAccounts.status = '承認済み'
-              userAccounts.approvedAt = approvalData[`approvalAt${no}`]
-            } else {
-              const status = ~~approvalData.approveStatus - 9
-              if (no === 'Last' && status === approvalData.approveUserCount) {
-                userAccounts.status = '処理中'
-                userAccounts.approvedAt = ''
+      const approvalData = approval.dataValues
+      const approveUserCount = approval.dataValues.approveUserCount
+
+      const userList = []
+      const keys = Object.keys(approvalData)
+
+      for (let i = 0; i < keys.length; i++) {
+        const approveUser = {}
+        let userAccounts
+        if (keys[i].includes('approveUser') && !keys[i].includes('approveUserCount')) {
+          const no = keys[i].replace('approveUser', '')
+          switch (approvalData[keys[i]]) {
+            case null:
+              break
+
+            default:
+              approveUser[`${keys[i]}`] = approvalData[keys[i]]
+              userAccounts = await tradeshiftDTO.findUser(approvalData[keys[i]])
+              userAccounts.message = approvalData[`message${no}`]
+              if (approvalData[`approvalAt${no}`] !== null) {
+                userAccounts.status = '承認済み'
+                userAccounts.approvedAt = approvalData[`approvalAt${no}`]
+              } else if (approvalData.rejectedUser && approvalData.rejectedUser === approvalData[`approveUser${no}`]) {
+                userAccounts.status = '差し戻し'
+                userAccounts.approvedAt = approvalData.rejectedAt
+                userAccounts.message = approvalData.rejectedMessage
               } else {
-                if (status === ~~no) {
+                const status = ~~approvalData.approveStatus - 9
+                if (no === 'Last' && status === approvalData.approveUserCount) {
                   userAccounts.status = '処理中'
-                  userAccounts.approvedAt = ' '
+                  userAccounts.approvedAt = ''
+                } else if (approvalData.rejectedUser && approvalData.rejectedUser === approvalData.approveUserLast) {
+                  userAccounts.status = '差し戻し'
+                  userAccounts.approvedAt = approvalData.rejectedAt
+                  userAccounts.message = approvalData.rejectedMessage
                 } else {
-                  userAccounts.status = ' '
-                  userAccounts.approvedAt = ' '
+                  if (status === ~~no) {
+                    userAccounts.status = '処理中'
+                    userAccounts.approvedAt = ' '
+                  } else {
+                    userAccounts.status = ' '
+                    userAccounts.approvedAt = ' '
+                  }
                 }
               }
-            }
-            userList.push(userAccounts)
-            break
+              userList.push(userAccounts)
+              break
+          }
         }
       }
-    }
 
-    if (userList.length !== approveUserCount) {
-      return null
-    }
-
-    const requester = await tradeshiftDTO.findUser(requestApproval.requester)
-
-    const request = {
-      requestId: requestApproval.requestId,
-      contractId: requestApproval.contractId,
-      invoiceId: requestApproval.invoiceId,
-      message: requestApproval.message,
-      status: requestApproval.status,
-      approveRoute: { name: approval.approveRouteName, users: userList },
-      approvals: [],
-      prevUser: {
-        name: null,
-        message: null
-      },
-      requester: {
-        no: '支払依頼',
-        name: requester.getName(),
-        status: '依頼済み',
-        message: requestApproval.message,
-        requestedAt: `${requestApproval.create.getFullYear()}-${
-          requestApproval.create.getMonth() + 1
-        }-${requestApproval.create.getDate()} ${requestApproval.create.getHours()}:${requestApproval.create.getMinutes()}:${requestApproval.create.getSeconds()}`
+      if (userList.length !== approveUserCount) {
+        return null
       }
-    }
 
-    const userNo = ~~request.status - 10
-    switch (userNo) {
-      case 0: {
-        request.prevUser.name = requester.getName()
-        request.prevUser.message = request.message
-        break
-      }
-      case 1:
-      case 2:
-      case 3:
-      case 4:
-      case 5:
-      case 6:
-      case 7:
-      case 8:
-      case 9:
-      case 10:
-        request.prevUser.name = request.approveRoute.users[userNo - 1].getName()
-        request.prevUser.message = request.approveRoute.users[userNo - 1].message
-    }
+      const requester = await tradeshiftDTO.findUser(requestApproval[i].requester)
 
+      request.push({
+        requestId: requestApproval[i].requestId,
+        contractId: requestApproval[i].contractId,
+        invoiceId: requestApproval[i].invoiceId,
+        status: requestApproval[i].status,
+        approveRoute: { name: approval.approveRouteName, users: userList },
+        requester: {
+          no: '支払依頼',
+          name: requester.getName(),
+          status: '依頼済み',
+          message: requestApproval[i].message,
+          requestedAt: `${requestApproval[i].create.getFullYear()}-${
+            requestApproval[i].create.getMonth() + 1
+          }-${requestApproval[i].create.getDate()} ${requestApproval[i].create.getHours()}:${requestApproval[
+            i
+          ].create.getMinutes()}:${requestApproval[i].create.getSeconds()}`
+        }
+      })
+    }
     return request
   } catch (error) {
     logger.error({ contractId: contract, stack: error.stack, status: 0 })

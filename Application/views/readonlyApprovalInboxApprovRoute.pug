@@ -2,36 +2,44 @@
   .column.m-0.p-0
     .column.p-2#displayRequestApprovaRoute
       - const approvalNo = ['一次承認', '二次承認', '三次承認', '四次承認', '五次承認', '六次承認', '七次承認', '八次承認', '九次承認', '十次承認', '最終承認']
-      if approveRoute
+      if requestApprovals
         .columns.px-0.mx-0.is-border-left-top-bottom
           .column.text-left.is-one-fifth.is-color-table-header.is-border-right
             p 承認ルート名
           .column.is-border-right#approveRouteName
-            p #{approveRoute.name}
+            p #{requestApprovals[requestApprovals.length - 1].approveRoute.name}
         section#displayDetailApproveRouteTable
           .columns.m-0.p-0.is-color-table-header.is-border-left-top
             .column.is-one-fifth.text-left.is-border-right 承認順
             .column.is-one-third.text-left.is-border-right 担当者名
             .column.text-left.is-border-right 承認状況
-          - const userLen = approveRoute.users.length
-          .columns.m-0.p-0.is-border-left-top
-            .column.is-one-fifth.text-left.is-border-right #{requester.no}
-            .column.is-one-third.text-left.is-border-right #{requester.name}
-            .column.text-left.is-border-right #{requester.status} #{requester.requestedAt}
-          each user, idx in approveRoute.users            
-            if idx < userLen - 1
-              .columns.m-0.p-0.is-border-left-top
-                .column.is-one-fifth.text-left.is-border-right #{approvalNo[idx]}
-                .column.is-one-third.text-left.is-border-right #{user.firstName} #{user.lastName}
-                if user.status === '処理中'
-                  .column.is-align-content-center.is-border-right.is-family-noto-sans-bold #{user.status} #{user.approvedAt}
-                else
-                  .column.is-align-content-center.is-border-right #{user.status} #{user.approvedAt}
-            else
-              .columns.m-0.p-0.is-border-left-top-bottom
-                .column.is-one-fifth.text-left.is-border-right #{approvalNo.slice(-1)}
-                .column.is-one-third.text-left.is-border-right  #{user.firstName} #{user.lastName}
-                if user.status === '処理中'
-                  .column.is-align-content-center.is-border-right.is-family-noto-sans-bold #{user.status} #{user.approvedAt}
-                else
-                  .column.is-align-content-center.is-border-right #{user.status} #{user.approvedAt}
+            .column.is-one-fifth.text-left.is-border-right メッセージ
+          each requestApproval in requestApprovals
+            - const userLen = requestApproval.approveRoute.users.length
+            .columns.m-0.p-0.is-border-left-top
+              .column.is-one-fifth.text-left.is-border-right #{requestApproval.requester.no}
+              .column.is-one-third.text-left.is-border-right #{requestApproval.requester.name}
+              .column.text-left.is-border-right #{requestApproval.requester.status} #{requestApproval.requester.requestedAt}
+              .column.is-one-fifth.text-left.is-border-right #{requestApproval.requester.message}
+            each user, idx in requestApproval.approveRoute.users
+              if idx < userLen - 1
+                .columns.m-0.p-0.is-border-left-top
+                  .column.is-one-fifth.text-left.is-border-right #{approvalNo[idx]}
+                  if user.firstName === '未設定'
+                    .column.is-one-third.text-left.is-border-right.input-label-required #{user.lastName} #{user.firstName}
+                  else
+                    .column.is-one-third.text-left.is-border-right #{user.lastName} #{user.firstName}
+                  if user.status === '処理中'
+                    .column.is-align-content-center.is-border-right.is-family-noto-sans-bold #{user.status} #{user.approvedAt}
+                  else
+                    .column.is-align-content-center.is-border-right #{user.status} #{user.approvedAt}
+                  .column.is-one-fifth.text-left.is-border-right #{user.message}
+              else
+                .columns.m-0.p-0.is-border-left-top-bottom
+                  .column.is-one-fifth.text-left.is-border-right #{approvalNo.slice(-1)}
+                  .column.is-one-third.text-left.is-border-right  #{user.lastName} #{user.firstName}
+                  if user.status === '処理中'
+                    .column.is-align-content-center.is-border-right.is-family-noto-sans-bold #{user.status} #{user.approvedAt}
+                  else
+                    .column.is-align-content-center.is-border-right #{user.status} #{user.approvedAt}
+                  .column.is-one-fifth.text-left.is-border-right #{user.message}

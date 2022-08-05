@@ -15,7 +15,7 @@ class Approver {
   }
 
   getName() {
-    return `${this.FirstName} ${this.LastName}`
+    return `${this.LastName} ${this.FirstName}`
   }
 
   getMail() {
