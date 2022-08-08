@@ -41,7 +41,8 @@ let approveRouteFindAll,
   approvalFineOne,
   journalizeInvoiceFindAllSpy,
   tradeshiftDTOSpy,
-  userAccountsGetNameSpy
+  userAccountsGetNameSpy,
+  requestApprovalFindAll
 let approveUserCreate, approveUserFindOne
 let validateIsUUID
 
@@ -59,6 +60,7 @@ describe('approvalInboxControllerのテスト', () => {
     ApproveUser.save = jest.fn()
     approveRouteFindOne = jest.spyOn(ApproveRoute, 'findOne')
     requestApprovalFindOne = jest.spyOn(RequestApproval, 'findOne')
+    requestApprovalFindAll = jest.spyOn(RequestApproval, 'findAll')
     approveStatusFindOne = jest.spyOn(ApproveStatus, 'findOne')
     userControllerFindOne = jest.spyOn(userController, 'findOne')
     RequestApproval.save = jest.fn()
@@ -83,6 +85,7 @@ describe('approvalInboxControllerのテスト', () => {
     approveRouteUpdate.mockRestore()
     approveRouteFindOne.mockRestore()
     requestApprovalFindOne.mockRestore()
+    requestApprovalFindAll.mockRestore()
     approveStatusFindOne.mockRestore()
     userControllerFindOne.mockRestore()
     validateIsUUID.mockRestore()
@@ -121,62 +124,70 @@ describe('approvalInboxControllerのテスト', () => {
       }
 
       // 検索予想結果
-      const expectResult = {
-        requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-        contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
-        invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
-        message: 'dummyData',
-        status: '10',
-        requester: 'dummyUserUUID',
-        approveRoute: {
-          users: [
+      const expectResult = [
+        {
+          requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+          contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
+          invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
+          message: 'dummyData',
+          status: '10',
+          requester: {
+            no: '支払依頼',
+            name: '名前',
+            status: '依頼済み',
+            message: 'メッセージテスト',
+            requestedAt: null
+          },
+          approveRoute: {
+            users: [
+              {
+                No: 1,
+                approveRouteName: 'dummyRouteName',
+                approverCount: 'dummyCount',
+                id: 'dummyUserUUID',
+                getName: function () {
+                  return 'test1'
+                }
+              },
+              {
+                No: 2,
+                approveRouteName: 'dummyRouteName2',
+                approverCount: 'dummyCount2',
+                id: 'dummyUserUUID2',
+                getName: function () {
+                  return 'test2'
+                }
+              }
+            ]
+          },
+          approvals: [
             {
-              No: 1,
-              approveRouteName: 'dummyRouteName',
-              approverCount: 'dummyCount',
-              id: 'dummyUserUUID',
+              approvalDate: null,
+              approvalId: 'c08ddcbf-c305-455f-89f9-42b53614cb0e',
+              approver: {
+                No: 1,
+                approveRouteName: 'dummyRouteName',
+                approverCount: 'dummyCount',
+                id: 'dummyUserUUID'
+              },
+              contractId: 'dummy',
+              message: null,
+              next: 'c08ddssf-c305-455f-89f9-42b53614cb0e',
+              prev: null,
+              request: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+              status: '10',
               getName: function () {
                 return 'test1'
               }
-            },
-            {
-              No: 2,
-              approveRouteName: 'dummyRouteName2',
-              approverCount: 'dummyCount2',
-              id: 'dummyUserUUID2',
-              getName: function () {
-                return 'test2'
-              }
             }
-          ]
-        },
-        approvals: [
-          {
-            approvalDate: null,
-            approvalId: 'c08ddcbf-c305-455f-89f9-42b53614cb0e',
-            approver: {
-              No: 1,
-              approveRouteName: 'dummyRouteName',
-              approverCount: 'dummyCount',
-              id: 'dummyUserUUID'
-            },
-            contractId: 'dummy',
-            message: null,
-            next: 'c08ddssf-c305-455f-89f9-42b53614cb0e',
-            prev: null,
-            request: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-            status: '10',
-            getName: function () {
-              return 'test1'
-            }
-          }
-        ],
+          ],
 
-        prevUser: {
-          message: 'dummyData',
-          name: 'test2'
+          prevUser: {
+            message: 'dummyData',
+            name: 'test2'
+          }
         }
-      }
+      ]
       const expectGetApprover = [
         {
           id: 'dummyId',
@@ -189,21 +200,23 @@ describe('approvalInboxControllerのテスト', () => {
           email: 'dummyEmail2'
         }
       ]
-      const expectRequestApproval = RequestApproval.build({
-        requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-        contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
-        approveRouteId: '7fa489ad-4c50-43d6-8057-1279877c8ef5',
-        invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
-        requester: 'dummyId',
-        status: '10',
-        message: 'dummyData',
-        create: new Date(),
-        isSaved: true
-      })
+      const expectRequestApproval = RequestApproval.build([
+        {
+          requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+          contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
+          approveRouteId: '7fa489ad-4c50-43d6-8057-1279877c8ef5',
+          invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
+          requester: 'dummyId',
+          status: '10',
+          message: 'メッセージテスト',
+          create: new Date(),
+          isSaved: true
+        }
+      ])
 
       approvalFineOne.mockReturnValue(ApprovalData1[0])
       approverControllerGetApprover.mockReturnValue(expectGetApprover)
-      requestApprovalFindOne.mockReturnValue(expectRequestApproval)
+      requestApprovalFindAll.mockReturnValue(expectRequestApproval)
       approverControllerGetApproveRoute.mockReturnValue(expectGetApproveRoute)
       tradeshiftDTOSpy.mockReturnValue({
         users: [
@@ -233,12 +246,11 @@ describe('approvalInboxControllerのテスト', () => {
 
       // 期待結果
       // 想定したデータがReturnされていること
-      expect(result.requestId).toEqual(expectResult.requestId)
-      expect(result.contractId).toEqual(expectResult.contractId)
-      expect(result.invoiceId).toEqual(expectResult.invoiceId)
-      expect(result.message).toEqual(expectResult.message)
-      expect(result.status).toEqual(expectResult.status)
-      expect(result.prevUser).toEqual(expectResult.prevUser)
+      expect(result[0].requestId).toEqual(expectResult[0].requestId)
+      expect(result[0].contractId).toEqual(expectResult[0].contractId)
+      expect(result[0].invoiceId).toEqual(expectResult[0].invoiceId)
+      expect(result[0].requester.message).toEqual(expectResult[0].requester.message)
+      expect(result[0].status).toEqual(expectResult[0].status)
     })
 
     test('正常：支払依頼取得ステータス：11', async () => {
@@ -267,62 +279,70 @@ describe('approvalInboxControllerのテスト', () => {
       }
 
       // 検索予想結果
-      const expectResult = {
-        requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-        contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
-        invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
-        message: 'dummyData',
-        status: '11',
-        requester: 'dummyUserUUID',
-        approveRoute: {
-          users: [
+      const expectResult = [
+        {
+          requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+          contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
+          invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
+          message: 'dummyData',
+          status: '11',
+          requester: {
+            no: '支払依頼',
+            name: '名前',
+            status: '依頼済み',
+            message: 'メッセージテスト',
+            requestedAt: null
+          },
+          approveRoute: {
+            users: [
+              {
+                No: 1,
+                approveRouteName: 'dummyRouteName',
+                approverCount: 'dummyCount',
+                id: 'dummyUserUUID',
+                getName: function () {
+                  return 'test1'
+                }
+              },
+              {
+                No: 2,
+                approveRouteName: 'dummyRouteName2',
+                approverCount: 'dummyCount2',
+                id: 'dummyUserUUID2',
+                getName: function () {
+                  return 'test2'
+                }
+              }
+            ]
+          },
+          approvals: [
             {
-              No: 1,
-              approveRouteName: 'dummyRouteName',
-              approverCount: 'dummyCount',
-              id: 'dummyUserUUID',
+              approvalDate: null,
+              approvalId: 'c08ddcbf-c305-455f-89f9-42b53614cb0e',
+              approver: {
+                No: 1,
+                approveRouteName: 'dummyRouteName',
+                approverCount: 'dummyCount',
+                id: 'dummyUserUUID'
+              },
+              contractId: 'dummy',
+              message: null,
+              next: 'c08ddssf-c305-455f-89f9-42b53614cb0e',
+              prev: null,
+              request: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+              status: '11',
               getName: function () {
                 return 'test1'
               }
-            },
-            {
-              No: 2,
-              approveRouteName: 'dummyRouteName2',
-              approverCount: 'dummyCount2',
-              id: 'dummyUserUUID2',
-              getName: function () {
-                return 'test2'
-              }
             }
-          ]
-        },
-        approvals: [
-          {
-            approvalDate: null,
-            approvalId: 'c08ddcbf-c305-455f-89f9-42b53614cb0e',
-            approver: {
-              No: 1,
-              approveRouteName: 'dummyRouteName',
-              approverCount: 'dummyCount',
-              id: 'dummyUserUUID'
-            },
-            contractId: 'dummy',
-            message: null,
-            next: 'c08ddssf-c305-455f-89f9-42b53614cb0e',
-            prev: null,
-            request: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-            status: '11',
-            getName: function () {
-              return 'test1'
-            }
-          }
-        ],
+          ],
 
-        prevUser: {
-          message: 'k',
-          name: 'test2'
+          prevUser: {
+            message: 'k',
+            name: 'test2'
+          }
         }
-      }
+      ]
       const expectGetApprover = [
         {
           id: 'dummyId',
@@ -335,21 +355,23 @@ describe('approvalInboxControllerのテスト', () => {
           email: 'dummyEmail2'
         }
       ]
-      const expectRequestApproval = RequestApproval.build({
-        requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-        contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
-        approveRouteId: '7fa489ad-4c50-43d6-8057-1279877c8ef5',
-        invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
-        requester: 'dummyId',
-        status: '11',
-        message: 'dummyData',
-        create: new Date(),
-        isSaved: true
-      })
+      const expectRequestApproval = RequestApproval.build([
+        {
+          requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+          contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
+          approveRouteId: '7fa489ad-4c50-43d6-8057-1279877c8ef5',
+          invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
+          requester: 'dummyId',
+          status: '11',
+          message: 'メッセージテスト',
+          create: new Date(),
+          isSaved: true
+        }
+      ])
 
       approvalFineOne.mockReturnValue(ApprovalData1[0])
       approverControllerGetApprover.mockReturnValue(expectGetApprover)
-      requestApprovalFindOne.mockReturnValue(expectRequestApproval)
+      requestApprovalFindAll.mockReturnValue(expectRequestApproval)
       approverControllerGetApproveRoute.mockReturnValue(expectGetApproveRoute)
       tradeshiftDTOSpy.mockReturnValue({
         users: [
@@ -379,52 +401,55 @@ describe('approvalInboxControllerのテスト', () => {
 
       // 期待結果
       // 想定したデータがReturnされていること
-      expect(result.requestId).toEqual(expectResult.requestId)
-      expect(result.contractId).toEqual(expectResult.contractId)
-      expect(result.invoiceId).toEqual(expectResult.invoiceId)
-      expect(result.message).toEqual(expectResult.message)
-      expect(result.status).toEqual(expectResult.status)
-      expect(result.prevUser).toEqual(expectResult.prevUser)
+      expect(result[0].requestId).toEqual(expectResult[0].requestId)
+      expect(result[0].contractId).toEqual(expectResult[0].contractId)
+      expect(result[0].invoiceId).toEqual(expectResult[0].invoiceId)
+      expect(result[0].requester.message).toEqual(expectResult[0].requester.message)
+      expect(result[0].status).toEqual(expectResult[0].status)
     })
 
-    test('正常：支払依頼取得ステータス：15', async () => {
+    test('正常：支払依頼取得ステータス：15（承認者数１０人＋最終承認者）', async () => {
       // 準備
 
       // 検索予想結果
-      const expectRequestApproval = RequestApproval.build({
-        requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-        contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
-        approveRouteId: '22155dd0-1111-44a2-ab29-0c4a6cb02bde',
-        invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
-        requester: '221559d0-f4db-484e-b822-0c4a6cb02bde',
-        status: '15',
-        message: '支払依頼します。',
-        create: new Date('2022-03-17 00:59:59'),
-        isSaved: true
-      })
-      const expectResult = {
-        ...expectRequestApproval.dataValues,
-        prevUser: {
-          name: '管理者 5次',
-          message: '了解'
+      const expectRequestApproval = RequestApproval.build([
+        {
+          requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+          contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
+          approveRouteId: '22155dd0-1111-44a2-ab29-0c4a6cb02bde',
+          invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
+          requester: {
+            no: '支払依頼',
+            name: '名前',
+            status: '依頼済み',
+            message: 'メッセージテスト',
+            requestedAt: null
+          },
+          status: '15',
+          message: 'メッセージテスト',
+          create: new Date('2022-03-17 00:59:59'),
+          isSaved: true
         }
-      }
+      ])
 
       // 支払依頼検索結果
-      requestApprovalFindOne.mockReturnValue(expectRequestApproval)
+      requestApprovalFindAll.mockReturnValue(expectRequestApproval)
       // 支払依頼状況検索結果
       approvalFineOne.mockReturnValue(ApprovalData1[1])
       // トレードシフトからユーザー情報取得
-      const UserAccounts = require('../../Application/DTO/VO/UserAccounts')
-      tradeshiftDTOSpy.mockImplementation((userId) => {
-        const tradeshiftFindUser = require('../mockDB/TradeshiftFindUser')
-        let user = null
-        tradeshiftFindUser.forEach((account) => {
-          if (account.Id === userId) {
-            user = UserAccounts.setUserAccounts(account)
+      tradeshiftDTOSpy.mockReturnValue({
+        users: [
+          {
+            firstName: 'a',
+            lastName: 'b',
+            companyName: 'dummyRouteName',
+            email: 'dummyCount',
+            id: 'dummyUserUUID'
           }
-        })
-        return user
+        ],
+        getName: function () {
+          return 'test2'
+        }
       })
 
       // 試験実施
@@ -438,52 +463,240 @@ describe('approvalInboxControllerのテスト', () => {
 
       // 期待結果
       // 想定したデータがReturnされていること
-      expect(result.requestId).toEqual(expectResult.requestId)
-      expect(result.contractId).toEqual(expectResult.contractId)
-      expect(result.invoiceId).toEqual(expectResult.invoiceId)
-      expect(result.message).toEqual(expectResult.message)
-      expect(result.status).toEqual(expectResult.status)
-      expect(result.prevUser).toEqual(expectResult.prevUser)
+      expect(result[0].requestId).toEqual(expectRequestApproval[0].requestId)
+      expect(result[0].contractId).toEqual(expectRequestApproval[0].contractId)
+      expect(result[0].invoiceId).toEqual(expectRequestApproval[0].invoiceId)
+      expect(result[0].requester.message).toEqual(expectRequestApproval[0].requester.message)
+      expect(result[0].status).toEqual(expectRequestApproval[0].status)
+    })
+
+    test('正常：支払依頼取得（最終承認者以外の承認者が差し戻し）', async () => {
+      // 準備
+
+      // 検索予想結果
+      const expectRequestApproval = RequestApproval.build([
+        {
+          requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+          contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
+          approveRouteId: '22155dd0-1111-44a2-ab29-0c4a6cb02bde',
+          invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
+          requester: {
+            no: '支払依頼',
+            name: '名前',
+            status: '依頼済み',
+            message: 'メッセージテスト',
+            requestedAt: null
+          },
+          status: '15',
+          message: 'メッセージテスト',
+          create: new Date('2022-03-17 00:59:59'),
+          isSaved: true
+        }
+      ])
+
+      // 支払依頼検索結果
+      requestApprovalFindAll.mockReturnValue(expectRequestApproval)
+      // 支払依頼状況検索結果
+      approvalFineOne.mockReturnValue(ApprovalData1[4])
+      // トレードシフトからユーザー情報取得
+      tradeshiftDTOSpy.mockReturnValue({
+        users: [
+          {
+            firstName: 'a',
+            lastName: 'b',
+            companyName: 'dummyRouteName',
+            email: 'dummyCount',
+            id: 'dummyUserUUID'
+          }
+        ],
+        getName: function () {
+          return 'test2'
+        }
+      })
+
+      // 試験実施
+      const result = await approvalInboxController.getRequestApproval(
+        accessToken,
+        refreshToken,
+        contract,
+        invoiceId,
+        tenant
+      )
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result[0].requestId).toEqual(expectRequestApproval[0].requestId)
+      expect(result[0].contractId).toEqual(expectRequestApproval[0].contractId)
+      expect(result[0].invoiceId).toEqual(expectRequestApproval[0].invoiceId)
+      expect(result[0].requester.message).toEqual(expectRequestApproval[0].requester.message)
+      expect(result[0].status).toEqual(expectRequestApproval[0].status)
+    })
+
+    test('正常：支払依頼取得（最終承認者が差し戻し）', async () => {
+      // 準備
+
+      // 検索予想結果
+      const expectRequestApproval = RequestApproval.build([
+        {
+          requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+          contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
+          approveRouteId: '22155dd0-1111-44a2-ab29-0c4a6cb02bde',
+          invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
+          requester: {
+            no: '支払依頼',
+            name: '名前',
+            status: '依頼済み',
+            message: 'メッセージテスト',
+            requestedAt: null
+          },
+          status: '15',
+          message: 'メッセージテスト',
+          create: new Date('2022-03-17 00:59:59'),
+          isSaved: true
+        }
+      ])
+
+      // 支払依頼検索結果
+      requestApprovalFindAll.mockReturnValue(expectRequestApproval)
+      // 支払依頼状況検索結果
+      approvalFineOne.mockReturnValue(ApprovalData1[5])
+      // トレードシフトからユーザー情報取得
+      tradeshiftDTOSpy.mockReturnValue({
+        users: [
+          {
+            firstName: 'a',
+            lastName: 'b',
+            companyName: 'dummyRouteName',
+            email: 'dummyCount',
+            id: 'dummyUserUUID'
+          }
+        ],
+        getName: function () {
+          return 'test2'
+        }
+      })
+
+      // 試験実施
+      const result = await approvalInboxController.getRequestApproval(
+        accessToken,
+        refreshToken,
+        contract,
+        invoiceId,
+        tenant
+      )
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result[0].requestId).toEqual(expectRequestApproval[0].requestId)
+      expect(result[0].contractId).toEqual(expectRequestApproval[0].contractId)
+      expect(result[0].invoiceId).toEqual(expectRequestApproval[0].invoiceId)
+      expect(result[0].requester.message).toEqual(expectRequestApproval[0].requester.message)
+      expect(result[0].status).toEqual(expectRequestApproval[0].status)
+    })
+
+    test('正常：支払依頼取得ステータス：15（承認者数９人＋最終承認者）', async () => {
+      // 準備
+      // 検索予想結果
+      const expectRequestApproval = RequestApproval.build([
+        {
+          requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+          contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
+          approveRouteId: '22155dd0-1111-44a2-ab29-0c4a6cb02bde',
+          invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
+          requester: {
+            no: '支払依頼',
+            name: '名前',
+            status: '依頼済み',
+            message: 'メッセージテスト',
+            requestedAt: null
+          },
+          status: '15',
+          message: 'メッセージテスト',
+          create: new Date('2022-03-17 00:59:59'),
+          isSaved: true
+        }
+      ])
+
+      // 支払依頼検索結果
+      requestApprovalFindAll.mockReturnValue(expectRequestApproval)
+      // 支払依頼状況検索結果
+      approvalFineOne.mockReturnValue(ApprovalData1[3])
+      // トレードシフトからユーザー情報取得
+      tradeshiftDTOSpy.mockReturnValue({
+        users: [
+          {
+            firstName: 'a',
+            lastName: 'b',
+            companyName: 'dummyRouteName',
+            email: 'dummyCount',
+            id: 'dummyUserUUID'
+          }
+        ],
+        getName: function () {
+          return 'test2'
+        }
+      })
+
+      // 試験実施
+      const result = await approvalInboxController.getRequestApproval(
+        accessToken,
+        refreshToken,
+        contract,
+        invoiceId,
+        tenant
+      )
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result[0].requestId).toEqual(expectRequestApproval[0].requestId)
+      expect(result[0].contractId).toEqual(expectRequestApproval[0].contractId)
+      expect(result[0].invoiceId).toEqual(expectRequestApproval[0].invoiceId)
+      expect(result[0].requester.message).toEqual(expectRequestApproval[0].requester.message)
+      expect(result[0].status).toEqual(expectRequestApproval[0].status)
     })
 
     test('正常：支払依頼取得ステータス：最終承認待ち', async () => {
       // 準備
 
       // 検索予想結果
-      const expectRequestApproval = RequestApproval.build({
-        requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-        contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
-        approveRouteId: '22155dd0-1111-44a2-ab29-0c4a6cb02bde',
-        invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
-        requester: '221559d0-f4db-484e-b822-0c4a6cb02bde',
-        status: '20',
-        message: '支払依頼します。',
-        create: new Date('2022-03-17 00:59:59'),
-        isSaved: true
-      })
-      const expectResult = {
-        ...expectRequestApproval.dataValues,
-        prevUser: {
-          name: '管理者 10次',
-          message: ''
+      const expectRequestApproval = RequestApproval.build([
+        {
+          requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+          contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
+          approveRouteId: '22155dd0-1111-44a2-ab29-0c4a6cb02bde',
+          invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
+          requester: {
+            no: '支払依頼',
+            name: '名前',
+            status: '依頼済み',
+            message: 'メッセージテスト',
+            requestedAt: null
+          },
+          status: '20',
+          message: 'メッセージテスト',
+          create: new Date('2022-03-17 00:59:59'),
+          isSaved: true
         }
-      }
+      ])
 
       // 支払依頼検索結果
-      requestApprovalFindOne.mockReturnValue(expectRequestApproval)
+      requestApprovalFindAll.mockReturnValue(expectRequestApproval)
       // 支払依頼状況検索結果
       approvalFineOne.mockReturnValue(ApprovalData1[2])
       // トレードシフトからユーザー情報取得
-      const UserAccounts = require('../../Application/DTO/VO/UserAccounts')
-      tradeshiftDTOSpy.mockImplementation((userId) => {
-        const tradeshiftFindUser = require('../mockDB/TradeshiftFindUser')
-        let user = null
-        tradeshiftFindUser.forEach((account) => {
-          if (account.Id === userId) {
-            user = UserAccounts.setUserAccounts(account)
+      tradeshiftDTOSpy.mockReturnValue({
+        users: [
+          {
+            firstName: 'a',
+            lastName: 'b',
+            companyName: 'dummyRouteName',
+            email: 'dummyCount',
+            id: 'dummyUserUUID'
           }
-        })
-        return user
+        ],
+        getName: function () {
+          return 'test2'
+        }
       })
 
       // 試験実施
@@ -497,12 +710,11 @@ describe('approvalInboxControllerのテスト', () => {
 
       // 期待結果
       // 想定したデータがReturnされていること
-      expect(result.requestId).toEqual(expectResult.requestId)
-      expect(result.contractId).toEqual(expectResult.contractId)
-      expect(result.invoiceId).toEqual(expectResult.invoiceId)
-      expect(result.message).toEqual(expectResult.message)
-      expect(result.status).toEqual(expectResult.status)
-      expect(result.prevUser).toEqual(expectResult.prevUser)
+      expect(result[0].requestId).toEqual(expectRequestApproval[0].requestId)
+      expect(result[0].contractId).toEqual(expectRequestApproval[0].contractId)
+      expect(result[0].invoiceId).toEqual(expectRequestApproval[0].invoiceId)
+      expect(result[0].requester.message).toEqual(expectRequestApproval[0].requester.message)
+      expect(result[0].status).toEqual(expectRequestApproval[0].status)
     })
 
     test('正常：承認者９人', async () => {
@@ -673,6 +885,64 @@ describe('approvalInboxControllerのテスト', () => {
       expect(result).toEqual(null)
     })
 
+    test('エラー：承認者数が異なる場合', async () => {
+      // 準備
+      // 検索予想結果
+      const expectRequestApproval = RequestApproval.build([
+        {
+          requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+          contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
+          approveRouteId: '22155dd0-1111-44a2-ab29-0c4a6cb02bde',
+          invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
+          requester: {
+            no: '支払依頼',
+            name: '名前',
+            status: '依頼済み',
+            message: 'メッセージテスト',
+            requestedAt: null
+          },
+          status: '15',
+          message: 'メッセージテスト',
+          create: new Date('2022-03-17 00:59:59'),
+          isSaved: true
+        }
+      ])
+
+      // 支払依頼検索結果
+      requestApprovalFindAll.mockReturnValue(expectRequestApproval)
+      // 支払依頼状況検索結果
+      approvalFineOne.mockReturnValue(ApprovalData1[6])
+      // トレードシフトからユーザー情報取得
+      tradeshiftDTOSpy.mockReturnValue({
+        users: [
+          {
+            firstName: 'a',
+            lastName: 'b',
+            companyName: 'dummyRouteName',
+            email: 'dummyCount',
+            id: 'dummyUserUUID'
+          }
+        ],
+        getName: function () {
+          return 'test2'
+        }
+      })
+
+      // 試験実施
+      const result = await approvalInboxController.getRequestApproval(
+        accessToken,
+        refreshToken,
+        contract,
+        invoiceId,
+        tenant,
+        true
+      )
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result).toEqual(null)
+    })
+
     test('準正常:RequestApproval検索の結果がRequestApproval形式ではない場合', async () => {
       // 準備
       const expectGetApproveRoute = {
@@ -696,7 +966,7 @@ describe('approvalInboxControllerのテスト', () => {
       const expectRequestApproval = {}
 
       approverControllerGetApprover.mockReturnValue(expectGetApprover)
-      requestApprovalFindOne.mockReturnValue(expectRequestApproval)
+      requestApprovalFindAll.mockReturnValue(expectRequestApproval)
       approverControllerGetApproveRoute.mockReturnValue(expectGetApproveRoute)
 
       // 試験実施

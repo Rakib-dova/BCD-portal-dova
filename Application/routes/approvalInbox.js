@@ -81,6 +81,7 @@ const cbGetIndex = async (req, res, next) => {
     invoiceId,
     tenantId
   )
+
   if (requestApproval === null) {
     req.flash('noti', [notiTitle, '当該請求書は支払依頼の文書ではありません。'])
     return res.redirect('/inboxList/1')
@@ -95,11 +96,8 @@ const cbGetIndex = async (req, res, next) => {
     return res.redirect('/inboxList/1')
   }
 
-  const approveRoute = requestApproval.approveRoute
-  const prevUser = requestApproval.prevUser
-
   // 依頼者と承認ルートの承認者のかを確認する。
-  const requestId = requestApproval.requestId
+  const requestId = requestApproval[requestApproval.length - 1].requestId
   const hasPowerOfEditing = await approvalInboxController.hasPowerOfEditing(contractId, userId, requestId)
 
   let presentation = 'readonlyApprovalInbox'
@@ -108,14 +106,11 @@ const cbGetIndex = async (req, res, next) => {
     req.session.requestApproval = { approval: requestApproval }
   }
 
-  const requester = requestApproval.requester
   res.render(presentation, {
     ...result,
     title: '支払依頼',
     documentId: invoiceId,
-    requester: requester,
-    approveRoute: approveRoute,
-    prevUser: prevUser,
+    requestApprovals: requestApproval,
     requestId: requestId,
     csrfToken: req.csrfToken()
   })
@@ -172,7 +167,7 @@ const cbPostApprove = async (req, res, next) => {
   }
 
   const data = req.body
-  const requestId = requestApproval.requestId
+  const requestId = requestApproval[requestApproval.length - 1].requestId
   const accessToken = req.user.accessToken
   const refreshToken = req.user.refreshToken
   const tenantId = req.user.tenantId

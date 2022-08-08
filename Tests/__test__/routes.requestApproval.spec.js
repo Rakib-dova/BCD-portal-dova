@@ -17,6 +17,9 @@ const errorHelper = require('../../Application/routes/helpers/error')
 const approverController = require('../../Application/controllers/approverController')
 const inboxController = require('../../Application/controllers/inboxController')
 const mailMsg = require('../../Application/lib/mailMsg')
+const approvalInboxController = require('../../Application/controllers/approvalInboxController')
+const UserAccounts = require('../../Application/DTO/VO/UserAccounts')
+const findUser = require('../mockDB/TradeshiftFindUser')
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
@@ -292,6 +295,40 @@ const readApprovalResult2 = {
   isSaved: false
 }
 
+const expectGetRequestApproval = [
+  {
+    requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+    contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
+    invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
+    message: '支払依頼します。',
+    status: '20',
+    approveRoute: {
+      name: undefined,
+      users: [
+        UserAccounts.setUserAccounts(findUser[0]),
+        UserAccounts.setUserAccounts(findUser[1]),
+        UserAccounts.setUserAccounts(findUser[2]),
+        UserAccounts.setUserAccounts(findUser[3]),
+        UserAccounts.setUserAccounts(findUser[4]),
+        UserAccounts.setUserAccounts(findUser[5]),
+        UserAccounts.setUserAccounts(findUser[6]),
+        UserAccounts.setUserAccounts(findUser[7]),
+        UserAccounts.setUserAccounts(findUser[8]),
+        UserAccounts.setUserAccounts(findUser[9]),
+        UserAccounts.setUserAccounts(findUser[10])
+      ]
+    },
+    approvals: [],
+    requester: {
+      no: '支払依頼',
+      name: '支払 依頼者',
+      status: '依頼済み',
+      requestedAt: '2022-3-17 0:59:59',
+      message: '支払依頼メッセージ'
+    }
+  }
+]
+
 let errorSpy, infoSpy
 let request, response
 let userControllerFindOneSpy, contractControllerFindOneSpy, checkContractStatusSpy
@@ -300,8 +337,8 @@ let approverControllerGetApproveRoute,
   approverControllerRequestApproval,
   approverControllerCheckApproveRoute,
   approverControllerSaveApproval
-let approverControllerReadApproval, approverControllerGetApprovalFromRejected
-let mailMsgSendPaymentRequestMail
+let approverControllerReadApproval
+let mailMsgSendPaymentRequestMail, approvalInboxControllerGetRequestApprovalSpy
 
 describe('requestApprovalのテスト', () => {
   beforeEach(() => {
@@ -320,8 +357,8 @@ describe('requestApprovalのテスト', () => {
     approverControllerReadApproval = jest.spyOn(approverController, 'readApproval')
     approverControllerCheckApproveRoute = jest.spyOn(approverController, 'checkApproveRoute')
     approverControllerSaveApproval = jest.spyOn(approverController, 'saveApproval')
-    approverControllerGetApprovalFromRejected = jest.spyOn(approverController, 'getApprovalFromRejected')
     mailMsgSendPaymentRequestMail = jest.spyOn(mailMsg, 'sendPaymentRequestMail')
+    approvalInboxControllerGetRequestApprovalSpy = jest.spyOn(approvalInboxController, 'getRequestApproval')
   })
   afterEach(() => {
     request.resetMocked()
@@ -339,8 +376,8 @@ describe('requestApprovalのテスト', () => {
     approverControllerReadApproval.mockRestore()
     approverControllerCheckApproveRoute.mockRestore()
     approverControllerSaveApproval.mockRestore()
-    approverControllerGetApprovalFromRejected.mockRestore()
     mailMsgSendPaymentRequestMail.mockRestore()
+    approvalInboxControllerGetRequestApprovalSpy.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -399,7 +436,7 @@ describe('requestApprovalのテスト', () => {
       checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
 
       inboxControllerGetInvoiceDetail.mockReturnValue(inboxControllerGetInvoiceDetailResult)
-      // approverControllerReadApproval.mockReturnValue(null)
+
       // CSRF対策
       const dummyToken = 'testCsrfToken'
       request.csrfToken = jest.fn(() => {
@@ -424,7 +461,7 @@ describe('requestApprovalのテスト', () => {
         documentId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904',
         message: 'test',
         approveRoute: null,
-        rejectedUser: null,
+        requestApprovals: [],
         csrfToken: dummyToken
       })
     })
@@ -475,7 +512,7 @@ describe('requestApprovalのテスト', () => {
         documentId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904',
         message: readApprovalResult.message,
         approveRoute: searchResult2,
-        rejectedUser: null,
+        requestApprovals: [],
         csrfToken: dummyToken
       })
     })
@@ -502,6 +539,8 @@ describe('requestApprovalのテスト', () => {
       approverControllerReadApproval.mockReturnValue(readApprovalResult2)
 
       approverControllerGetApproveRoute.mockReturnValue(searchResult2)
+
+      approvalInboxControllerGetRequestApprovalSpy.mockReturnValueOnce(expectGetRequestApproval)
       // CSRF対策
       const dummyToken = 'testCsrfToken'
       request.csrfToken = jest.fn(() => {
@@ -525,7 +564,7 @@ describe('requestApprovalのテスト', () => {
         documentId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904',
         message: null,
         approveRoute: null,
-        rejectedUser: false,
+        requestApprovals: expectGetRequestApproval,
         csrfToken: dummyToken
       })
     })
@@ -562,7 +601,7 @@ describe('requestApprovalのテスト', () => {
       expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
     })
 
-    test('500エラー：差し戻しの承認データ取得エラー', async () => {
+    test('500エラー：requestApprovalの検索結果無し', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session, isSaved: false }
@@ -583,10 +622,8 @@ describe('requestApprovalのテスト', () => {
       inboxControllerGetInvoiceDetail.mockReturnValue(inboxControllerGetInvoiceDetailResult)
       approverControllerReadApproval.mockReturnValue(readApprovalResult2)
 
-      const dbError = new Error()
-      approverControllerGetApprovalFromRejected.mockReturnValue(dbError)
+      approvalInboxControllerGetRequestApprovalSpy.mockReturnValueOnce(null)
 
-      approverControllerGetApproveRoute.mockReturnValue(searchResult2)
       // 試験実施
       await requestApproval.cbGetRequestApproval(request, response, next)
 

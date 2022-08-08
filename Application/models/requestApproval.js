@@ -70,7 +70,12 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: true,
         defaultValue: new Date()
       },
-      isSaved: {
+      version: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+      },
+      rejectedFlag: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false

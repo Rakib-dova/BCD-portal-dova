@@ -2358,30 +2358,35 @@ describe('approverControllerのテスト', () => {
       const rejectTestData = await RequestApproval.build({
         requestId: requestId,
         contractId: contractId,
+        rejectedFlag: false,
         approveRouteId: approveRouteId,
         invoiceId: invoiceId,
         requester: userId,
-        status: '90',
+        status: '80',
         message: message,
-        create: '2021-01-25T08:45:49.803Z',
-        isSaved: true
+        create: '2021-01-25T09:45:49.803Z',
+        isSaved: true,
+        version: 0
       })
 
       const testData = await RequestApproval.build({
         requestId: requestId,
         contractId: contractId,
+        rejectedFlag: false,
         approveRouteId: approveRouteId,
         invoiceId: invoiceId,
         requester: userId,
-        status: '10',
+        status: '80',
         message: message,
         create: '2021-01-25T09:45:49.803Z',
-        isSaved: true
+        isSaved: true,
+        version: 0
       })
       testData.save = jest.fn()
 
       approveStatusDAOGetStatusCode.mockReturnValueOnce('80').mockReturnValueOnce('90').mockReturnValueOnce('10')
       RequestApprovalDAO.prototype.getRequestApprovalFromInvoice.mockReturnValueOnce(rejectTestData)
+      RequestApprovalDAO.prototype.createRequestApproval.mockReturnValueOnce(testData)
       RequestApprovalDAO.prototype.updateRequestApproval.mockReturnValueOnce(testData)
       RequestApprovalDAO.prototype.saveRequestApproval.mockReturnValueOnce(testData)
 
@@ -2394,8 +2399,88 @@ describe('approverControllerのテスト', () => {
       )
 
       // 結果確認
-      // 実際DBを更新しないため、getRequestApprovalFromInvoiceで取得した値が更新されない。
-      expect(result).toStrictEqual(rejectTestData)
+      expect(result.requestId).toStrictEqual(rejectTestData.requestId)
+      expect(result.rejectedFlag).toStrictEqual(rejectTestData.rejectedFlag)
+      expect(result.approveRouteId).toStrictEqual(rejectTestData.approveRouteId)
+      expect(result.invoiceId).toStrictEqual(rejectTestData.invoiceId)
+      expect(result.requester).toStrictEqual(rejectTestData.requester)
+      expect(result.status).toStrictEqual(rejectTestData.status)
+      expect(result.message).toStrictEqual(rejectTestData.message)
+      expect(result.create).toStrictEqual(rejectTestData.create)
+      expect(result.version).toStrictEqual(rejectTestData.version)
+    })
+
+    test('エラー：レコード作成失敗', async () => {
+      // パラメータ作成
+      const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+      const invoiceId = 'aa974511-8188-4022-bd86-45e251fd259e'
+      const requesterId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+      const message = 'messege'
+
+      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+      const tenantId = '12345678-8ba0-42a4-8582-b234cb4a2089'
+
+      // DBのデータがある場合
+      userControllerFindOne.mockReturnValueOnce({
+        userId: userId,
+        tenantId: tenantId,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: 'dummyRefreshToken',
+        subRefreshToken: null,
+        userStatus: 0,
+        lastRefreshedAt: null,
+        createdAt: '2021-01-25T08:45:49.803Z',
+        updatedAt: '2021-01-25T08:45:49.803Z'
+      })
+
+      const rejectTestData = await RequestApproval.build({
+        requestId: requestId,
+        contractId: contractId,
+        rejectedFlag: false,
+        approveRouteId: approveRouteId,
+        invoiceId: invoiceId,
+        requester: userId,
+        status: '80',
+        message: message,
+        create: '2021-01-25T09:45:49.803Z',
+        isSaved: true,
+        version: 0
+      })
+
+      const testData = await RequestApproval.build({
+        requestId: requestId,
+        contractId: contractId,
+        rejectedFlag: false,
+        approveRouteId: approveRouteId,
+        invoiceId: invoiceId,
+        requester: userId,
+        status: '80',
+        message: message,
+        create: '2021-01-25T09:45:49.803Z',
+        isSaved: true,
+        version: 0
+      })
+      testData.save = jest.fn()
+
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('80').mockReturnValueOnce('90').mockReturnValueOnce('10')
+      RequestApprovalDAO.prototype.getRequestApprovalFromInvoice.mockReturnValueOnce(rejectTestData)
+      RequestApprovalDAO.prototype.createRequestApproval.mockReturnValueOnce(null)
+      RequestApprovalDAO.prototype.updateRequestApproval.mockReturnValueOnce(testData)
+      RequestApprovalDAO.prototype.saveRequestApproval.mockReturnValueOnce(testData)
+
+      const result = await approverController.requestApproval(
+        contractId,
+        approveRouteId,
+        invoiceId,
+        requesterId,
+        message
+      )
+
+      // 結果確認
+      expect(result).toStrictEqual(-1)
     })
 
     test('エラー：すでに支払依頼データがある場合()', async () => {

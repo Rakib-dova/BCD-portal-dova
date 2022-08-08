@@ -27,7 +27,8 @@ module.exports = async (req, res, next) => {
   let noticeCount
   const requestApprovals = await requestApproval.findAll({
     where: {
-      contractId: contract.contractId
+      contractId: contract.contractId,
+      rejectedFlag: false
     }
   })
 

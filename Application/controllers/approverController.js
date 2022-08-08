@@ -586,6 +586,7 @@ const requestApproval = async (contractId, approveRouteId, invoiceId, requesterI
     const noneWorkflowStatusCode = await approveStatusDAO.getStautsCode('未処理')
     const rejectWorkflowStatusCode = await approveStatusDAO.getStautsCode('差し戻し')
     const waitingWorkflowStatusCode = await approveStatusDAO.getStautsCode('支払依頼中')
+    let newRequest
 
     // 該当請求書の情報取得
     const requestApprovalFind = await requestApprovalDAO.getRequestApprovalFromInvoice(invoiceId)
@@ -593,7 +594,7 @@ const requestApproval = async (contractId, approveRouteId, invoiceId, requesterI
     // 該当請求書の情報が１つもない場合のみ
     if (!requestApprovalFind) {
       // レコード作成（ステータス：支払依頼中）
-      const newRequest = await requestApprovalDAO.createRequestApproval(
+      newRequest = await requestApprovalDAO.createRequestApproval(
         requester.userId,
         invoiceId,
         approveRouteId,
@@ -610,21 +611,29 @@ const requestApproval = async (contractId, approveRouteId, invoiceId, requesterI
       requestApprovalFind.status === noneWorkflowStatusCode ||
       requestApprovalFind.status === rejectWorkflowStatusCode
     ) {
-      await requestApprovalDAO.updateRequestApproval(
-        requestApprovalFind,
+      // rejectedFlagをtrueに変更
+      await requestApprovalDAO.updateRequestApproval(requestApprovalFind)
+
+      if ((await requestApprovalDAO.saveRequestApproval(requestApprovalFind)) instanceof Request === false) {
+        throw Error('request approval fail')
+      }
+
+      // レコード作成（ステータス：支払依頼中）
+      newRequest = await requestApprovalDAO.createRequestApproval(
         requester.userId,
+        invoiceId,
         approveRouteId,
         waitingWorkflowStatusCode,
-        message
+        message,
+        requestApprovalFind.version + 1
       )
+      if (newRequest instanceof Request === false) return -1
+      await newRequest.save()
     } else {
       return 1
     }
 
-    if ((await requestApprovalDAO.saveRequestApproval(requestApprovalFind)) instanceof Request === false) {
-      throw Error('request approval fail')
-    }
-    return requestApprovalFind
+    return newRequest
   } catch (error) {
     logger.error({ contractId: contractId, stack: error.stack, status: 0 })
     logger.info(constantsDefine.logMessage.INF001 + 'requestApproval')

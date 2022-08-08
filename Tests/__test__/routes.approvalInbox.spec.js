@@ -164,6 +164,40 @@ const expectGetRequestApproval2 = {
   }
 }
 
+const expectGetRequestApproval3 = [
+  {
+    requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+    contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
+    invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
+    message: '支払依頼します。',
+    status: '20',
+    approveRoute: {
+      name: undefined,
+      users: [
+        UserAccounts.setUserAccounts(findUser[0]),
+        UserAccounts.setUserAccounts(findUser[1]),
+        UserAccounts.setUserAccounts(findUser[2]),
+        UserAccounts.setUserAccounts(findUser[3]),
+        UserAccounts.setUserAccounts(findUser[4]),
+        UserAccounts.setUserAccounts(findUser[5]),
+        UserAccounts.setUserAccounts(findUser[6]),
+        UserAccounts.setUserAccounts(findUser[7]),
+        UserAccounts.setUserAccounts(findUser[8]),
+        UserAccounts.setUserAccounts(findUser[9]),
+        UserAccounts.setUserAccounts(findUser[10])
+      ]
+    },
+    approvals: [],
+    requester: {
+      no: '支払依頼',
+      name: '支払 依頼者',
+      status: '依頼済み',
+      requestedAt: '2022-3-17 0:59:59',
+      message: '支払依頼メッセージ'
+    }
+  }
+]
+
 describe('approvalInboxのテスト', () => {
   beforeEach(() => {
     request = new Request()
@@ -262,7 +296,7 @@ describe('approvalInboxのテスト', () => {
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
-      approvalInboxControllerGetRequestApproval.mockReturnValueOnce(expectGetRequestApproval)
+      approvalInboxControllerGetRequestApproval.mockReturnValueOnce(expectGetRequestApproval3)
       inboxControllerGetInvoiceDetail.mockReturnValue(resultInvoice)
       approvalInboxControllerHasPowerOfEditing.mockReturnValueOnce(true)
 
@@ -274,20 +308,14 @@ describe('approvalInboxのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでapproveRouteListが呼ばれ「る」
+      // response.renderでapprovalInboxが呼ばれ「る」
+      console.log(response.render)
       expect(response.render).toHaveBeenCalledWith('approvalInbox', {
         ...resultInvoice,
         title: '支払依頼',
         documentId: request.params.invoiceId,
-        approveRoute: expectGetRequestApproval.approveRoute,
-        requester: {
-          name: UserAccounts.setUserAccounts(findUser[16]).getName(),
-          no: '支払依頼',
-          requestedAt: '2022-3-17 0:59:59',
-          status: '依頼済み'
-        },
-        prevUser: expectGetRequestApproval.prevUser,
-        requestId: expectGetRequestApproval.requestId
+        requestApprovals: expectGetRequestApproval3,
+        requestId: expectGetRequestApproval3[0].requestId
       })
     })
 
@@ -493,7 +521,7 @@ describe('approvalInboxのテスト', () => {
         'SequelizeConnectionError: Failed to connect to localhost:1433 - Could not connect (sequence)'
       )
       dbError.stack = 'SequelizeConnectionError: Failed to connect to localhost:1433 - Could not connect (sequence)'
-      approvalInboxControllerGetRequestApproval.mockReturnValueOnce(expectGetRequestApproval)
+      approvalInboxControllerGetRequestApproval.mockReturnValueOnce(expectGetRequestApproval3)
       approvalInboxControllerHasPowerOfEditing.mockReturnValueOnce(true)
       // DB検索の時エラーが発生
       inboxControllerGetInvoiceDetail.mockImplementation(() => {
@@ -541,7 +569,6 @@ describe('approvalInboxのテスト', () => {
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
-      approvalInboxControllerGetRequestApproval.mockReturnValueOnce(expectGetRequestApproval)
       inboxControllerGetInvoiceDetail.mockReturnValue(resultInvoice)
       approvalInboxControllerHasPowerOfEditing.mockReturnValueOnce(true)
       approvalInboxControllerInsertAndUpdateJournalizeInvoice.mockReturnValue({
