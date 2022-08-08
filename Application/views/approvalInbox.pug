@@ -11,7 +11,8 @@ block content
         include approvalInboxInvoiceLines
         include approvalInvoiceFooter
         include approvaInboxMessage
-        include approvalInboxApprovRoute
+        if requestApprovals
+          include approvalInboxApprovRoute
         .grouped-button
           a.button.mr-6(href='/inboxList/1')  戻る
           a.button.is-danger.mr-6#rejectApproval 差し戻し

@@ -6,7 +6,7 @@ const Op = db.Sequelize.Op
 const RequestApproval = db.RequestApproval
 const DbApproval = db.Approval
 
-const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId, tenant) => {
+const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId, tenant, isFinalApproval = false) => {
   try {
     const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(accessToken, refreshToken, tenant)
     tradeshiftDTO.setUserAccounts(require('../DTO/VO/UserAccounts'))
@@ -18,6 +18,7 @@ const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId
     }
 
     requestStatus.push({ status: '90' })
+    if (isFinalApproval) requestStatus.push({ status: '00' })
 
     const requestApproval = await RequestApproval.findAll({
       where: {
