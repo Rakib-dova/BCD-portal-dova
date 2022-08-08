@@ -190,7 +190,7 @@ const cbGetRequestApproval = async (req, res, next) => {
   if (approval && approval.status === '80') {
     approveRouteId = approval.approveRouteId
     message = approval.message
-  } else if (approval && approval.status === '90' && approval.requester === req.user.userId) {
+  } else if (approval && approval.status === '90') {
     requestApproval = await approvalInboxController.getRequestApproval(
       accessToken,
       refreshToken,
