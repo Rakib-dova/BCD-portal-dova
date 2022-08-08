@@ -16,8 +16,11 @@ const userController = require('../../Application/controllers/userController.js'
 const contractController = require('../../Application/controllers/contractController.js')
 const tenantController = require('../../Application/controllers/tenantController')
 const inboxController = require('../../Application/controllers/inboxController')
+const approvalInboxController = require('../../Application/controllers/approvalInboxController')
 const logger = require('../../Application/lib/logger.js')
 const InvoiceDetail = require('../../Application/lib/invoiceDetail')
+const UserAccounts = require('../../Application/DTO/VO/UserAccounts')
+const findUser = require('../mockDB/TradeshiftFindUser')
 
 let request, response, infoSpy
 let userControllerFindOneSpy,
@@ -27,7 +30,8 @@ let userControllerFindOneSpy,
   inboxControllerSpy,
   getCodeSpy,
   insertAndUpdateJournalizeInvoiceSpy,
-  getDepartmentSpy
+  getDepartmentSpy,
+  getRequestApprovalSpy
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
@@ -63,6 +67,40 @@ const loggedInSession = {
   userRole: 'dummy'
 }
 
+const expectGetRequestApproval = [
+  {
+    requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+    contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
+    invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
+    message: '支払依頼します。',
+    status: '20',
+    approveRoute: {
+      name: undefined,
+      users: [
+        UserAccounts.setUserAccounts(findUser[0]),
+        UserAccounts.setUserAccounts(findUser[1]),
+        UserAccounts.setUserAccounts(findUser[2]),
+        UserAccounts.setUserAccounts(findUser[3]),
+        UserAccounts.setUserAccounts(findUser[4]),
+        UserAccounts.setUserAccounts(findUser[5]),
+        UserAccounts.setUserAccounts(findUser[6]),
+        UserAccounts.setUserAccounts(findUser[7]),
+        UserAccounts.setUserAccounts(findUser[8]),
+        UserAccounts.setUserAccounts(findUser[9]),
+        UserAccounts.setUserAccounts(findUser[10])
+      ]
+    },
+    approvals: [],
+    requester: {
+      no: '支払依頼',
+      name: '支払 依頼者',
+      status: '依頼済み',
+      requestedAt: '2022-3-17 0:59:59',
+      message: '支払依頼メッセージ'
+    }
+  }
+]
+
 // モックテーブル定義
 const Users = require('../mockDB/Users_Table')
 const Tenants = require('../mockDB/Tenants_Table')
@@ -84,6 +122,7 @@ describe('inboxのテスト', () => {
     insertAndUpdateJournalizeInvoiceSpy = jest.spyOn(inboxController, 'insertAndUpdateJournalizeInvoice')
     getDepartmentSpy = jest.spyOn(inboxController, 'getDepartment')
     request.csrfToken = jest.fn()
+    getRequestApprovalSpy = jest.spyOn(approvalInboxController, 'getRequestApproval')
   })
   afterEach(() => {
     request.resetMocked()
@@ -98,6 +137,7 @@ describe('inboxのテスト', () => {
     getCodeSpy.mockRestore()
     insertAndUpdateJournalizeInvoiceSpy.mockRestore()
     getDepartmentSpy.mockRestore()
+    getRequestApprovalSpy.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -153,6 +193,8 @@ describe('inboxのテスト', () => {
       const dummyData = new InvoiceDetail(dummyDocument, [])
       inboxControllerSpy.mockReturnValue(dummyData)
 
+      getRequestApprovalSpy.mockReturnValueOnce(expectGetRequestApproval)
+
       // 試験実施
       await inbox.cbGetIndex(request, response, next)
 
@@ -172,7 +214,8 @@ describe('inboxのテスト', () => {
         optionLine6: createOptions(6, dummyData.options),
         optionLine7: createOptions(7, dummyData.options),
         optionLine8: createOptions(8, dummyData.options),
-        documentId: request.params.invoiceId
+        documentId: request.params.invoiceId,
+        requestApprovals: expectGetRequestApproval
       })
     })
 
@@ -199,6 +242,8 @@ describe('inboxのテスト', () => {
       const dummyData = new InvoiceDetail(dummyDocument, [])
       inboxControllerSpy.mockReturnValue(dummyData)
 
+      getRequestApprovalSpy.mockReturnValueOnce(expectGetRequestApproval)
+
       // 試験実施
       await inbox.cbGetIndex(request, response, next)
 
@@ -218,7 +263,8 @@ describe('inboxのテスト', () => {
         optionLine6: createOptions(6, dummyData.options),
         optionLine7: {},
         optionLine8: {},
-        documentId: request.params.invoiceId
+        documentId: request.params.invoiceId,
+        requestApprovals: expectGetRequestApproval
       })
     })
 
@@ -245,6 +291,8 @@ describe('inboxのテスト', () => {
       const dummyData = new InvoiceDetail(dummyDocument, [])
       inboxControllerSpy.mockReturnValue(dummyData)
 
+      getRequestApprovalSpy.mockReturnValueOnce(expectGetRequestApproval)
+
       // 試験実施
       await inbox.cbGetIndex(request, response, next)
 
@@ -264,7 +312,8 @@ describe('inboxのテスト', () => {
         optionLine6: createOptions(6, dummyData.options),
         optionLine7: {},
         optionLine8: {},
-        documentId: request.params.invoiceId
+        documentId: request.params.invoiceId,
+        requestApprovals: expectGetRequestApproval
       })
     })
 
@@ -291,6 +340,8 @@ describe('inboxのテスト', () => {
       const dummyData = new InvoiceDetail(dummyDocument, [])
       inboxControllerSpy.mockReturnValue(dummyData)
 
+      getRequestApprovalSpy.mockReturnValueOnce(expectGetRequestApproval)
+
       // 試験実施
       await inbox.cbGetIndex(request, response, next)
 
@@ -310,7 +361,8 @@ describe('inboxのテスト', () => {
         optionLine6: createOptions(6, dummyData.options),
         optionLine7: {},
         optionLine8: {},
-        documentId: request.params.invoiceId
+        documentId: request.params.invoiceId,
+        requestApprovals: expectGetRequestApproval
       })
     })
 
@@ -337,6 +389,8 @@ describe('inboxのテスト', () => {
       const dummyData = new InvoiceDetail(dummyDocument, [])
       inboxControllerSpy.mockReturnValue(dummyData)
 
+      getRequestApprovalSpy.mockReturnValueOnce(expectGetRequestApproval)
+
       // 試験実施
       await inbox.cbGetIndex(request, response, next)
 
@@ -356,7 +410,8 @@ describe('inboxのテスト', () => {
         optionLine6: createOptions(6, dummyData.options),
         optionLine7: {},
         optionLine8: {},
-        documentId: request.params.invoiceId
+        documentId: request.params.invoiceId,
+        requestApprovals: expectGetRequestApproval
       })
     })
 
@@ -512,6 +567,39 @@ describe('inboxのテスト', () => {
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
+    test('500エラー：requestApprovalの検索結果無し', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      // inboxControllerのgetInvoiceDetail実施結果設定
+      const dummyDocument = require('../mockInvoice/invoice33')
+      const dummyData = new InvoiceDetail(dummyDocument, [])
+      inboxControllerSpy.mockReturnValue(dummyData)
+
+      getRequestApprovalSpy.mockReturnValueOnce(null)
+
+      // 試験実施
+      await inbox.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
     test('正常：請求日、通貨のみ', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
@@ -535,6 +623,8 @@ describe('inboxのテスト', () => {
       const dummyData = new InvoiceDetail(dummyDocument, [])
       inboxControllerSpy.mockReturnValue(dummyData)
 
+      getRequestApprovalSpy.mockReturnValueOnce(expectGetRequestApproval)
+
       // 試験実施
       await inbox.cbGetIndex(request, response, next)
 
@@ -557,7 +647,8 @@ describe('inboxのテスト', () => {
         optionLine6: [],
         optionLine7: {},
         optionLine8: {},
-        documentId: request.params.invoiceId
+        documentId: request.params.invoiceId,
+        requestApprovals: expectGetRequestApproval
       })
     })
 
