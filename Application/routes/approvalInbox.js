@@ -167,7 +167,7 @@ const cbPostApprove = async (req, res, next) => {
   }
 
   const data = req.body
-  const requestId = requestApproval.requestId
+  const requestId = requestApproval[requestApproval.length - 1].requestId
   const accessToken = req.user.accessToken
   const refreshToken = req.user.refreshToken
   const tenantId = req.user.tenantId

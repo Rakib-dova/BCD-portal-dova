@@ -186,7 +186,8 @@ const cbGetIndex = async (req, res, next) => {
       refreshToken,
       contractId,
       invoiceId,
-      tenantId
+      tenantId,
+      true
     )
 
     if (requestApproval === null) return next(errorHelper.create(500))
