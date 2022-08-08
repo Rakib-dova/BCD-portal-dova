@@ -44,8 +44,7 @@ div.margin-top-40p
             p.line-unitPrice
         td.text-center
           if editing
-            a.show-modal(data-target='taxType-modal')
-              input.input(data-prop='unitPrice' class='line-unitPrice' type='text')
+            input.input(data-prop='taxType' class='line-taxType' type='text')#taxType-modal-form
           eles
             p.line-taxType
         td.text-right.line-subtotal.align-middle
@@ -82,16 +81,29 @@ div.margin-top-40p
           if editing
             td.text-center.button.discount-line-del-action.is-danger#discount-btn 割引削除
           else
-            td
+            td         
 
-    .modal#taxType-modal
+    template#line-add-btn
+      tr
+        td
+        td
+        td
+        td
+        td
+        td
+        td
+        td.text-center.align-middle
+          a#btn-plus-invoice-detail.mr-auto
+            i.fas.fa-plus-circle
+  
+  .modal#taxType-modal
         .modal-background.cancel-button(data-target='taxType-modal')
         .modal-card.is-family-noto-sans
           header.modal-card-head
             p.modal-card-title 税率設定
             button.delete(data-target="taxType-modal")
           section.modal-card-body
-            .modalWidth
+            .modalWidth#taxRadio
               label.radio
                 input(type='radio' name='taxType' checked=true value='untaxable' class='taxT noCheck' )
                 label.ml-2.taxTbox(for='taxType') 不課税 0%
@@ -126,21 +138,8 @@ div.margin-top-40p
               .columns.mt-0.is-centered: .column.is-four-fifths.pt-0
                 .field.is-grouped.is-grouped-centered
                   .control
-                    a.button.cancel-button.mr-6 キャンセル
-                    button.button.is-success.is-link 適用            
-
-    template#line-add-btn
-      tr
-        td
-        td
-        td
-        td
-        td
-        td
-        td
-        td.text-center.align-middle
-          a#btn-plus-invoice-detail.mr-auto
-            i.fas.fa-plus-circle
+                    a.button.cancel-button.mr-6#taxModelCancel キャンセル
+                    button.button.is-success.is-link#taxModelAccept 適用      
 
   table#discount-table.discount-table.is-fullwidth.is-hoverable.table-fixed
     thead

@@ -358,6 +358,9 @@ function renderLines() {
     unitPriceInput.value = line.unitPrice
     // 税設定
     const taxTypeSelect = clone.querySelector('.line-taxType')
+    taxTypeSelect.addEventListener('focus', () => {
+      $('#taxType-modal').classList.add('is-active')
+    })
     taxTypeSelect.selectedIndex = getTaxTypeIndex(line.taxType)
     // 小計設定
     const subtotalTd = clone.querySelector('.line-subtotal')
@@ -655,6 +658,14 @@ $('#save-btn')?.addEventListener('click', async () => {
     console.log('成功しました response.json:\n', res)
     if (!invoiceId) invoiceId = res.invoice?.invoiceId
   }
+})
+
+$('#taxModelCancel')?.addEventListener('click', async () => {
+  $('#taxType-modal').classList.remove('is-active')
+})
+
+$('#taxModelAccept')?.addEventListener('click', async () => {
+  $('#taxType-modal').classList.remove('is-active')
 })
 
 $('#output-btn')?.addEventListener('click', async () => {
