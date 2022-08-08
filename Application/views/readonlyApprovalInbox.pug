@@ -8,7 +8,7 @@ block content
       include readonlyApprovalInboxHeader
       include readonlyApprovalInboxInvoiceLines
       include readonlyApprovalInvoiceFooter
-      if requestApproval
+      if (requestApprovals.length !== 0)
         include readonlyApprovalInboxApprovRoute
       .grouped-button
         a.button.mr-6(href='/inboxList/1')  戻る

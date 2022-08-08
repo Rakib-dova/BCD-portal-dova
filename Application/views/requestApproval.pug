@@ -12,7 +12,7 @@ block content
         include requestApprovalInvoiceLines
         include invoiceFooter
         include requestApprovalMessage
-        if requestApprovals
+        if (requestApprovals.length !== 0)
           include requestApprovalBeforeRoute
         include requestApprovalRoute
 
