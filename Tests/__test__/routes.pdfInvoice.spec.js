@@ -4,6 +4,8 @@ jest.mock('../../Application/node_modules/express', () => {
   return require('jest-express')
 })
 
+const fileType = require('../../Application/node_modules/file-type')
+
 const pdfInvoice = require('../../Application/routes/pdfInvoice.js')
 const Request = require('jest-express').Request
 const Response = require('jest-express').Response
@@ -14,6 +16,8 @@ const apiManager = require('../../Application/controllers/apiManager.js')
 const pdfInvoiceController = require('../../Application/controllers/pdfInvoiceController.js')
 const logger = require('../../Application/lib/logger.js')
 const pdfGenerator = require('../../Application/lib/pdfGenerator')
+const storageCommon = require('../../Application/lib/storageCommon')
+
 jest.mock('../../Application/lib/pdfGenerator')
 
 let request, response, infoSpy, errorSpy, accessTradeshift
@@ -21,7 +25,9 @@ let pdfInvoiceControllerFindAllInvoicesSpy,
   pdfInvoiceControllerfindInvoiceSpy,
   createInvoiceSpy,
   updateInvoiceSpy,
-  deleteInvoiceSpy
+  deleteInvoiceSpy,
+  getSealImpSpy,
+  fileTypeFromBufferSpy
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
@@ -996,7 +1002,8 @@ const exprectedEditData = {
       accountNumber: '1234567',
       note: '備考備考備考\n備考',
       createdAt: new Date('2022-05-13T00:00:00.000Z'),
-      updatedAt: new Date('2022-05-13T00:00:00.000Z')
+      updatedAt: new Date('2022-05-13T00:00:00.000Z'),
+      PdfSealImp: { dataValues: { invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5', image: null } }
     }),
     lines: JSON.stringify([
       {
@@ -1020,7 +1027,7 @@ const exprectedEditData = {
         taxType: 'tax8p'
       }
     ]),
-    sealImpSrc: '/image/ts-app-digitaltrade-func-icon-pdf_stamp_select.svg',
+    sealImpSrc: 'data:image/png;base64,ZHVtbXlGaWxl',
     logoSrc: null,
     editing: true,
     csrfToken: 'dummyCsrfToken'
@@ -1056,7 +1063,8 @@ const exprectedEditData = {
       accountNumber: '1234567',
       note: '備考備考備考\n備考',
       createdAt: new Date('2022-05-13T00:00:00.000Z'),
-      updatedAt: new Date('2022-05-13T00:00:00.000Z')
+      updatedAt: new Date('2022-05-13T00:00:00.000Z'),
+      PdfSealImp: { dataValues: { invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5', image: 'dummyBuffer' } }
     }),
     lines: JSON.stringify([
       {
@@ -1080,7 +1088,7 @@ const exprectedEditData = {
         taxType: 'tax8p'
       }
     ]),
-    sealImpSrc: 'data:image/png;base64,dummyBuffer',
+    sealImpSrc: 'data:image/png;base64,ZHVtbXlGaWxl',
     logoSrc: null,
     editing: true,
     csrfToken: 'dummyCsrfToken'
@@ -1116,7 +1124,8 @@ const exprectedEditData = {
       accountNumber: '1234567',
       note: '備考備考備考\n備考',
       createdAt: new Date('2022-05-13T00:00:00.000Z'),
-      updatedAt: new Date('2022-05-13T00:00:00.000Z')
+      updatedAt: new Date('2022-05-13T00:00:00.000Z'),
+      PdfSealImp: { dataValues: { invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5', image: null } }
     }),
     lines: JSON.stringify([
       {
@@ -1140,7 +1149,7 @@ const exprectedEditData = {
         taxType: 'tax8p'
       }
     ]),
-    sealImpSrc: '/image/ts-app-digitaltrade-func-icon-pdf_stamp_select.svg',
+    sealImpSrc: 'data:image/png;base64,ZHVtbXlGaWxl',
     logoSrc: 'https://res.cloudinary.com/tradeshift-test/image/upload/fa0cc2df-fa4f-5052-b22a-b6984d326ab6.png',
     editing: true,
     csrfToken: 'dummyCsrfToken'
@@ -1176,7 +1185,8 @@ const exprectedEditData = {
       accountNumber: '1234567',
       note: '備考備考備考\n備考',
       createdAt: new Date('2022-05-13T00:00:00.000Z'),
-      updatedAt: new Date('2022-05-13T00:00:00.000Z')
+      updatedAt: new Date('2022-05-13T00:00:00.000Z'),
+      PdfSealImp: { dataValues: { invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5', image: 'dummyBuffer' } }
     }),
     lines: JSON.stringify([
       {
@@ -1200,7 +1210,7 @@ const exprectedEditData = {
         taxType: 'tax8p'
       }
     ]),
-    sealImpSrc: 'data:image/png;base64,dummyBuffer',
+    sealImpSrc: 'data:image/png;base64,ZHVtbXlGaWxl',
     logoSrc: 'https://res.cloudinary.com/tradeshift-test/image/upload/fa0cc2df-fa4f-5052-b22a-b6984d326ab6.png',
     editing: true,
     csrfToken: 'dummyCsrfToken'
@@ -1235,7 +1245,8 @@ const exprectedEditData = {
       accountNumber: '1234567',
       note: '備考備考備考\n備考',
       createdAt: new Date('2022-05-13T00:00:00.000Z'),
-      updatedAt: new Date('2022-05-13T00:00:00.000Z')
+      updatedAt: new Date('2022-05-13T00:00:00.000Z'),
+      PdfSealImp: { dataValues: { invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5', image: 'dummyBuffer' } }
     }),
     lines: JSON.stringify([
       {
@@ -1263,7 +1274,7 @@ const exprectedEditData = {
         taxType: 'tax8p'
       }
     ]),
-    sealImpSrc: 'data:image/png;base64,dummyBuffer',
+    sealImpSrc: 'data:image/png;base64,ZHVtbXlGaWxl',
     logoSrc: 'https://res.cloudinary.com/tradeshift-test/image/upload/fa0cc2df-fa4f-5052-b22a-b6984d326ab6.png',
     editing: true,
     csrfToken: 'dummyCsrfToken'
@@ -1298,7 +1309,8 @@ const exprectedEditData = {
       accountNumber: '1234567',
       note: '備考備考備考\n備考',
       createdAt: new Date('2022-05-13T00:00:00.000Z'),
-      updatedAt: new Date('2022-05-13T00:00:00.000Z')
+      updatedAt: new Date('2022-05-13T00:00:00.000Z'),
+      PdfSealImp: { dataValues: { invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5', image: 'dummyBuffer' } }
     }),
     lines: JSON.stringify([
       {
@@ -1332,7 +1344,7 @@ const exprectedEditData = {
         discountUnit3: 'percent'
       }
     ]),
-    sealImpSrc: 'data:image/png;base64,dummyBuffer',
+    sealImpSrc: 'data:image/png;base64,ZHVtbXlGaWxl',
     logoSrc: null,
     editing: true,
     csrfToken: 'dummyCsrfToken'
@@ -1371,7 +1383,8 @@ const exprectedEditData = {
       disocunts: 1,
       discountDescription1: 'text1',
       discountAmount1: '30',
-      discountUnit1: 'percent'
+      discountUnit1: 'percent',
+      PdfSealImp: { dataValues: { invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5', image: null } }
     }),
     lines: JSON.stringify([
       {
@@ -1395,7 +1408,7 @@ const exprectedEditData = {
         taxType: 'tax8p'
       }
     ]),
-    sealImpSrc: '/image/ts-app-digitaltrade-func-icon-pdf_stamp_select.svg',
+    sealImpSrc: 'data:image/png;base64,ZHVtbXlGaWxl',
     logoSrc: 'https://res.cloudinary.com/tradeshift-test/image/upload/fa0cc2df-fa4f-5052-b22a-b6984d326ab6.png',
     editing: true,
     csrfToken: 'dummyCsrfToken'
@@ -1440,7 +1453,8 @@ const exprectedEditData = {
       discountUnit2: 'jpy',
       discountDescription3: 'text3',
       discountAmount3: '10',
-      discountUnit3: 'percent'
+      discountUnit3: 'percent',
+      PdfSealImp: { dataValues: { invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5', image: 'dummyBuffer' } }
     }),
     lines: JSON.stringify([
       {
@@ -1464,7 +1478,7 @@ const exprectedEditData = {
         taxType: 'tax8p'
       }
     ]),
-    sealImpSrc: 'data:image/png;base64,dummyBuffer',
+    sealImpSrc: 'data:image/png;base64,ZHVtbXlGaWxl',
     logoSrc: 'https://res.cloudinary.com/tradeshift-test/image/upload/fa0cc2df-fa4f-5052-b22a-b6984d326ab6.png',
     editing: true,
     csrfToken: 'dummyCsrfToken'
@@ -1503,7 +1517,8 @@ const exprectedEditData = {
       disocunts: 1,
       discountDescription1: 'text1',
       discountAmount1: '30',
-      discountUnit1: 'percent'
+      discountUnit1: 'percent',
+      PdfSealImp: { dataValues: { invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5', image: null } }
     }),
     lines: JSON.stringify([
       {
@@ -1531,7 +1546,7 @@ const exprectedEditData = {
         taxType: 'tax8p'
       }
     ]),
-    sealImpSrc: '/image/ts-app-digitaltrade-func-icon-pdf_stamp_select.svg',
+    sealImpSrc: 'data:image/png;base64,ZHVtbXlGaWxl',
     logoSrc: 'https://res.cloudinary.com/tradeshift-test/image/upload/fa0cc2df-fa4f-5052-b22a-b6984d326ab6.png',
     editing: true,
     csrfToken: 'dummyCsrfToken'
@@ -1573,7 +1588,8 @@ const exprectedEditData = {
       discountUnit1: 'percent',
       discountDescription2: 'text2',
       discountAmount2: '1000',
-      discountUnit2: 'jpy'
+      discountUnit2: 'jpy',
+      PdfSealImp: { dataValues: { invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5', image: null } }
     }),
     lines: JSON.stringify([
       {
@@ -1604,7 +1620,7 @@ const exprectedEditData = {
         discountUnit2: 'percent'
       }
     ]),
-    sealImpSrc: '/image/ts-app-digitaltrade-func-icon-pdf_stamp_select.svg',
+    sealImpSrc: 'data:image/png;base64,ZHVtbXlGaWxl',
     logoSrc: null,
     editing: true,
     csrfToken: 'dummyCsrfToken'
@@ -1712,6 +1728,8 @@ describe('pdfInvoiceのテスト', () => {
     createInvoiceSpy = jest.spyOn(pdfInvoiceController, 'createInvoice')
     updateInvoiceSpy = jest.spyOn(pdfInvoiceController, 'updateInvoice')
     deleteInvoiceSpy = jest.spyOn(pdfInvoiceController, 'deleteInvoice')
+    getSealImpSpy = jest.spyOn(storageCommon, 'getSealImp')
+    fileTypeFromBufferSpy = jest.spyOn(fileType, 'fromBuffer')
   })
   afterEach(() => {
     request.resetMocked()
@@ -1725,6 +1743,8 @@ describe('pdfInvoiceのテスト', () => {
     createInvoiceSpy.mockRestore()
     updateInvoiceSpy.mockRestore()
     deleteInvoiceSpy.mockRestore()
+    getSealImpSpy.mockRestore()
+    fileTypeFromBufferSpy.mockRestore()
   })
 
   describe('コールバック:pdfInvoiceList', () => {
@@ -1827,7 +1847,7 @@ describe('pdfInvoiceのテスト', () => {
           sendAddr3: '大手町プレイスウエスト'
         }),
         lines: JSON.stringify([]),
-        sealImpSrc: '/image/ts-app-digitaltrade-func-icon-pdf_stamp_select.svg',
+        sealImpSrc: 'data:image/png;base64,ZHVtbXlGaWxl',
         logoSrc: 'https://res.cloudinary.com/tradeshift-test/image/upload/fa0cc2df-fa4f-5052-b22a-b6984d326ab6.png',
         editing: true,
         csrfToken: 'dummyCsrfToken'
@@ -1852,7 +1872,7 @@ describe('pdfInvoiceのテスト', () => {
           sendAddr3: '大手町プレイスウエスト'
         }),
         lines: JSON.stringify([]),
-        sealImpSrc: '/image/ts-app-digitaltrade-func-icon-pdf_stamp_select.svg',
+        sealImpSrc: 'data:image/png;base64,ZHVtbXlGaWxl',
         logoSrc: null,
         editing: true,
         csrfToken: 'dummyCsrfToken'
@@ -2088,11 +2108,13 @@ describe('pdfInvoiceのテスト', () => {
   })
 
   describe('コールバック:outputPdfInvoice', () => {
-    test('正常', async () => {
+    test('正常 ロゴあり', async () => {
       request.body = { invoice: '{"billingDate":null,"paymentDate":null,"deliveryDate":null}', lines: '[]' }
-      accessTradeshift.mockReturnValue(accountInfoTestData.noLogo) // ユーザ情報正常取得を想定する
+      accessTradeshift.mockReturnValue(accountInfoTestData.hasLogo) // ユーザ情報正常取得を想定する
       pdfGenerator.renderInvoiceHTML.mockReturnValue('<html></html>')
       pdfGenerator.generatePdf.mockResolvedValue('dummyBuffer')
+      getSealImpSpy.mockReturnValue(Buffer.from('dummyImg'))
+      fileTypeFromBufferSpy.mockReturnValue({ ext: 'dummyType', mime: 'dummyType' })
 
       await pdfInvoice.outputPdfInvoice(request, response, next)
 
@@ -2100,6 +2122,21 @@ describe('pdfInvoiceのテスト', () => {
       expect(response.status).toHaveBeenCalledWith(200)
       expect(response.send).toHaveBeenCalledWith('dummyBuffer')
     })
+    test('正常 ロゴなし', async () => {
+      request.body = { invoice: '{"billingDate":null,"paymentDate":null,"deliveryDate":null}', lines: '[]' }
+      accessTradeshift.mockReturnValue(accountInfoTestData.noLogo) // ユーザ情報正常取得を想定する
+      pdfGenerator.renderInvoiceHTML.mockReturnValue('<html></html>')
+      pdfGenerator.generatePdf.mockResolvedValue('dummyBuffer')
+      getSealImpSpy.mockReturnValue(Buffer.from('dummyImg'))
+      fileTypeFromBufferSpy.mockReturnValue({ ext: 'dummyType' })
+
+      await pdfInvoice.outputPdfInvoice(request, response, next)
+
+      // expect(pdfGenerator.renderInvoiceHTML).toHaveBeenCalledWith(renderHtmlInput, undefined, undefined)
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.send).toHaveBeenCalledWith('dummyBuffer')
+    })
+
     test('準正常: 入力データが存在しない', async () => {
       request.body = {}
 
@@ -2128,6 +2165,7 @@ describe('pdfInvoiceのテスト', () => {
       request.body = { invoice: '{"billingDate":null,"paymentDate":null,"deliveryDate":null}', lines: '[]' }
       accessTradeshift.mockReturnValue(accountInfoTestData.noLogo) // ユーザ情報正常取得を想定する
       pdfGenerator.renderInvoiceHTML.mockReturnValue(null)
+      fileTypeFromBufferSpy.mockReturnValue({ ext: 'dummyType' })
 
       await pdfInvoice.outputPdfInvoice(request, response, next)
 
@@ -2140,6 +2178,8 @@ describe('pdfInvoiceのテスト', () => {
       pdfGenerator.generatePdf.mockImplementation(() => {
         throw new Error('pdf generate failed')
       })
+      getSealImpSpy.mockReturnValue(Buffer.from('dummyImg'))
+      fileTypeFromBufferSpy.mockReturnValue({ ext: 'dummyType' })
 
       await pdfInvoice.outputPdfInvoice(request, response, next)
 
@@ -2148,7 +2188,7 @@ describe('pdfInvoiceのテスト', () => {
   })
 
   describe('コールバック:deleteAndOutputPdfInvoice', () => {
-    test('正常', async () => {
+    test('正常 ロゴなし', async () => {
       request.params.invoiceId = 'dummyID'
       request.body = { invoice: '{"billingDate":null,"paymentDate":null,"deliveryDate":null}', lines: '[]' }
       pdfInvoiceControllerfindInvoiceSpy.mockResolvedValue(pdfInvoiceTestData.hasPdfSealImp)
@@ -2156,6 +2196,24 @@ describe('pdfInvoiceのテスト', () => {
       pdfGenerator.renderInvoiceHTML.mockReturnValue('<html></html>')
       pdfGenerator.generatePdf.mockResolvedValue('dummyBuffer')
       deleteInvoiceSpy.mockReturnValue(1)
+      getSealImpSpy.mockReturnValue(Buffer.from('dummyImg'))
+      fileTypeFromBufferSpy.mockReturnValue({ ext: 'dummyType' })
+
+      await pdfInvoice.deleteAndOutputPdfInvoice(request, response, next)
+
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.send).toHaveBeenCalledWith('dummyBuffer')
+    })
+    test('正常 ロゴあり', async () => {
+      request.params.invoiceId = 'dummyID'
+      request.body = { invoice: '{"billingDate":null,"paymentDate":null,"deliveryDate":null}', lines: '[]' }
+      pdfInvoiceControllerfindInvoiceSpy.mockResolvedValue(pdfInvoiceTestData.hasPdfSealImp)
+      accessTradeshift.mockReturnValue(accountInfoTestData.hasLogo)
+      pdfGenerator.renderInvoiceHTML.mockReturnValue('<html></html>')
+      pdfGenerator.generatePdf.mockResolvedValue('dummyBuffer')
+      deleteInvoiceSpy.mockReturnValue(1)
+      getSealImpSpy.mockReturnValue(Buffer.from('dummyImg'))
+      fileTypeFromBufferSpy.mockReturnValue({ ext: 'dummyType', mime: 'dummyType' })
 
       await pdfInvoice.deleteAndOutputPdfInvoice(request, response, next)
 
@@ -2187,9 +2245,12 @@ describe('pdfInvoiceのテスト', () => {
     test('準正常: PDF請求書情報取得時、DBエラー', async () => {
       request.params.invoiceId = 'dummyID'
       request.body = { invoice: '{}', lines: '[]' }
+      accessTradeshift.mockReturnValue(accountInfoTestData.noLogo)
       pdfInvoiceControllerfindInvoiceSpy.mockImplementation(() => {
         throw new Error('DB Error')
       })
+      getSealImpSpy.mockReturnValue(Buffer.from('dummyImg'))
+      fileTypeFromBufferSpy.mockReturnValue({ ext: 'dummyType' })
 
       await pdfInvoice.deleteAndOutputPdfInvoice(request, response, next)
 
@@ -2211,6 +2272,8 @@ describe('pdfInvoiceのテスト', () => {
       pdfInvoiceControllerfindInvoiceSpy.mockResolvedValue(pdfInvoiceTestData.hasPdfSealImp)
       accessTradeshift.mockReturnValue(accountInfoTestData.noLogo)
       pdfGenerator.renderInvoiceHTML.mockReturnValue(null)
+      getSealImpSpy.mockReturnValue(Buffer.from('dummyImg'))
+      fileTypeFromBufferSpy.mockReturnValue({ ext: 'dummyType' })
 
       await pdfInvoice.deleteAndOutputPdfInvoice(request, response, next)
 
@@ -2225,6 +2288,8 @@ describe('pdfInvoiceのテスト', () => {
       pdfGenerator.generatePdf.mockImplementation(() => {
         throw new Error('pdf generate failed')
       })
+      getSealImpSpy.mockReturnValue(Buffer.from('dummyImg'))
+      fileTypeFromBufferSpy.mockReturnValue({ ext: 'dummyType' })
 
       await pdfInvoice.deleteAndOutputPdfInvoice(request, response, next)
 
@@ -2238,6 +2303,8 @@ describe('pdfInvoiceのテスト', () => {
       pdfGenerator.renderInvoiceHTML.mockReturnValue('<html></html>')
       pdfGenerator.generatePdf.mockResolvedValue('dummyBuffer')
       deleteInvoiceSpy.mockReturnValue(0)
+      getSealImpSpy.mockReturnValue(Buffer.from('dummyImg'))
+      fileTypeFromBufferSpy.mockReturnValue({ ext: 'dummyType' })
 
       await pdfInvoice.deleteAndOutputPdfInvoice(request, response, next)
 
@@ -2254,6 +2321,8 @@ describe('pdfInvoiceのテスト', () => {
       deleteInvoiceSpy.mockImplementation(() => {
         throw new Error('DB Error')
       })
+      getSealImpSpy.mockReturnValue(Buffer.from('dummyImg'))
+      fileTypeFromBufferSpy.mockReturnValue({ ext: 'dummyType' })
 
       await pdfInvoice.deleteAndOutputPdfInvoice(request, response, next)
 
