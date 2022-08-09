@@ -14,44 +14,71 @@ if (!AZURE_STORAGE_CONNECTION_STRING) {
 // BlobServiceClientクラスのインスタンス生成
 const blobServiceClient = BlobServiceClient.fromConnectionString(AZURE_STORAGE_CONNECTION_STRING)
 // コンテナ接続
-const containerClient = blobServiceClient.getContainerClient('imprint')
+const containerClient = blobServiceClient.getContainerClient('sealimp')
 
-const upload = (tenantId, data) => {
+async function getSealImp(tenantId) {
+  logger.info(constantsDefine.logMessage.INF000 + 'storageCommon getSealImp')
+
+  let sealImp = null
+  try {
+    const blockBlobClient = containerClient.getBlockBlobClient(tenantId)
+    const download = await blockBlobClient.download(0)
+    if (download.readableStreamBody) {
+      sealImp = await streamToBuffer(download.readableStreamBody)
+    }
+  } catch (error) {
+    // 取得できない場合、nullを返却
+    console.log(error)
+  }
+
+  logger.info(constantsDefine.logMessage.INF001 + 'storageCommon getSealImp')
+  return sealImp
+}
+
+async function upload(tenantId, data) {
   logger.info(constantsDefine.logMessage.INF000 + 'storageCommon upload')
 
-  // Get a block blob client
-  const blockBlobClient = containerClient.getBlockBlobClient(tenantId)
-
-  console.log('\nUploading to Azure storage as blob:\n\t', tenantId)
-
-  const result = blockBlobClient.upload(data, data.length)
+  // テナントIDをキーにデータ登録する
+  let result = null
+  try {
+    const blockBlobClient = containerClient.getBlockBlobClient(tenantId)
+    result = await blockBlobClient.upload(data, data.length)
+  } catch (error) {
+    console.log(error)
+  }
 
   logger.info(constantsDefine.logMessage.INF001 + 'storageCommon upload')
   return result
 }
 
-const getImprint = (tenantId) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'storageCommon getImprint')
-  // Get a block blob client
-  const blockBlobClient = containerClient.getBlockBlobClient(tenantId)
-  const downloadBlockBlobResponse = blockBlobClient.download(0)
-  const result = streamToText(downloadBlockBlobResponse.readableStreamBody)
+async function deleteSealImp(tenantId) {
+  logger.info(constantsDefine.logMessage.INF000 + 'storageCommon deleteSealImp')
 
-  console.log('\nDownloaded blob content...')
-  console.log('\t', streamToText(downloadBlockBlobResponse.readableStreamBody))
+  let result = null
+  try {
+    const blockBlobClient = containerClient.getBlockBlobClient(tenantId)
+    result = await blockBlobClient.delete()
+  } catch (error) {
+    console.log(error)
+  }
 
-  logger.info(constantsDefine.logMessage.INF001 + 'storageCommon getClient')
+  logger.info(constantsDefine.logMessage.INF001 + 'storageCommon deleteSealImp')
   return result
 }
 
-async function streamToText(readable) {
-  readable.setEncoding('utf8')
-  let data = ''
-  for await (const chunk of readable) {
-    data += chunk
-  }
-  return data
+async function streamToBuffer(readableStream) {
+  return new Promise((resolve, reject) => {
+    const chunks = []
+    readableStream.on('data', (data) => {
+      chunks.push(data instanceof Buffer ? data : Buffer.from(data))
+    })
+    readableStream.on('end', () => {
+      resolve(Buffer.concat(chunks))
+    })
+    readableStream.on('error', reject)
+  })
 }
 
 exports.upload = upload
-exports.getImprint = getImprint
+exports.getSealImp = getSealImp
+exports.deleteSealImp = deleteSealImp

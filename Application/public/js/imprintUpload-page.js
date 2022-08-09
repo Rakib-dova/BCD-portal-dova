@@ -4,34 +4,35 @@
 
 */
 
+let fr = null
+let targetFile = null
+
 // 写真上限サイズ（1MB）
 const maxImageSize = 1048576
 
-const originSrc = $('#imprintImg').getAttribute('src')
+const originSrc = $('#sealImpImg').getAttribute('src')
 
 /**
  * 選択されたファイルが条件を満たない場合、エラーメッセージを表示し、アップロードできないようにする
  * @param {string} message メッセージ
  */
 const disabledUpload = (message) => {
-  // TODO モーダルでメッセージを表示
   alert(message)
-  $('#imprintImg').setAttribute('src', originSrc)
-  $('#fileName').value = ''
-  $('#upload-btn').setAttribute('disabled', 'disabled')
+  $('#file-upload').setAttribute('src', originSrc)
+  $('#filename').value = ''
+  $('#start-upload-btn').setAttribute('disabled', 'disabled')
 }
 
-// ファイルの選択
-$('#upload-file').addEventListener('change', function (e) {
+$('#file-upload').addEventListener('change', function (e) {
   const file = e.target.files[0]
-
-  const fr = new FileReader()
+  fr = new FileReader()
   fr.onload = function (e) {
     const image = new Image()
     image.onload = function () {
-      $('#imprintImg').setAttribute('src', fr.result)
-      $('#upload-btn').removeAttribute('disabled')
-      $('#fileName').value = file.name
+      $('#sealImpImg').setAttribute('src', fr.result)
+      $('#start-upload-btn').removeAttribute('disabled')
+      $('#filename').value = file.name
+      targetFile = file
     }
     image.onerror = function () {
       disabledUpload('写真を選択してください。')
@@ -48,14 +49,72 @@ $('#upload-file').addEventListener('change', function (e) {
   }
 })
 
-// アップロードボタンのクリック
-$('#upload-btn').addEventListener('click', function (e) {
-  const element = e.srcElement
-  element.classList.add('is-loading')
+$('#file-upload').addEventListener('click', function (e) {
+  e.target.value = ''
 })
 
-// 登録済み印影の削除ボタンのクリック
-$('#delete-btn').addEventListener('click', function (e) {
-  const element = e.srcElement
-  element.classList.add('is-loading')
+$('#start-upload-btn')?.addEventListener('click', async () => {
+  if ($('#start-upload-btn').getAttribute('Disabled') || fr === null || targetFile === null) {
+    return null
+  }
+
+  const modal = document.getElementById('upload-progress-modal')
+  modal.classList.add('is-active')
+
+  const csvFile = targetFile
+  const response = await uploadimage(csvFile)
+  console.log('==  response =====================:\n', response)
+  modal.classList.remove('is-active')
+  if (response.status === 500 || response.status === 400 || response.status === 200) {
+    const data = await response.json()
+    console.log('==  json data =====================:\n', data)
+    if (data.message) alert(data.message)
+    if (response.status === 200 && data.url) location.href = data.url
+  }
 })
+
+// eslint-disable-next-line no-unused-vars
+const uploadimage = async (file) => {
+  const formData = new FormData()
+  if (file) formData.append('csvFile', file)
+
+  return await uploadApiController(
+    `https://${location.host}/imprintUpload/upload`,
+    'POST',
+    formData,
+    async (response) => {
+      const url = response.url
+      const a = document.createElement('a')
+      document.body.appendChild(a)
+      a.href = url
+      a.click()
+      a.remove()
+    }
+  )
+}
+
+const uploadApiController = async (url, method, body = null, callback = null) => {
+  console.log('===apiController', body)
+
+  const options = {
+    method,
+    headers: {
+      credentials: 'include',
+      'CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    },
+    body
+  }
+
+  try {
+    const response = await fetch(url, options)
+    if (response.ok) {
+      if (callback) callback(response)
+    } else {
+      console.log('失敗しました response:\n', response)
+    }
+
+    return response
+  } catch (err) {
+    console.error('失敗しました ERR:\n', err)
+  }
+}

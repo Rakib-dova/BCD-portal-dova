@@ -4,9 +4,10 @@
   .column.is-half
     .column.text-right
       if sealImpSrc
-        input(type='file' id='file-sealImp')
-        label(id="file-sealImp-label" for="file-sealImp") 
-            img#sealImp(src = sealImpSrc width='256' height='256')
+        img#sealImp(src = sealImpSrc width='256' height='256')
+      else
+        a.button.mr-6.show-modal(id = 'uploadSealImpButton') 印影登録
+        
       if logoSrc
         img.ml-5(src = logoSrc width='256' height='256')
 

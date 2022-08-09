@@ -16,6 +16,7 @@ const apiManager = require('../controllers/apiManager')
 const pdfInvoiceController = require('../controllers/pdfInvoiceController.js')
 const { generatePdf, renderInvoiceHTML } = require('../lib/pdfGenerator')
 const { formatDate } = require('../lib/utils')
+const storageCommon = require('../lib/storageCommon')
 
 const taxDatabase = [
   { type: 'tax10p', taxRate: 0.1 },
@@ -65,6 +66,10 @@ const pdfInvoiceRegister = async (req, res, next) => {
   const { accountInfo, senderInfo } = await getAccountAndSenderInfo(req)
   if (!accountInfo || !senderInfo) return next(errorHelper.create(500))
 
+  // 印影情報取得
+  const sealImp = await storageCommon.getSealImp(req.user.tenantId)
+  const sealImpSrc = sealImp ? `data:image/png;base64,${sealImp.toString('base64')}` : null
+
   // 企業ロゴ設定
   const logoSrc = accountInfo.LogoURL ? accountInfo.LogoURL : null
 
@@ -73,7 +78,7 @@ const pdfInvoiceRegister = async (req, res, next) => {
     engTitle: 'REGISTER PDF INVOICE',
     invoice: JSON.stringify(senderInfo),
     lines: JSON.stringify([]),
-    sealImpSrc: '/image/ts-app-digitaltrade-func-icon-pdf_stamp_select.svg',
+    sealImpSrc,
     logoSrc,
     editing: true,
     csrfToken: req.csrfToken()
@@ -92,18 +97,18 @@ const pdfInvoiceEdit = async (req, res, next) => {
   if (!accountInfo || !senderInfo) return next(errorHelper.create(500))
 
   // PDF請求書情報取得
-  const { invoice, lines, sealImpRecord } = await getInvoiceInfo(req, senderInfo)
+  const { invoice, lines } = await getInvoiceInfo(req, senderInfo)
   if (!invoice || !lines) return next(errorHelper.create(500))
 
-  // console.log('=== sealImpRecord =========\n', sealImpRecord)
+  // 印影情報取得
+  const sealImp = await storageCommon.getSealImp(req.user.tenantId)
+
   console.log('=== invoice =========\n', invoice)
   console.log('=== lines =========\n', lines)
-  console.log('=== sealImpRecord =========\n', sealImpRecord)
+  console.log('=== sealImp =========\n', sealImp)
 
   // 印影設定
-  const sealImpSrc = sealImpRecord?.dataValues.image
-    ? `data:image/png;base64,${sealImpRecord?.dataValues.image.toString('base64')}`
-    : '/image/ts-app-digitaltrade-func-icon-pdf_stamp_select.svg'
+  const sealImpSrc = sealImp ? `data:image/png;base64,${sealImp.toString('base64')}` : null
   // 企業ロゴ設定
   const logoSrc = accountInfo.LogoURL ? accountInfo.LogoURL : null
 
@@ -145,7 +150,7 @@ const createPdfInvoice = async (req, res, next) => {
 
   let createdInvoice
   try {
-    createdInvoice = await pdfInvoiceController.createInvoice(invoice, lines, req.file ? req.file.buffer : null)
+    createdInvoice = await pdfInvoiceController.createInvoice(invoice, lines)
   } catch (error) {
     console.log(error)
     return next(errorHelper.create(500))
@@ -188,16 +193,10 @@ const updatePdfInvoice = async (req, res, next) => {
   })
 
   console.log('==  lines  ===================\n', lines)
-  console.log('==  req.file  ===================\n', req.file)
 
   let updatedInvoice
   try {
-    updatedInvoice = await pdfInvoiceController.updateInvoice(
-      req.params.invoiceId,
-      invoice,
-      lines,
-      req.file ? req.file.buffer : null
-    )
+    updatedInvoice = await pdfInvoiceController.updateInvoice(req.params.invoiceId, invoice, lines)
     console.log('==  updatedInvoice  ===================\n', updatedInvoice) // [ 1 ]
   } catch (error) {
     console.log(error)
@@ -246,7 +245,7 @@ const outputPdfInvoice = async (req, res, next) => {
   if (!req.body.invoice || !req.body.lines) return next(errorHelper.create(400))
   const invoice = JSON.parse(req.body.invoice)
   const lines = JSON.parse(req.body.lines)
-  console.log('==  req.file  ===================\n', req.file)
+
   if (!Array.isArray(lines)) return next(errorHelper.create(400))
 
   // アカウント情報取得
@@ -266,15 +265,16 @@ const outputPdfInvoice = async (req, res, next) => {
   invoice.deliveryDate = formatDate(deliveryDate, 'YYYY年MM月DD日')
 
   // 印影取得
-  let sealImp
-  if (req.file) {
-    if (req.file.mimetype !== 'image/png' && req.file.mimetype !== 'image/jpeg') return next(errorHelper.create(400))
-
+  const getSealImp = await storageCommon.getSealImp(req.user.tenantId)
+  let sealImp = null
+  if (getSealImp) {
+    const fileType = await FileType.fromBuffer(getSealImp)
     sealImp = {
-      buffer: req.file.buffer,
-      type: req.file.mimetype.replace('image/', '')
+      buffer: getSealImp,
+      type: fileType.ext
     }
   }
+
   // 企業ロゴ取得
   let logo
   if (accountInfo.LogoURL) {
@@ -319,36 +319,18 @@ const deleteAndOutputPdfInvoice = async (req, res, next) => {
   console.log('==  invoice  ===================: ', invoice)
   console.log('==  lines  ===================: ', lines)
 
-  // 請求書情報の取得
-  let invoiceRecord
-  try {
-    invoiceRecord = await pdfInvoiceController.findInvoice(req.params.invoiceId)
-    // console.log('==  invoiceRecord  ===================\n', invoiceRecord)
-  } catch (error) {
-    console.log(error)
-    return next(errorHelper.create(500))
-  }
-
   // アカウント情報取得
   const { accountInfo, senderInfo } = await getAccountAndSenderInfo(req)
   if (!accountInfo || !senderInfo) return next(errorHelper.create(500))
 
-  let sealImp
-  if (req.file) {
-    if (req.file.mimetype !== 'image/png' && req.file.mimetype !== 'image/jpeg') return next(errorHelper.create(400))
-
+  // 印影取得
+  const getSealImp = await storageCommon.getSealImp(req.user.tenantId)
+  let sealImp = null
+  if (getSealImp) {
+    const fileType = await FileType.fromBuffer(getSealImp)
     sealImp = {
-      buffer: req.file.buffer,
-      type: req.file.mimetype.replace('image/', '')
-    }
-  } else {
-    if (invoiceRecord.PdfSealImp?.dataValues.image) {
-      const fileType = await FileType.fromBuffer(invoiceRecord.PdfSealImp.dataValues.image)
-      console.log('==  fileType  ===================: ', fileType)
-      sealImp = {
-        buffer: invoiceRecord.PdfSealImp.dataValues.image,
-        type: fileType.mime.replace('image/', '')
-      }
+      buffer: getSealImp,
+      type: fileType.ext
     }
   }
 
@@ -468,11 +450,10 @@ const getInvoiceInfo = async (req, senderInfo) => {
   // console.log('=== invoice =========\n', invoice)
   const lines = invoiceRecord.PdfInvoiceLines.map((line) => line.dataValues)
   // console.log('=== lines =========\n', lines)
-  const sealImpRecord = invoiceRecord.dataValues.PdfSealImp
-  delete invoice.PdfInvoiceLines
-  delete invoice.PdfSealImp
 
-  return { invoice, lines, sealImpRecord }
+  delete invoice.PdfInvoiceLines
+
+  return { invoice, lines }
 }
 
 // targetで受け取った日付を9時間進めて返却する

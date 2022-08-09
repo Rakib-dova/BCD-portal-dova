@@ -8,10 +8,7 @@ module.exports = {
   findInvoice: async (invoiceId) => {
     try {
       return await PdfInvoice.findOne({
-        include: [
-          { model: PdfInvoiceLine },
-          { model: PdfSealImp }
-        ],
+        include: [{ model: PdfInvoiceLine }],
         where: { invoiceId: invoiceId }
       })
     } catch (error) {
@@ -39,7 +36,7 @@ module.exports = {
       throw error
     }
   },
-  createInvoice: async (invoice, lines, image) => {
+  createInvoice: async (invoice, lines) => {
     try {
       // 重複コード検索
       const foundInvoices = await PdfInvoice.findAll({
@@ -52,15 +49,12 @@ module.exports = {
         // PdfInvoiceテーブルにレコード挿入
         const result = await PdfInvoice.create(invoice, { transaction: t })
 
-        await PdfSealImp.create(
-          image ? { invoiceId: invoice.invoiceId, image } : { invoiceId: invoice.invoiceId },
-          { transaction: t }
-        )
-
         // PdfInvoiceLineテーブルにレコード挿入
-        await Promise.all(lines.map(async (line) => {
-          return await PdfInvoiceLine.create(line, { transaction: t })
-        }))
+        await Promise.all(
+          lines.map(async (line) => {
+            return await PdfInvoiceLine.create(line, { transaction: t })
+          })
+        )
 
         return result
       })
@@ -75,18 +69,22 @@ module.exports = {
 
     try {
       // PdfInvoiceテーブルにレコード挿入
-      await Promise.all(invoices.map(async (invoice) => {
-        if (transaction) return await PdfInvoice.create(invoice, { transaction })
-        else return await PdfInvoice.create(invoice)
-      }))
+      await Promise.all(
+        invoices.map(async (invoice) => {
+          if (transaction) return await PdfInvoice.create(invoice, { transaction })
+          else return await PdfInvoice.create(invoice)
+        })
+      )
       // if (transaction) createdInvoice = await PdfInvoice.create(invoice, { transaction })
       // else createdInvoice = await PdfInvoice.create(invoice)
 
       // PdfInvoiceLineテーブルにレコード挿入
-      await Promise.all(lines.map(async (line) => {
-        if (transaction) return await PdfInvoiceLine.create(line, { transaction })
-        else return await PdfInvoiceLine.create(line)
-      }))
+      await Promise.all(
+        lines.map(async (line) => {
+          if (transaction) return await PdfInvoiceLine.create(line, { transaction })
+          else return await PdfInvoiceLine.create(line)
+        })
+      )
 
       return true
     } catch (error) {
@@ -94,7 +92,7 @@ module.exports = {
       throw error
     }
   },
-  updateInvoice: async (invoiceId, invoice, lines, image) => {
+  updateInvoice: async (invoiceId, invoice, lines) => {
     try {
       const updated = await db.sequelize.transaction(async (t) => {
         if (invoice.invoiceId) delete invoice.invoiceId
@@ -114,21 +112,6 @@ module.exports = {
             return await PdfInvoiceLine.create(line, { transaction: t })
           })
         )
-
-        if (image) {
-          // 印影を更新
-          const [sealImpRecord, created] = await PdfSealImp.findOrCreate({
-            where: { invoiceId },
-            defaults: { image },
-            transaction: t
-          })
-          if (!created) {
-            sealImpRecord.image = image
-            sealImpRecord.save()
-          }
-        } else {
-          console.log('====  印影の更新はなし  ==========')
-        }
 
         return result
       })

@@ -93,9 +93,6 @@ function init() {
     renderInvoice()
     renderTotals()
   } else {
-    // 印影画像クリックでファイル選択を無効化
-    $('#file-sealImp-label')?.setAttribute('for', '')
-    if ($('#sealImp')) $('#sealImp').style.cursor = 'default'
     renderTotals()
   }
 
@@ -225,26 +222,6 @@ addEvent(document, 'change', (e, target) => {
     renderLines()
     if (invoice.discounts >= 1) renderInvoicecDiscount()
     renderTotals()
-  }
-
-  // 画像が設定されたらプレビュに反映させる処理
-  if (e.target.id === 'file-sealImp') {
-    const fr = new FileReader()
-    fr.onload = function () {
-      $('#sealImp').setAttribute('src', fr.result)
-    }
-
-    console.log('==== e.target.files[0] ====\n', e.target.files[0])
-
-    const file = e.target.files[0]
-
-    if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
-      imageFile = e.target.files[0]
-      fr.readAsDataURL(e.target.files[0])
-    } else if (file) {
-      alert('印影に使えるファイル形式は png か jpeg だけです。')
-      e.target.files[0] = null
-    }
   }
 })
 
@@ -675,6 +652,10 @@ $('#output-btn')?.addEventListener('click', async () => {
 $('#backButton')?.addEventListener('click', async () => {
   if (!saved) $('#back-modal').classList.add('is-active')
   else location.href = `https://${location.host}/pdfInvoices/list`
+})
+
+$('#uploadSealImpButton')?.addEventListener('click', async () => {
+  $('#uploadSealImp-modal').classList.add('is-active')
 })
 
 function getTaxTypeIndex(taxType) {
