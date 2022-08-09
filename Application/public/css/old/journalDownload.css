@@ -108,8 +108,8 @@
   text-decoration: none;
 }
 
-.ms-dd .ms-list-option.enabled:hover,
-.ms-dd .ms-optgroup ul .ms-list-option.enabled:hover,
+.ms-dd .ms-list-option:hover,
+.ms-dd .ms-optgroup ul .ms-list-option:hover,
 li.ms-list-option.enabled.option-selected {
   background: #1e90ff;
   color: #fff;
