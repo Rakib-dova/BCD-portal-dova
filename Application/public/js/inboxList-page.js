@@ -459,8 +459,13 @@ if ($('#BtnInboxSearch')) {
     const maxIssuedate = form.maxIssuedate.value
     let sentBy = form['sentBy[]']
     if (sentBy !== undefined) {
-      sentBy = Array.prototype.slice.call(sentBy)
-      sentBy = sentBy.filter((ele) => ele.checked === true)
+      if (sentBy.length !== undefined) {
+        sentBy = Array.prototype.slice.call(sentBy)
+        sentBy = sentBy.filter((ele) => ele.checked === true)
+      } else {
+        sentBy = sentBy.checked === true
+      }
+
       if (!sentBy) {
         sentBy = []
       }

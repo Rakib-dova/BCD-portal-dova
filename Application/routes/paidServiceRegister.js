@@ -1,6 +1,7 @@
 'use strict'
 const csrf = require('csurf')
 const express = require('express')
+const moment = require('moment-timezone')
 
 const middleware = require('./helpers/middleware')
 const noticeHelper = require('./helpers/notice')
@@ -164,8 +165,7 @@ const showPaidServiceRegister = async (req, res, next) => {
   logger.info(logMessage.INF000 + 'showPaidServiceRegister')
 
   // チェックされている申込サービスの取得
-  const services = req.body?.services
-  const serviceList = services instanceof Array ? services : [services]
+  const serviceList = req.body?.services
 
   // 有料サービス申込前の契約状態のチェック
   const contracts = await getAndCheckContracts(req.user?.tenantId, serviceList, next)
@@ -205,9 +205,6 @@ const applyPaidServiceRegister = async (req, res, next) => {
   // 有料サービス申込前の契約状態のチェック
   const contracts = await getAndCheckContracts(req.user?.tenantId, serviceList, next)
   if (!contracts) return
-
-  // セッションから申込サービスリストをクリアする
-  req.session.serviceList = null
 
   let salesChannelDeptType
   // 組織区分が選択された場合、コードで組織区分を取得し、オーダー情報に設定する
@@ -260,10 +257,18 @@ const applyPaidServiceRegister = async (req, res, next) => {
     orderDataList.push(newOrderData)
   }
 
+  // 導入支援のみ申込時、開通希望日に16日後の日付を固定値とする
+  if (serviceList.length === 1 && serviceList[0] === serviceTypes.introductionSupport) {
+    orderDataList[0].contractBasicInfo.OpeningDate = moment().tz('Asia/Tokyo').add(16, 'd').format('YYYYMMDD')
+  }
+
   // 契約する
   const result = await applyOrderController.applyNewOrders(req.user?.tenantId, orderDataList)
   // データベースエラーは、エラーオブジェクトが返る
   if (result instanceof Error) return next(errorHelper.create(500))
+
+  // セッションから申込サービスリストをクリアする
+  req.session.serviceList = null
 
   // 有料サービス利用登録完了画面の表示
   res.render('paidServiceRegisterComplete', {
