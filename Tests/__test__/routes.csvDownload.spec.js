@@ -19,12 +19,14 @@ const logger = require('../../Application/lib/logger.js')
 const DOMParser = require('../../Application/node_modules/dom-parser')
 const notiTitle = '請求書ダウンロード'
 const csvDownloadSysError = 'システムエラーが発生しました。時間を空けてもう一度試してください。'
+const promiseAll = require('../../Application/lib/promiseAll')
 
 let request, response, infoSpy
 let userControllerFindOneSpy,
   contractControllerFindOneSpy,
   tenantControllerFindOneSpy,
-  contractControllerFindContractSpyon
+  contractControllerFindContractSpyon,
+  promiseAllControllerPromiseAllSpyon
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
@@ -74,6 +76,7 @@ describe('csvDownloadのテスト', () => {
     contractControllerFindContractSpyon = jest.spyOn(contractController, 'findContract')
     request.flash = jest.fn()
     request.csrfToken = jest.fn()
+    promiseAllControllerPromiseAllSpyon = jest.spyOn(promiseAll, 'controllerPromiseAll')
   })
   afterEach(() => {
     request.resetMocked()
@@ -84,6 +87,7 @@ describe('csvDownloadのテスト', () => {
     contractControllerFindOneSpy.mockRestore()
     tenantControllerFindOneSpy.mockRestore()
     contractControllerFindContractSpyon.mockRestore()
+    promiseAllControllerPromiseAllSpyon.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -5043,6 +5047,13 @@ describe('csvDownloadのテスト', () => {
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
+      const result = []
+      const invoice1 = [require('../mockInvoice/invoice1')]
+      const invoice2 = [require('../mockInvoice/invoice2')]
+      result.push(invoice1)
+      result.push(invoice2)
+      promiseAllControllerPromiseAllSpyon.mockReturnValue(result)
+
       // 試験実施
       await csvDownload.cbPostIndex(request, response, next)
 
@@ -5059,8 +5070,15 @@ describe('csvDownloadのテスト', () => {
 
       // responseのcsvファイル
       const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
 
       expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+
+      const checkingData = require('../mockInvoice/invoice1')
+      const checkingData2 = require('../mockInvoice/invoice2')
+      // 複数の請求書番号
+      expect(csvBody).toContain(`${checkingData.ID.value}`)
+      expect(csvBody).toContain(`${checkingData2.ID.value}`)
     })
 
     test('準正常:請求書複数の場合のAPIエラー', async () => {
