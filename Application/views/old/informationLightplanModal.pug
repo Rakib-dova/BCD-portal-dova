@@ -40,9 +40,7 @@
               | 受取請求書目安：100～500件/月
             .planBody 
               span.is-block.has-text-weight-bold.planBodyPrice.pt-0.pb-2
-                | 月額利用料 <span class="mr-1">4</span>万円<br>
-                p
-                  |（税込:44,000円）
+                | 月額利用料 <span class="mr-1">4</span>万円
               p.is-flex.m-2 
                 | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">フリープランの機能はすべて利用可能</span>
               p.is-flex.m-2 
@@ -71,7 +69,7 @@
                 | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">その他貴社の業務に沿うようにカスタマイズした機能をご提供</span>                  
       p.px-4.my-5 ※フリープランとスタンダードプランは、下記の導入支援サービスにお申し込み頂くことでセットアップのサポートをいたします。          
       .mb-4.btnWrap.is-block.text-center
-        a.button.mr-1.is-info.show-modal(href='https://www.ntt.com/business/services/application/crm-dm/bconnection.html' target='_blank') オプションサービス詳細   
+        a.button.mr-1.is-success.show-modal(href='https://www.ntt.com/business/services/application/crm-dm/bconnection.html' target='_blank') オプションサービス詳細   
         if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
           if (contractPlan.isLightPlan === true || contractPlan.isLightPlanForEntry === true)
             a.button.ml-1.is-can.show-modal(data-target='' disabled) お申込みフォーム
@@ -86,53 +84,16 @@
         | 導入支援サービスは、フリープラン、スタンダードプランをお申込みのお客様の環境につきまして、​<br>
         | それぞれのプランで提供される機能の登録や設定を支援・代行するサービスです。<br>
         | （オプションとして個別マニュアル作成や説明会も実施します）​<br>
-        | 利用開始にあたっての必要な登録や設定を実施いたしますので、設定等完了後はすぐにお使いいただけます。<br>
-        | お申込みを確認後、実施内容コンサルのご連絡をいたします。（数日お待ちいただく場合がございます）<br>
-        h3.mt-4.px-4.has-text-weight-bold 導入支援サービス提供の流れ
-        .border-bottom
-        img(src='../image/informationLightplanModal.svg' alt='フロー図').flowImg
-      h3.mt-4.px-4.has-text-weight-bold 料金
-      p.border-bottom
-        p.mt-3.px-4 
-          | 導入支援サービスの工事費は基本メニューとオプションサービスからなります。種別毎の工事費、注意事項は下記の通りです。​
-        p.px-4.has-text-weight-bold 導入支援サービスご利用1回あたりの目安
-        p.px-4.is-flex.mx-2.mt-2.mb-0
-          | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">フリープランをご利用の方　50,000円(税込:55,000円)～</span>
-        p.px-4.is-flex.mx-2.mt-0.mb-2
-          | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">スタンダードプランをご利用の方　200,000円(税込:220,000円)～</span>  
+        | 利用開始にあたっての必要な登録や設定を実施いたしますので、設定等完了後はすぐにお使います。
       .planBody.noHeight 
-        .entry-service
-          span 基本メニュー 
-          span 工事費：50,000円(税込:55,000円)
-        div
-          p Tradeshiftテナント登録、BConnectionデジタルトレードアプリケーションの設定代行を実施します。<br>実施にあたっては下記の制約がございます。<br>
-            ul
-              li
-                span 利用者登録は100件まで
-              li
-                span 取引先登録は100件まで<br>※取引先への招待メール送信までが実施内容となります
-              li
-                span 発行請求書の設定は10種類までとなります。現在お使いの請求書等の<br>イメージを提出いただきます
-        .entry-service.mt-4
-          span オプションメニュー 
-          span 工事費：10,000円(税込:11,000円)～
-        div 
-          p オプションメニューでは基本メニューの内容に加え、下記の設定代行等を実施します。
-            ul
-              li
-                span 利用者登録が100件を超える場合、100件毎に10,000円(税込:11,000円)となります。削除も同様です
-              li
-                span 取引先登録が100件を超える場合、100件毎に10,000円(税込:11,000円)となります。削除も同様です
-              li
-                span 発行請求書の設定が10種類を超える場合、1種類毎に10,000円(税込:11,000円)となります。削除も同様です
-              li
-                span キックオフミーティング、プロジェクトトレーニング、問合せ対応を合わせての実施は150,000円<br>(税込:165,000円)となります
-              li
-                span 個別マニュアル作成、説明会実施、取引先対応、外部連携等のご要望にもお応えします<br>※個別見積となります     
-      h3.mt-4.px-4.has-text-weight-bold 基本メニュー、オプションメニューの組み合わせ例（スタンダードプランをご利用の方）
-      img(src='../image/informationLightplanModal2.svg' alt='フロー図').flowImg
+        p.has-text-weight-bold 料金（導入支援サービスご利用1回あたり） 
+        p.is-flex.mx-2.mt-2.mb-0 
+          | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">フリープランをご利用の方　5万円～</span>
+        p.is-flex.mx-2.mt-0.mb-2
+          | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">スタンダードプランをご利用の方　15万円～</span>  
+      img(src='../image/informationLightplanModal.svg' alt='フロー図').flowImg
       .mb-4.btnWrap.is-block.text-center
-        a.button.mr-1.is-info.show-modal(href='https://www.ntt.com/business/services/application/crm-dm/bconnection.html' target='_blank') オプションサービス詳細   
+        a.button.mr-1.is-success.show-modal(href='https://www.ntt.com/business/services/application/crm-dm/bconnection.html' target='_blank') オプションサービス詳細   
         if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
           if (contractPlan.isIntroductionSupportPlanForEntry === true)
             a.button.ml-1.is-can.show-modal(data-target='' disabled) お申込みフォーム

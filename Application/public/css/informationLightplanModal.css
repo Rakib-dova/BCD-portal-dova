@@ -86,8 +86,34 @@
 }
 .flowImg{
   display: block;
-  margin: 2rem 1rem;
+  margin: 1rem 1rem;
 }
 .cauText{
   font-size: 14px;
+}
+.border-bottom {
+  border-bottom: 2px solid;
+  margin-bottom: 5px;
+  padding-bottom: 0px;
+  margin-left: 1rem !important;
+  margin-right: 1rem !important;
+}
+.entry-service {
+  display: flex;
+}
+.entry-service span:nth-child(1) {
+  font-weight: bold;
+  width: 20%;
+  background-color: #bfebff;
+  padding: 7px;
+}
+.entry-service span:nth-child(2) {
+  font-weight: bold;
+  width: 80%;
+  background-color: #ededed;
+  padding: 7px;
+}
+.planBody ul li{
+  list-style-type: disc;
+  margin-left: 1.5rem;
 }
