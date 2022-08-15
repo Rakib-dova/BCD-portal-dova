@@ -77,7 +77,7 @@ schedules:
     displayName: run schedule for 5:00(0)
     branches:
       include:
-        - develop_v1.8.0.0
+        - develop_v1.9.0.0
     always: true
 
 variables:
