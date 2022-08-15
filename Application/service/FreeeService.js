@@ -93,7 +93,6 @@ class FreeeService {
     for (const freee of freees) {
       freeeFormat += `${this.covertFormatFile(freee)}${linefeed}`
     }
-    console.log(freeeFormat)
 
     return freeeFormat
   }
