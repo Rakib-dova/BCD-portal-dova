@@ -13,6 +13,7 @@ const validate = require('../lib/validate')
 const apiManager = require('../controllers/apiManager')
 const functionName = 'cbPostIndex'
 const bconCsvUnitDefault = require('../lib/bconCsvUnitcode')
+const promiseAll = require('../lib/promiseAll')
 const csvDownloadController = require('../controllers/csvDownloadController.js')
 
 const notiTitle = '請求書ダウンロード'
@@ -409,14 +410,18 @@ const cbPostIndex = async (req, res, next) => {
           res.redirect(303, '/csvDownload')
         }
       } else {
-        let invoicesForDownload
-        await Promise.all(
-          documentsResult.Document.map(async (key) => {
-            return csvDownloadController.createInvoiceDataForDownload(req.user.accessToken, req.user.refreshToken, key)
-          })
-        ).then(function (result) {
-          invoicesForDownload = result
-        })
+        const promiseAllArgs = {
+          controller: csvDownloadController,
+          apiName: 'csvDownload',
+          size: 5
+        }
+
+        const invoicesForDownload = await promiseAll.controllerPromiseAll(
+          documentsResult.Document,
+          req,
+          contract,
+          promiseAllArgs
+        )
 
         // エラーを確認する
         for (let i = 0; invoicesForDownload.length > i; i++) {
@@ -479,7 +484,7 @@ const errorHandle = (documentsResult, _res, _req) => {
     )
     _req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_APIERROR])
     _res.redirect(303, '/csvDownload')
-  } else if (String(documentsResult.response?.status).slice(0, 1) === '5') {
+  } else {
     // 500番エラーの場合
     logger.error(
       {
