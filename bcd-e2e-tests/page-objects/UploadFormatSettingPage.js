@@ -47,6 +47,7 @@ class UploadFormatSettingPage {
     await this.actionUtils.selectByXpath(this.frame, '//*[@id="paymentDate"]', numbers.paymentDate)
     await this.actionUtils.selectByXpath(this.frame, '//*[@id="deliveryDate"]', numbers.deliveryDate)
     await this.actionUtils.selectByXpath(this.frame, '//*[@id="documentDescription"]', numbers.documentDescription)
+    await this.actionUtils.selectByXpath(this.frame, '//*[@id="mailaddress"]', numbers.mailAddress)
     await this.actionUtils.selectByXpath(this.frame, '//*[@id="bankName"]', numbers.bankName)
     await this.actionUtils.selectByXpath(this.frame, '//*[@id="financialName"]', numbers.financialName)
     await this.actionUtils.selectByXpath(this.frame, '//*[@id="accountType"]', numbers.accountType)
