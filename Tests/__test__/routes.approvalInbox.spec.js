@@ -27,6 +27,7 @@ const Approver = require('../../Application/models').ApproveUser
 const logger = require('../../Application/lib/logger.js')
 const sendMail = require('../../Application/lib/sendMail')
 const TradeshiftDTO = require('../../Application/DTO/TradeshiftDTO')
+const mailMsg = require('../../Application/lib/mailMsg')
 
 let request, response, infoSpy, errorSpy
 let userControllerFindOneSpy,
@@ -45,7 +46,8 @@ let userControllerFindOneSpy,
   approverControllerUpdateApprove,
   sendMailSpy,
   requestApprovalControllerFindOneRequestApprovalSpy,
-  tradeshiftDTOSpy
+  tradeshiftDTOSpy,
+  mailMsgSendPaymentRequestMailSpy
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
@@ -233,6 +235,7 @@ describe('approvalInboxのテスト', () => {
     requestApprovalControllerFindOneRequestApprovalSpy = jest.spyOn(requestApprovalController, 'findOneRequestApproval')
     tradeshiftDTOSpy = jest.spyOn(TradeshiftDTO.prototype, 'findUser')
     request.csrfToken = jest.fn()
+    mailMsgSendPaymentRequestMailSpy = jest.spyOn(mailMsg, 'sendPaymentRequestMail')
   })
   afterEach(() => {
     request.resetMocked()
@@ -257,6 +260,7 @@ describe('approvalInboxのテスト', () => {
     sendMailSpy.mockRestore()
     requestApprovalControllerFindOneRequestApprovalSpy.mockRestore()
     tradeshiftDTOSpy.mockRestore()
+    mailMsgSendPaymentRequestMailSpy.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -590,7 +594,7 @@ describe('approvalInboxのテスト', () => {
       requestApprovalControllerFindOneRequestApprovalSpy.mockReturnValueOnce(expectGetRequestApproval)
       approvalInboxControllerGetRequestApproval.mockReturnValueOnce(expectGetRequestApproval)
 
-      sendMailSpy.mockReturnValue(0)
+      mailMsgSendPaymentRequestMailSpy.mockReturnValue(0)
 
       // 試験実施
       await approvalInbox.cbPostApprove(request, response, next)
@@ -656,7 +660,7 @@ describe('approvalInboxのテスト', () => {
       requestApprovalControllerFindOneRequestApprovalSpy.mockReturnValueOnce(expectGetRequestApproval)
       approvalInboxControllerGetRequestApproval.mockReturnValueOnce(expectGetRequestApproval)
 
-      sendMailSpy.mockReturnValue(0)
+      mailMsgSendPaymentRequestMailSpy.mockReturnValue(0)
 
       // 試験実施
       await approvalInbox.cbPostApprove(request, response, next)
