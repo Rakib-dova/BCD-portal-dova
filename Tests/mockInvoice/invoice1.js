@@ -1,6 +1,7 @@
 'use stric'
 module.exports = {
   DocumentType: 'InvoiceType',
+  documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
   UBLExtensions: {
     UBLExtension: [
       {
@@ -182,7 +183,7 @@ module.exports = {
           }
         }
       },
-      Contact: {}
+      Contact: { ID: { value: 'abc@test.co.jp' } }
     }
   },
   Delivery: [

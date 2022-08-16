@@ -1,0 +1,93 @@
+#information-lightplan .modal-card{
+  width: 90%;
+  max-width: 980px;
+}
+.opSelect a{
+  width: 48%;
+  color:#fff ;
+  background-color:#004386 ;
+  border-radius: 5px;
+  text-align: center;
+  padding: 1rem;
+  margin: .5rem 0 3rem;
+  position: relative;
+}
+.opSelect a span{
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 22px 20px 0 20px;
+  border-color: #004386 transparent transparent transparent;
+  position: absolute;
+  left: 45%;
+  bottom: -18px;
+}
+#information-lightplan h2{
+  width: 100%;
+  font-weight: bold;
+  background-color: #ededed;
+  padding: .5rem;
+}
+.planWrap h3{
+  font-size: 18px;
+}
+.planWrap p{
+  font-size: 14px;
+}
+
+.planWrap>div>p{
+  min-height: 100px;
+}
+
+#information-lightplan .freeColor{
+  background-color: #ededed;
+  border-radius: 4px;
+  padding-bottom: .5rem;
+}
+#information-lightplan .stanColor{
+  background-color:#BEE8F5 ;
+  border-radius: 4px;
+  padding-bottom: .5rem;
+  /* box-shadow:6px 9px 6px -2px rgb(0 0 0 / 20%); */
+  box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0px 0 1px rgb(10 10 10 / 2%);;
+}
+#information-lightplan .planBody{
+  background-color: #fff;
+  padding: .5rem;
+  margin: 1rem 1rem .5rem;
+  border-radius: 4px;
+  min-height: 380px;
+}
+#information-lightplan .planBody.noHeight{
+  min-height: 0;
+  border: 2px solid #ededed;
+  border-radius: 0;
+  margin-bottom: 0;
+}
+#information-lightplan .planBody .planBodytext{
+  text-align: left;
+  padding: 0.5rem 0.25rem;
+  text-indent: -25px;
+}
+#information-lightplan .planBody p .panel-icon{
+  margin-top: 4px;
+  color: #004386;
+}
+#information-lightplan .planBody .planBodyPrice{
+  font-size: 22px;
+  border-bottom: 1px solid #ededed;
+  padding: 1em ;
+}
+#information-lightplan .planBody .planBodyPrice span{
+  font-size: 46px;
+}
+#information-lightplan .btnWrap .button{
+  width: 213px;
+}
+.flowImg{
+  display: block;
+  margin: 2rem 1rem;
+}
+.cauText{
+  font-size: 14px;
+}

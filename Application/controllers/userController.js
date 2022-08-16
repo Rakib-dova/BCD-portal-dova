@@ -134,6 +134,7 @@ module.exports = {
         const contract = await Contract.findOne({
           where: {
             tenantId: _tenantId,
+            serviceType: '010',
             contractStatus: {
               [Op.ne]: ['99']
             },
@@ -157,6 +158,7 @@ module.exports = {
             contractId: _contractId,
             tenantId: _tenantId,
             numberN: '',
+            serviceType: '010',
             contractStatus: constantsDefine.statusConstants.contractStatusNewContractOrder,
             deleteFlag: false,
             createdAt: _date,

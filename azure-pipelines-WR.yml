@@ -7,7 +7,7 @@ parameters:
   - name: browser
     displayName: "実行したいブラウザを選択してください"
     type: string
-    default: all
+    default: chrome
     values:
       - all
       - chrome
@@ -19,20 +19,31 @@ parameters:
     default: all
     values:
       - all
-      - scenario001.js
-      - scenario002.js
-      - scenario003.js
-      - scenario004.js
-      - scenario005.js
-      - scenario006.js
-      - scenario007.js
-      - scenario008.js
-      - journal_*.js
-      - journal_accountCodeList.js
-      - journal_subAccountCodeList.js
-      - journal_departmentList.js
-      - journal_paymentRequest.js
-      - journal_journalDownload.js
+      - シナリオ1_お知らせ・サポート・請求書アップロードフォーマット一覧・契約情報変更
+      - シナリオ2_請求書フォーマットアップロード - 行番号あり
+      - シナリオ3_請求書フォーマットアップロード - 行番号なし - 設定画面の確認のみ
+      - シナリオ4_請求書フォーマットアップロード - 更新
+      - シナリオ5_請求書一括作成 - デフォルトフォーマット
+      - シナリオ6_請求書一括作成 - カスタムフォーマット
+      - シナリオ7_提携サービス導線・OGPファビコン
+      - シナリオ8_機能試験-一括ダウンロード
+      - 仕訳情報設定_勘定科目一覧
+      - 仕訳情報設定_補助科目一覧
+      - 仕訳情報設定_部門データ一覧
+      - 仕訳情報設定_承認ルート一覧
+      - 仕訳情報設定_支払依頼一覧
+      - 仕訳情報設定_支払依頼一覧（仕訳情報保存）
+      - 仕訳情報設定_支払依頼（一次承認まで）
+      - 仕訳情報設定_支払依頼（十次承認まで）
+      - 仕訳情報設定_仕訳情報ダウンロード
+      - 利用登録
+  - name: app
+    displayName: "実行したいアプリを選択してください"
+    type: string
+    default: デジタルトレードアプリ（モック）
+    values:
+      - デジタルトレードアプリ（モック）
+      - デジタルトレード (prodstg)
   - name: account
     displayName: "実行したいアカウントを選択してください"
     type: string
@@ -62,11 +73,11 @@ pr:
   - none
 
 schedules:
-  - cron: "0 0 * * 2"
-    displayName: run schedule for 9:00(0)
+  - cron: "0 20 * * 1"
+    displayName: run schedule for 5:00(0)
     branches:
       include:
-        - snake_case
+        - develop_v1.8.0.0
     always: true
 
 variables:
@@ -80,6 +91,7 @@ stages:
     jobs:
       - ${{ each BROWSER_NAME in parameters.BROWSER_NAME_LIST }}:
           - job: ${{ BROWSER_NAME }}
+            timeoutInMinutes: 300
             displayName: ${{ BROWSER_NAME }}
             condition: or( eq( '${{ parameters.browser }}', '${{ BROWSER_NAME }}' ), eq( '${{ parameters.browser }}', 'all' ))
             steps:
@@ -99,15 +111,100 @@ stages:
                 workingDirectory: $(DIR)
                 displayName: install
 
-              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && npm run ${{BROWSER_NAME}}
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && (SET APP="${{ parameters.app }}") && npm run ${{BROWSER_NAME}} -- spec\*.js
                 workingDirectory: $(DIR)
                 displayName: test
                 condition: eq( '${{ parameters.scenario }}', 'all' )
 
-              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && npm run ${{BROWSER_NAME}} -- spec\${{ parameters.scenario }}
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && (SET APP="${{ parameters.app }}") && npm run ${{BROWSER_NAME}} -- spec\scenario001.js
                 workingDirectory: $(DIR)
                 displayName: test
-                condition: ne( '${{ parameters.scenario }}', 'all' )
+                condition: eq( '${{ parameters.scenario }}', 'シナリオ1_お知らせ・サポート・請求書アップロードフォーマット一覧・契約情報変更' )
+
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && (SET APP="${{ parameters.app }}") && npm run ${{BROWSER_NAME}} -- spec\scenario002.js
+                workingDirectory: $(DIR)
+                displayName: test
+                condition: eq( '${{ parameters.scenario }}', 'シナリオ2_請求書フォーマットアップロード - 行番号あり' )
+
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && (SET APP="${{ parameters.app }}") && npm run ${{BROWSER_NAME}} -- spec\scenario003.js
+                workingDirectory: $(DIR)
+                displayName: test
+                condition: eq( '${{ parameters.scenario }}', 'シナリオ3_請求書フォーマットアップロード - 行番号なし - 設定画面の確認のみ' )
+
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && (SET APP="${{ parameters.app }}") && npm run ${{BROWSER_NAME}} -- spec\scenario004.js
+                workingDirectory: $(DIR)
+                displayName: test
+                condition: eq( '${{ parameters.scenario }}', 'シナリオ4_請求書フォーマットアップロード - 更新' )
+
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && (SET APP="${{ parameters.app }}") && npm run ${{BROWSER_NAME}} -- spec\scenario005.js
+                workingDirectory: $(DIR)
+                displayName: test
+                condition: eq( '${{ parameters.scenario }}', 'シナリオ5_請求書一括作成 - デフォルトフォーマット' )
+
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && (SET APP="${{ parameters.app }}") && npm run ${{BROWSER_NAME}} -- spec\scenario006.js
+                workingDirectory: $(DIR)
+                displayName: test
+                condition: eq( '${{ parameters.scenario }}', 'シナリオ6_請求書一括作成 - カスタムフォーマット' )
+
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && (SET APP="${{ parameters.app }}") && npm run ${{BROWSER_NAME}} -- spec\scenario007.js
+                workingDirectory: $(DIR)
+                displayName: test
+                condition: eq( '${{ parameters.scenario }}', 'シナリオ7_提携サービス導線・OGPファビコン' )
+
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && (SET APP="${{ parameters.app }}") && npm run ${{BROWSER_NAME}} -- spec\scenario008.js
+                workingDirectory: $(DIR)
+                displayName: test
+                condition: eq( '${{ parameters.scenario }}', 'シナリオ8_機能試験-一括ダウンロード' )
+
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && (SET APP="${{ parameters.app }}") && npm run ${{BROWSER_NAME}} -- spec\journal_accountCodeList.js
+                workingDirectory: $(DIR)
+                displayName: test
+                condition: eq( '${{ parameters.scenario }}', '仕訳情報設定_勘定科目一覧' )
+
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && (SET APP="${{ parameters.app }}") && npm run ${{BROWSER_NAME}} -- spec\journal_subAccountCodeList.js
+                workingDirectory: $(DIR)
+                displayName: test
+                condition: eq( '${{ parameters.scenario }}', '仕訳情報設定_補助科目一覧' )
+
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && (SET APP="${{ parameters.app }}") && npm run ${{BROWSER_NAME}} -- spec\journal_departmentList.js
+                workingDirectory: $(DIR)
+                displayName: test
+                condition: eq( '${{ parameters.scenario }}', '仕訳情報設定_部門データ一覧' )
+
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && (SET APP="${{ parameters.app }}") && npm run ${{BROWSER_NAME}} -- spec\journal_approveRouteList.js
+                workingDirectory: $(DIR)
+                displayName: test
+                condition: eq( '${{ parameters.scenario }}', '仕訳情報設定_承認ルート一覧' )
+
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && (SET APP="${{ parameters.app }}") && npm run ${{BROWSER_NAME}} -- spec\journal_paymentRequestList.js
+                workingDirectory: $(DIR)
+                displayName: test
+                condition: eq( '${{ parameters.scenario }}', '仕訳情報設定_支払依頼一覧' )
+
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && (SET APP="${{ parameters.app }}") && npm run ${{BROWSER_NAME}} -- spec\journal_paymentRequestList_detail.js
+                workingDirectory: $(DIR)
+                displayName: test
+                condition: eq( '${{ parameters.scenario }}', '仕訳情報設定_支払依頼一覧（仕訳情報保存）' )
+
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && (SET APP="${{ parameters.app }}") && npm run ${{BROWSER_NAME}} -- spec\journal_paymentRequest.js
+                workingDirectory: $(DIR)
+                displayName: test
+                condition: eq( '${{ parameters.scenario }}', '仕訳情報設定_支払依頼（一次承認まで）' )
+
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && (SET APP="${{ parameters.app }}") && npm run ${{BROWSER_NAME}} -- spec\journal_paymentRequest_long.js
+                workingDirectory: $(DIR)
+                displayName: test
+                condition: eq( '${{ parameters.scenario }}', '仕訳情報設定_支払依頼（十次承認まで）' )
+
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && (SET APP="${{ parameters.app }}") && npm run ${{BROWSER_NAME}} -- spec\journal_journalDownload.js
+                workingDirectory: $(DIR)
+                displayName: test
+                condition: eq( '${{ parameters.scenario }}', '仕訳情報設定_仕訳情報ダウンロード' )
+
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && (SET APP="${{ parameters.app }}") && npm run ${{BROWSER_NAME}} -- spec\register.js
+                workingDirectory: $(DIR)
+                displayName: test
+                condition: eq( '${{ parameters.scenario }}', '利用登録' )
 
               - script: npm run e2e-report
                 workingDirectory: $(DIR)

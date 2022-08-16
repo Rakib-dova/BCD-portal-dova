@@ -3,7 +3,7 @@ module.exports = {
   // 共通
 
   // カラム数
-  COLUMN_VALUE: 19,
+  COLUMN_VALUE: 20,
 
   // 発行日
   ISSUEDATE_KEY: '発行日',
@@ -24,6 +24,10 @@ module.exports = {
   // 備考
   FINANCIALINSTITUTION_KEY: '備考',
   FINANCIALINSTITUTION_VALUE: 200,
+
+  // 取引先メールアドレス
+  MAILADDRESS_KEY: '取引先メールアドレス',
+  MAILADDRESS_VALUE: 255,
 
   // 銀行名
   BANKNAME_KEY: '銀行名',

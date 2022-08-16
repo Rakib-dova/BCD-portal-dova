@@ -11,7 +11,7 @@ block content
      .column.is-11
       .box
        form#form(method="POST")
-        input(type='hidden' name='_csrf' value=csrfToken)
+        input(type="hidden" name="_csrf" value=csrfToken)
         article.panel.is-info
          h2.panel-heading 条件絞り込み
          .panel-block.mr-4
@@ -72,19 +72,17 @@ block content
             .field-label
               label.bulmalabel 出力フォーマット
             .field-body
-              .control
-                .select.is-fullwidth
-                  select(name='serviceDataFormat')
-                    option(value=0)=serviceDataFormatName[0]
-                    option(value=1)=serviceDataFormatName[1]
-                    option(value=2)=serviceDataFormatName[2]
-                    option(value=3)=serviceDataFormatName[3]
-                .mt-3
-                  div
-                    p ※「既定フォーマット（デジタルトレードフォーマット）」以外の出力フォーマットのダウンロードは、2022年8月下旬以降に有料化を予定しております。「既定フォーマット」以外の出力フォーマットを継続して利用される方は、別途お申し込みが必要となります。
-                  div
-                    p お申し込みについては後日「お知らせ」にてご連絡させていただきます。
-            
+              .select
+                select(name='serviceDataFormat' is='ms-dropdown')
+                  option(value=0)=serviceDataFormatName[0]
+                  option(data-image='/image/lock.svg' value=1 disabled)=serviceDataFormatName[1]
+                  option(data-image='/image/lock.svg' value=2 disabled)=serviceDataFormatName[2]
+                  option(data-image='/image/lock.svg' value=3 disabled)=serviceDataFormatName[3]
+                  option(data-image='/image/lock.svg' value=4 disabled)=serviceDataFormatName[4]
+              .span.is-link.midSpace 
+              a.button.is-link.i.fas.fa-lock.show-modal(data-target='information-lightplan')
+                .span.is-link.lockBorder 
+                .span.is-link.lockText 出力フォーマットを追加
         .field.is-grouped.is-grouped-centered
           .control.mx-4
             .mt-5.has-text-centered
@@ -126,8 +124,13 @@ block content
          div.button-area
           a.button.cancel-button(data-target="searchCompany-modal") 確認
 
+    include informationLightplanModal
+
     include footer
 
 block append scripts
   //- 画面のJSファイル
   script(src="/js/journalDownload-page.js")
+  script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+  script(src="/js/dd.min.js")
+  link(rel='stylesheet', type='text/css', href='/css/journalDownload.css')

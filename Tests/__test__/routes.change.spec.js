@@ -653,7 +653,44 @@ describe('changeのテスト', () => {
 
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
-      createSpy.mockReturnValue(createData)
+      createSpy.mockImplementation(async (_tenantId, contractInformationcancelOrder) => {
+        expect(_tenantId).toEqual('15e2d952-8ba0-42a4-8582-b234cb4a2089')
+        expect(contractInformationcancelOrder).toEqual({
+          contractBasicInfo: {
+            tradeshiftId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            orderId: '',
+            orderType: '040',
+            serviceType: '010',
+            contractChangeName: '1',
+            contractChangeAddress: '',
+            contractChangeContact: '',
+            appDate: '',
+            OpeningDate: '',
+            contractNumber: '0000011111',
+            salesChannelCode: '79100100',
+            salesChannelName: 'ＰＳ本部＿ＡＰＳ部＿第二ＳＣ部門一Ｇ四Ｔ',
+            salesChannelDeptName: '第二ＳＣ部門　第一グループ',
+            salesChannelEmplyeeCode: '',
+            salesChannelPersonName: 'デジトレアプリ担当',
+            salesChannelDeptType: 'アプリケーションサービス部',
+            salesChannelPhoneNumber: '050-3383-9608',
+            salesChannelMailAddress: 'digitaltrade-ap-ops@ntt.com',
+            kaianPassword: ''
+          },
+          contractAccountInfo: {
+            contractAccountId: '',
+            customerType: '',
+            commonCustomerId: '',
+            contractorName: 'テスト１',
+            contractorKanaName: 'テスト２',
+            postalNumber: '',
+            contractAddress: '',
+            banch1: '',
+            tatemono1: ''
+          }
+        })
+        return createData
+      })
       checkcontractStatusSpy.mockReturnValue('00')
 
       // 試験実施
@@ -687,7 +724,44 @@ describe('changeのテスト', () => {
 
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
-      createSpy.mockReturnValue(createData)
+      createSpy.mockImplementation(async (_tenantId, contractInformationcancelOrder) => {
+        expect(_tenantId).toEqual('15e2d952-8ba0-42a4-8582-b234cb4a2089')
+        expect(contractInformationcancelOrder).toEqual({
+          contractBasicInfo: {
+            tradeshiftId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            orderId: '',
+            orderType: '040',
+            serviceType: '010',
+            contractChangeName: '',
+            contractChangeAddress: '1',
+            contractChangeContact: '',
+            appDate: '',
+            OpeningDate: '',
+            contractNumber: '0000011111',
+            salesChannelCode: '79100100',
+            salesChannelName: 'ＰＳ本部＿ＡＰＳ部＿第二ＳＣ部門一Ｇ四Ｔ',
+            salesChannelDeptName: '第二ＳＣ部門　第一グループ',
+            salesChannelEmplyeeCode: '',
+            salesChannelPersonName: 'デジトレアプリ担当',
+            salesChannelDeptType: 'アプリケーションサービス部',
+            salesChannelPhoneNumber: '050-3383-9608',
+            salesChannelMailAddress: 'digitaltrade-ap-ops@ntt.com',
+            kaianPassword: ''
+          },
+          contractAccountInfo: {
+            contractAccountId: '',
+            customerType: '',
+            commonCustomerId: '',
+            contractorName: '',
+            contractorKanaName: '',
+            postalNumber: '0100000',
+            contractAddress: 'テスト県テスト市',
+            banch1: '１２３番',
+            tatemono1: 'テスト'
+          }
+        })
+        return createData
+      })
       checkcontractStatusSpy.mockReturnValue('00')
 
       // 試験実施
@@ -720,7 +794,41 @@ describe('changeのテスト', () => {
 
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
-      createSpy.mockReturnValue(createData)
+      createSpy.mockImplementation(async (_tenantId, contractInformationcancelOrder) => {
+        expect(_tenantId).toEqual('15e2d952-8ba0-42a4-8582-b234cb4a2089')
+        expect(contractInformationcancelOrder).toEqual({
+          contractBasicInfo: {
+            tradeshiftId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            orderId: '',
+            orderType: '040',
+            serviceType: '010',
+            contractChangeName: '',
+            contractChangeAddress: '',
+            contractChangeContact: '1',
+            appDate: '',
+            OpeningDate: '',
+            contractNumber: '0000011111',
+            salesChannelCode: '79100100',
+            salesChannelName: 'ＰＳ本部＿ＡＰＳ部＿第二ＳＣ部門一Ｇ四Ｔ',
+            salesChannelDeptName: '第二ＳＣ部門　第一グループ',
+            salesChannelEmplyeeCode: '',
+            salesChannelPersonName: 'デジトレアプリ担当',
+            salesChannelDeptType: 'アプリケーションサービス部',
+            salesChannelPhoneNumber: '050-3383-9608',
+            salesChannelMailAddress: 'digitaltrade-ap-ops@ntt.com',
+            kaianPassword: ''
+          },
+          contactList: [
+            {
+              contactType: '',
+              contactPersonName: 'テスト連絡先',
+              contactPhoneNumber: '123-456-789',
+              contactMail: 'test@co.jp'
+            }
+          ]
+        })
+        return createData
+      })
       checkcontractStatusSpy.mockReturnValue('00')
 
       // 試験実施
@@ -872,7 +980,52 @@ describe('changeのテスト', () => {
 
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
-      createSpy.mockReturnValue(createData)
+      createSpy.mockImplementation(async (_tenantId, contractInformationcancelOrder) => {
+        expect(_tenantId).toEqual('15e2d952-8ba0-42a4-8582-b234cb4a2089')
+        expect(contractInformationcancelOrder).toEqual({
+          contractBasicInfo: {
+            tradeshiftId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            orderId: '',
+            orderType: '040',
+            serviceType: '010',
+            contractChangeName: '1',
+            contractChangeAddress: '1',
+            contractChangeContact: '1',
+            appDate: '',
+            OpeningDate: '',
+            contractNumber: '0000011111',
+            salesChannelCode: '79100100',
+            salesChannelName: 'ＰＳ本部＿ＡＰＳ部＿第二ＳＣ部門一Ｇ四Ｔ',
+            salesChannelDeptName: '第二ＳＣ部門　第一グループ',
+            salesChannelEmplyeeCode: '',
+            salesChannelPersonName: 'デジトレアプリ担当',
+            salesChannelDeptType: 'アプリケーションサービス部',
+            salesChannelPhoneNumber: '050-3383-9608',
+            salesChannelMailAddress: 'digitaltrade-ap-ops@ntt.com',
+            kaianPassword: ''
+          },
+          contractAccountInfo: {
+            contractAccountId: '',
+            customerType: '',
+            commonCustomerId: '',
+            contractorName: 'テスト１',
+            contractorKanaName: 'テスト２',
+            postalNumber: '0100000',
+            contractAddress: 'テスト県テスト市',
+            banch1: '１２３番',
+            tatemono1: 'テスト'
+          },
+          contactList: [
+            {
+              contactType: '',
+              contactPersonName: 'テスト連絡先',
+              contactPhoneNumber: '123-456-789',
+              contactMail: 'test@co.jp'
+            }
+          ]
+        })
+        return createData
+      })
       checkcontractStatusSpy.mockReturnValue('00')
 
       // 試験実施

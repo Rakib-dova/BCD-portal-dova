@@ -1,12 +1,32 @@
 const Contract = require('../models').Contract
 const logger = require('../lib/logger')
+const db = require('../models')
+const Op = db.Sequelize.Op
+const constantsDefine = require('../constants')
+const contractStatuses = constantsDefine.statusConstants.contractStatuses
+const serviceTypes = constantsDefine.statusConstants.serviceTypes
 
 module.exports = {
+  findContractsBytenantId: async (tenantId, order) => {
+    try {
+      const contracts = await Contract.findAll({
+        raw: true,
+        where: { tenantId: tenantId },
+        order
+      })
+
+      return contracts
+    } catch (error) {
+      logger.error({ user: tenantId, stack: error.stack, status: 0 }, error.name)
+      return null
+    }
+  },
   findOne: async (tenantId) => {
     try {
       const contract = await Contract.findOne({
         where: {
           tenantId: tenantId,
+          serviceType: '010',
           deleteFlag: false
         }
       })
@@ -34,6 +54,21 @@ module.exports = {
       return error
     }
   },
+  findContracts: async (where, order) => {
+    try {
+      const contract = await Contract.findAll({
+        raw: true,
+        where: where,
+        order
+      })
+
+      return contract
+    } catch (error) {
+      // status 0はDBエラー
+      logger.error({ where: where, stack: error.stack, status: 0 }, error.name)
+      return error
+    }
+  },
   updateStatus: async (_contractId, _orderType) => {
     try {
       const contract = await Contract.update(
@@ -49,6 +84,86 @@ module.exports = {
       return contract
     } catch (error) {
       logger.error({ user: _contractId, stack: error.stack, status: 0 }, error.name)
+      return error
+    }
+  },
+  findLightPlan: async (tenantId) => {
+    try {
+      const contract = await Contract.findOne({
+        where: {
+          tenantId: tenantId,
+          contractStatus: {
+            [Op.or]: [contractStatuses.onContract, contractStatuses.newContractBeforeCompletion]
+          },
+          serviceType: serviceTypes.lightPlan,
+          deleteFlag: false
+        }
+      })
+      return contract
+    } catch (error) {
+      // status 0はDBエラー
+      logger.error({ user: tenantId, stack: error.stack, status: 0 }, error.name)
+      return error
+    }
+  },
+  findIntroductionSupportPlan: async (tenantId) => {
+    try {
+      const contract = await Contract.findOne({
+        where: {
+          tenantId: tenantId,
+          contractStatus: {
+            [Op.or]: [contractStatuses.onContract]
+          },
+          serviceType: serviceTypes.introductionSupport,
+          deleteFlag: false
+        }
+      })
+      return contract
+    } catch (error) {
+      // status 0はDBエラー
+      logger.error({ user: tenantId, stack: error.stack, status: 0 }, error.name)
+      return error
+    }
+  },
+  findLightPlanForEntry: async (tenantId) => {
+    try {
+      const contract = await Contract.findOne({
+        where: {
+          tenantId: tenantId,
+          contractStatus: {
+            [Op.or]: [contractStatuses.newContractOrder, contractStatuses.newContractReceive]
+          },
+          serviceType: serviceTypes.lightPlan,
+          deleteFlag: false
+        }
+      })
+      return contract
+    } catch (error) {
+      // status 0はDBエラー
+      logger.error({ user: tenantId, stack: error.stack, status: 0 }, error.name)
+      return error
+    }
+  },
+  findIntroductionSupportPlanForEntry: async (tenantId) => {
+    try {
+      const contract = await Contract.findOne({
+        where: {
+          tenantId: tenantId,
+          contractStatus: {
+            [Op.or]: [
+              contractStatuses.newContractOrder,
+              contractStatuses.newContractReceive,
+              contractStatuses.newContractBeforeCompletion
+            ]
+          },
+          serviceType: serviceTypes.introductionSupport,
+          deleteFlag: false
+        }
+      })
+      return contract
+    } catch (error) {
+      // status 0はDBエラー
+      logger.error({ user: tenantId, stack: error.stack, status: 0 }, error.name)
       return error
     }
   }

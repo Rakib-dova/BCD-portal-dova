@@ -110,8 +110,8 @@ const cbPostIndex = async (req, res, next) => {
   } else {
     let headlessItems = ''
     let idx = 0
-    while (idx < 19) {
-      if (idx !== 18) {
+    while (idx < 20) {
+      if (idx !== 19) {
         headlessItems += `項目${idx + 1},`
       } else {
         headlessItems += `項目${idx + 1}`
@@ -378,7 +378,7 @@ const cbPostIndex = async (req, res, next) => {
   }
 
   const emptyselectedFormatData = []
-  for (let i = 0; i < 19; i++) {
+  for (let i = 0; i < 20; i++) {
     emptyselectedFormatData.push('')
   }
 
@@ -566,6 +566,10 @@ const cbPostConfirmIndex = async (req, res, next) => {
       }
     }
   }
+
+  // アプリ効果測定用ログ出力
+  const jsonLog = { tenantId: req.user.tenantId, action: 'registerUploadFormat' }
+  logger.info(jsonLog)
 
   // 画面移動
   req.flash('info', 'フォーマットの登録が完了しました。')

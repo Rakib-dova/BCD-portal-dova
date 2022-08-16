@@ -25,6 +25,11 @@ constantsDefine({
   // 備考
   FINANCIALINSTITUTIONERR000: `${invoiceValidDefine.FINANCIALINSTITUTION_KEY}は${invoiceValidDefine.FINANCIALINSTITUTION_VALUE}文字以内で入力してください。`,
 
+  // 取引先メールアドレス
+  MAILADDRESSERR001: `${invoiceValidDefine.MAILADDRESS_KEY}は半角英数字記号を入力してください`,
+  MAILADDRESSERR002: `${invoiceValidDefine.MAILADDRESS_KEY}が未入力です。`,
+  MAILADDRESSERR003: `${invoiceValidDefine.MAILADDRESS_KEY}がフォーマットに含まれておりません。`,
+
   // 明細-項目IDエラーメッセージ
   SELLERSITEMNUMERR000: `${invoiceValidDefine.SELLERSITEMNUM_KEY}は${invoiceValidDefine.SELLERSITEMNUM_VALUE}文字以内で入力してください。`,
   SELLERSITEMNUMERR002: `${invoiceValidDefine.SELLERSITEMNUM_KEY}が未入力です。`,

@@ -31,6 +31,10 @@ const cbGetRequestApproval = async (req, res, next) => {
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
 
+  // 仕訳情報設定画面から接続すること確認
+  const referer = req.header('Referer') ?? ''
+  if (referer.length === 0 || !referer.match(`/inbox/${req.params.invoiceId}`)) return next(errorHelper.create(404))
+
   // DBからuserデータ取得
   const user = await userController.findOne(req.user.userId)
   // データベースエラーは、エラーオブジェクトが返る
