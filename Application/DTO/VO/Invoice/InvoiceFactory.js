@@ -1,4 +1,5 @@
 const Invoice = require('./')
+const promiseAll = require('../../../lib/promiseAll')
 
 class InvoiceFactory {
   constructor(passport, contract) {
@@ -59,13 +60,9 @@ class InvoiceFactory {
 
     if (isSearchedDocument.length === 0) return null
 
-    await Promise.all(
-      isSearchedDocument.map(async (key) => {
-        return this.tradeshiftDTO.getDocument(key.DocumentId)
-      })
-    ).then(function (result) {
-      documents = result
-    })
+    const promiseAllArgs = { tradeshiftDTO: this.tradeshiftDTO, apiName: 'getDocument', size: 5 }
+
+    documents = await promiseAll.apiPromiseAll(isSearchedDocument, promiseAllArgs)
 
     // エラーを確認する
     for (let i = 0; documents.length > i; i++) {

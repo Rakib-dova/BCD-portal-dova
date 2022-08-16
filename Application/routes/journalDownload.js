@@ -13,6 +13,7 @@ const validate = require('../lib/validate')
 const apiManager = require('../controllers/apiManager')
 const functionName = 'cbPostIndex'
 const bconCsvUnitDefault = require('../lib/bconCsvUnitcode')
+const promiseAll = require('../lib/promiseAll')
 const journalDownloadController = require('../controllers/journalDownloadController.js')
 const iconv = require('iconv-lite')
 
@@ -412,21 +413,19 @@ const cbPostIndex = async (req, res, next) => {
           res.redirect(303, '/journalDownload')
         }
       } else {
-        let invoicesForDownload
-        await Promise.all(
-          documentsResult.Document.map(async (key) => {
-            return journalDownloadController.createInvoiceDataForDownload(
-              req.user.accessToken,
-              req.user.refreshToken,
-              key,
-              contract.contractId,
-              chkFinalapproval,
-              req.user.userId
-            )
-          })
-        ).then(function (result) {
-          invoicesForDownload = result
-        })
+        const promiseAllArgs = {
+          controller: journalDownloadController,
+          apiName: 'journalDownload',
+          size: 5,
+          chkFinalapproval: chkFinalapproval
+        }
+
+        const invoicesForDownload = await promiseAll.controllerPromiseAll(
+          documentsResult.Document,
+          req,
+          contract,
+          promiseAllArgs
+        )
 
         // エラーを確認する
         for (let i = 0; invoicesForDownload.length > i; i++) {
