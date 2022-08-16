@@ -2,7 +2,6 @@ const webdriverUtils = require('../utils/webdriver-utils');
 const chai = require('chai');
 const chaiWithReporting = require('../utils/chai-with-reporting').chaiWithReporting;
 const comment = require('../utils/chai-with-reporting').comment;
-const config = require('../autotest-script-config');
 const fs = require('fs');
 const { parse } = require('csv-parse/sync');
 const common = require('./common');
@@ -52,22 +51,11 @@ describe('リグレッションテスト', function () {
       }
 
       // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, downloadInvoicePage }
-        = common.getPageObject(browser, page);
+      const { topPage, downloadInvoicePage } = common.getPageObject(browser, page);
       downloadPage = downloadInvoicePage;
 
-      // 指定したURLに遷移する
-      await page.goto(config.baseUrl);
-
-      // ログインを行う
-      await loginPage.doLogin(account.id, account.password);
-      await tradeShiftTopPage.waitForLoading();
-
-      // デジタルトレードアプリをクリックする
-      let appName = process.env.APP ? process.env.APP : config.appName;
-      appName = appName.replace(/\"/g, '');
-      await tradeShiftTopPage.clickBcdApp(appName);
-      await topPage.waitForLoading();
+      // デジタルトレードアプリのトップページを表示する
+      await common.gotoTop(page, account);
 
       // 請求情報ダウンロードページに遷移する
       await topPage.openDownloadInvoicePage();

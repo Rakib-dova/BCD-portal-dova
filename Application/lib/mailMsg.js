@@ -55,10 +55,11 @@ const mailContent = async function (accessToken, refreshToken, contractId, invoi
         invoiceId,
         tenantId
       )
-      const activeApproverNo = approver.status - 10
-      uerMailAddress = approver.approveRoute.users[activeApproverNo].email
-      companyName = approver.approveRoute.users[activeApproverNo].companyName
-      userName = `${approver.approveRoute.users[activeApproverNo].firstName} ${approver.approveRoute.users[activeApproverNo].lastName}`
+      const activeApproverNo = approver[approver.length - 1].status - 10
+      const approveRoute = approver[approver.length - 1].approveRoute
+      uerMailAddress = approveRoute.users[activeApproverNo].email
+      companyName = approveRoute.users[activeApproverNo].companyName
+      userName = `${approveRoute.users[activeApproverNo].firstName} ${approveRoute.users[activeApproverNo].lastName}`
 
       subject = `BConnectionデジタルトレードお知らせ 支払依頼（${year}/${month}/${day}）`
 

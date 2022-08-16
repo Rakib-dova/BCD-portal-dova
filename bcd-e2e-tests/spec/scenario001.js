@@ -2,7 +2,6 @@ const webdriverUtils = require('../utils/webdriver-utils');
 const chai = require('chai');
 const chaiWithReporting = require('../utils/chai-with-reporting').chaiWithReporting;
 const comment = require('../utils/chai-with-reporting').comment;
-const config = require('../autotest-script-config');
 const fs = require('fs');
 const common = require('./common');
 const { parse } = require('csv-parse/sync');
@@ -52,21 +51,11 @@ describe('リグレッションテスト', function () {
       }
 
       // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, supportMenuPage, uploadInvoiceMenuPage, uploadInvoicePage, uploadFormatTopPage, settingMenuPage, contractChangePage }
+      const { topPage, supportMenuPage, uploadInvoiceMenuPage, uploadInvoicePage, uploadFormatTopPage, settingMenuPage, contractChangePage }
         = common.getPageObject(browser, page);
 
-      // 指定したURLに遷移する
-      await page.goto(config.baseUrl);
-
-      // ログインを行う
-      await loginPage.doLogin(account.id, account.password);
-      await tradeShiftTopPage.waitForLoading();
-
-      // デジタルトレードアプリをクリックする
-      let appName = process.env.APP ? process.env.APP : config.appName;
-      appName = appName.replace(/\"/g, '');
-      await tradeShiftTopPage.clickBcdApp(appName);
-      await topPage.waitForLoading();
+      // デジタルトレードアプリのトップページを表示する
+      await common.gotoTop(page, account);
 
       // 「お知らせ」の「もっと見る」をクリックして、リンク先URLをチェックする
       let url = await topPage.getInformationLinkUrl();
@@ -135,7 +124,7 @@ describe('リグレッションテスト', function () {
       // CSVファイルの中身をチェックする
       let testDataRow = fs.readFileSync(csvPath)
       let csvData = JSON.stringify(parse(testDataRow));
-      let expectedVal = '[["\ufeff発行日","請求書番号","テナントID","支払期日","納品日","備考","銀行名","支店名","科目","口座番号","口座名義","その他特記事項","明細-項目ID","明細-内容","明細-数量","明細-単位","明細-単価","明細-税（消費税／軽減税率／不課税／免税／非課税）","明細-備考"]]'
+      let expectedVal = '[["\ufeff発行日","請求書番号","テナントID","支払期日","納品日","備考","取引先メールアドレス","銀行名","支店名","科目","口座番号","口座名義","その他特記事項","明細-項目ID","明細-内容","明細-数量","明細-単位","明細-単価","明細-税（消費税／軽減税率／不課税／免税／非課税）","明細-備考"]]'
       expect(csvData).to.equal(expectedVal, 'フォーマットファイルの中身が正しいこと');
 
       // 請求書一括作成ページに遷移する
@@ -192,7 +181,6 @@ describe('リグレッションテスト', function () {
         await contractChangePage.waitForLoading();
         expect(await contractChangePage.getTitle()).to.equal('ご契約内容', 'ご契約内容画面に遷移すること');
       }
-
       await page.waitForTimeout(1000);
     }
   });
