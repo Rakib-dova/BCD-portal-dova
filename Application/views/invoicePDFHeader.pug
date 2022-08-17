@@ -1,7 +1,7 @@
 .columns.m-0
-  .column.is-half
+  .column.is-one-third
     p.title.is-10 請求書
-  .column.is-half
+  .column.is-two-thirds
     .column.text-right
       if sealImpSrc
         input(type='file' id='file-sealImp')
@@ -75,3 +75,9 @@ div.margin-top-20#header-error
           input.input.width-120px(data-prop='deliveryDate' id='invoice-deliveryDate' type='date')
         else
           p.width-120px#invoice-deliveryDate
+
+.columns.mb-0
+  .column.is-half.m-0.p-0
+    .columns.m-0
+      .column.m-0.p-0.text-inbox.text-inbox-common.text-inbox-subtitle 合計金額 ￥
+      .column.m-0.p-0.text-right.text-inbox-subtitle#totalAmount

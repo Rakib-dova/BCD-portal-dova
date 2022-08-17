@@ -1,14 +1,24 @@
 const puppeteer = require('puppeteer')
 
 const defaultOptions = {
-  format: 'A4'
+  format: 'A4',
+  margin: {
+    top: 40,
+    bottom: 40
+  },
+  displayHeaderFooter: true,
+  headerTemplate: '<div></div>',
+  footerTemplate: `
+  <div style="width: 100%; font-size: 9px; padding: 5px 5px 0; color: #bbb; position: relative;">
+    <div style="text-align: center;">
+      <<span class="pageNumber"></span>/<span class="totalPages"></span>>
+    </div>
+  </div>
+`
 }
 
 const generatePdf = async (html, options = defaultOptions) => {
-  const args = [
-    '--no-sandbox',
-    '--disable-setuid-sandbox'
-  ]
+  const args = ['--no-sandbox', '--disable-setuid-sandbox']
 
   console.log('== ブラウザ起動 ==================')
   const browser = await puppeteer.launch({
