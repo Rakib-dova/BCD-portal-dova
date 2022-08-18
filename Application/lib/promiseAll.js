@@ -55,6 +55,18 @@ function callApi(key, promiseAllArgs) {
     case 'getDocument': {
       return promiseAllArgs.tradeshiftDTO.getDocument(key.DocumentId)
     }
+    case 'csvUpload': {
+      return promiseAllArgs.apiManager.accessTradeshift(
+        promiseAllArgs.accessToken,
+        promiseAllArgs.refreshToken,
+        'put',
+        '/documents/' + key.INVOICE.getDocumentId() + '?draft=true&documentProfileId=tradeshift.invoice.1.0',
+        JSON.stringify(key.INVOICE.getDocument()),
+        {
+          headers: promiseAllArgs.setHeaders
+        }
+      )
+    }
   }
 }
 
