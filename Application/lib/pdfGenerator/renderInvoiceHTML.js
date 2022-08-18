@@ -80,6 +80,7 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
       padding-right: 15px;
       padding-left: 15px;
       margin-top: -25px;
+      margin-bottom: -25px;
       margin-right: auto;
       margin-left: auto;
       height: auto;
@@ -100,6 +101,9 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
     }
     .mr-075 {
       margin: 0.75rem;
+    }
+    .ml-10px {
+      margin-left: 10px !important; 
     }
     .column {
       display: block;
@@ -192,6 +196,9 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
     .unbreak {
       break-inside: avoid;
     }
+    .border {
+      border: 1px solid;
+    }
     pre {
       white-space: pre-wrap;
     }
@@ -251,8 +258,8 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
     </div>
     <div class="columns">
       <div class="column width-50">
-        <div class="flex">
-          <p class="text-l width-30 font-bold">合計金額 ￥</p>
+        <div class="flex border">
+          <p class="text-l width-30 font-bold ml-10px">合計金額 ￥</p>
           <p class="text-r width-70 font-bold" id="total">${total}</p>
         </div>
       </div>
@@ -388,37 +395,39 @@ const setLines = (lines) => {
     const subTotal = Math.floor(line.unitPrice * line.quantity - discountPrices)
     tags += `
       <tr>
-        <td class="text-l">
+        <td class="text-center">
           <p class="line-lineId" data-prop="lineId">${line.lineId}</p>
         </td>
         <td class="text-l">
           <p class="line-lineDescription" data-prop="lineDescription">${line.lineDescription}</p>
         </td>
-        <td class="text-l"><p class="line-quantity" data-prop="quantity">${parseFloat(
+        <td class="text-center"><p class="line-quantity" data-prop="quantity">${parseFloat(
           line.quantity
         ).toLocaleString()}</p></td>
-        <td class="text-l"><p class="line-unit" data-prop="unit">${line.unit}</p></td>
-        <td class="text-l"><p class="line-unitPrice" data-prop="unitPrice">${parseInt(
+        <td class="text-center"><p class="line-unit" data-prop="unit">${line.unit}</p></td>
+        <td class="text-center"><p class="line-unitPrice" data-prop="unitPrice">${parseInt(
           line.unitPrice
         ).toLocaleString()}</p></td>
-        <td class="text-l"><p class="line-taxType" data-prop="taxType">${getTaxTypeName(line.taxType)}</p></td>
+        <td class="text-center"><p class="line-taxType" data-prop="taxType">${getTaxTypeName(line.taxType)}</p></td>
         <td class="text-right line-subtotal"><p class="line-subtotal" data-prop="subtotal">${subTotal.toLocaleString()}</p></td>
       </tr>`
     for (let i = 1; i <= line.discounts; i++) {
       if (i >= 4) break
       tags += `
       <tr>
-        <td class="text-l">
+        <td class="text-center">
           <p class="line-lineId" data-prop="lineId">項目割引</p>
         </td>
         <td class="text-l">
           <p class="line-lineDescription" data-prop="lineDescription">${line['discountDescription' + i]}</p>
         </td>
-        <td class="text-l"><p class="line-quantity" data-prop="quantity">${line[
+        <td class="text-center"><p class="line-quantity" data-prop="quantity">${line[
           'discountAmount' + i
         ].toLocaleString()}</p></td>
-        <td class="text-l"><p class="line-unit" data-prop="unit">${getUnitTypeName(line['discountUnit' + i])}</p></td>
-        <td class="text-l"><p class="line-unitPrice" data-prop="unitPrice">- ${Math.floor(
+        <td class="text-center"><p class="line-unit" data-prop="unit">${getUnitTypeName(
+          line['discountUnit' + i]
+        )}</p></td>
+        <td class="text-center"><p class="line-unitPrice" data-prop="unitPrice">- ${Math.floor(
           functionDiscountCalcs[i](line, Math.floor(line.unitPrice * line.quantity))
         ).toLocaleString()}</p></td>
         <td></td>
@@ -441,7 +450,7 @@ const setDiscountLines = (input) => {
     if (i >= 4) break
     tags += `
     <tr>
-      <td class="text-l">
+      <td class="text-center">
         <p class="line-lineId" data-prop="lineId">割引</p>
       </td>
       <td class="text-l">
@@ -449,10 +458,12 @@ const setDiscountLines = (input) => {
           'discountDescription' + i
         ].toLocaleString()}</p>
       </td>
-      <td class="text-l"><p class="line-quantity" data-prop="quantity">${input[
+      <td class="text-center"><p class="line-quantity" data-prop="quantity">${input[
         'discountAmount' + i
       ].toLocaleString()}</p></td>
-      <td class="text-l"><p class="line-unit" data-prop="unit">${getUnitTypeName(input['discountUnit' + i])} </p></td>
+      <td class="text-center"><p class="line-unit" data-prop="unit">${getUnitTypeName(
+        input['discountUnit' + i]
+      )} </p></td>
       <td></td>
       <td></td>
       <td class="text-right line-subtotal"><p class="line-unitPrice" data-prop="unitPrice">- ${Math.floor(

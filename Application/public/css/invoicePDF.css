@@ -83,7 +83,7 @@ input.width-330px {
 .discount-table {
   border: 0px none;
   width: 100%;
-} 
+}
 
 .discount-table td,
 .discount-table th {
@@ -92,4 +92,8 @@ input.width-330px {
 
 pre {
   white-space: pre-wrap;
+}
+
+.border {
+  border: 1px solid;
 }
