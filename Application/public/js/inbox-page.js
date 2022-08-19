@@ -65,6 +65,43 @@ window.onload = function () {
   })
 }
 
+const autoCalc = function () {
+  const name = this.name
+  const valueInput = $('.inputInstallmentAmount')
+  let value = 0
+  valueInput.forEach((ele) => {
+    if (ele.id === name) {
+      value = ele.value
+    }
+  })
+  const totalAmmout = BigInt($(`#${name.split('_')[0]}Total`).value.replaceAll(',', ''))
+  if (BigInt(value) !== 0n) {
+    if (totalAmmout - BigInt(value) <= 0) {
+      $('#installmentAmountErrMsg').innerText = '計上金額の合計が小計金額を超えています。'
+      return null
+    }
+    valueInput.forEach((ele) => {
+      if (ele.id === name) {
+        ele.value = BigInt(value).toLocaleString('ja-JP')
+      }
+    })
+    let checkTotalAmount = totalAmmout
+    Array.prototype.forEach.call($(`.${name.split('_')[0]}_input_amount`), (item, idx) => {
+      if (idx !== 0) {
+        checkTotalAmount -= BigInt(item.value.replaceAll(',', ''))
+      }
+    })
+    if (checkTotalAmount <= 0) {
+      $('#installmentAmountErrMsg').innerText = '計上金額の合計が小計金額を超えています。'
+      return null
+    } else {
+      $(`.${name.split('_')[0]}_input_amount`)[0].value = checkTotalAmount.toLocaleString('ja-JP')
+    }
+  } else {
+    $('#installmentAmountErrMsg').innerText = '金額は1円以上を入力してください。'
+  }
+}
+
 // 仕訳情報一括入力ボタンの機能
 $('#btn-bulkInsert').addEventListener('click', function () {
   // 仕訳情報一括入力モーダル初期化
@@ -355,6 +392,10 @@ Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
       cloneAccountCodeItem
         .querySelector('.inputInstallmentAmount')
         .classList.add(`${targetId.split('_')[0]}_input_amount`)
+      cloneAccountCodeItem
+        .querySelector('.inputInstallmentAmount')
+        .addEventListener('blur', { name: `${targetId}_input_amount`, handleEvent: autoCalc })
+
       // 項目の計上金額の入力ボタン
       // 各ボタンあたりIDを割り当て
       // 計上金額の入力ボタン
@@ -1611,6 +1652,9 @@ const addBulkList = function () {
         cloneAccountCodeItem
           .querySelector('.inputInstallmentAmount')
           .classList.add(`${tagetIdBase.split('_')[0]}_input_amount`)
+        cloneAccountCodeItem
+          .querySelector('.inputInstallmentAmount')
+          .addEventListener('blur', { name: `${tagetIdBase}_input_amount`, handleEvent: autoCalc })
 
         // 項目の計上金額の入力ボタン
         // 各ボタンあたりIDを割り当て
