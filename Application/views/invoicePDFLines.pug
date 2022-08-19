@@ -44,7 +44,7 @@ div.margin-top-40p
             p.line-unitPrice
         td.text-center
           if editing
-            input.input(data-prop='taxType' class='line-taxType' type='text')#taxType-modal-form
+            input.input(data-prop='taxType' class='line-taxType' type='text' placeholder='選択してください')#taxType-modal-form
           eles
             p.line-taxType
         td.text-right.line-subtotal.align-middle
@@ -130,9 +130,12 @@ div.margin-top-40p
                 label.ml-2.taxTbox(for='taxType') その他税額を入力 
                 div.taxInfo
                   label.ml-5 税ラベル
+                   span.ml-3.red-color 入力必須
                   input.input.taxLabel.mb-2.ml-5(type='text' size='15' placeholder='半角全角 10文字') 
                   label.ml-5 税額(円)
+                   span.ml-3.red-color 入力必須
                   input.input.taxLabel.ml-5(type='text' size='15' placeholder='0～999999999999')
+                  p.mt-2.text-center.red-color 未入力の項目があります。
           footer.modal-card-foot
             div.button-area
               .columns.mt-0.is-centered: .column.is-four-fifths.pt-0
