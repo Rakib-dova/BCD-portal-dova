@@ -3,12 +3,13 @@
     p.title.is-10 請求書
   .column.is-two-thirds
     .column.text-right
+      if logoSrc
+        img(src = logoSrc width='256' height='256')
+
       if sealImpSrc
         input(type='file' id='file-sealImp')
         label(id="file-sealImp-label" for="file-sealImp") 
-            img#sealImp(src = sealImpSrc width='256' height='256')
-      if logoSrc
-        img.ml-5(src = logoSrc width='256' height='256')
+            img.ml-5#sealImp(src = sealImpSrc width='256' height='256')
 
 div.margin-top-20#header-error
 

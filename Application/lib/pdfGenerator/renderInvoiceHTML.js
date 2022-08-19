@@ -233,8 +233,8 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
         </div>
       </div>
       <div class="column text-r width-50">
-        ${sealImp ? setImageTag(sealImp.buffer, sealImp.type, 120) : ''}
         ${logo ? `<img src="${logo}" width="120" height="120" class="image"/>` : ''}
+        ${sealImp ? setImageTag(sealImp.buffer, sealImp.type, 120) : ''}
       </div>
     </div>
     <div class="columns">
