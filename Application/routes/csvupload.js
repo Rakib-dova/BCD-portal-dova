@@ -447,7 +447,6 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
           invoiceList[idx].status = 2
         }
       })
-
       switch (invoiceList[idx].status) {
         case 0:
           putDoucumentList.push(invoiceList[idx])
@@ -553,7 +552,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
   const apiResult = await promiseAll.apiPromiseAll(putDoucumentList, promiseAllArgs)
 
   // APIエラー確認
-  for (let i = 0; apiResult.length > i; i++) {
+  for (let i = 0; putDoucumentList.length > i; i++) {
     const meisaiLength = putDoucumentList[i].INVOICE.getDocument().InvoiceLine.length
     const invoiceId = putDoucumentList[i].invoiceId
     let status = putDoucumentList[i].status
@@ -564,15 +563,12 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
     if (!(apiResult[i] instanceof Error)) {
       successCount += putDoucumentList[i].successCount
       uploadInvoiceCnt++
-      // totalDetailCount += meisaiLength
 
       let messageIdx = 0
 
       // ヘッダ行目チェック
       if (itemRowNumber === 1) {
         messageIdx = putDoucumentList[i].lines - 1
-      } else {
-        messageIdx = 0
       }
 
       invoiceLines.map((ele, idx) => {
@@ -597,7 +593,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
       resultFlag = 4
       failCount += putDoucumentList[i].successCount
       status = -1
-      if (String(apiResult.response?.status).slice(0, 1) === '4') {
+      if (String(apiResult[i].response?.status).slice(0, 1) === '4') {
         // 400番エラーの場合
         putDoucumentList[i].errorData = constantsDefine.invoiceErrMsg.APIERROR
         logger.error(

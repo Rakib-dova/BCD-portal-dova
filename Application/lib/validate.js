@@ -708,28 +708,21 @@ const isValidTotalPrice = function (documentNo, invoiceData) {
   invoiceData.forEach((element) => {
     if (element.docNo === documentNo) {
       const csvColumn = element.rows.split(',')
-      console.log('csvColumn === ', csvColumn)
       // 数量
       const quantityValue = csvColumn[15]
-      console.log('quantityValue === ', quantityValue)
       // 単価
       const price = csvColumn[17]
-      console.log('price === ', price)
       // 小計
       const subTotal = quantityValue * price
-      console.log('subTotal === ', subTotal)
       // 税率
       const taxPercent = isTaxPercent(csvColumn[18])
-      console.log('taxPercent === ', taxPercent)
       // 税金額
       const taxPrice = subTotal * taxPercent
-      console.log('taxPrice === ', Math.floor(taxPrice))
 
       totalPrice += subTotal + Math.floor(taxPrice)
     }
   })
 
-  console.log('totalPrice === ', totalPrice)
   if (totalPrice > constantsDefine.invoiceValidDefine.TOTALPRICEVALUE) {
     return false
   }
