@@ -377,6 +377,17 @@ class bconCsv {
         parentInvoice = new Invoice()
         parentInvoiceStatus = 0
 
+        // 合計金額の判定
+        const isValidTotalPrice = validate.isValidTotalPrice(element.docNo, invoiceData)
+
+        // 合計金額が上限超えた場合
+        if (!isValidTotalPrice) {
+          errorData += errorData
+            ? `,${constants.invoiceErrMsg['TOTALPRICEVALUEERR000']}`
+            : `${constants.invoiceErrMsg['TOTALPRICEVALUEERR000']}`
+          resultConvert.status = -1
+        }
+
         // formatFlag-ユーザが設定したフォーマットを使う場合、true
         // isCheckedHeader-カラムを１回チェックする（trueだとヘッダ行のチェックを行う。一度チェックするとfalseになる）
         // ユーザが設定したアップロードフォーマットと項目数が間違い場合
