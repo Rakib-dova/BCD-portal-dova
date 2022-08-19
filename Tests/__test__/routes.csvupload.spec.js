@@ -85,8 +85,16 @@ describe('csvuploadのテスト', () => {
       let result
       switch (method) {
         case 'get':
-          if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000/i)) {
-            if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000&page=/i)) {
+          if (
+            query.match(
+              /^\/documents\?stag=draft&stag=outbox&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&limit=10000/i
+            )
+          ) {
+            if (
+              query.match(
+                /^\/documents\?stag=draft&stag=outbox&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&limit=10000&page=/i
+              )
+            ) {
               return documentListData2
             }
             return documentListData
@@ -109,6 +117,11 @@ describe('csvuploadのテスト', () => {
               error500.response = { status: 500 }
               error500.data = 'Server Internel Error'
               result = error500
+            } else if (invoice.ID.value === 'api400error') {
+              const error400 = new Error('API Error')
+              error400.response = { status: 400 }
+              error400.data = 'API Error'
+              result = error400
             } else {
               result = 200
             }
@@ -1895,8 +1908,16 @@ describe('csvuploadのテスト', () => {
       apiManager.accessTradeshift = jest.fn((req, refreshToken, method, query, body = {}, config = {}) => {
         switch (method) {
           case 'get':
-            if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000/i)) {
-              if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000&page=/i)) {
+            if (
+              query.match(
+                /^\/documents\?stag=draft&stag=outbox&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&limit=10000/i
+              )
+            ) {
+              if (
+                query.match(
+                  /^\/documents\?stag=draft&stag=outbox&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&limit=10000&page=/i
+                )
+              ) {
                 return documentListData2
               }
               return documentListData
@@ -2077,25 +2098,25 @@ describe('csvuploadのテスト', () => {
       expect(invoiceDetailDB[1].status).toBe(1)
       expect(invoiceDetailDB[1].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
 
-      expect(invoiceDetailDB[2].invoiceId).toBe('UT_TEST_hotfix_1483_1_success')
-      expect(invoiceDetailDB[2].lines).toBe(3)
-      expect(invoiceDetailDB[2].status).toBe(0)
-      expect(invoiceDetailDB[2].errorData).toBe(constantsDefine.invoiceErrMsg.SUCCESS)
+      expect(invoiceDetailDB[2].invoiceId).toBe('UT_TEST_INVOICE_5_2')
+      expect(invoiceDetailDB[2].lines).toBe(5)
+      expect(invoiceDetailDB[2].status).toBe(1)
+      expect(invoiceDetailDB[2].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
 
-      expect(invoiceDetailDB[3].invoiceId).toBe('UT_TEST_hotfix_1483_1_success')
-      expect(invoiceDetailDB[3].lines).toBe(4)
-      expect(invoiceDetailDB[3].status).toBe(0)
-      expect(invoiceDetailDB[3].errorData).toBe(constantsDefine.invoiceErrMsg.SUCCESS)
+      expect(invoiceDetailDB[3].invoiceId).toBe('UT_TEST_INVOICE_5_2')
+      expect(invoiceDetailDB[3].lines).toBe(6)
+      expect(invoiceDetailDB[3].status).toBe(1)
+      expect(invoiceDetailDB[3].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
 
-      expect(invoiceDetailDB[4].invoiceId).toBe('UT_TEST_INVOICE_5_2')
-      expect(invoiceDetailDB[4].lines).toBe(5)
-      expect(invoiceDetailDB[4].status).toBe(1)
-      expect(invoiceDetailDB[4].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+      expect(invoiceDetailDB[4].invoiceId).toBe('UT_TEST_hotfix_1483_1_success')
+      expect(invoiceDetailDB[4].lines).toBe(3)
+      expect(invoiceDetailDB[4].status).toBe(0)
+      expect(invoiceDetailDB[4].errorData).toBe(constantsDefine.invoiceErrMsg.SUCCESS)
 
-      expect(invoiceDetailDB[5].invoiceId).toBe('UT_TEST_INVOICE_5_2')
-      expect(invoiceDetailDB[5].lines).toBe(6)
-      expect(invoiceDetailDB[5].status).toBe(1)
-      expect(invoiceDetailDB[5].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+      expect(invoiceDetailDB[5].invoiceId).toBe('UT_TEST_hotfix_1483_1_success')
+      expect(invoiceDetailDB[5].lines).toBe(4)
+      expect(invoiceDetailDB[5].status).toBe(0)
+      expect(invoiceDetailDB[5].errorData).toBe(constantsDefine.invoiceErrMsg.SUCCESS)
     })
 
     test('hotfix1483：請求書【スキップ、失敗、スキップ】', async () => {
@@ -3075,27 +3096,27 @@ describe('csvuploadのテスト', () => {
       expect(invoiceDetailDB[1].status).toBe(1)
       expect(invoiceDetailDB[1].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
 
-      expect(invoiceDetailDB[2].invoiceId).toBe('UT_TEST_hotfix_1483_7_success_1')
-      expect(invoiceDetailDB[2].lines).toBe(3)
-      expect(invoiceDetailDB[2].status).toBe(0)
-      expect(invoiceDetailDB[2].errorData).toBe(constantsDefine.invoiceErrMsg.SUCCESS)
+      expect(invoiceDetailDB[2].invoiceId).toBe('UT_TEST_hotfix_1483_7_fail_1')
+      expect(invoiceDetailDB[2].lines).toBe(5)
+      expect(invoiceDetailDB[2].status).toBe(-1)
+      expect(invoiceDetailDB[2].errorData).toBe(`${constantsDefine.invoiceErrMsg.BANKNAMEERR002}`)
 
-      expect(invoiceDetailDB[3].invoiceId).toBe('UT_TEST_hotfix_1483_7_success_1')
-      expect(invoiceDetailDB[3].lines).toBe(4)
-      expect(invoiceDetailDB[3].status).toBe(0)
-      expect(invoiceDetailDB[3].errorData).toBe(constantsDefine.invoiceErrMsg.SUCCESS)
-
-      expect(invoiceDetailDB[4].invoiceId).toBe('UT_TEST_hotfix_1483_7_fail_1')
-      expect(invoiceDetailDB[4].lines).toBe(5)
-      expect(invoiceDetailDB[4].status).toBe(-1)
-      expect(invoiceDetailDB[4].errorData).toBe(`${constantsDefine.invoiceErrMsg.BANKNAMEERR002}`)
-
-      expect(invoiceDetailDB[5].invoiceId).toBe('UT_TEST_hotfix_1483_7_fail_1')
-      expect(invoiceDetailDB[5].lines).toBe(6)
-      expect(invoiceDetailDB[5].status).toBe(-1)
-      expect(invoiceDetailDB[5].errorData).toBe(
-        `${constantsDefine.invoiceErrMsg.UNITERR001},${invoiceDetailDB[5].invoiceId}${constantsDefine.invoiceErrMsg.HEADERBEFORERR}`
+      expect(invoiceDetailDB[3].invoiceId).toBe('UT_TEST_hotfix_1483_7_fail_1')
+      expect(invoiceDetailDB[3].lines).toBe(6)
+      expect(invoiceDetailDB[3].status).toBe(-1)
+      expect(invoiceDetailDB[3].errorData).toBe(
+        `${constantsDefine.invoiceErrMsg.UNITERR001},${invoiceDetailDB[3].invoiceId}${constantsDefine.invoiceErrMsg.HEADERBEFORERR}`
       )
+
+      expect(invoiceDetailDB[4].invoiceId).toBe('UT_TEST_hotfix_1483_7_success_1')
+      expect(invoiceDetailDB[4].lines).toBe(3)
+      expect(invoiceDetailDB[4].status).toBe(0)
+      expect(invoiceDetailDB[4].errorData).toBe(constantsDefine.invoiceErrMsg.SUCCESS)
+
+      expect(invoiceDetailDB[5].invoiceId).toBe('UT_TEST_hotfix_1483_7_success_1')
+      expect(invoiceDetailDB[5].lines).toBe(4)
+      expect(invoiceDetailDB[5].status).toBe(0)
+      expect(invoiceDetailDB[5].errorData).toBe(constantsDefine.invoiceErrMsg.SUCCESS)
     })
 
     test('hotfix1483：請求書【スキップ、失敗、失敗】', async () => {
@@ -4921,7 +4942,9 @@ describe('csvuploadのテスト', () => {
 
       // エラーメッセージが予定通りにある
       resultInvoiceDetailController.forEach((invoiceDetail) => {
-        expect(invoiceDetail.errorData).toEqual(`${constantsDefine.invoiceErrMsg.QUANTITYVALUEERR000}`)
+        expect(invoiceDetail.errorData).toEqual(
+          `${constantsDefine.invoiceErrMsg.TOTALPRICEVALUEERR000},${constantsDefine.invoiceErrMsg.QUANTITYVALUEERR000}`
+        )
       })
 
       invoiceController.insert = tmpInsert
@@ -7085,39 +7108,39 @@ describe('csvuploadのテスト', () => {
       expect(invoicesDB[0].csvFileName).toBe('paymentMeansTest.csv')
 
       expect(invoiceDetailDB[0].invoicesId).toBe(invoicesDB[0].invoicesId)
-      expect(invoiceDetailDB[0].invoiceId).toBe('paymentMeansTest1')
-      expect(invoiceDetailDB[0].status).toBe(0)
-      expect(invoiceDetailDB[0].errorData).toBe('正常に取込ました。')
+      expect(invoiceDetailDB[0].invoiceId).toBe('paymentMeansTest3')
+      expect(invoiceDetailDB[0].status).toBe(-1)
+      expect(invoiceDetailDB[0].errorData).toBe('銀行名が未入力です。')
 
       expect(invoiceDetailDB[1].invoicesId).toBe(invoicesDB[0].invoicesId)
-      expect(invoiceDetailDB[1].invoiceId).toBe('paymentMeansTest2')
-      expect(invoiceDetailDB[1].status).toBe(0)
-      expect(invoiceDetailDB[1].errorData).toBe('正常に取込ました。')
+      expect(invoiceDetailDB[1].invoiceId).toBe('paymentMeansTest4')
+      expect(invoiceDetailDB[1].status).toBe(-1)
+      expect(invoiceDetailDB[1].errorData).toBe('支店名が未入力です。')
 
       expect(invoiceDetailDB[2].invoicesId).toBe(invoicesDB[0].invoicesId)
-      expect(invoiceDetailDB[2].invoiceId).toBe('paymentMeansTest3')
+      expect(invoiceDetailDB[2].invoiceId).toBe('paymentMeansTest5')
       expect(invoiceDetailDB[2].status).toBe(-1)
-      expect(invoiceDetailDB[2].errorData).toBe('銀行名が未入力です。')
+      expect(invoiceDetailDB[2].errorData).toBe('科目が未入力です。')
 
       expect(invoiceDetailDB[3].invoicesId).toBe(invoicesDB[0].invoicesId)
-      expect(invoiceDetailDB[3].invoiceId).toBe('paymentMeansTest4')
+      expect(invoiceDetailDB[3].invoiceId).toBe('paymentMeansTest6')
       expect(invoiceDetailDB[3].status).toBe(-1)
-      expect(invoiceDetailDB[3].errorData).toBe('支店名が未入力です。')
+      expect(invoiceDetailDB[3].errorData).toBe('口座番号が未入力です。')
 
       expect(invoiceDetailDB[4].invoicesId).toBe(invoicesDB[0].invoicesId)
-      expect(invoiceDetailDB[4].invoiceId).toBe('paymentMeansTest5')
+      expect(invoiceDetailDB[4].invoiceId).toBe('paymentMeansTest7')
       expect(invoiceDetailDB[4].status).toBe(-1)
-      expect(invoiceDetailDB[4].errorData).toBe('科目が未入力です。')
+      expect(invoiceDetailDB[4].errorData).toBe('口座名義が未入力です。')
 
       expect(invoiceDetailDB[5].invoicesId).toBe(invoicesDB[0].invoicesId)
-      expect(invoiceDetailDB[5].invoiceId).toBe('paymentMeansTest6')
-      expect(invoiceDetailDB[5].status).toBe(-1)
-      expect(invoiceDetailDB[5].errorData).toBe('口座番号が未入力です。')
+      expect(invoiceDetailDB[5].invoiceId).toBe('paymentMeansTest1')
+      expect(invoiceDetailDB[5].status).toBe(0)
+      expect(invoiceDetailDB[5].errorData).toBe('正常に取込ました。')
 
       expect(invoiceDetailDB[6].invoicesId).toBe(invoicesDB[0].invoicesId)
-      expect(invoiceDetailDB[6].invoiceId).toBe('paymentMeansTest7')
-      expect(invoiceDetailDB[6].status).toBe(-1)
-      expect(invoiceDetailDB[6].errorData).toBe('口座名義が未入力です。')
+      expect(invoiceDetailDB[6].invoiceId).toBe('paymentMeansTest2')
+      expect(invoiceDetailDB[6].status).toBe(0)
+      expect(invoiceDetailDB[6].errorData).toBe('正常に取込ました。')
     })
 
     test('準正常：明細-税（消費税／軽減税率／不課税／免税／非課税）バリデーションチェック（ユーザーフォーマット）', async () => {
@@ -7468,8 +7491,16 @@ describe('csvuploadのテスト', () => {
       apiManager.accessTradeshift = jest.fn((accToken, refreshToken, method, query, body = {}, config = {}) => {
         switch (method) {
           case 'get':
-            if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000/i)) {
-              if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000&page=/i)) {
+            if (
+              query.match(
+                /^\/documents\?stag=draft&stag=outbox&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&limit=10000/i
+              )
+            ) {
+              if (
+                query.match(
+                  /^\/documents\?stag=draft&stag=outbox&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&limit=10000&page=/i
+                )
+              ) {
                 return expectError
               }
               return expectError
@@ -7558,8 +7589,16 @@ describe('csvuploadのテスト', () => {
       apiManager.accessTradeshift = jest.fn((accToken, refreshToken, method, query, body = {}, config = {}) => {
         switch (method) {
           case 'get':
-            if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000/i)) {
-              if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000&page=/i)) {
+            if (
+              query.match(
+                /^\/documents\?stag=draft&stag=outbox&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&limit=10000/i
+              )
+            ) {
+              if (
+                query.match(
+                  /^\/documents\?stag=draft&stag=outbox&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&limit=10000&page=/i
+                )
+              ) {
                 return 'test'
               }
               return 'test'
@@ -7648,8 +7687,16 @@ describe('csvuploadのテスト', () => {
       apiManager.accessTradeshift = jest.fn((accToken, refreshToken, method, query, body = {}, config = {}) => {
         switch (method) {
           case 'get':
-            if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000/i)) {
-              if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000&page=/i)) {
+            if (
+              query.match(
+                /^\/documents\?stag=draft&stag=outbox&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&limit=10000/i
+              )
+            ) {
+              if (
+                query.match(
+                  /^\/documents\?stag=draft&stag=outbox&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&limit=10000&page=/i
+                )
+              ) {
                 return documentListData2
               }
               return documentListData
@@ -7829,6 +7876,144 @@ describe('csvuploadのテスト', () => {
       expect(invoiceDetailDB[0].invoiceId).toBe('api500error')
       expect(invoiceDetailDB[0].status).toBe(-1)
       expect(invoiceDetailDB[0].errorData).toBe(constantsDefine.invoiceErrMsg.SYSERROR)
+    })
+
+    test('400エラー：APIエラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      const fs = require('fs')
+      const path = require('path')
+      const fileName = 'api400error.csv'
+      const filePath = path.resolve(`./testData/${fileName}`)
+      const fileData = Buffer.from(
+        fs.readFileSync(filePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+      ).toString('base64')
+
+      const invoicesDB = []
+      const invoiceDetailDB = []
+
+      userController.findOne = jest.fn((userId) => {
+        return dataValues
+      })
+      tenantController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      contractController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      invoiceController.insert = jest.fn((values) => {
+        const userTenantId = values?.tenantId
+        let tenantRow
+        let tenantId
+        let resultToInsertInvoice
+        if (!userTenantId) {
+          return
+        }
+        try {
+          tenantRow = tenantController.findOne(userTenantId)
+          tenantId = tenantRow?.dataValues?.tenantId
+        } catch (error) {
+          return
+        }
+
+        if (!tenantId) {
+          return
+        }
+
+        try {
+          resultToInsertInvoice = {
+            ...values,
+            tenantId: tenantId
+          }
+          invoicesDB.push(resultToInsertInvoice)
+        } catch (error) {
+          return
+        }
+        return { dataValues: resultToInsertInvoice }
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        const result = { dataValues: null }
+        invoicesDB.forEach((invoiceElement) => {
+          if (invoiceElement.invoicesId === invoice) {
+            result.dataValues = invoiceElement
+          }
+        })
+        return result
+      })
+      invoiceController.updateCount = jest.fn(({ invoicesId, successCount, failCount, skipCount, invoiceCount }) => {
+        try {
+          const invoice = [1]
+          invoicesDB.forEach((invoiceElement) => {
+            if (invoiceElement.invoicesId === invoicesId) {
+              invoiceElement.successCount = successCount
+              invoiceElement.failCount = failCount
+              invoiceElement.skipCount = skipCount
+              invoiceElement.invoiceCount = invoiceCount
+            }
+          })
+          return invoice
+        } catch (error) {
+          return error
+        }
+      })
+      invoiceDetailController.insert = jest.fn((values) => {
+        const invoicesId = values?.invoicesId
+
+        if (!invoicesId) {
+          return
+        }
+
+        const invoiceRow = invoiceController.findInvoice(invoicesId)
+
+        if (!invoiceRow?.dataValues.invoicesId) {
+          return
+        }
+
+        let resultToInsertInvoiceDetail
+
+        try {
+          resultToInsertInvoiceDetail = {
+            ...values,
+            invoicesId: invoiceRow?.dataValues.invoicesId
+          }
+          invoiceDetailDB.push(resultToInsertInvoiceDetail)
+        } catch (error) {}
+        return { dataValues: resultToInsertInvoiceDetail }
+      })
+
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+
+      const api400ErrUser = {
+        ...user,
+        accessToken: 'dummyAccess'
+      }
+      request.user = api400ErrUser
+      request.body = {
+        filename: 'api400error.csv',
+        fileData: fileData,
+        uploadFormatId: ''
+      }
+      checkContractStatusSpy.mockReturnValue('00')
+
+      // 試験実施
+      await csvupload.cbPostUpload(request, response, next)
+      // 期待結果
+      // DB内容
+      expect(invoicesDB[0].csvFileName).toBe('api400error.csv')
+      expect(invoicesDB[0].failCount).toBe(1)
+      expect(invoicesDB[0].successCount).toBe(0)
+      expect(invoicesDB[0].skipCount).toBe(0)
+      expect(invoicesDB[0].invoiceCount).toBe(0)
+      expect(invoiceDetailDB[0].invoicesId).toBe(invoicesDB[0].invoicesId)
+      expect(invoiceDetailDB[0].invoiceId).toBe('api400error')
+      expect(invoiceDetailDB[0].status).toBe(-1)
+      expect(invoiceDetailDB[0].errorData).toBe(constantsDefine.invoiceErrMsg.APIERROR)
     })
 
     test('500エラー：uploadFormatDetail取得エラー', async () => {

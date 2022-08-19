@@ -83,5 +83,9 @@ module.exports = {
   DESCRIPTION_VALUE: 1000,
 
   // ネットワーク
-  NETWORK_KEY: 'テナントID'
+  NETWORK_KEY: 'テナントID',
+
+  // 合計（トレードシフトの上限値）
+  TOTALPRICEVALUE: 999999999998,
+  TOTALPRICEVALUE_MESSAGE: '999,999,999,998'
 }
