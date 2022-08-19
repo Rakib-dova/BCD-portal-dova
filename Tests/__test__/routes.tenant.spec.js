@@ -1569,8 +1569,8 @@ describe('tenantのテスト', () => {
               billMailingAddress: '東京都渋谷区１丁目',
               billMailingAddressBanchi1: '１番地',
               billMailingAddressBuilding1: '銀王ビル',
-              billMailingKanaName: 'アイウエオカキクケコアイウエオカキクケコアイウエオカキクケコアイウエオカキクケコ',
-              billMailingName: 'あいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえお',
+              billMailingKanaName: 'アイウエオカキクケコアイウエオカキクケコアイウエオカキクケコアイウエオ',
+              billMailingName: 'あいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこ',
               billMailingPersonName: 'トレド',
               billMailingPhoneNumber: '080-1234-5678',
               billMailingMailAddress: 'example@example.com'

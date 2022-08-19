@@ -130,13 +130,13 @@ block content
                             p#billMailingKanaNameRequired.input-label-required.input-label （必須）
                             p#billMailingKanaNameMessage.input-label-required.input-label
                             .control
-                              input.input#billMailingKanaName(type="text" name="billMailingKanaName" value="" pattern=inputPattarnZenkaku maxlength=35 required placeholder='全角35文字まで')
+                              input.input#billMailingKanaName(type="text" name="billMailingKanaName" value="" pattern=inputPattarnZenkaku maxlength=40 required placeholder='全角40文字まで')
                           .field
                             label(for="billMailingName").input-label 請求書送付先宛カナ名（企業名+部課名）
                             p#billMailingNameRequired.input-label-required.input-label （必須）
                             p#billMailingNameMessage.input-label-required.input-label
                             .control
-                              input.input#billMailingName(type="text" name="billMailingName" value="" pattern=inputPattarnZenkakuKatakana maxlength=40 required placeholder='全角カタカナ40文字まで')
+                              input.input#billMailingName(type="text" name="billMailingName" value="" pattern=inputPattarnZenkakuKatakana maxlength=35 required placeholder='全角カタカナ35文字まで')
 
                       .field.card
                         .card-content
