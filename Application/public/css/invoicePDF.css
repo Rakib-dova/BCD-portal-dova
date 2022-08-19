@@ -40,8 +40,9 @@ input.width-330px {
   display: none;
 }
 
-#sealImp {
-  cursor: pointer;
+.img-256 {
+  width: 256px;
+  height: 256px;
 }
 
 .items {
@@ -83,7 +84,7 @@ input.width-330px {
 .discount-table {
   border: 0px none;
   width: 100%;
-} 
+}
 
 .discount-table td,
 .discount-table th {
