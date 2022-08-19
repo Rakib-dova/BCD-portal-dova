@@ -59,3 +59,15 @@
   color: #fff;
   border-color: #dbdbdb;
 }
+#termBox .serviceTitle{
+  background-color: #3298dc;
+  padding:.5rem;
+  margin: .5rem 0;
+}
+#termBox .serviceTitle span{
+  padding: 0 .5em;
+  color:#fff ;
+  font-weight: bold;
+  font-size: 18px;
+  border-left: solid 8px #fff;
+}
