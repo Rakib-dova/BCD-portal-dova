@@ -69,6 +69,8 @@ let createSpyInvoices,
   findByUploadFormatIdIdentifierSpy,
   checkContractStatusSpy
 
+let writeFileSyncSpy, existsSyncSpy, mkdirSyncSpy
+
 describe('csvuploadのテスト', () => {
   beforeEach(() => {
     request = new Request()
@@ -126,6 +128,9 @@ describe('csvuploadのテスト', () => {
     logger.info = jest.fn()
     logger.error = jest.fn()
     request.csrfToken = jest.fn()
+    writeFileSyncSpy = jest.spyOn(fs, 'writeFileSync')
+    existsSyncSpy = jest.spyOn(fs, 'existsSync')
+    mkdirSyncSpy = jest.spyOn(fs, 'mkdirSync')
   })
   afterEach(() => {
     request.resetMocked()
@@ -145,6 +150,9 @@ describe('csvuploadのテスト', () => {
     findByUploadFormatIdIdentifierSpy.mockRestore()
     findUploadFormatIdSpy.mockRestore()
     checkContractStatusSpy.mockRestore()
+    writeFileSyncSpy.mockRestore()
+    existsSyncSpy.mockRestore()
+    mkdirSyncSpy.mockRestore()
   })
 
   // 404エラー定義
@@ -3495,6 +3503,10 @@ describe('csvuploadのテスト', () => {
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
       const uploadCsvData = Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
       const filePath = '/test'
+
+      writeFileSyncSpy.mockReturnValue()
+      existsSyncSpy.mockReturnValue(false)
+      mkdirSyncSpy.mockReturnValue()
 
       // 試験実施
       const result = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)

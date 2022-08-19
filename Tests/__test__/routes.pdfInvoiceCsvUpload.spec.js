@@ -1,5 +1,8 @@
 'use strict'
 
+process.env.AZURE_STORAGE_CONNECTION_STRING =
+  'DefaultEndpointsProtocol=https;AccountName=bcdappsstoragedev;AccountKey=+FcB8p0pXG9i4glq4iWTOZYU5+sOR590fSqFl7NkrZCb1eQehuxxAwl1w8hIyAW1xs1R7N/6OuwU+AStPv+oFQ==;EndpointSuffix=core.windows.net'
+
 jest.mock('../../Application/node_modules/express', () => {
   return require('jest-express')
 })
@@ -292,7 +295,7 @@ const exprectedResultData = {
     resultArr: [
       {
         index: 1,
-        date: '2022/05/01 09:00:00',
+        date: '2022-05-01T00:00:00.000Z',
         filename: 'PDF請求書ドラフト一括作成フォーマット1.csv',
         invoicesAll: 6,
         invoicesCount: 6,
@@ -304,7 +307,7 @@ const exprectedResultData = {
       },
       {
         index: 2,
-        date: '2022/12/11 21:59:59',
+        date: '2022-12-11T12:59:59.000Z',
         filename: 'PDF請求書ドラフト一括作成フォーマット2.csv',
         invoicesAll: 9,
         invoicesCount: 0,
@@ -607,9 +610,7 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith(
-        '{"message":"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
-      )
+      expect(response.send).toHaveBeenCalledWith('{"message":"システムエラーです。（後程、接続してください）"}')
       expect(response.status).toHaveBeenCalledWith(400)
     })
     test('準正常: 文字コードがUTF-8以外', async () => {
@@ -620,6 +621,17 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
       expect(response.send).toHaveBeenCalledWith(
         '{"message":"文字コードはUTF-8 BOM付で作成してください。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
+      )
+      expect(response.status).toHaveBeenCalledWith(400)
+    })
+    test('準正常: CSV内容チェック', async () => {
+      request.file = { buffer: Buffer.from(new Uint8Array([0xef, 0xbb, 0xbf])) }
+      encodingSpy.mockReturnValue(true)
+
+      await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
+
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
       )
       expect(response.status).toHaveBeenCalledWith(400)
     })

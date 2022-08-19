@@ -72,13 +72,13 @@ trigger:
 pr:
   - none
 
-schedules:
-  - cron: "0 20 * * 1"
-    displayName: run schedule for 5:00(0)
-    branches:
-      include:
-        - develop_v1.8.0.0
-    always: true
+#schedules:
+#  - cron: "0 20 * * 1"
+#    displayName: run schedule for 5:00(0)
+#    branches:
+#      include:
+#        - develop_v1.8.0.0
+#    always: true
 
 variables:
   DIR: $(Build.SourcesDirectory)/bcd-e2e-tests
