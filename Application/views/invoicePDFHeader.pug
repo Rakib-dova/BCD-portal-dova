@@ -3,13 +3,13 @@
     p.title.is-10 請求書
   .column.is-four-fifth
     .column.text-right
+      if logoSrc
+        img(src = logoSrc width='256' height='256')
+
       if sealImpSrc
         img.img-256(src = sealImpSrc width='256px' height='256px')
       else
         a.button.mr-6.show-modal(id = 'uploadSealImpButton') 印影登録
-        
-      if logoSrc
-        img.ml-5.img-256(src = logoSrc width='256px' height='256px')
 
 div.margin-top-20#header-error
 
@@ -76,3 +76,9 @@ div.margin-top-20#header-error
           input.input.width-120px(data-prop='deliveryDate' id='invoice-deliveryDate' type='date')
         else
           p.width-120px#invoice-deliveryDate
+
+.columns.mb-0
+  .column.is-half.m-0.p-0
+    .columns.m-0.px-2.border
+      .column.m-0.p-0.text-inbox.text-inbox-common.text-inbox-subtitle 合計金額 ￥
+      .column.m-0.p-0.text-right.text-inbox-subtitle#totalAmount

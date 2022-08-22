@@ -94,3 +94,7 @@ input.width-330px {
 pre {
   white-space: pre-wrap;
 }
+
+.border {
+  border: 1px solid;
+}

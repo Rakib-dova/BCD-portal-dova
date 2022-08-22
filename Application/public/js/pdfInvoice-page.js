@@ -536,8 +536,11 @@ function renderTotals() {
   })
 
   // 合計
+  const total = Math.floor(subTotal + taxTotal - invoiceDiscountTotal).toLocaleString()
   const totalDiv = $('#total')
-  totalDiv.textContent = Math.floor(subTotal + taxTotal - invoiceDiscountTotal).toLocaleString()
+  totalDiv.textContent = total
+  const totalAmountDiv = $('#totalAmount')
+  totalAmountDiv.textContent = total
 
   // 税額合計
   const taxTotalDiv = $('#taxTotal')

@@ -1,7 +1,6 @@
 'use strict'
 const express = require('express')
 const router = express.Router()
-const axios = require('axios')
 const multer = require('multer')
 const upload = multer({ storage: multer.memoryStorage() })
 const csrf = require('csurf')
@@ -275,23 +274,10 @@ const outputPdfInvoice = async (req, res, next) => {
     }
   }
 
-  // 企業ロゴ取得
-  let logo
-  if (accountInfo.LogoURL) {
-    const response = await axios.get(accountInfo.LogoURL, { responseType: 'arraybuffer' })
-    const buffer = Buffer.from(response.data, 'utf-8')
-    const fileType = await FileType.fromBuffer(buffer)
-    console.log('==  fileType  ===================: ', fileType)
-    logo = {
-      buffer,
-      type: fileType.mime.replace('image/', '')
-    }
-  }
-
   console.log('==  invoice  ===================\n', invoice)
   console.log('==  lines  ===================\n', lines)
 
-  const html = renderInvoiceHTML(invoice, sealImp, logo)
+  const html = renderInvoiceHTML(invoice, sealImp, accountInfo.LogoURL)
   // console.log('=====  生成されたHTML  =====\n', html)
   if (!html) return next(errorHelper.create(500))
 
@@ -334,19 +320,6 @@ const deleteAndOutputPdfInvoice = async (req, res, next) => {
     }
   }
 
-  // 企業ロゴ取得
-  let logo
-  if (accountInfo.LogoURL) {
-    const response = await axios.get(accountInfo.LogoURL, { responseType: 'arraybuffer' })
-    const buffer = Buffer.from(response.data, 'utf-8')
-    const fileType = await FileType.fromBuffer(buffer)
-    console.log('==  fileType  ===================: ', fileType)
-    logo = {
-      buffer,
-      type: fileType.mime.replace('image/', '')
-    }
-  }
-
   lines.forEach((line, index) => {
     line.unitPrice = line.unitPrice ? line.unitPrice : null
     line.quantity = line.quantity ? Math.floor(line.quantity * 1000) / 1000 : null
@@ -360,7 +333,7 @@ const deleteAndOutputPdfInvoice = async (req, res, next) => {
   invoice.deliveryDate = formatDate(deliveryDate, 'YYYY年MM月DD日')
 
   let pdfBuffer
-  const html = renderInvoiceHTML(invoice, sealImp, logo)
+  const html = renderInvoiceHTML(invoice, sealImp, accountInfo.LogoURL)
   if (!html) return next(errorHelper.create(500))
 
   try {
