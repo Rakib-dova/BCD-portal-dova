@@ -1,6 +1,7 @@
 'use stric'
 const logger = require('../lib/logger')
 const db = require('../models')
+const Op = db.Sequelize.Op
 const requestApproval = db.RequestApproval
 
 const findOneRequestApproval = async (contractId, documentId) => {
@@ -8,7 +9,10 @@ const findOneRequestApproval = async (contractId, documentId) => {
     return await requestApproval.findOne({
       where: {
         contractId: contractId,
-        invoiceId: documentId
+        invoiceId: documentId,
+        rejectedFlag: {
+          [Op.ne]: true
+        }
       },
       order: [['create', 'DESC']]
     })
