@@ -69,6 +69,8 @@ let createSpyInvoices,
   findByUploadFormatIdIdentifierSpy,
   checkContractStatusSpy
 
+let writeFileSyncSpy, existsSyncSpy, mkdirSyncSpy
+
 describe('csvuploadのテスト', () => {
   beforeEach(() => {
     request = new Request()
@@ -139,6 +141,9 @@ describe('csvuploadのテスト', () => {
     logger.info = jest.fn()
     logger.error = jest.fn()
     request.csrfToken = jest.fn()
+    writeFileSyncSpy = jest.spyOn(fs, 'writeFileSync')
+    existsSyncSpy = jest.spyOn(fs, 'existsSync')
+    mkdirSyncSpy = jest.spyOn(fs, 'mkdirSync')
   })
   afterEach(() => {
     request.resetMocked()
@@ -158,6 +163,9 @@ describe('csvuploadのテスト', () => {
     findByUploadFormatIdIdentifierSpy.mockRestore()
     findUploadFormatIdSpy.mockRestore()
     checkContractStatusSpy.mockRestore()
+    writeFileSyncSpy.mockRestore()
+    existsSyncSpy.mockRestore()
+    mkdirSyncSpy.mockRestore()
   })
 
   // 404エラー定義
@@ -3509,7 +3517,7 @@ describe('csvuploadのテスト', () => {
       expect(result).toBeFalsy()
     })
 
-    test('User Directory is Nothing.(error)', async () => {
+    test('User Directory is Nothing.', async () => {
       // 準備
       request.user = user
 
@@ -3517,12 +3525,16 @@ describe('csvuploadのテスト', () => {
       const uploadCsvData = Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
       const filePath = '/test'
 
+      writeFileSyncSpy.mockReturnValue()
+      existsSyncSpy.mockReturnValue(false)
+      mkdirSyncSpy.mockReturnValue()
+
       // 試験実施
       const result = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
 
       // 期待結果
-      // returnがfalseであること
-      expect(result).toBeFalsy()
+      // ユーザディレクトリが存在しない場合、trueが返却される
+      expect(result).toBeTruthy()
     })
   })
 

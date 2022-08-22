@@ -1,5 +1,8 @@
 'use strict'
 
+process.env.AZURE_STORAGE_CONNECTION_STRING =
+  'DefaultEndpointsProtocol=https;AccountName=bcdappsstoragedev;AccountKey=+FcB8p0pXG9i4glq4iWTOZYU5+sOR590fSqFl7NkrZCb1eQehuxxAwl1w8hIyAW1xs1R7N/6OuwU+AStPv+oFQ==;EndpointSuffix=core.windows.net'
+
 jest.mock('../../Application/node_modules/express', () => {
   return require('jest-express')
 })
@@ -10,16 +13,17 @@ const Request = require('jest-express').Request
 const Response = require('jest-express').Response
 const next = require('jest-express').Next
 const fs = require('fs')
+const Encoding = require('encoding-japanese')
 
 const apiManager = require('../../Application/controllers/apiManager.js')
 const pdfInvoiceController = require('../../Application/controllers/pdfInvoiceController.js')
 const pdfInvoiceHistoryController = require('../../Application/controllers/pdfInvoiceHistoryController.js')
 const pdfInvoiceHistoryDetailController = require('../../Application/controllers/pdfInvoiceHistoryDetailController.js')
 const logger = require('../../Application/lib/logger.js')
-jest.mock('../../Application/lib/csv.js', () => ({ convertCsvStringToMultiArray: jest.fn(), convertToDataObject: jest.fn() }))
-const { convertCsvStringToMultiArray, convertToDataObject } = require('../../Application/lib/csv.js')
+const csv = require('../../Application/lib/csv')
 const validation = require('../../Application/lib/pdfInvoiceCsvUploadValidation')
 const db = require('../../Application/models')
+const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
 
 let request, response, infoSpy, errorSpy, accessTradeshift
 let createUploadHistoryAndRowsSpy
@@ -28,6 +32,8 @@ let findInvoiceDetailSpy
 let fsSpy
 let validateSpy, validateHeaderSpy
 let pdfInvoiceGetAccountAndSenderInfoSpy
+let convertCsvStringToMultiArray, convertToDataObject, convertCsvDataArrayToPdfInvoiceModels
+let encodingSpy
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
@@ -289,7 +295,7 @@ const exprectedResultData = {
     resultArr: [
       {
         index: 1,
-        date: '2022/05/01 09:00:00',
+        date: '2022-05-01T00:00:00.000Z',
         filename: 'PDF請求書ドラフト一括作成フォーマット1.csv',
         invoicesAll: 6,
         invoicesCount: 6,
@@ -301,7 +307,7 @@ const exprectedResultData = {
       },
       {
         index: 2,
-        date: '2022/12/11 21:59:59',
+        date: '2022-12-11T12:59:59.000Z',
         filename: 'PDF請求書ドラフト一括作成フォーマット2.csv',
         invoicesAll: 9,
         invoicesCount: 0,
@@ -399,6 +405,7 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
   beforeEach(() => {
     request = new Request()
     request.user = user[0]
+    request.file = { buffer: Buffer.from(csvString) }
     request.csrfToken = () => 'dummyCsrfToken'
     response = new Response()
     infoSpy = jest.spyOn(logger, 'info')
@@ -410,10 +417,18 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
     createInvoicesAndLinesSpy = jest.spyOn(pdfInvoiceController, 'createInvoicesAndLines')
     createUploadHistoryAndRowsSpy = jest.spyOn(pdfInvoiceHistoryController, 'createUploadHistoryAndRows')
     fsSpy = jest.spyOn(fs, 'readFileSync')
+    fsSpy.mockReturnValue(defaultCsvData)
     validateSpy = jest.spyOn(validation, 'validate')
     validateHeaderSpy = jest.spyOn(validation, 'validateHeader')
+    validateHeaderSpy.mockReturnValue(true)
     pdfInvoiceGetAccountAndSenderInfoSpy = jest.spyOn(pdfInvoice, 'getAccountAndSenderInfo')
-    convertCsvStringToMultiArray.mockImplementation(() => [])
+    pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ senderInfo })
+    convertCsvStringToMultiArray = jest.spyOn(csv, 'convertCsvStringToMultiArray')
+    convertCsvStringToMultiArray.mockReturnValue([[], []])
+    convertToDataObject = jest.spyOn(csv, 'convertToDataObject')
+    convertToDataObject.mockReturnValue({})
+    convertCsvDataArrayToPdfInvoiceModels = jest.spyOn(csv, 'convertCsvDataArrayToPdfInvoiceModels')
+    encodingSpy = jest.spyOn(Encoding, 'detect')
   })
   afterEach(() => {
     request.resetMocked()
@@ -432,6 +447,8 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
     pdfInvoiceGetAccountAndSenderInfoSpy.mockRestore()
     convertCsvStringToMultiArray.mockRestore()
     convertToDataObject.mockRestore()
+    convertCsvDataArrayToPdfInvoiceModels.mockRestore()
+    encodingSpy.mockRestore()
   })
 
   describe('コールバック:pdfInvoiceCsvUploadIndex', () => {
@@ -448,14 +465,6 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
   describe('コールバック:pdfInvoiceCsvUpload', () => {
     test('正常: 成功のみ', async () => {
-      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
-      request.file = { buffer: Buffer.from(csvString) }
-      fsSpy.mockReturnValue(defaultCsvData)
-      validateHeaderSpy.mockReturnValue(true)
-      convertCsvStringToMultiArray.mockImplementation(() => [[], []])
-      convertToDataObject.mockReturnValue({})
-      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ senderInfo })
-
       validateSpy.mockReturnValue({
         validInvoices: invoiceData.singleValid,
         validLines: validLinesData.success,
@@ -470,17 +479,12 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
       })
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
-
-      expect(response.redirect).toHaveBeenCalledWith('/pdfInvoices/list')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"請求書取込が完了しました。\\n（反映には時間がかかる場合がございます。）","url":"/pdfInvoices/list/"}'
+      )
+      expect(response.status).toHaveBeenCalledWith(200)
     })
     test('正常: 失敗のみ', async () => {
-      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
-      request.file = { buffer: Buffer.from(csvString) }
-      fsSpy.mockReturnValue(defaultCsvData)
-      validateHeaderSpy.mockReturnValue(true)
-      convertCsvStringToMultiArray.mockImplementation(() => [[], []])
-      convertToDataObject.mockReturnValue({})
-      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ senderInfo })
       validateSpy.mockReturnValue({
         validInvoices: invoiceData.singleValid,
         validLines: validLinesData.skip,
@@ -495,17 +499,12 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
       })
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
-
-      expect(response.redirect).toHaveBeenCalledWith('/pdfInvoiceCsvUpload/resultList')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"請求書取込が完了しました。\\n（反映には時間がかかる場合がございます。）","url":"/pdfInvoiceCsvUpload/resultList/"}'
+      )
+      expect(response.status).toHaveBeenCalledWith(200)
     })
     test('正常-スキップのみ', async () => {
-      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
-      request.file = { buffer: Buffer.from(csvString) }
-      fsSpy.mockReturnValue(defaultCsvData)
-      validateHeaderSpy.mockReturnValue(true)
-      convertCsvStringToMultiArray.mockImplementation(() => [[], []])
-      convertToDataObject.mockReturnValue({})
-      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ senderInfo })
       validateSpy.mockReturnValue({
         validInvoices: invoiceData.singleValid,
         validLines: validLinesData.skip,
@@ -520,17 +519,12 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
       })
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
-
-      expect(response.redirect).toHaveBeenCalledWith('/pdfInvoiceCsvUpload/resultList')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"請求書取込が完了しました。\\n（反映には時間がかかる場合がございます。）","url":"/pdfInvoiceCsvUpload/resultList/"}'
+      )
+      expect(response.status).toHaveBeenCalledWith(200)
     })
     test('正常: 成功 & 失敗', async () => {
-      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
-      request.file = { buffer: Buffer.from(csvString) }
-      fsSpy.mockReturnValue(defaultCsvData)
-      validateHeaderSpy.mockReturnValue(true)
-      convertCsvStringToMultiArray.mockImplementation(() => [[], []])
-      convertToDataObject.mockReturnValue({})
-      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ senderInfo })
       validateSpy.mockReturnValue({
         validInvoices: invoiceData.singleValid,
         validLines: validLinesData.skip,
@@ -545,17 +539,12 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
       })
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
-
-      expect(response.redirect).toHaveBeenCalledWith('/pdfInvoiceCsvUpload/resultList')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"請求書取込が完了しました。\\n（反映には時間がかかる場合がございます。）","url":"/pdfInvoiceCsvUpload/resultList/"}'
+      )
+      expect(response.status).toHaveBeenCalledWith(200)
     })
     test('正常: 成功 & スキップ', async () => {
-      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
-      request.file = { buffer: Buffer.from(csvString) }
-      fsSpy.mockReturnValue(defaultCsvData)
-      validateHeaderSpy.mockReturnValue(true)
-      convertCsvStringToMultiArray.mockImplementation(() => [[], []])
-      convertToDataObject.mockReturnValue({})
-      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ senderInfo })
       validateSpy.mockReturnValue({
         validInvoices: invoiceData.singleValid,
         validLines: validLinesData.skip,
@@ -570,17 +559,12 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
       })
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
-
-      expect(response.redirect).toHaveBeenCalledWith('/pdfInvoices/list')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"請求書取込が完了しました。\\n（反映には時間がかかる場合がございます。）","url":"/pdfInvoices/list/"}'
+      )
+      expect(response.status).toHaveBeenCalledWith(200)
     })
     test('正常: 失敗 & スキップ', async () => {
-      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
-      request.file = { buffer: Buffer.from(csvString) }
-      fsSpy.mockReturnValue(defaultCsvData)
-      validateHeaderSpy.mockReturnValue(true)
-      convertCsvStringToMultiArray.mockImplementation(() => [[], []])
-      convertToDataObject.mockReturnValue({})
-      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ senderInfo })
       validateSpy.mockReturnValue({
         validInvoices: invoiceData.singleValid,
         validLines: validLinesData.skip,
@@ -595,17 +579,12 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
       })
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
-
-      expect(response.redirect).toHaveBeenCalledWith('/pdfInvoiceCsvUpload/resultList')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"請求書取込が完了しました。\\n（反映には時間がかかる場合がございます。）","url":"/pdfInvoiceCsvUpload/resultList/"}'
+      )
+      expect(response.status).toHaveBeenCalledWith(200)
     })
     test('正常: 成功 & 失敗 & スキップ', async () => {
-      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
-      request.file = { buffer: Buffer.from(csvString) }
-      fsSpy.mockReturnValue(defaultCsvData)
-      validateHeaderSpy.mockReturnValue(true)
-      convertCsvStringToMultiArray.mockImplementation(() => [[], []])
-      convertToDataObject.mockReturnValue({})
-      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ senderInfo })
       validateSpy.mockReturnValue({
         validInvoices: invoiceData.singleValid,
         validLines: validLinesData.all,
@@ -620,8 +599,10 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
       })
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
-
-      expect(response.redirect).toHaveBeenCalledWith('/pdfInvoiceCsvUpload/resultList')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"請求書取込が完了しました。\\n（反映には時間がかかる場合がございます。）","url":"/pdfInvoiceCsvUpload/resultList/"}'
+      )
+      expect(response.status).toHaveBeenCalledWith(200)
     })
 
     test('準正常: アップロードデータ空の不正リクエスト', async () => {
@@ -629,139 +610,157 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"システムエラーです。（後程、接続してください）\"}')
-      expect(response.status).toHaveBeenCalledWith(500)
+      expect(response.send).toHaveBeenCalledWith('{"message":"システムエラーです。（後程、接続してください）"}')
+      expect(response.status).toHaveBeenCalledWith(400)
     })
-    test('準正常: CSVファイル読込エラー', async () => {
-      request.file = { buffer: undefined }
-      fsSpy.mockImplementation(() => { throw new Error('File Read Error') })
+    test('準正常: 文字コードがUTF-8以外', async () => {
+      request.file = { buffer: 'あ' }
+      encodingSpy.mockReturnValue(false)
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"システムエラーです。（後程、接続してください）\"}')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"文字コードはUTF-8 BOM付で作成してください。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
+      )
+      expect(response.status).toHaveBeenCalledWith(400)
+    })
+    test('準正常: CSV内容チェック', async () => {
+      request.file = { buffer: Buffer.from(new Uint8Array([0xef, 0xbb, 0xbf])) }
+      encodingSpy.mockReturnValue(true)
+
+      await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
+
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
+      )
+      expect(response.status).toHaveBeenCalledWith(400)
+    })
+    test('準正常: CSVファイル読込エラー', async () => {
+      fsSpy.mockImplementation(() => {
+        throw new Error('File Read Error')
+      })
+      encodingSpy.mockReturnValue('UTF8')
+
+      await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
+
+      expect(response.send).toHaveBeenCalledWith('{"message":"システムエラーです。（後程、接続してください）"}')
       expect(response.status).toHaveBeenCalledWith(500)
     })
     test('準正常: デフォルトフォーマットデータ取得エラー', async () => {
-      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
-      request.file = { buffer: Buffer.from(csvString) }
-      fsSpy.mockImplementation(() => { throw new Error('File Read Error') })
+      fsSpy.mockImplementation(() => {
+        throw new Error('File Read Error')
+      })
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"システムエラーです。（後程、接続してください）\"}')
+      expect(response.send).toHaveBeenCalledWith('{"message":"システムエラーです。（後程、接続してください）"}')
       expect(response.status).toHaveBeenCalledWith(500)
     })
     test('準正常: CSV文字列データをCSV多次元配列データに変換時エラー', async () => {
-      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
-      request.file = { buffer: Buffer.from(csvString) }
-      fsSpy.mockReturnValue(defaultCsvData)
-      convertCsvStringToMultiArray.mockImplementation(() => null)
+      convertCsvStringToMultiArray.mockReturnValue(null)
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。\"}')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
+      )
       expect(response.status).toHaveBeenCalledWith(400)
     })
     test('準正常: ヘッダーバリデーションエラー', async () => {
-      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
-      request.file = { buffer: Buffer.from(csvString) }
-      fsSpy.mockReturnValue(defaultCsvData)
       validateHeaderSpy.mockReturnValue(false)
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"ヘッダーが指定のものと異なります。CSVファイルの内容を確認の上、再度実行をお願いします。\"}')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"ヘッダーが指定のものと異なります。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
+      )
       expect(response.status).toHaveBeenCalledWith(400)
     })
     test('準正常: CSV多次元配列データをデータオブジェクト配列に変換時エラー', async () => {
-      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
-      request.file = { buffer: Buffer.from(csvString) }
-      fsSpy.mockReturnValue(defaultCsvData)
-      validateHeaderSpy.mockReturnValue(true)
-      convertCsvStringToMultiArray.mockImplementation(() => [[], []])
-      convertToDataObject.mockImplementation(() => { throw new Error('data convert Error') })
+      convertToDataObject.mockImplementation(() => {
+        throw new Error('data convert Error')
+      })
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。\"}')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
+      )
       expect(response.status).toHaveBeenCalledWith(400)
     })
     test('準正常: CSVファイルにデータが存在しない', async () => {
-      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
-      request.file = { buffer: Buffer.from(csvString) }
-      fsSpy.mockReturnValue(defaultCsvData)
-      validateHeaderSpy.mockReturnValue(true)
-      convertCsvStringToMultiArray.mockImplementation(() => [])
+      convertCsvStringToMultiArray.mockReturnValue([])
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"CSVファイルのデータが存在しません。CSVファイルの内容を確認の上、再度実行をお願いします。\"}')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"CSVファイルのデータが存在しません。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
+      )
       expect(response.status).toHaveBeenCalledWith(400)
     })
     test('準正常: CSVファイル空行エラー', async () => {
-      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
-      request.file = { buffer: Buffer.from(csvString) }
-      fsSpy.mockReturnValue(defaultCsvData)
-      validateHeaderSpy.mockReturnValue(true)
-      convertCsvStringToMultiArray.mockImplementation(() => [[], []])
       convertToDataObject.mockReturnValue(undefined)
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。\"}')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
+      )
       expect(response.status).toHaveBeenCalledWith(400)
     })
     test('準正常: 送信先情報取得失敗', async () => {
-      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
-      request.file = { buffer: Buffer.from(csvString) }
-      fsSpy.mockReturnValue(defaultCsvData)
-      validateHeaderSpy.mockReturnValue(true)
-      convertCsvStringToMultiArray.mockImplementation(() => [[], []])
-      convertToDataObject.mockReturnValue({})
       pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ senderInfo: null })
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
       expect(response.status).toHaveBeenCalledWith(500)
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"APIエラーです、時間を空けて再度実行をお願いいたします。\"}')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"APIエラーです、時間を空けて再度実行をお願いいたします。"}'
+      )
     })
     test('準正常: データオブジェクト配列をDBモデルに変換時にエラー', async () => {
-      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
-      request.file = { buffer: Buffer.from(csvString) }
-      fsSpy.mockReturnValue(defaultCsvData)
-      validateHeaderSpy.mockReturnValue(true)
-      convertCsvStringToMultiArray.mockImplementation(() => [[], []])
-      convertToDataObject.mockReturnValue('XXX')
-      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ senderInfo })
+      convertCsvDataArrayToPdfInvoiceModels.mockReturnValue({ pdfInvoices: null, pdfInvoiceLines: null })
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。\"}')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
+      )
       expect(response.status).toHaveBeenCalledWith(500)
     })
+    test('準正常: 請求書数200オーバーエラー', async () => {
+      convertCsvDataArrayToPdfInvoiceModels.mockReturnValue({ pdfInvoices: Array(201), pdfInvoiceLines: [] })
+
+      await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
+
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"作成できる請求書数は200までです。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
+      )
+      expect(response.status).toHaveBeenCalledWith(400)
+    })
+    test('準正常: 明細数20オーバーエラー', async () => {
+      convertCsvDataArrayToPdfInvoiceModels.mockReturnValue({ pdfInvoices: [], pdfInvoiceLines: Array(21) })
+
+      await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
+
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"一つの請求書で作成できる明細数は20までです。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
+      )
+      expect(response.status).toHaveBeenCalledWith(400)
+    })
     test('準正常: バリデーション失敗', async () => {
-      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
-      request.file = { buffer: Buffer.from(csvString) }
-      fsSpy.mockReturnValue(defaultCsvData)
-      validateHeaderSpy.mockReturnValue(true)
-      convertCsvStringToMultiArray.mockImplementation(() => [[], []])
-      convertToDataObject.mockReturnValue({})
-      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ senderInfo })
+      convertCsvDataArrayToPdfInvoiceModels.mockReturnValue({ pdfInvoices: [], pdfInvoiceLines: [] })
       validateSpy.mockReturnValue({})
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。\"}')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
+      )
       expect(response.status).toHaveBeenCalledWith(500)
     })
     test('準正常: DB登録エラー createUploadHistoryAndRows', async () => {
-      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
-      request.file = { buffer: Buffer.from(csvString) }
-      fsSpy.mockReturnValue(defaultCsvData)
-      validateHeaderSpy.mockReturnValue(true)
-      convertCsvStringToMultiArray.mockImplementation(() => [[], []])
-      convertToDataObject.mockReturnValue({})
-      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ senderInfo })
+      convertCsvDataArrayToPdfInvoiceModels.mockReturnValue({ pdfInvoices: [], pdfInvoiceLines: [] })
       validateSpy.mockReturnValue({
         validInvoices: validInvoicesData.all,
         validLines: validLinesData.all,
@@ -778,7 +777,7 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"システムエラーです。（後程、接続してください）\"}')
+      expect(response.send).toHaveBeenCalledWith('{"message":"システムエラーです。（後程、接続してください）"}')
       expect(response.status).toHaveBeenCalledWith(500)
     })
   })

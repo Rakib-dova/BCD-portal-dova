@@ -1238,6 +1238,384 @@ describe('tenantのテスト', () => {
       expect(response.getHeader('Location')).toEqual('/portal')
     })
 
+    test('正常 契約者名、契約者カナ名がundefined', async () => {
+      // 準備
+      // session.userContextにNotTenantRegisteredを入れる
+      request.session = {
+        userContext: 'NotTenantRegistered'
+      }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on',
+        // 入力フォームデータ
+        password: '1q2w3e4r5t',
+        postalNumber: '1234567',
+        contractAddressVal: '東京都渋谷区１丁目',
+        banch1: '１番地',
+        tatemono1: '銀王ビル',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5',
+        salesPersonName: ''
+      }
+      // request.userに正常値を想定する
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      // request.flashは関数なのでモックする。返り値は必要ないので処理は空
+      request.flash = jest.fn()
+      // Tradeshift(1回目)から正常なユーザデータ取得を想定する
+      accessTradeshiftSpy
+        .mockReturnValueOnce({
+          Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          CompanyName: 'UnitTestCompany',
+          Username: 'dummy@example.com',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+              GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+              Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+            }
+          ],
+          Created: '2021-01-20T05:11:15.177Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'Yamada',
+          LastName: 'Taro',
+          Visible: true
+        })
+        // Tradeshift(2回目)から正常なテナントデータ取得を想定する
+        .mockReturnValue({
+          CompanyName: 'UnitTestCompany',
+          Country: 'JP',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          State: 'ACTIVE',
+          Identifiers: [
+            {
+              scheme: 'TS:ID',
+              value: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+            }
+          ],
+          AddressLines: [
+            {
+              scheme: 'city',
+              value: '東京都'
+            },
+            {
+              scheme: 'street',
+              value: '港区'
+            },
+            {
+              scheme: 'zip',
+              value: '105-0000'
+            }
+          ],
+          RegistrationAddressLines: [],
+          AcceptingDocumentProfiles: [],
+          LookingFor: [],
+          Offering: [],
+          PublicProfile: false,
+          NonuserInvoicing: false,
+          AutoAcceptConnections: false,
+          Restricted: true,
+          Created: '2021-01-20T05:11:15.177Z',
+          Modified: '2021-01-20T05:20:07.137Z',
+          AccountType: 'FREE'
+        })
+      // DBからの正常なユーザデータ取得を想定する
+      createSpy.mockImplementation(async (accessToken, refreshToken, contractInformationnewOrder) => {
+        expect(accessToken).toEqual('dummyAccessToken')
+        expect(refreshToken).toEqual('dummyRefreshToken')
+        expect(contractInformationnewOrder).toEqual({
+          contractBasicInfo: {
+            tradeshiftId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            orderId: '',
+            orderType: '010',
+            serviceType: '010',
+            contractChangeName: '',
+            contractChangeAddress: '',
+            contractChangeContact: '',
+            appDate: '',
+            OpeningDate: '',
+            contractNumber: '',
+            salesChannelCode: '79100100',
+            salesChannelName: 'ＰＳ本部＿ＡＰＳ部＿第二ＳＣ部門一Ｇ四Ｔ',
+            salesChannelDeptName: '第二ＳＣ部門　第一グループ',
+            salesChannelEmplyeeCode: '',
+            salesChannelPersonName: 'デジトレアプリ担当',
+            salesChannelDeptType: 'アプリケーションサービス部',
+            salesChannelPhoneNumber: '050-3383-9608',
+            salesChannelMailAddress: 'digitaltrade-ap-ops@ntt.com',
+            campaignCode: 'A1b2C3d4E5',
+            salesPersonName: '',
+            kaianPassword: '1q2w3e4r5t'
+          },
+          contractAccountInfo: {
+            contractAccountId: '',
+            customerType: '',
+            commonCustomerId: '',
+            postalNumber: '1234567',
+            contractAddress: '東京都渋谷区１丁目',
+            banch1: '１番地',
+            tatemono1: '銀王ビル'
+          },
+          contactList: [
+            {
+              contactType: '',
+              contactPersonName: 'トレド',
+              contactPhoneNumber: '080-1234-5678',
+              contactMail: 'example@example.com',
+              billMailingPostalNumber: '1234567',
+              billMailingAddress: '東京都渋谷区１丁目',
+              billMailingAddressBanchi1: '１番地',
+              billMailingAddressBuilding1: '銀王ビル',
+              billMailingKanaName: '',
+              billMailingName: '',
+              billMailingPersonName: 'トレド',
+              billMailingPhoneNumber: '080-1234-5678',
+              billMailingMailAddress: 'example@example.com'
+            }
+          ],
+          prdtList: [{ prdtCode: 'BF1021000000100', idnumber: '', appType: '010' }]
+        })
+        return [
+          {
+            dataValues: {
+              userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+              tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+              userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+              appVersion: '0.0.1',
+              refreshToken: 'dummyRefreshToken',
+              userStatus: 0
+            }
+          },
+          true
+        ]
+      })
+
+      checkContractStatusSpy.mockReturnValue(null)
+
+      // 試験実施
+      await routesTenant.cbPostRegister(request, response, next)
+
+      // 期待結果
+      // 400,500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // 登録成功時のログが呼ばれ「る」
+      expect(infoSpy).toHaveBeenCalledWith(
+        { tenant: request.user?.tenantId, user: request.user?.userId },
+        'Tenant Registration Succeeded'
+      )
+      // request.session.userContextが'TenantRegistrationCompleted'になる
+      expect(request.session.userContext).toBe('TenantRegistrationCompleted')
+      // request.flashが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('info', '利用登録が完了いたしました。')
+      // ポータルにリダイレクト「される」
+      expect(response.redirect).toHaveBeenCalledWith(303, '/portal')
+      expect(response.getHeader('Location')).toEqual('/portal')
+    })
+
+    test('正常 契約者名、契約者カナ名が最大桁数', async () => {
+      // 準備
+      // session.userContextにNotTenantRegisteredを入れる
+      request.session = {
+        userContext: 'NotTenantRegistered'
+      }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on',
+        // 入力フォームデータ
+        password: '1q2w3e4r5t',
+        contractorName:
+          'あいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこ',
+        contractorKanaName:
+          'アイウエオカキクケコアイウエオカキクケコアイウエオカキクケコアイウエオカキクケコアイウエオカキクケコアイウエオカキクケコアイウエオカキクケコアイウエオカキクケコ',
+        postalNumber: '1234567',
+        contractAddressVal: '東京都渋谷区１丁目',
+        banch1: '１番地',
+        tatemono1: '銀王ビル',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5',
+        salesPersonName: ''
+      }
+      // request.userに正常値を想定する
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      // request.flashは関数なのでモックする。返り値は必要ないので処理は空
+      request.flash = jest.fn()
+      // Tradeshift(1回目)から正常なユーザデータ取得を想定する
+      accessTradeshiftSpy
+        .mockReturnValueOnce({
+          Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          CompanyName: 'UnitTestCompany',
+          Username: 'dummy@example.com',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+              GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+              Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+            }
+          ],
+          Created: '2021-01-20T05:11:15.177Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'Yamada',
+          LastName: 'Taro',
+          Visible: true
+        })
+        // Tradeshift(2回目)から正常なテナントデータ取得を想定する
+        .mockReturnValue({
+          CompanyName: 'UnitTestCompany',
+          Country: 'JP',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          State: 'ACTIVE',
+          Identifiers: [
+            {
+              scheme: 'TS:ID',
+              value: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+            }
+          ],
+          AddressLines: [
+            {
+              scheme: 'city',
+              value: '東京都'
+            },
+            {
+              scheme: 'street',
+              value: '港区'
+            },
+            {
+              scheme: 'zip',
+              value: '105-0000'
+            }
+          ],
+          RegistrationAddressLines: [],
+          AcceptingDocumentProfiles: [],
+          LookingFor: [],
+          Offering: [],
+          PublicProfile: false,
+          NonuserInvoicing: false,
+          AutoAcceptConnections: false,
+          Restricted: true,
+          Created: '2021-01-20T05:11:15.177Z',
+          Modified: '2021-01-20T05:20:07.137Z',
+          AccountType: 'FREE'
+        })
+      // DBからの正常なユーザデータ取得を想定する
+      createSpy.mockImplementation(async (accessToken, refreshToken, contractInformationnewOrder) => {
+        expect(accessToken).toEqual('dummyAccessToken')
+        expect(refreshToken).toEqual('dummyRefreshToken')
+        expect(contractInformationnewOrder).toEqual({
+          contractBasicInfo: {
+            tradeshiftId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            orderId: '',
+            orderType: '010',
+            serviceType: '010',
+            contractChangeName: '',
+            contractChangeAddress: '',
+            contractChangeContact: '',
+            appDate: '',
+            OpeningDate: '',
+            contractNumber: '',
+            salesChannelCode: '79100100',
+            salesChannelName: 'ＰＳ本部＿ＡＰＳ部＿第二ＳＣ部門一Ｇ四Ｔ',
+            salesChannelDeptName: '第二ＳＣ部門　第一グループ',
+            salesChannelEmplyeeCode: '',
+            salesChannelPersonName: 'デジトレアプリ担当',
+            salesChannelDeptType: 'アプリケーションサービス部',
+            salesChannelPhoneNumber: '050-3383-9608',
+            salesChannelMailAddress: 'digitaltrade-ap-ops@ntt.com',
+            campaignCode: 'A1b2C3d4E5',
+            salesPersonName: '',
+            kaianPassword: '1q2w3e4r5t'
+          },
+          contractAccountInfo: {
+            contractAccountId: '',
+            customerType: '',
+            commonCustomerId: '',
+            contractorName:
+              'あいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこ',
+            contractorKanaName:
+              'アイウエオカキクケコアイウエオカキクケコアイウエオカキクケコアイウエオカキクケコアイウエオカキクケコアイウエオカキクケコアイウエオカキクケコアイウエオカキクケコ',
+            postalNumber: '1234567',
+            contractAddress: '東京都渋谷区１丁目',
+            banch1: '１番地',
+            tatemono1: '銀王ビル'
+          },
+          contactList: [
+            {
+              contactType: '',
+              contactPersonName: 'トレド',
+              contactPhoneNumber: '080-1234-5678',
+              contactMail: 'example@example.com',
+              billMailingPostalNumber: '1234567',
+              billMailingAddress: '東京都渋谷区１丁目',
+              billMailingAddressBanchi1: '１番地',
+              billMailingAddressBuilding1: '銀王ビル',
+              billMailingKanaName: 'アイウエオカキクケコアイウエオカキクケコアイウエオカキクケコアイウエオ',
+              billMailingName: 'あいうえおかきくけこあいうえおかきくけこあいうえおかきくけこあいうえおかきくけこ',
+              billMailingPersonName: 'トレド',
+              billMailingPhoneNumber: '080-1234-5678',
+              billMailingMailAddress: 'example@example.com'
+            }
+          ],
+          prdtList: [{ prdtCode: 'BF1021000000100', idnumber: '', appType: '010' }]
+        })
+        return [
+          {
+            dataValues: {
+              userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+              tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+              userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+              appVersion: '0.0.1',
+              refreshToken: 'dummyRefreshToken',
+              userStatus: 0
+            }
+          },
+          true
+        ]
+      })
+
+      checkContractStatusSpy.mockReturnValue(null)
+
+      // 試験実施
+      await routesTenant.cbPostRegister(request, response, next)
+
+      // 期待結果
+      // 400,500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // 登録成功時のログが呼ばれ「る」
+      expect(infoSpy).toHaveBeenCalledWith(
+        { tenant: request.user?.tenantId, user: request.user?.userId },
+        'Tenant Registration Succeeded'
+      )
+      // request.session.userContextが'TenantRegistrationCompleted'になる
+      expect(request.session.userContext).toBe('TenantRegistrationCompleted')
+      // request.flashが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('info', '利用登録が完了いたしました。')
+      // ポータルにリダイレクト「される」
+      expect(response.redirect).toHaveBeenCalledWith(303, '/portal')
+      expect(response.getHeader('Location')).toEqual('/portal')
+    })
+
     test('400エラー：セッション内のuserContextがNotTenantRegisteredではない場合', async () => {
       // 準備
       // session.userContextに異常値(NotTenantRegistered「以外」)を想定する

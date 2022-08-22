@@ -77,8 +77,15 @@ class Invoice {
         PostalZone: { value: null },
         Country: { IdentificationCode: { value: 'JP' } }
       },
-      Contact: { ElectronicMail: { value: null } }
+      Contact: {
+        ID: { value: null },
+        ElectronicMail: { value: null }
+      }
     }
+  }
+
+  setMailaddress(_mailaddress) {
+    this.#AccountingCustomerParty.Party.Contact.ID.value = _mailaddress
   }
 
   setCustomerTennant(_tennantId) {
@@ -453,12 +460,13 @@ class bconCsvNoHeader {
         let paymentDateBan = 3
         let deliveryDateBan = 4
         let etcBan = 5
-        let bankNameBan = 6
-        let bankLocalNameBan = 7
-        let subjectBan = 8
-        let accountNumberBan = 9
-        let accountNameBan = 10
-        let etcWriteBan = 11
+        let mailaddressBan = 6
+        let bankNameBan = 7
+        let bankLocalNameBan = 8
+        let subjectBan = 9
+        let accountNumberBan = 10
+        let accountNameBan = 11
+        let etcWriteBan = 12
 
         uploadFormatDetail.forEach((detail) => {
           if (detail.defaultNumber === 0) {
@@ -480,21 +488,24 @@ class bconCsvNoHeader {
             etcBan = detail.uploadFormatNumber + 1
           }
           if (detail.defaultNumber === 6) {
-            bankNameBan = detail.uploadFormatNumber + 1
+            mailaddressBan = detail.uploadFormatNumber + 1
           }
           if (detail.defaultNumber === 7) {
-            bankLocalNameBan = detail.uploadFormatNumber + 1
+            bankNameBan = detail.uploadFormatNumber + 1
           }
           if (detail.defaultNumber === 8) {
-            subjectBan = detail.uploadFormatNumber + 1
+            bankLocalNameBan = detail.uploadFormatNumber + 1
           }
           if (detail.defaultNumber === 9) {
-            accountNumberBan = detail.uploadFormatNumber + 1
+            subjectBan = detail.uploadFormatNumber + 1
           }
           if (detail.defaultNumber === 10) {
-            accountNameBan = detail.uploadFormatNumber + 1
+            accountNumberBan = detail.uploadFormatNumber + 1
           }
           if (detail.defaultNumber === 11) {
+            accountNameBan = detail.uploadFormatNumber + 1
+          }
+          if (detail.defaultNumber === 12) {
             etcWriteBan = detail.uploadFormatNumber + 1
           }
         })
@@ -671,25 +682,41 @@ class bconCsvNoHeader {
         }
         parentInvoice.setAdditionalDocumentReference(csvColumn[5])
 
+        // 取引先メールアドレス チェック
+        if (csvColumn[6] !== '') {
+          if (!validate.isValidEmailTsUser(csvColumn[6])) {
+            errorData += errorData
+              ? `,${constants.invoiceErrMsg['MAILADDRESSERR001']}`
+              : `${constants.invoiceErrMsg['MAILADDRESSERR001']}`
+            resultConvert.status = -1
+          }
+        } else {
+          errorData += errorData
+            ? `,${constants.invoiceErrMsg['MAILADDRESSERR002']}`
+            : `${constants.invoiceErrMsg['MAILADDRESSERR002']}`
+          resultConvert.status = -1
+        }
+        parentInvoice.setMailaddress(csvColumn[6])
+
         // PayeeFinancialAccountチェック
         if (
-          csvColumn[6] !== '' ||
           csvColumn[7] !== '' ||
           csvColumn[8] !== '' ||
           csvColumn[9] !== '' ||
-          csvColumn[10] !== ''
+          csvColumn[10] !== '' ||
+          csvColumn[11] !== ''
         ) {
           // 銀行名
-          switch (validate.isBankName(csvColumn[6])) {
+          switch (validate.isBankName(csvColumn[7])) {
             case '':
               break
             default:
               errorData += errorData
                 ? `,${dataNumber}${bankNameBan}${
-                    constants.invoiceErrMsgForUploadFormat[validate.isBankName(csvColumn[6])]
+                    constants.invoiceErrMsgForUploadFormat[validate.isBankName(csvColumn[7])]
                   }`
                 : `${dataNumber}${bankNameBan}${
-                    constants.invoiceErrMsgForUploadFormat[validate.isBankName(csvColumn[6])]
+                    constants.invoiceErrMsgForUploadFormat[validate.isBankName(csvColumn[7])]
                   }`
 
               resultConvert.status = -1
@@ -697,16 +724,16 @@ class bconCsvNoHeader {
           }
 
           // 支店名
-          switch (validate.isFinancialName(csvColumn[7])) {
+          switch (validate.isFinancialName(csvColumn[8])) {
             case '':
               break
             default:
               errorData += errorData
                 ? `,${dataNumber}${bankLocalNameBan}${
-                    constants.invoiceErrMsgForUploadFormat[validate.isFinancialName(csvColumn[7])]
+                    constants.invoiceErrMsgForUploadFormat[validate.isFinancialName(csvColumn[8])]
                   }`
                 : `${dataNumber}${bankLocalNameBan}${
-                    constants.invoiceErrMsgForUploadFormat[validate.isFinancialName(csvColumn[7])]
+                    constants.invoiceErrMsgForUploadFormat[validate.isFinancialName(csvColumn[8])]
                   }`
 
               resultConvert.status = -1
@@ -714,7 +741,7 @@ class bconCsvNoHeader {
           }
 
           // 科目
-          switch (validate.isAccountType(csvColumn[8])) {
+          switch (validate.isAccountType(csvColumn[9])) {
             case 1:
               errorData += errorData
                 ? `,${dataNumber}${subjectBan}${constants.invoiceErrMsgForUploadFormat['ACCOUNTTYPEERR000']}`
@@ -730,21 +757,21 @@ class bconCsvNoHeader {
               resultConvert.status = -1
               break
             default:
-              csvColumn[8] = validate.isAccountType(csvColumn[8])
+              csvColumn[9] = validate.isAccountType(csvColumn[9])
               break
           }
 
           // 口座番号
-          switch (validate.isAccountId(csvColumn[9])) {
+          switch (validate.isAccountId(csvColumn[10])) {
             case '':
               break
             default:
               errorData += errorData
                 ? `,${dataNumber}${accountNumberBan}${
-                    constants.invoiceErrMsgForUploadFormat[validate.isAccountId(csvColumn[9])]
+                    constants.invoiceErrMsgForUploadFormat[validate.isAccountId(csvColumn[10])]
                   }`
                 : `${dataNumber}${accountNumberBan}${
-                    constants.invoiceErrMsgForUploadFormat[validate.isAccountId(csvColumn[9])]
+                    constants.invoiceErrMsgForUploadFormat[validate.isAccountId(csvColumn[10])]
                   }`
 
               resultConvert.status = -1
@@ -752,16 +779,16 @@ class bconCsvNoHeader {
           }
 
           // 口座名義
-          switch (validate.isAccountName(csvColumn[10])) {
+          switch (validate.isAccountName(csvColumn[11])) {
             case '':
               break
             default:
               errorData += errorData
                 ? `,${dataNumber}${accountNameBan}${
-                    constants.invoiceErrMsgForUploadFormat[validate.isAccountName(csvColumn[10])]
+                    constants.invoiceErrMsgForUploadFormat[validate.isAccountName(csvColumn[11])]
                   }`
                 : `${dataNumber}${accountNameBan}${
-                    constants.invoiceErrMsgForUploadFormat[validate.isAccountName(csvColumn[10])]
+                    constants.invoiceErrMsgForUploadFormat[validate.isAccountName(csvColumn[11])]
                   }`
 
               resultConvert.status = -1
@@ -771,30 +798,30 @@ class bconCsvNoHeader {
 
         parentInvoice.setPaymentMeans(
           csvColumn[3],
-          csvColumn[6],
           csvColumn[7],
           csvColumn[8],
           csvColumn[9],
-          csvColumn[10]
+          csvColumn[10],
+          csvColumn[11]
         )
 
         // その他特記事項
-        if (csvColumn[11] !== '') {
-          switch (validate.isNote(csvColumn[11])) {
+        if (csvColumn[12] !== '') {
+          switch (validate.isNote(csvColumn[12])) {
             case '':
               break
             default:
               errorData += errorData
                 ? `,${dataNumber}${etcWriteBan}${
-                    constants.invoiceErrMsgForUploadFormat[validate.isNote(csvColumn[11])]
+                    constants.invoiceErrMsgForUploadFormat[validate.isNote(csvColumn[12])]
                   }`
-                : `${dataNumber}${etcWriteBan}${constants.invoiceErrMsgForUploadFormat[validate.isNote(csvColumn[11])]}`
+                : `${dataNumber}${etcWriteBan}${constants.invoiceErrMsgForUploadFormat[validate.isNote(csvColumn[12])]}`
 
               resultConvert.status = -1
               break
           }
         }
-        parentInvoice.setNote(csvColumn[11])
+        parentInvoice.setNote(csvColumn[12])
 
         this.#invoiceDocumentList.forEach((ele) => {
           if (ele.INVOICE.getDocument().ID.value === element.docNo) {
@@ -814,49 +841,49 @@ class bconCsvNoHeader {
 
       setInvoiceLineCnt++
 
-      let meiItemBan = 12
-      let meiContentBan = 13
-      let meiQuantityBan = 14
-      let meiUnitBan = 15
-      let meiUnitPriceBan = 16
-      let meiTaxBan = 17
-      let meiEtcBan = 18
+      let meiItemBan = 13
+      let meiContentBan = 14
+      let meiQuantityBan = 15
+      let meiUnitBan = 16
+      let meiUnitPriceBan = 17
+      let meiTaxBan = 18
+      let meiEtcBan = 19
 
       uploadFormatDetail.forEach((detail) => {
-        if (detail.defaultNumber === 12) {
+        if (detail.defaultNumber === 13) {
           meiItemBan = detail.uploadFormatNumber + 1
         }
-        if (detail.defaultNumber === 13) {
+        if (detail.defaultNumber === 14) {
           meiContentBan = detail.uploadFormatNumber + 1
         }
-        if (detail.defaultNumber === 14) {
+        if (detail.defaultNumber === 15) {
           meiQuantityBan = detail.uploadFormatNumber + 1
         }
-        if (detail.defaultNumber === 15) {
+        if (detail.defaultNumber === 16) {
           meiUnitBan = detail.uploadFormatNumber + 1
         }
-        if (detail.defaultNumber === 16) {
+        if (detail.defaultNumber === 17) {
           meiUnitPriceBan = detail.uploadFormatNumber + 1
         }
-        if (detail.defaultNumber === 17) {
+        if (detail.defaultNumber === 18) {
           meiTaxBan = detail.uploadFormatNumber + 1
         }
-        if (detail.defaultNumber === 18) {
+        if (detail.defaultNumber === 19) {
           meiEtcBan = detail.uploadFormatNumber + 1
         }
       })
 
       // 明細-項目ID
-      switch (validate.isSellersItemNum(csvColumn[12])) {
+      switch (validate.isSellersItemNum(csvColumn[13])) {
         case '':
           break
         default:
           errorData += errorData
             ? `,${dataNumber}${meiItemBan}${
-                constants.invoiceErrMsgForUploadFormat[validate.isSellersItemNum(csvColumn[12])]
+                constants.invoiceErrMsgForUploadFormat[validate.isSellersItemNum(csvColumn[13])]
               }`
             : `${dataNumber}${meiItemBan}${
-                constants.invoiceErrMsgForUploadFormat[validate.isSellersItemNum(csvColumn[12])]
+                constants.invoiceErrMsgForUploadFormat[validate.isSellersItemNum(csvColumn[13])]
               }`
 
           resultConvert.status = -1
@@ -864,16 +891,16 @@ class bconCsvNoHeader {
       }
 
       // 明細-内容
-      switch (validate.isItemName(csvColumn[13])) {
+      switch (validate.isItemName(csvColumn[14])) {
         case '':
           break
         default:
           errorData += errorData
             ? `,${dataNumber}${meiContentBan}${
-                constants.invoiceErrMsgForUploadFormat[validate.isItemName(csvColumn[13])]
+                constants.invoiceErrMsgForUploadFormat[validate.isItemName(csvColumn[14])]
               }`
             : `${dataNumber}${meiContentBan}${
-                constants.invoiceErrMsgForUploadFormat[validate.isItemName(csvColumn[13])]
+                constants.invoiceErrMsgForUploadFormat[validate.isItemName(csvColumn[14])]
               }`
 
           resultConvert.status = -1
@@ -881,16 +908,16 @@ class bconCsvNoHeader {
       }
 
       // 明細-数量
-      switch (validate.isQuantityValue(csvColumn[14])) {
+      switch (validate.isQuantityValue(csvColumn[15])) {
         case '':
           break
         default:
           errorData += errorData
             ? `,${dataNumber}${meiQuantityBan}${
-                constants.invoiceErrMsgForUploadFormat[validate.isQuantityValue(csvColumn[14])]
+                constants.invoiceErrMsgForUploadFormat[validate.isQuantityValue(csvColumn[15])]
               }`
             : `${dataNumber}${meiQuantityBan}${
-                constants.invoiceErrMsgForUploadFormat[validate.isQuantityValue(csvColumn[14])]
+                constants.invoiceErrMsgForUploadFormat[validate.isQuantityValue(csvColumn[15])]
               }`
 
           resultConvert.status = -1
@@ -899,14 +926,14 @@ class bconCsvNoHeader {
 
       // 明細-単位
       if (!bconCsvUnitUser) {
-        switch (validate.isUnitcode(csvColumn[15])) {
+        switch (validate.isUnitcode(csvColumn[16])) {
           case 'UNITERR000':
             errorData += errorData
               ? `,${dataNumber}${meiUnitBan}${
-                  constants.invoiceErrMsgForUploadFormat[validate.isUnitcode(csvColumn[15])]
+                  constants.invoiceErrMsgForUploadFormat[validate.isUnitcode(csvColumn[16])]
                 }`
               : `${dataNumber}${meiUnitBan}${
-                  constants.invoiceErrMsgForUploadFormat[validate.isUnitcode(csvColumn[15])]
+                  constants.invoiceErrMsgForUploadFormat[validate.isUnitcode(csvColumn[16])]
                 }`
 
             resultConvert.status = -1
@@ -914,27 +941,27 @@ class bconCsvNoHeader {
           case 'UNITERR001':
             errorData += errorData
               ? `,${dataNumber}${meiUnitBan}${
-                  constants.invoiceErrMsgForUploadFormat[validate.isUnitcode(csvColumn[15])]
+                  constants.invoiceErrMsgForUploadFormat[validate.isUnitcode(csvColumn[16])]
                 }`
               : `${dataNumber}${meiUnitBan}${
-                  constants.invoiceErrMsgForUploadFormat[validate.isUnitcode(csvColumn[15])]
+                  constants.invoiceErrMsgForUploadFormat[validate.isUnitcode(csvColumn[16])]
                 }`
 
             resultConvert.status = -1
             break
           default:
-            csvColumn[15] = validate.isUnitcode(csvColumn[15])
+            csvColumn[16] = validate.isUnitcode(csvColumn[16])
             break
         }
       } else {
-        switch (validate.isUserUnitcode(csvColumn[15], bconCsvUnitUser)) {
+        switch (validate.isUserUnitcode(csvColumn[16], bconCsvUnitUser)) {
           case 'UNITERR000':
             errorData += errorData
               ? `,${dataNumber}${meiUnitBan}${
-                  constants.invoiceErrMsgForUploadFormat[validate.isUserUnitcode(csvColumn[15], bconCsvUnitUser)]
+                  constants.invoiceErrMsgForUploadFormat[validate.isUserUnitcode(csvColumn[16], bconCsvUnitUser)]
                 }`
               : `${dataNumber}${meiUnitBan}${
-                  constants.invoiceErrMsgForUploadFormat[validate.isUserUnitcode(csvColumn[15], bconCsvUnitUser)]
+                  constants.invoiceErrMsgForUploadFormat[validate.isUserUnitcode(csvColumn[16], bconCsvUnitUser)]
                 }`
 
             resultConvert.status = -1
@@ -942,31 +969,31 @@ class bconCsvNoHeader {
           case 'UNITERR002':
             errorData += errorData
               ? `,${dataNumber}${meiUnitBan}${
-                  constants.invoiceErrMsgForUploadFormat[validate.isUserUnitcode(csvColumn[15], bconCsvUnitUser)]
+                  constants.invoiceErrMsgForUploadFormat[validate.isUserUnitcode(csvColumn[16], bconCsvUnitUser)]
                 }`
               : `${dataNumber}${meiUnitBan}${
-                  constants.invoiceErrMsgForUploadFormat[validate.isUserUnitcode(csvColumn[15], bconCsvUnitUser)]
+                  constants.invoiceErrMsgForUploadFormat[validate.isUserUnitcode(csvColumn[16], bconCsvUnitUser)]
                 }`
 
             resultConvert.status = -1
             break
           default:
-            csvColumn[15] = validate.isUserUnitcode(csvColumn[15], bconCsvUnitUser)
+            csvColumn[16] = validate.isUserUnitcode(csvColumn[16], bconCsvUnitUser)
             break
         }
       }
 
       // 明細-単価
-      switch (validate.isPriceValue(csvColumn[16])) {
+      switch (validate.isPriceValue(csvColumn[17])) {
         case '':
           break
         default:
           errorData += errorData
             ? `,${dataNumber}${meiUnitPriceBan}${
-                constants.invoiceErrMsgForUploadFormat[validate.isPriceValue(csvColumn[16])]
+                constants.invoiceErrMsgForUploadFormat[validate.isPriceValue(csvColumn[17])]
               }`
             : `${dataNumber}${meiUnitPriceBan}${
-                constants.invoiceErrMsgForUploadFormat[validate.isPriceValue(csvColumn[16])]
+                constants.invoiceErrMsgForUploadFormat[validate.isPriceValue(csvColumn[17])]
               }`
 
           resultConvert.status = -1
@@ -975,14 +1002,14 @@ class bconCsvNoHeader {
 
       // 明細-税（消費税／軽減税率／不課税／免税／非課税）
       if (!bconCsvTaxUser) {
-        switch (validate.isTaxCategori(csvColumn[17])) {
+        switch (validate.isTaxCategori(csvColumn[18])) {
           case 'TAXERR000':
             errorData += errorData
               ? `,${dataNumber}${meiTaxBan}${
-                  constants.invoiceErrMsgForUploadFormat[validate.isTaxCategori(csvColumn[17])]
+                  constants.invoiceErrMsgForUploadFormat[validate.isTaxCategori(csvColumn[18])]
                 }`
               : `${dataNumber}${meiTaxBan}${
-                  constants.invoiceErrMsgForUploadFormat[validate.isTaxCategori(csvColumn[17])]
+                  constants.invoiceErrMsgForUploadFormat[validate.isTaxCategori(csvColumn[18])]
                 }`
 
             resultConvert.status = -1
@@ -990,27 +1017,27 @@ class bconCsvNoHeader {
           case 'TAXERR001':
             errorData += errorData
               ? `,${dataNumber}${meiTaxBan}${
-                  constants.invoiceErrMsgForUploadFormat[validate.isTaxCategori(csvColumn[17])]
+                  constants.invoiceErrMsgForUploadFormat[validate.isTaxCategori(csvColumn[18])]
                 }`
               : `${dataNumber}${meiTaxBan}${
-                  constants.invoiceErrMsgForUploadFormat[validate.isTaxCategori(csvColumn[17])]
+                  constants.invoiceErrMsgForUploadFormat[validate.isTaxCategori(csvColumn[18])]
                 }`
 
             resultConvert.status = -1
             break
           default:
-            csvColumn[17] = validate.isTaxCategori(csvColumn[17])
+            csvColumn[18] = validate.isTaxCategori(csvColumn[18])
             break
         }
       } else {
-        switch (validate.isUserTaxCategori(csvColumn[17], bconCsvTaxUser)) {
+        switch (validate.isUserTaxCategori(csvColumn[18], bconCsvTaxUser)) {
           case 'TAXERR000':
             errorData += errorData
               ? `,${dataNumber}${meiTaxBan}${
-                  constants.invoiceErrMsgForUploadFormat[validate.isUserTaxCategori(csvColumn[17], bconCsvTaxUser)]
+                  constants.invoiceErrMsgForUploadFormat[validate.isUserTaxCategori(csvColumn[18], bconCsvTaxUser)]
                 }`
               : `${dataNumber}${meiTaxBan}${
-                  constants.invoiceErrMsgForUploadFormat[validate.isUserTaxCategori(csvColumn[17], bconCsvTaxUser)]
+                  constants.invoiceErrMsgForUploadFormat[validate.isUserTaxCategori(csvColumn[18], bconCsvTaxUser)]
                 }`
 
             resultConvert.status = -1
@@ -1018,32 +1045,32 @@ class bconCsvNoHeader {
           case 'TAXERR002':
             errorData += errorData
               ? `,${dataNumber}${meiTaxBan}${
-                  constants.invoiceErrMsgForUploadFormat[validate.isUserTaxCategori(csvColumn[17], bconCsvTaxUser)]
+                  constants.invoiceErrMsgForUploadFormat[validate.isUserTaxCategori(csvColumn[18], bconCsvTaxUser)]
                 }`
               : `${dataNumber}${meiTaxBan}${
-                  constants.invoiceErrMsgForUploadFormat[validate.isUserTaxCategori(csvColumn[17], bconCsvTaxUser)]
+                  constants.invoiceErrMsgForUploadFormat[validate.isUserTaxCategori(csvColumn[18], bconCsvTaxUser)]
                 }`
 
             resultConvert.status = -1
             break
           default:
-            csvColumn[17] = validate.isUserTaxCategori(csvColumn[17], bconCsvTaxUser)
+            csvColumn[18] = validate.isUserTaxCategori(csvColumn[18], bconCsvTaxUser)
             break
         }
       }
 
       // 明細-備考
-      if (csvColumn[18] !== '') {
-        switch (validate.isDescription(csvColumn[18])) {
+      if (csvColumn[19] !== '') {
+        switch (validate.isDescription(csvColumn[19])) {
           case '':
             break
           default:
             errorData += errorData
               ? `,${dataNumber}${meiEtcBan}${
-                  constants.invoiceErrMsgForUploadFormat[validate.isDescription(csvColumn[18])]
+                  constants.invoiceErrMsgForUploadFormat[validate.isDescription(csvColumn[19])]
                 }`
               : `${dataNumber}${meiEtcBan}${
-                  constants.invoiceErrMsgForUploadFormat[validate.isDescription(csvColumn[18])]
+                  constants.invoiceErrMsgForUploadFormat[validate.isDescription(csvColumn[19])]
                 }`
 
             resultConvert.status = -1
@@ -1052,13 +1079,13 @@ class bconCsvNoHeader {
       }
 
       parentInvoice.setInvoiceLine(
-        csvColumn[12],
         csvColumn[13],
         csvColumn[14],
         csvColumn[15],
         csvColumn[16],
         csvColumn[17],
-        csvColumn[18]
+        csvColumn[18],
+        csvColumn[19]
       )
 
       if (resultConvert.status !== -1 && headerFlag) {
@@ -1115,7 +1142,7 @@ class bconCsvNoHeader {
 
   // デフォルトフォーマットをユーザーが登録したアップロードフォーマットに合わせる
   convertUserCsvFormat(uploadFormatDetail, csvColumn) {
-    let result = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']
+    let result = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']
     uploadFormatDetail.forEach((detail) => {
       if (csvColumn[detail.uploadFormatNumber]) {
         result[detail.defaultNumber] = csvColumn[detail.uploadFormatNumber].trim()
