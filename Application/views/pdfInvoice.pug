@@ -40,7 +40,20 @@ block content
         div.button-area
           a.button#cancel-btn.cancel-button(data-target='back-modal') キャンセル
           a.button.is-link.mr-6(href='/pdfInvoices/list') 離れる 
-  
+
+  .modal#uploadSealImp-modal
+    .modal-background.cancel-button(data-target='uploadSealImp-modal')
+    .modal-card.is-family-noto-sans
+      header.modal-card-head
+        p.modal-card-title.title.mb-0 注意
+        button.delete(data-target='uploadSealImp-modal')
+      section.modal-card-body
+        p 画面を離れると入力した内容が失われます。画面を離れますか？
+      footer.modal-card-foot
+        div.button-area
+          a.button#cancel-btn.cancel-button(data-target='uploadSealImp-modal') キャンセル
+          a.button.is-link.mr-6(href='/imprintUpload') 印影登録
+
   .modal#output-modal
     .modal-background.cancel-button(data-target='output-modal')
     .modal-card.is-family-noto-sans
