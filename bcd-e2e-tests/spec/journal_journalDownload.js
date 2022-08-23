@@ -99,6 +99,56 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
   }
 
   /**
+   * STEP8_ライトプラン_No.28-31,33
+   */
+   it("ライトプラン未加入時のフォーマット選択制限", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+    const context = await browser.newContext(contextOption);
+    if (page != null) {
+      page.close();
+    }
+    page = await context.newPage();
+    global.reporter.setBrowserInfo(browser, page);
+
+    // ページオブジェクト
+    const { topPage, journalMenuPage, journalDownloadPage, lightPlanMenuPage, paidServiceRegisterPage }
+      = common.getPageObject(browser, page);
+
+    // デジタルトレードアプリのトップページへ遷移する
+    await common.gotoTop(page, config.company2.user06);
+
+    // 仕訳情報管理メニューを開く
+    await comment('「仕訳情報管理」をクリックする');
+    await topPage.openJournalMenu();
+    await journalMenuPage.waitForLoading();
+
+    // 仕訳情報ダウンロードページへ遷移する
+    await journalMenuPage.clickJournalDownload();
+    await journalDownloadPage.waitForLoading();
+
+    // 出力フォーマットが「規定フォーマット」のみであること
+    await journalDownloadPage.openFormat();
+    let formats = await journalDownloadPage.getSelectableFormats();
+    expect(formats).to.equal('既定フォーマット（デジタルトレードフォーマット）', '出力フォーマットが「規定フォーマット」のみであること');
+
+    // オプションサービス申込モーダルが表示されること
+    await journalDownloadPage.clickLightPlan();
+    await lightPlanMenuPage.waitForLoading();
+    expect(await lightPlanMenuPage.getTitle()).to.equal('オプションサービス申込', '「オプションサービス申込」モーダルが表示されること');
+    expect(await lightPlanMenuPage.getApplyEnabled()).to.equal(true, '「お申し込みフォーム」ボタンが活性状態であること');
+
+    /*
+    // 申し込み画面（利用規約）に遷移すること
+    await lightPlanMenuPage.clickApply();
+    await paidServiceRegisterPage.waitForLoading();
+    expect(await paidServiceRegisterPage.getTitle()).to.equal('有料サービス利用登録', '申し込み画面（利用規約）に遷移すること');
+    expect(await paidServiceRegisterPage.isStandardChecked()).to.equal(true, '「ご利用希望サービス」の「スタンダードプラン」にチェックが入っていること');
+    */
+    await page.waitForTimeout(1000);
+  });
+
+  /**
    * STEP5_No.129
    * STEP7_No.113
    */

@@ -30,24 +30,57 @@ class PaymentRequestListPage {
     await this.actionUtils.click(this.frame, '//*[contains(text(), "Home")]');
   }
 
+  // 検索条件フォームの表示状態を確認する
+  async isFormShown() {
+    return await this.actionUtils.isDisplayed(this.frame, '#form');
+  }
+
+  // 「検索機能を利用」ボタンの表示状態を確認する
+  async isLightPlanShown() {
+    return await this.actionUtils.isDisplayed(this.frame, '//a[@data-target="information-lightplan"]');
+  }
+
+  // 「検索機能を利用」ボタンをクリックする
+  async clickLightPlan() {
+    await this.addComment('「検索機能を利用」ボタンをクリックする');
+    await this.actionUtils.click(this.frame, '//a[@data-target="information-lightplan"]');
+  }
+
+  // 指定の請求書が見つかるまでページングを行う
+  async paging(invoiceNo) {
+    var pages = await this.actionUtils.getElements(this.frame, '//ul[@class="pagination-list"]/li');
+    var i = 0;
+    for (i = 0; i < pages.length; i++) {
+      if (await this.actionUtils.isExist(this.frame, '//table//td[contains(text(), "' + invoiceNo + '")]')) {
+        return;
+      }
+      await pages[i + 1].click();
+      await this.frame.waitForTimeout(30000);
+    }
+  }
+
   // 仕訳情報設定ページへ遷移する
   async clickDetail(invoiceNo) {
     await this.addComment('請求書番号"' + invoiceNo + '"にて、「仕訳情報設定」をクリックする');
+    await this.paging(invoiceNo);
     await this.actionUtils.click(this.frame, '//table//td[contains(text(), "' + invoiceNo + '")]/..//a[contains(text(), "仕訳情報設定")]');
   }
 
   // 承認ステータスを取得する
   async getApproveStatus(invoiceNo) {
+    await this.paging(invoiceNo);
     return await this.actionUtils.getText(this.frame, '//table//td[contains(text(), "' + invoiceNo + '")]/../td[3]/a');
   }
 
   // 金額を取得する
   async getCost(invoiceNo) {
+    await this.paging(invoiceNo);
     return await this.actionUtils.getText(this.frame, '//table//td[contains(text(), "' + invoiceNo + '")]/../td[5]');
   }
 
   // 差出人を取得する
   async getSender(invoiceNo) {
+    await this.paging(invoiceNo);
     return await this.actionUtils.getText(this.frame, '//table//td[contains(text(), "' + invoiceNo + '")]/../td[6]');
   }
 

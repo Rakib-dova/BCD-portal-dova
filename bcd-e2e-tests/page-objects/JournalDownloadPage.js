@@ -60,6 +60,35 @@ class JournalDownloadPage {
     }
   }
 
+  // 「出力フォーマット」プルダウンを展開する（フリープラン限定）
+  async openFormat() {
+    await this.addComment('「出力フォーマット」プルダウンを展開する');
+    await this.actionUtils.click(this.frame, '//input[@name="serviceDataFormat"]/..');
+  }
+
+  // 「出力フォーマット」プルダウンの選択可否を確認する
+  async getSelectableFormats() {
+    let formats = await this.actionUtils.getTexts(this.frame, '//input[@name="serviceDataFormat"]/../ul/li//span[@class="ms-dd-label"]');
+    let result = '';
+    let i = 0;
+    for (i = 0; i < formats.length; i++) {
+      if (!(await this.actionUtils.isExist(this.frame, '//input[@name="serviceDataFormat"]/../ul/li[contains(@class, "enabled")]//span[contains(text(), "' + formats[i] + '")]'))) {
+        continue;
+      }
+      if (result) {
+        result += ',';
+      }
+      result += formats[i];
+    }
+    return result;
+  }
+
+  // 「出力フォーマットを追加」をクリックする
+  async clickLightPlan() {
+    await this.addComment('「出力フォーマットを追加」をクリックする');
+    await this.actionUtils.click(this.frame, '//a[@data-target="information-lightplan"]');
+  }
+
   // 「CSVダウンロード」をクリックする
   async download() {
     await this.addComment('「CSVダウンロード」をクリックする');

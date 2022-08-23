@@ -85,16 +85,17 @@ class JournalDetailPage {
     let result = [];
     let i = 0;
     for (i = 0; i < 10; i++) {
-      if (!await this.actionUtils.isExist(this.frame, '#lineNo1_lineAccountCode' + (i + 1))) {
+      let xpathBase = '//div[@id="lineNo' + lineNo + '"]/div[contains(@class, "lineAccountcode")][' + (i + 1) + ']';
+      if (!await this.actionUtils.isExist(this.frame, xpathBase)) {
         break;
       }
       result.push({
-        accountCode: await this.actionUtils.getValue(this.frame, '#lineNo' + lineNo + '_lineAccountCode' + (i + 1) + '_accountCode'),
-        subAccountCode: await this.actionUtils.getValue(this.frame, '#lineNo' + lineNo + '_lineAccountCode' + (i + 1) + '_subAccountCode'),
-        departmentCode: await this.actionUtils.getValue(this.frame, '#lineNo' + lineNo + '_lineAccountCode' + (i + 1) + '_departmentCode'),
-        creditAccountCode: await this.actionUtils.getValue(this.frame, '#lineNo' + lineNo + '_lineCreditAccountCode' + (i + 1) + '_creditAccountCode'),
-        creditSubAccountCode: await this.actionUtils.getValue(this.frame, '#lineNo' + lineNo + '_lineCreditAccountCode' + (i + 1) + '_creditSubAccountCode'),
-        creditDepartmentCode: await this.actionUtils.getValue(this.frame, '#lineNo' + lineNo + '_lineCreditAccountCode' + (i + 1) + '_creditDepartmentCode'),
+        accountCode: await this.actionUtils.getValue(this.frame, xpathBase + '/div[1]/table/tbody/tr[1]//input[@type="text"]'),
+        subAccountCode: await this.actionUtils.getValue(this.frame, xpathBase + '/div[1]/table/tbody/tr[2]//input[@type="text"]'),
+        departmentCode: await this.actionUtils.getValue(this.frame, xpathBase + '/div[1]/table/tbody/tr[3]//input[@type="text"]'),        
+        creditAccountCode: await this.actionUtils.getValue(this.frame, xpathBase + '/div[3]/table/tbody/tr[1]//input[@type="text"]'),
+        creditSubAccountCode: await this.actionUtils.getValue(this.frame, xpathBase + '/div[3]/table/tbody/tr[2]//input[@type="text"]'),
+        creditDepartmentCode: await this.actionUtils.getValue(this.frame, xpathBase + '/div[3]/table/tbody/tr[3]//input[@type="text"]'),
         cost: await this.actionUtils.getValue(this.frame, '#lineNo' + lineNo + '_lineAccountCode' + (i + 1) + '_input_amount')
       });
     }

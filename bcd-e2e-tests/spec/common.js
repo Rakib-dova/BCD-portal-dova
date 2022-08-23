@@ -21,6 +21,7 @@ const { UploadFormatModPage } = require('../page-objects/UploadFormatModPage');
 const { SettingMenuPage } = require('../page-objects/SettingMenuPage');
 const { ContractCancelPage } = require('../page-objects/ContractCancelPage');
 const { ContractChangePage } = require('../page-objects/ContractChangePage');
+const { ContractDetailPage } = require('../page-objects/ContractDetailPage');
 const { UploadListPage } = require('../page-objects/UploadListPage');
 const { UploadListDetailPage } = require('../page-objects/UploadListDetailPage');
 const { SettlementPage } = require('../page-objects/SettlementPage');
@@ -43,6 +44,11 @@ const { UploadSubAccountCodePage } = require('../page-objects/UploadSubAccountCo
 const { UploadDepartmentPage } = require('../page-objects/UploadDepartmentPage');
 const { JournalDownloadPage } = require('../page-objects/JournalDownloadPage');
 const { RegisterPage } = require('../page-objects/RegisterPage');
+const { PdfInvoicingPage } = require('../page-objects/PdfInvoicingPage');
+const { RegistPdfInvoicePage } = require('../page-objects/RegistPdfInvoicePage');
+const { LightPlanMenuPage } = require('../page-objects/LightPlanMenuPage');
+const { PaidServiceRegisterPage } = require('../page-objects/PaidServiceRegisterPage');
+const { PaidServiceRegisterInputPage } = require('../page-objects/PaidServiceRegisterInputPage');
 
 // テストの準備を行う
 exports.initTest = async () => {
@@ -99,6 +105,7 @@ exports.getPageObject = (browser, page) => {
   pages.settingMenuPage = new SettingMenuPage(browser, page);
   pages.contractCancelPage = new ContractCancelPage(browser, page);
   pages.contractChangePage = new ContractChangePage(browser, page);
+  pages.contractDetailPage = new ContractDetailPage(browser, page);
   pages.uploadListPage = new UploadListPage(browser, page);
   pages.uploadListDetailPage = new UploadListDetailPage(browser, page);
   pages.settlementPage = new SettlementPage(browser, page);
@@ -121,6 +128,11 @@ exports.getPageObject = (browser, page) => {
   pages.uploadDepartmentPage = new UploadDepartmentPage(browser, page);
   pages.journalDownloadPage = new JournalDownloadPage(browser, page);
   pages.registerPage = new RegisterPage(browser, page);
+  pages.pdfInvoicingPage = new PdfInvoicingPage(browser, page);
+  pages.registPdfInvoicePage = new RegistPdfInvoicePage(browser, page);
+  pages.lightPlanMenuPage = new LightPlanMenuPage(browser, page);
+  pages.paidServiceRegisterPage = new PaidServiceRegisterPage(browser, page);
+  pages.paidServiceRegisterInputPage = new PaidServiceRegisterInputPage(browser, page);
   this.pages = pages;
   return pages;
 }

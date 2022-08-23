@@ -8,7 +8,7 @@ class ActionUtils {
 
   // 要素を取得する
   async getElement(target, selector) {
-    await target.waitForSelector(selector, { state: 'attached' });
+    await target.waitForSelector(selector, { state: 'attached', timeout: 30000 });
     let elem = await target.$(selector);
     return elem;
   }
@@ -21,7 +21,7 @@ class ActionUtils {
   // フレーム内の要素が表示されるまで待機する
   async waitForLoading(elemSelector, frameSelector = '[name="main-app-iframe"]') {
     let frame, elem, elems;
-    const timeout = 60000;
+    const timeout = 90000;
     const start = Date.now();
     while (true) {
       if ((Date.now() - start) >= timeout) {
@@ -66,9 +66,9 @@ class ActionUtils {
       text = String(text);
     }
     if (isFill) {
-      await elem.fill(text);
+      await elem.fill(text, {delay:500});
     } else {
-      await elem.type(text);
+      await elem.type(text, {delay:500});
     }
   }
 
@@ -111,7 +111,7 @@ class ActionUtils {
   // ファイルをダウンロードする
   async downloadFile(frame, selector) {
     const [download] = await Promise.all([
-      this.page.waitForEvent('download'),
+      this.page.waitForEvent('download', { timeout: 60000 }),
       this.click(frame, selector),
     ]);
     return await download.path();
