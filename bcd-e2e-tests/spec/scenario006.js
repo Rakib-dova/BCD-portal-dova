@@ -55,7 +55,8 @@ describe('リグレッションテスト', function () {
       // デジタルトレードアプリのトップページを表示する
       await common.gotoTop(page, account);
 
-      const testPattern = [true, false];
+      const testPattern = [true];
+      // const testPattern = [true, false];
       for (const hasHeader of testPattern) {
         let itemName;
         if (hasHeader) {
@@ -65,7 +66,7 @@ describe('リグレッションテスト', function () {
           // formatPath = path.resolve('testdata', 'upload', 'format_header.csv')
           // itemName = await common.uploadFormat(formatPath, true, 2, 3, 2)
           formatPath = path.resolve('testdata', 'upload', 'format_header_tmp.csv')
-          itemName = await common.uploadFormat(formatPath, true, 1, 2, 2)
+          itemName = await common.uploadFormat(formatPath, true, 1, 2, 1)
         } else {
           await comment('---------- ヘッダーなしの請求書作成 ----------')
           // ヘッダーなしの請求書フォーマットを作成する
@@ -86,7 +87,7 @@ describe('リグレッションテスト', function () {
         if (hasHeader) {
           baseFilePath = path.resolve('testdata', 'upload', 'invoice_header.csv')
           tmpFilePath = path.resolve('testdata', 'upload', 'tmp_invoice_header.csv')
-          itemNames = common.updateInvoiceItemNameForCustom(baseFilePath, tmpFilePath, 2, 3);
+          itemNames = common.updateInvoiceItemNameForCustom(baseFilePath, tmpFilePath, 2, 2);
         } else {
           // 請求書ファイルの請求書番号を一意な値に書き換える
           baseFilePath = path.resolve('testdata', 'upload', 'invoice_no_header.csv')

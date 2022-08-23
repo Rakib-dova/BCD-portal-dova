@@ -74,6 +74,21 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     global.reporter.setBrowserInfo(browser, page);
   };
 
+  async function gotoList(topPage, journalMenuPage, paymentRequestListPage) {
+    // デジタルトレードアプリのトップページへ遷移する
+    await common.gotoTop(page, requester);
+
+    // 仕訳情報管理メニューを開く
+    await comment('「仕訳情報管理」をクリックする');
+    await topPage.openJournalMenu();
+    await journalMenuPage.waitForLoading();
+
+    // 支払依頼一覧ページへ遷移する
+    await comment('「支払依頼一覧」をクリックする');
+    await journalMenuPage.clickPaymentRequest();
+    await paymentRequestListPage.waitForLoading();
+  };
+
   // 勘定科目・補助科目・部門データ・承認ルートを登録する
   it("準備", async function () {
     await initBrowser();
@@ -93,18 +108,8 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     const { topPage, journalMenuPage, paymentRequestListPage, journalDetailPage, paymentRequestPage }
       = common.getPageObject(browser, page);
 
-    // デジタルトレードアプリのトップページへ遷移する
-    await common.gotoTop(page, requester);
-
-    // 仕訳情報管理メニューを開く
-    await comment('「仕訳情報管理」をクリックする');
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-
     // 支払依頼一覧ページへ遷移する
-    await comment('「支払依頼一覧」をクリックする');
-    await journalMenuPage.clickPaymentRequest();
-    await paymentRequestListPage.waitForLoading();
+    await gotoList(topPage, journalMenuPage, paymentRequestListPage);
 
     // ステータスが「未処理」となっていること
     expect(await paymentRequestListPage.getApproveStatus('fcde40393')).to.equal('未処理', 'ステータスが「未処理」となっていること');
@@ -147,18 +152,8 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     const { topPage, journalMenuPage, paymentRequestListPage, journalDetailPage, paymentRequestPage }
       = common.getPageObject(browser, page);
 
-    // デジタルトレードアプリのトップページへ遷移する
-    await common.gotoTop(page, requester);
-
-    // 仕訳情報管理メニューを開く
-    await comment('「仕訳情報管理」をクリックする');
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-
     // 支払依頼一覧ページへ遷移する
-    await comment('「支払依頼一覧」をクリックする');
-    await journalMenuPage.clickPaymentRequest();
-    await paymentRequestListPage.waitForLoading();
+    await gotoList(topPage, journalMenuPage, paymentRequestListPage);
 
     // 仕訳情報設定ページへ遷移する
     await comment('「仕訳情報設定」をクリックする');
@@ -191,18 +186,8 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     const { topPage, journalMenuPage, paymentRequestListPage, journalDetailPage, paymentRequestPage }
       = common.getPageObject(browser, page);
 
-    // デジタルトレードアプリのトップページへ遷移する
-    await common.gotoTop(page, requester);
-
-    // 仕訳情報管理メニューを開く
-    await comment('「仕訳情報管理」をクリックする');
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-
     // 支払依頼一覧ページへ遷移する
-    await comment('「支払依頼一覧」をクリックする');
-    await journalMenuPage.clickPaymentRequest();
-    await paymentRequestListPage.waitForLoading();
+    await gotoList(topPage, journalMenuPage, paymentRequestListPage);
 
     // 仕訳情報設定ページへ遷移する
     await comment('「仕訳情報設定」をクリックする');
@@ -260,18 +245,8 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     const { topPage, journalMenuPage, paymentRequestListPage, journalDetailPage, paymentRequestPage }
       = common.getPageObject(browser, page);
 
-    // デジタルトレードアプリのトップページへ遷移する
-    await common.gotoTop(page, requester);
-
-    // 仕訳情報管理メニューを開く
-    await comment('「仕訳情報管理」をクリックする');
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-
     // 支払依頼一覧ページへ遷移する
-    await comment('「支払依頼一覧」をクリックする');
-    await journalMenuPage.clickPaymentRequest();
-    await paymentRequestListPage.waitForLoading();
+    await gotoList(topPage, journalMenuPage, paymentRequestListPage);
 
     // 仕訳情報設定ページへ遷移する
     await comment('「仕訳情報設定」をクリックする');
@@ -393,18 +368,8 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     const { topPage, journalMenuPage, paymentRequestListPage, paymentRequestPage, journalDetailPage }
       = common.getPageObject(browser, page);
 
-    // デジタルトレードアプリのトップページへ遷移する
-    await common.gotoTop(page, approveRoute.authorizers[authorizerNo]);
-
-    // 仕訳情報管理メニューを開く
-    await comment('「仕訳情報管理」をクリックする');
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-  
     // 支払依頼一覧ページへ遷移する
-    await comment('「支払依頼一覧」をクリックする');
-    await journalMenuPage.clickPaymentRequest();
-    await paymentRequestListPage.waitForLoading();
+    await gotoList(topPage, journalMenuPage, paymentRequestListPage);
 
     // 承認待ちタブを開く
     await comment('「承認待ち」タブを開く');
@@ -499,18 +464,8 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     const { topPage, journalMenuPage, paymentRequestListPage, paymentRequestPage }
       = common.getPageObject(browser, page);
 
-    // デジタルトレードアプリのトップページへ遷移する
-    await common.gotoTop(page, requester);
-
-    // 仕訳情報管理メニューを開く
-    await comment('「仕訳情報管理」をクリックする');
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-
     // 支払依頼一覧ページへ遷移する
-    await comment('「支払依頼一覧」をクリックする');
-    await journalMenuPage.clickPaymentRequest();
-    await paymentRequestListPage.waitForLoading();
+    await gotoList(topPage, journalMenuPage, paymentRequestListPage);
 
     // ステータスが「一次承認済み」となっていること
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('一次承認済み', 'ステータスが「一次承認済み」となっていること');
@@ -552,18 +507,8 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     const { topPage, journalMenuPage, paymentRequestListPage, paymentRequestPage }
       = common.getPageObject(browser, page);
 
-    // デジタルトレードアプリのトップページへ遷移する
-    await common.gotoTop(page, approveRoute.authorizers[authorizerNo]);
-
-    // 仕訳情報管理メニューを開く
-    await comment('「仕訳情報管理」をクリックする');
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-
     // 支払依頼一覧ページへ遷移する
-    await comment('「支払依頼一覧」をクリックする');
-    await journalMenuPage.clickPaymentRequest();
-    await paymentRequestListPage.waitForLoading();
+    await gotoList(topPage, journalMenuPage, paymentRequestListPage);
 
     // 承認待ちタブを開く
     await comment('「承認待ち」タブを開く');

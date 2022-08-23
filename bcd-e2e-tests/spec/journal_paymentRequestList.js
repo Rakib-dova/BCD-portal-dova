@@ -64,6 +64,56 @@ describe('仕訳情報設定_支払依頼一覧', function () {
   });
 
   /**
+   * STEP8_No.21,22,25
+   */
+  it("ライトプラン未加入時の検索機能利用制限", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+    const context = await browser.newContext(contextOption);
+    if (page != null) {
+      page.close();
+    }
+    page = await context.newPage();
+    global.reporter.setBrowserInfo(browser, page);
+
+    // ページオブジェクト
+    const { topPage, journalMenuPage, paymentRequestListPage, lightPlanMenuPage, paidServiceRegisterPage }
+      = common.getPageObject(browser, page);
+
+    // デジタルトレードアプリのトップページへ遷移する
+    await common.gotoTop(page, config.company2.user06);
+
+    // 仕訳情報管理メニューを開く
+    await comment('「仕訳情報管理」をクリックする');
+    await topPage.openJournalMenu();
+    await journalMenuPage.waitForLoading();
+
+    // 支払依頼一覧ページへ遷移する
+    await comment('「支払依頼一覧」をクリックする');
+    await journalMenuPage.clickPaymentRequest();
+    await paymentRequestListPage.waitForLoading();
+
+    // 「支払依頼検索」機能が利用できないこと
+    expect(await paymentRequestListPage.isFormShown()).to.equal(false, '「支払依頼検索」機能が利用できないこと');
+    expect(await paymentRequestListPage.isLightPlanShown()).to.equal(true, '「検索機能を利用」ボタンが表示されていること');
+
+    // 「オプションサービス申込」モーダルが表示されること
+    await paymentRequestListPage.clickLightPlan();
+    await lightPlanMenuPage.waitForLoading();
+    expect(await lightPlanMenuPage.getTitle()).to.equal('オプションサービス申込', '「オプションサービス申込」モーダルが表示されること');
+    expect(await lightPlanMenuPage.getApplyEnabled()).to.equal(true, '「お申し込みフォーム」ボタンが活性状態であること');
+    
+    /*
+    // 申し込み画面（利用規約）に遷移すること
+    await lightPlanMenuPage.clickApply();
+    await paidServiceRegisterPage.waitForLoading();
+    expect(await paidServiceRegisterPage.getTitle()).to.equal('有料サービス利用登録', '申し込み画面（利用規約）に遷移すること');
+    expect(await paidServiceRegisterPage.isStandardChecked()).to.equal(true, '「ご利用希望サービス」の「スタンダードプラン」にチェックが入っていること');
+    */
+    await page.waitForTimeout(1000);
+  });
+
+  /**
    * STEP5_No.109
    */
   it("受領請求書への仕訳情報設定", async function () {

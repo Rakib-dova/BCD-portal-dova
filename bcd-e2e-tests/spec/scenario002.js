@@ -102,8 +102,8 @@ describe('リグレッションテスト', function () {
 
       // 各項目に値を設定する
       await uploadFormatCreatePage.setItemName(itemName);
-      await uploadFormatCreatePage.setFormatNumber('2');
-      await uploadFormatCreatePage.setDefaultNumber('3');
+      await uploadFormatCreatePage.setFormatNumber('1');
+      await uploadFormatCreatePage.setDefaultNumber('2');
       const taxs = {
         keyConsumptionTax: '消費税2',
         keyReducedTax: '軽減税率2',
@@ -162,19 +162,19 @@ describe('リグレッションテスト', function () {
       // 項目名を取得
       headers = await uploadFormatSettingPage.getHeaders();
       headerTexts = JSON.stringify(headers);
-      expectedVal = '["列1","列2","列3","列4","列5","列6","列7","列8","列9","列10","列11","列12","列13","列14","列15","列16","列17","列18","列19","列20","列21","列22","列23","列24","列25","列26","列27"]'
+      expectedVal = '["発行日","請求書番号","テナントID","支払期日","納品日","備考","取引先メールアドレス","銀行名","支店名","科目","口座番号","口座名義","その他特記事項","明細-項目ID","明細-内容","明細-数量","明細-単位","明細-単価","明細-税（消費税／軽減税率／不課税／免税／非課税）","明細-備考"]'
       expect(headerTexts).to.equal(expectedVal, '取り込んだCSVのヘッダーが正しいこと');
 
       // データ内容を取得
       datas = await uploadFormatSettingPage.getDatas();
       dataTexts = JSON.stringify(datas);
-      expectedVal = '["","2022/10/8","A0000125","fcde4039-8d4d-4e3e-8b5c-43fca9d6e113","2022/11/8","2022/9/8","備考あああ","aaa@example.com","銀行名あああ","支店名あああ","当座","1423123","口座名義あああ","その他特記事項あああ","1","明細１","2","個","10000","消費税","備考あああ","","","","","",""]'
+      expectedVal = '["2022/10/8","A0000125","fcde4039-8d4d-4e3e-8b5c-43fca9d6e113","2022/11/8","2022/9/8","備考あああ","aaa@example.com","銀行名あああ","支店名あああ","当座","1423123","口座名義あああ","その他特記事項あああ","1","明細１","2","個","10000","消費税","備考あああ"]'
       expect(dataTexts).to.equal(expectedVal, '取り込んだCSVのデータが正しいこと');
 
       // データ番号の選択肢を取得
       options = await uploadFormatSettingPage.getOptions();
       optionTexts = JSON.stringify(options);
-      expectedVal = '["選択してください","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27"]'
+      expectedVal = '["選択してください","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]'
       expect(optionTexts).to.equal(expectedVal, 'データ番号の選択肢が正しいこと');
 
       // 戻るボタンをクリック
@@ -191,8 +191,8 @@ describe('リグレッションテスト', function () {
       await uploadFormatCreatePage.waitForLoading('"format_header.csv"');
 
       expect(await uploadFormatCreatePage.isItemNameLineOn()).to.equal(true, '「項目名の行有無」が保持されていること');
-      expect(await uploadFormatCreatePage.getFormatNumber()).to.equal('2', '「項目名の行番号」が保持されていること');
-      expect(await uploadFormatCreatePage.getDefaultNumber()).to.equal('3', '「データ開始行番号」が保持されていること');
+      expect(await uploadFormatCreatePage.getFormatNumber()).to.equal('1', '「項目名の行番号」が保持されていること');
+      expect(await uploadFormatCreatePage.getDefaultNumber()).to.equal('2', '「データ開始行番号」が保持されていること');
 
       // 明細-税 識別子
       taxValues = await uploadFormatCreatePage.getTaxs();
@@ -212,26 +212,26 @@ describe('リグレッションテスト', function () {
       expect(await uploadFormatSettingPage.getTitle()).to.equal(true, '請求書アップロードフォーマット設定ページに遷移すること');
 
       const numbers = {
-        issueDate: '2',
-        invoiceNumber: '3',
-        tenantId: '4',
-        paymentDate: '5',
-        deliveryDate: '6',
-        documentDescription: '7',
-        mailAddress: '8',
-        bankName: '9',
-        financialName: '10',
-        accountType: '11',
-        accountId: '12',
-        accountName: '13',
-        note: '14',
-        sellersItemNum: '15',
-        itemName: '16',
-        quantityValue: '17',
-        quantityUnitCode: '18',
-        priceValue: '19',
-        taxRate: '20',
-        description: '21'
+        issueDate: '1',
+        invoiceNumber: '2',
+        tenantId: '3',
+        paymentDate: '4',
+        deliveryDate: '5',
+        documentDescription: '6',
+        mailAddress: '7',
+        bankName: '8',
+        financialName: '9',
+        accountType: '10',
+        accountId: '11',
+        accountName: '12',
+        note: '13',
+        sellersItemNum: '14',
+        itemName: '15',
+        quantityValue: '16',
+        quantityUnitCode: '17',
+        priceValue: '18',
+        taxRate: '19',
+        description: '20'
       }
       await uploadFormatSettingPage.setNumbers(numbers);
 
@@ -259,7 +259,7 @@ describe('リグレッションテスト', function () {
       // ユーザフォーマット項目名
       headers = await uploadFormatConfirmPage.getHeaders();
       headerTexts = JSON.stringify(headers);
-      expectedVal = '["列2","列3","列4","列5","列6","列7","列8","列9","列10","列11","列12","列13","列14","列15","列16","列17","列18","列19","列20","列21"]'
+      expectedVal = '["発行日","請求書番号","テナントID","支払期日","納品日","備考","取引先メールアドレス","銀行名","支店名","科目","口座番号","口座名義","その他特記事項","明細-項目ID","明細-内容","明細-数量","明細-単位","明細-単価","明細-税（消費税／軽減税率／不課税／免税／非課税）","明細-備考"]'
       expect(headerTexts).to.equal(expectedVal, '「ユーザフォーマット項目名」の値が保持されていること');
 
       // データ内容
@@ -275,7 +275,7 @@ describe('リグレッションテスト', function () {
       // 対応するデータ番号を取得
       selectNumbers = await uploadFormatSettingPage.getNumbers(); // 表示文字列ではなくValueであることに注意
       selectNumberTexts = JSON.stringify(selectNumbers);
-      expectedVal = '["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]'
+      expectedVal = '["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19"]'
       expect(selectNumberTexts).to.equal(expectedVal, '選択したデータ番号が残っていること');
 
       // 確認ページに遷移する

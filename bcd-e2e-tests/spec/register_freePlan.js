@@ -127,16 +127,62 @@ describe('利用登録', function () {
   };
 
   /**
-   * STEP7 No.1,3,15,25-30,37-40
+   * STEP7_No.1,3,15,25-30,37-40
    */
   it("利用登録（販売店コードあり、販売担当者あり）", async function () {
     await register(config.company2.user, true, true);
   });
   
   /**
-   * STEP7 No.1,3,15,25-30,47-50
+   * STEP7_No.1,3,15,25-30,47-50
    */
   it("利用登録（販売店コードなし、販売担当者なし）", async function () {
-    await register(config.company2.user02, false, false);
+    await register(config.company2.user, false, false);
+  });
+
+  /**
+   * STEP8_ライトプラン_No.37-41
+   */
+   it("契約内容確認", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+    const context = await browser.newContext(contextOption);
+    if (page != null) {
+      page.close();
+    }
+    page = await context.newPage();
+    global.reporter.setBrowserInfo(browser, page);
+
+    // ページオブジェクト
+    const { topPage, settingMenuPage, contractDetailPage, contractChangePage, contractCancelPage }
+      = common.getPageObject(browser, page);
+
+    // デジタルトレードアプリのトップページを表示する
+    await common.gotoTop(page, config.company1.mng);
+
+    // ご契約内容画面に遷移すること
+    await topPage.openSettingMenu();
+    await settingMenuPage.waitForLoading();
+    await settingMenuPage.clickContractChange();
+    await contractDetailPage.waitForLoading();
+    expect(await contractDetailPage.getTitle()).to.equal('ご契約内容', '【ご契約内容】ご契約内容画面に遷移すること');
+    let planName = 'BConnectionデジタルトレードアプリ フリー';
+    expect(await contractDetailPage.getStatus(planName)).to.equal('契約中', '【ご契約内容】継続利用サービスにフリープランが「契約中」で表示されていること');
+    expect(await contractDetailPage.getContractNo(planName)).to.not.equal('ー', '【ご契約内容】フリープランの契約番号が表示されていること');
+
+    // 契約変更画面へ遷移すること
+    await contractDetailPage.clickChange(planName);
+    await contractChangePage.waitForLoading();
+    expect(await contractChangePage.getTitle()).to.equal('契約情報変更', '【契約情報変更】契約変更画面へ遷移すること');
+
+    /*
+    // フリープランの契約情報解約画面へ遷移すること
+    await contractChangePage.back();
+    await contractDetailPage.waitForLoading();
+    await contractDetailPage.clickCancel();
+    await contractCancelPage.waitForLoading();
+    expect(await contractCancelPage.getTitle()).to.equal('契約情報解約', '【契約情報解約】契約情報解約画面へ遷移すること');
+    */
+    await page.waitForTimeout(1000);
   });
 });
