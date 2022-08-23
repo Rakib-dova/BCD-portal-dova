@@ -543,7 +543,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
     setHeaders,
     apiManager,
     apiName: 'csvUpload',
-    size: 5
+    size: 3
   }
 
   // promiseAll共通関数でapi実行
