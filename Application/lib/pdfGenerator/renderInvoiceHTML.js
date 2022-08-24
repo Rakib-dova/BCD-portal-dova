@@ -12,7 +12,7 @@ const requiredProps = [
   'sendAddr1',
   'sendAddr2',
   'sendAddr3',
-  'sendRegistrationNo',
+  // 'sendRegistrationNo',
 
   'invoiceNo',
   'currency',
@@ -361,7 +361,10 @@ const validateInvoiceInput = (input) => {
 
   for (let i = 0; i < requiredProps.length; i++) {
     // eslint-disable-next-line no-prototype-builtins
-    if (!input.hasOwnProperty(requiredProps[i])) return false
+    if (!input.hasOwnProperty(requiredProps[i])) {
+      console.log('not exist Props =' + requiredProps[i])
+      return false
+    }
   }
 
   return true
@@ -435,7 +438,10 @@ const setLines = (lines) => {
         <td class="text-center"><p class="line-unitPrice" data-prop="unitPrice">${parseInt(
           line.unitPrice
         ).toLocaleString()}</p></td>
-        <td class="text-center"><p class="line-taxType" data-prop="taxType">${getTaxTypeName(line.taxType)}</p></td>
+        <td class="text-center"><p class="line-taxType" data-prop="taxType">${getTaxTypeName(
+          line.taxType,
+          line
+        )}</p></td>
         <td class="text-right line-subtotal"><p class="line-subtotal" data-prop="subtotal">${subTotal.toLocaleString()}</p></td>
       </tr>`
     for (let i = 1; i <= line.discounts; i++) {
@@ -547,9 +553,9 @@ const setTaxGroup = (taxGroups) => {
   let tags = ''
 
   taxGroups.forEach((group) => {
-    const taxRate = group.type.replace('tax', '').replace('p', '')
+    const taxRate = group.type === 'otherTax' && group.taxLabel ? group.taxLabel : getTaxTypeName(group.type)
     tags += `<div class="flex">
-               <p class="text-l width-50 taxGroupLabel">${group.subTotal.toLocaleString()}円のJP 消費税 ${taxRate}%</p>
+               <p class="text-l width-50 taxGroupLabel">${group.subTotal.toLocaleString()}円のJP ${taxRate}</p>
                <p class="text-r width-50 taxGroupValue">${group.taxGroupTotal.toLocaleString()}</p>
             </div>`
   })
@@ -579,7 +585,7 @@ const setImageTag = (imageBuffer, type, size = 120) => {
  * @param {string} taxType 消費税区分文字列
  * @returns {string} 消費税区名 (日本語)
  */
-const getTaxTypeName = (taxType) => {
+const getTaxTypeName = (taxType, line) => {
   switch (taxType) {
     case 'tax10p':
       return '消費税 10%'
@@ -592,7 +598,7 @@ const getTaxTypeName = (taxType) => {
     case 'taxExemption':
       return '免税'
     case 'otherTax':
-      return 'その他の消費税'
+      return line.taxLabel
     default:
       return ''
   }
