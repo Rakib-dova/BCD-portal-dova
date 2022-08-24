@@ -861,7 +861,7 @@ const testLineDataOther = {
       quantity: '10',
       taxType: 'その他の消費税',
       taxLabel: '１',
-      taxAmount: '9',
+      taxAmount: '0',
       discounts: 3,
       discountDescription1: 'ワゴンA',
       discountAmount1: '2',
@@ -962,6 +962,56 @@ const testLineDataOther = {
       taxType: 'その他の消費税',
       taxLabel: 'その他名前１２３４５',
       taxAmount: '1000000000000',
+      discounts: 3,
+      discountDescription1: 'ワゴンA',
+      discountAmount1: '2',
+      discountUnit1: 'percent',
+      discountDescription2: 'ワゴンB',
+      discountAmount2: '3',
+      discountUnit2: 'percent',
+      discountDescription3: 'ワゴンC',
+      discountAmount3: '100',
+      discountUnit3: 'jpy',
+      invoiceNo: 'I2022070101'
+    }
+  ],
+  invalidTaxAmountNoInteger: [
+    {
+      invoiceId: '74b0b766-5aae-49f2-aa2d-d26ed8b9ac09',
+      lineIndex: 0,
+      lineId: '1',
+      lineDescription: 'しな１',
+      unit: 'kg',
+      unitPrice: '3000',
+      quantity: '10',
+      taxType: 'その他の消費税',
+      taxLabel: 'その他名前１２３４５',
+      taxAmount: '0.1',
+      discounts: 3,
+      discountDescription1: 'ワゴンA',
+      discountAmount1: '2',
+      discountUnit1: 'percent',
+      discountDescription2: 'ワゴンB',
+      discountAmount2: '3',
+      discountUnit2: 'percent',
+      discountDescription3: 'ワゴンC',
+      discountAmount3: '100',
+      discountUnit3: 'jpy',
+      invoiceNo: 'I2022070101'
+    }
+  ],
+  invalidTaxAmountString: [
+    {
+      invoiceId: '74b0b766-5aae-49f2-aa2d-d26ed8b9ac09',
+      lineIndex: 0,
+      lineId: '1',
+      lineDescription: 'しな１',
+      unit: 'kg',
+      unitPrice: '3000',
+      quantity: '10',
+      taxType: 'その他の消費税',
+      taxLabel: 'その他名前１２３４５',
+      taxAmount: 'a',
       discounts: 3,
       discountDescription1: 'ワゴンA',
       discountAmount1: '2',
@@ -1796,6 +1846,70 @@ describe('lib/pdfInvoiceCsvUploadValidation のテスト', () => {
       const { validInvoices, validLines, uploadHistory, csvRows } = await pdfInvoiceCsvUploadValidation.validate(
         copyTestData(testInvoiceDataOther.valid),
         copyTestData(testLineDataOther.invalidTaxAmountLength),
+        defaultTenantId,
+        defaultFileName
+      )
+
+      expect(validInvoices).toEqual([])
+      expect(validLines).toEqual([])
+      expect(uploadHistory).toEqual({
+        csvFileName: 'dummyCsvFile',
+        failCount: 1,
+        historyId: uploadHistory.historyId,
+        invoiceCount: 0,
+        skipCount: 0,
+        successCount: 0,
+        tenantId: 'dummyTenantId'
+      })
+      expect(csvRows).toEqual([
+        {
+          errorData: '明細-その他税額は整数 0 ～ 999999999999 の範囲で入力してください。' + '\r\n',
+          historyDetailId: csvRows[0].historyDetailId,
+          historyId: csvRows[0].historyId,
+          invoiceNo: 'I2022070101',
+          lines: 1,
+          status: 2
+        }
+      ])
+    })
+    test('正常: （その他の消費税）その他税額が小数', async () => {
+      findAllInvoicesSpy.mockResolvedValue([])
+
+      const { validInvoices, validLines, uploadHistory, csvRows } = await pdfInvoiceCsvUploadValidation.validate(
+        copyTestData(testInvoiceDataOther.valid),
+        copyTestData(testLineDataOther.invalidTaxAmountString),
+        defaultTenantId,
+        defaultFileName
+      )
+
+      expect(validInvoices).toEqual([])
+      expect(validLines).toEqual([])
+      expect(uploadHistory).toEqual({
+        csvFileName: 'dummyCsvFile',
+        failCount: 1,
+        historyId: uploadHistory.historyId,
+        invoiceCount: 0,
+        skipCount: 0,
+        successCount: 0,
+        tenantId: 'dummyTenantId'
+      })
+      expect(csvRows).toEqual([
+        {
+          errorData: '明細-その他税額は整数 0 ～ 999999999999 の範囲で入力してください。' + '\r\n',
+          historyDetailId: csvRows[0].historyDetailId,
+          historyId: csvRows[0].historyId,
+          invoiceNo: 'I2022070101',
+          lines: 1,
+          status: 2
+        }
+      ])
+    })
+    test('正常: （その他の消費税）その他税額が文字列', async () => {
+      findAllInvoicesSpy.mockResolvedValue([])
+
+      const { validInvoices, validLines, uploadHistory, csvRows } = await pdfInvoiceCsvUploadValidation.validate(
+        copyTestData(testInvoiceDataOther.valid),
+        copyTestData(testLineDataOther.invalidTaxAmountNoInteger),
         defaultTenantId,
         defaultFileName
       )
