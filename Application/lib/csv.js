@@ -33,7 +33,9 @@ const invoiceHeaderArray = [
   '明細-数量',
   '明細-単位',
   '明細-単価',
-  '明細-税（消費税／軽減税率／不課税／免税／非課税）',
+  '明細-税（消費税／軽減税率／不課税／免税／非課税／その他の消費税）',
+  '明細-その他税名',
+  '明細-その他税額',
   '明細-割引内容1',
   '明細-割引数値1',
   '明細-割引種別1',
@@ -77,7 +79,9 @@ const pdfInvoiceMapper = [
   { col: '明細-数量', prop: 'quantity', modifier: null },
   { col: '明細-単位', prop: 'unit', modifier: null },
   { col: '明細-単価', prop: 'unitPrice', modifier: null },
-  { col: '明細-税（消費税／軽減税率／不課税／免税／非課税）', prop: 'taxType', modifier: null },
+  { col: '明細-税（消費税／軽減税率／不課税／免税／非課税／その他の消費税）', prop: 'taxType', modifier: null },
+  { col: '明細-その他税名', prop: 'line-taxLabel', modifier: (value, _) => convertEmptyStringToNull(value) },
+  { col: '明細-その他税額', prop: 'line-taxAmount', modifier: (value, _) => convertEmptyStringToNull(value) },
   { col: '明細-割引内容1', prop: 'line-discountDescription1', modifier: (value, _) => convertEmptyStringToNull(value) },
   { col: '明細-割引数値1', prop: 'line-discountAmount1', modifier: (value, _) => convertEmptyStringToNull(value) },
   { col: '明細-割引種別1', prop: 'line-discountUnit1', modifier: (value, _) => convertEmptyStringToNull(value) },
@@ -108,7 +112,9 @@ const convertCsvStringToMultiArray = (csvString) => {
   // 空行を削除
   rowArray = rowArray.filter((row) => {
     let allEmpty = true
-    row.forEach((col) => { if (col !== '') allEmpty = false })
+    row.forEach((col) => {
+      if (col !== '') allEmpty = false
+    })
     return !allEmpty
   })
 
@@ -160,7 +166,12 @@ const convertEmptyStringToNull = (str) => {
  * @returns
  */
 const convertCsvDataArrayToPdfInvoiceModels = (csvArray, senderInfo, tenantId) => {
-  if (!Array.isArray(csvArray) || csvArray.filter((row) => getType(row) === 'Object').length === 0 || getType(senderInfo) !== 'Object' || typeof tenantId !== 'string') {
+  if (
+    !Array.isArray(csvArray) ||
+    csvArray.filter((row) => getType(row) === 'Object').length === 0 ||
+    getType(senderInfo) !== 'Object' ||
+    typeof tenantId !== 'string'
+  ) {
     return { pdfInvoices: null, pdfInvoiceLines: null }
   }
 
@@ -226,6 +237,8 @@ const convertCsvDataArrayToPdfInvoiceModels = (csvArray, senderInfo, tenantId) =
         unitPrice: row.unitPrice,
         quantity: row.quantity,
         taxType: row.taxType,
+        taxLabel: row.taxType === 'その他の消費税' ? row['line-taxLabel'] : null, // taxTypeが'その他'以外の場合は設定しない
+        taxAmount: row.taxType === 'その他の消費税' ? row['line-taxAmount'] : null, // taxTypeが'その他'以外の場合は設定しない
         discounts: getDiscountLength(row, 'line'),
         discountDescription1: row['line-discountDescription1'],
         discountAmount1: row['line-discountAmount1'],
