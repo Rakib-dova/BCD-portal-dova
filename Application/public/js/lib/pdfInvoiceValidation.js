@@ -701,9 +701,8 @@ const taxRules = [
     displayLocation: 'tax',
     exDisplayLocation: 'taxAmountErr',
     prop: 'taxAmount',
-    customValidator: (value) => value > 0 && value <= 999999999999,
-    regexp: '',
-    message: '税額は整数or少数 0 ～ 999999999999 の範囲で入力してください。',
+    regexp: /^[0-9]{0,12}$/,
+    message: '税額は整数 0 ～ 999999999999 の範囲で入力してください。',
     emptyMessage: '入力必須',
     required: true
   }
