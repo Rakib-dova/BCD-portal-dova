@@ -469,7 +469,6 @@ const lineRules = [
     customValidator(value, model) {
       // 税種別が'その他の消費税'以外はスキップ
       if (model.taxType !== 'その他の消費税') return true
-      if (!model.taxLabel && !model.taxAmount) return true
       else {
         if (!value) {
           this.message = `${this.colName}は必須です。`
@@ -481,19 +480,18 @@ const lineRules = [
       }
     },
     message: '',
-    colName: '明細-その他税名'
+    colName: '明細-その他税ラベル'
   },
   {
     prop: 'taxAmount',
     customValidator(value, model) {
       // 税種別が'その他の消費税'以外はスキップ
       if (model.taxType !== 'その他の消費税') return true
-      if (!model.taxLabel && !model.taxAmount) return true
       else {
         if (!value) {
           this.message = `${this.colName}は必須です。`
           return false
-        } else if (!(value > 0 && value <= 999999999999)) {
+        } else if (!Number.isSafeInteger(Number(value)) || !(value >= 0 && value <= 999999999999)) {
           this.message = `${this.colName}は整数 0 ～ 999999999999 の範囲で入力してください。`
           return false
         } else return true

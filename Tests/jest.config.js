@@ -21,6 +21,8 @@ module.exports = {
 
   // An array of glob patterns indicating a set of files for which coverage information should be collected
   collectCoverageFrom: [
+    '<rootDir>/Application/lib/csv.js',
+    '<rootDir>/Application/lib/pdfInvoiceCsvUploadValidation.js',
     '<rootDir>/Application/routes/**',
     '<rootDir>/Application/controllers/**',
     '<rootDir>/Application/memberSite/**'
