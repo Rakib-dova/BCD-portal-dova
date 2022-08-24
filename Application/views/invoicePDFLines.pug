@@ -95,47 +95,53 @@ div.margin-top-40p
         td.text-center.align-middle
           a#btn-plus-invoice-detail.mr-auto
             i.fas.fa-plus-circle
-  
-  .modal#taxType-modal
+
+    .modal#taxType-modal
         .modal-background.cancel-button(data-target='taxType-modal')
         .modal-card.is-family-noto-sans
           header.modal-card-head
             p.modal-card-title 税率設定
             button.delete(data-target="taxType-modal")
+          input(class='taxLineId' name='taxLineId' type='hidden' value=10)
           section.modal-card-body
             .modalWidth#taxRadio
               label.radio
-                input(type='radio' name='taxType' checked=true value='untaxable' class='taxT noCheck' )
+                input(type='radio' name='taxType' checked=false value='untaxable' class='taxT noCheck' id='taxRadio-untaxable')
                 label.ml-2.taxTbox(for='taxType') 不課税 0%
               br   
               label.radio
-                input(type='radio' name='taxType' checked=false value='taxExemption' class='taxT noCheck' )
+                input(type='radio' name='taxType' checked=false value='taxExemption' class='taxT noCheck' id='taxRadio-taxExemption')
                 label.ml-2.taxTbox(for='taxType') 免税 0%
               br                       
               label.radio
-                input(type='radio' name='taxType' checked=false value='tax10p' class='taxT noCheck' )
+                input(type='radio' name='taxType' checked=false value='tax10p' class='taxT noCheck' id='taxRadio-tax10p')
                 label.ml-2.taxTbox(for='taxType') 消費税 10%
               br
               label.radio
-                input(type='radio' name='taxType' checked=false value='tax8p' class='taxT noCheck' )
+                input(type='radio' name='taxType' checked=false value='tax8p' class='taxT noCheck' id='taxRadio-tax8p')
                 label.ml-2.taxTbox(for='taxType') 消費税(軽減税率) 8%
               br
               label.radio
-                input(type='radio' name='taxType' checked=false value='nonTaxable' class='taxT noCheck' )
+                input(type='radio' name='taxType' checked=false value='nonTaxable' class='taxT noCheck' id='taxRadio-nonTaxable')
                 label.ml-2.taxTbox(for='taxType') 非課税 0%
               br
 
               label.radio
-                input(type='radio' name='taxType' checked=false value='otherTax' class='taxT yesCheck' )
+                input(type='radio' name='taxType' checked=false value='otherTax' class='taxT yesCheck' id='taxRadio-Other')
                 label.ml-2.taxTbox(for='taxType') その他税額を入力 
                 div.taxInfo
                   label.ml-5 税ラベル
-                   span.ml-3.red-color 入力必須
-                  input.input.taxLabel.mb-2.ml-5(type='text' size='15' placeholder='半角全角 10文字') 
+                   span.ml-3.red-color(id='taxLabelErr')
+                  input.input.taxLabel.mb-2.ml-5(type='text' size='15' name='tax-label' placeholder='半角全角 10文字' id='taxRadio-Other-Label' prop='taxRadio-Other-Label') 
                   label.ml-5 税額(円)
-                   span.ml-3.red-color 入力必須
-                  input.input.taxLabel.ml-5(type='text' size='15' placeholder='0～999999999999')
-                  p.mt-2.text-center.red-color 未入力の項目があります。
+                   span.ml-3.red-color(id='taxAmountErr')
+                  input.input.taxLabel.ml-5(type='text' size='15' name='tax-amount' placeholder='0～999999999999' id='taxRadio-Other-Amount'
+                  prop='taxRadio-Other-Amount')
+                  p.mt-2.text-center(id='taxErrEmptyMassage' class='has-text-danger') 
+                  //- p.mt-2.text-center.red-color(id='taxErrMassage') 
+                  p.mt-2.text-center.red-color#tax-error 
+
+            div.margin-top-20#tax-error
           footer.modal-card-foot
             div.button-area
               .columns.mt-0.is-centered: .column.is-four-fifths.pt-0
