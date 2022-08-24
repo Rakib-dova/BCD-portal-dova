@@ -566,12 +566,13 @@ function renderTotals() {
       otherTaxLineList.push(line.taxLabel)
     } else if (line.taxType && !taxLineList.includes(line.taxType)) taxLineList.push(line.taxType)
   })
-
+  // 選択肢にある税から、行順に追加
   taxLineList.forEach((taxLine) => {
     const existOtherTax = taxGroups.find(({ type }) => type === taxLine)
     if (!existOtherTax) return
     displayTaxGroups(existOtherTax, totalParentDiv)
   })
+  // 「その他」を行順に追加
   otherTaxLineList.forEach((taxLine) => {
     const existOtherTax = taxGroups.find(({ taxLabel }) => taxLabel === taxLine)
     if (!existOtherTax) return
@@ -757,18 +758,9 @@ $('#save-btn')?.addEventListener('click', async () => {
   }
 })
 
+// 税モーダルのキャンセルボタン動作(×と同じ)
 $('#taxModelCancel')?.addEventListener('click', async () => {
-  const taxmodaltemplate = document.getElementById('taxType-modal')
-  const taxLineId = taxmodaltemplate.querySelector('input[name=taxLineId]').value
-  lines[taxLineId].taxType = ''
-  lines[taxLineId].taxLabel = ''
-  lines[taxLineId].taxAmount = ''
-  const radios = taxmodaltemplate.querySelectorAll('input[type=radio]')
-  const selectedRadio = getRadioChecked(radios)
-  selectedRadio.checked = false
   $('#taxType-modal').classList.remove('is-active')
-  renderLines()
-  renderTotals()
 })
 
 // 税モーダル内「適応」
