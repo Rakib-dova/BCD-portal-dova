@@ -19,7 +19,8 @@ const { formatDate } = require('../lib/utils')
 
 const taxDatabase = [
   { type: 'tax10p', taxRate: 0.1 },
-  { type: 'tax8p', taxRate: 0.08 }
+  { type: 'tax8p', taxRate: 0.08 },
+  { type: 'otherTax', taxRate: 0 } // 'その他の税'
 ]
 
 const pdfInvoiceList = async (req, res, next) => {
@@ -44,7 +45,7 @@ const pdfInvoiceList = async (req, res, next) => {
     invoice.paymentDate = invoice.paymentDate ? formatDate(invoice.paymentDate, 'YYYY年MM月DD日') : ''
   })
 
-  console.log('==  加工後 invoices  ===================\n', invoices)
+  // console.log('==  加工後 invoices  ===================\n', invoices)
 
   res.render('pdfInvoiceList', {
     title: 'PDF請求書作成ドラフト一覧',
@@ -489,14 +490,40 @@ const getDateJST = async (target) => {
 
 const getTotal = (lines, taxDatabase) => {
   let total = 0
-  console.log('====  getTotal  =======', lines, taxDatabase)
+  // console.log('====  getTotal  =======', lines, taxDatabase)
 
   lines.forEach((line) => {
     let taxRate = 0
     const taxInfo = taxDatabase.find((tax) => tax.type === line.taxType)
     if (taxInfo) taxRate = taxInfo.taxRate
-    total +=
-      (line.unitPrice * line.quantity - getDiscount(line, Math.floor(line.unitPrice * line.quantity))) * (1 + taxRate)
+    // total +=
+    //   (line.unitPrice * line.quantity - getDiscount(line, Math.floor(line.unitPrice * line.quantity))) *
+    //     (1 + taxRate)
+    const noTaxTotal = line.unitPrice * line.quantity - getDiscount(line, Math.floor(line.unitPrice * line.quantity))
+    total += noTaxTotal
+    if (taxRate) total += noTaxTotal * taxRate
+    if (line.taxType === 'otherTax' && line.taxAmount) {
+      total += line.taxAmount
+    }
+    // if (total) {
+    console.log('################hhhhhh=' + total)
+    //   // eslint-disable-next-line camelcase
+    //   const pri_qu = line.unitPrice * line.quantity
+    //   console.log('line.unitPrice * line.quantity= ' + pri_qu.toLocaleString())
+    //   const disc = getDiscount(line, Math.floor(line.unitPrice * line.quantity))
+    //   console.log('disc= ' + disc.toLocaleString())
+    //   const dimath = line.unitPrice * line.quantity - getDiscount(line, Math.floor(line.unitPrice * line.quantity))
+    //   console.log('dimath= ' + dimath)
+    //   const rate = 1 + taxRate
+    //   console.log('rate= ' + rate)
+    //   console.log(
+    //     'result= ' +
+    //       (line.unitPrice * line.quantity - getDiscount(line, Math.floor(line.unitPrice * line.quantity))) *
+    //         (1 + taxRate)
+    //   )
+    //   // eslint-disable-next-line camelcase
+    //   console.log('ret2= ' + (pri_qu * taxRate + pri_qu))
+    // }
   })
 
   return total
