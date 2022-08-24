@@ -469,7 +469,6 @@ const lineRules = [
     customValidator(value, model) {
       // 税種別が'その他の消費税'以外はスキップ
       if (model.taxType !== 'その他の消費税') return true
-      if (!model.taxLabel && !model.taxAmount) return true
       else {
         if (!value) {
           this.message = `${this.colName}は必須です。`
@@ -488,7 +487,6 @@ const lineRules = [
     customValidator(value, model) {
       // 税種別が'その他の消費税'以外はスキップ
       if (model.taxType !== 'その他の消費税') return true
-      if (!model.taxLabel && !model.taxAmount) return true
       else {
         if (!value) {
           this.message = `${this.colName}は必須です。`
