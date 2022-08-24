@@ -480,7 +480,7 @@ const lineRules = [
       }
     },
     message: '',
-    colName: '明細-その他税名'
+    colName: '明細-その他税ラベル'
   },
   {
     prop: 'taxAmount',

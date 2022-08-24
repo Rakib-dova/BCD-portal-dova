@@ -1694,7 +1694,7 @@ describe('lib/pdfInvoiceCsvUploadValidation のテスト', () => {
         }
       ])
     })
-    test('正常: （その他の消費税）その他税名が未指定', async () => {
+    test('正常: （その他の消費税）その他税ラベルが未指定', async () => {
       findAllInvoicesSpy.mockResolvedValue([])
 
       const { validInvoices, validLines, uploadHistory, csvRows } = await pdfInvoiceCsvUploadValidation.validate(
@@ -1717,7 +1717,7 @@ describe('lib/pdfInvoiceCsvUploadValidation のテスト', () => {
       })
       expect(csvRows).toEqual([
         {
-          errorData: '明細-その他税名は必須です。' + '\r\n',
+          errorData: '明細-その他税ラベルは必須です。' + '\r\n',
           historyDetailId: csvRows[0].historyDetailId,
           historyId: csvRows[0].historyId,
           invoiceNo: 'I2022070101',
@@ -1758,7 +1758,7 @@ describe('lib/pdfInvoiceCsvUploadValidation のテスト', () => {
         }
       ])
     })
-    test('正常: （その他の消費税）その他税名文字列長超過', async () => {
+    test('正常: （その他の消費税）その他税ラベル文字列長超過', async () => {
       findAllInvoicesSpy.mockResolvedValue([])
 
       const { validInvoices, validLines, uploadHistory, csvRows } = await pdfInvoiceCsvUploadValidation.validate(
@@ -1781,7 +1781,7 @@ describe('lib/pdfInvoiceCsvUploadValidation のテスト', () => {
       })
       expect(csvRows).toEqual([
         {
-          errorData: '明細-その他税名は10文字以内で入力してください。' + '\r\n',
+          errorData: '明細-その他税ラベルは10文字以内で入力してください。' + '\r\n',
           historyDetailId: csvRows[0].historyDetailId,
           historyId: csvRows[0].historyId,
           invoiceNo: 'I2022070101',
