@@ -87,8 +87,16 @@ describe('csvuploadのテスト', () => {
       let result
       switch (method) {
         case 'get':
-          if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000/i)) {
-            if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000&page=/i)) {
+          if (
+            query.match(
+              /^\/documents\?stag=draft&stag=outbox&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&limit=10000/i
+            )
+          ) {
+            if (
+              query.match(
+                /^\/documents\?stag=draft&stag=outbox&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&limit=10000&page=/i
+              )
+            ) {
               return documentListData2
             }
             return documentListData
@@ -1903,8 +1911,16 @@ describe('csvuploadのテスト', () => {
       apiManager.accessTradeshift = jest.fn((req, refreshToken, method, query, body = {}, config = {}) => {
         switch (method) {
           case 'get':
-            if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000/i)) {
-              if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000&page=/i)) {
+            if (
+              query.match(
+                /^\/documents\?stag=draft&stag=outbox&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&limit=10000/i
+              )
+            ) {
+              if (
+                query.match(
+                  /^\/documents\?stag=draft&stag=outbox&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&limit=10000&page=/i
+                )
+              ) {
                 return documentListData2
               }
               return documentListData
@@ -4934,7 +4950,9 @@ describe('csvuploadのテスト', () => {
 
       // エラーメッセージが予定通りにある
       resultInvoiceDetailController.forEach((invoiceDetail) => {
-        expect(invoiceDetail.errorData).toEqual(`${constantsDefine.invoiceErrMsg.QUANTITYVALUEERR000}`)
+        expect(invoiceDetail.errorData).toEqual(
+          `${constantsDefine.invoiceErrMsg.TOTALPRICEVALUEERR000},${constantsDefine.invoiceErrMsg.QUANTITYVALUEERR000}`
+        )
       })
 
       invoiceController.insert = tmpInsert
@@ -7481,8 +7499,16 @@ describe('csvuploadのテスト', () => {
       apiManager.accessTradeshift = jest.fn((accToken, refreshToken, method, query, body = {}, config = {}) => {
         switch (method) {
           case 'get':
-            if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000/i)) {
-              if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000&page=/i)) {
+            if (
+              query.match(
+                /^\/documents\?stag=draft&stag=outbox&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&limit=10000/i
+              )
+            ) {
+              if (
+                query.match(
+                  /^\/documents\?stag=draft&stag=outbox&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&limit=10000&page=/i
+                )
+              ) {
                 return expectError
               }
               return expectError
@@ -7571,8 +7597,16 @@ describe('csvuploadのテスト', () => {
       apiManager.accessTradeshift = jest.fn((accToken, refreshToken, method, query, body = {}, config = {}) => {
         switch (method) {
           case 'get':
-            if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000/i)) {
-              if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000&page=/i)) {
+            if (
+              query.match(
+                /^\/documents\?stag=draft&stag=outbox&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&limit=10000/i
+              )
+            ) {
+              if (
+                query.match(
+                  /^\/documents\?stag=draft&stag=outbox&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&limit=10000&page=/i
+                )
+              ) {
                 return 'test'
               }
               return 'test'
@@ -7661,8 +7695,16 @@ describe('csvuploadのテスト', () => {
       apiManager.accessTradeshift = jest.fn((accToken, refreshToken, method, query, body = {}, config = {}) => {
         switch (method) {
           case 'get':
-            if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000/i)) {
-              if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000&page=/i)) {
+            if (
+              query.match(
+                /^\/documents\?stag=draft&stag=outbox&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&limit=10000/i
+              )
+            ) {
+              if (
+                query.match(
+                  /^\/documents\?stag=draft&stag=outbox&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&limit=10000&page=/i
+                )
+              ) {
                 return documentListData2
               }
               return documentListData

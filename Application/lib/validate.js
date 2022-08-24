@@ -287,6 +287,21 @@ const isTaxCategori = function (category) {
   return taxCategory[category]
 }
 
+// 明細-税
+const isTaxPercent = function (category) {
+  const taxCategory = require('./bconCsvTaxPercent')
+  // 値の存在有無確認
+  if (category.length < 1) {
+    return 'TAXERR001'
+  }
+
+  if (!taxCategory[category]) {
+    return 'TAXERR000'
+  }
+
+  return taxCategory[category]
+}
+
 // 明細-税(ユーザーフォーマット)
 const isUserTaxCategori = function (category, bconCsvTaxUser) {
   // 値の存在有無確認
@@ -687,6 +702,34 @@ const isValidEmailTsUser = function (emailAddress) {
   return true
 }
 
+// トレードシフトのユーザアカウント用に使用するメールアドレスの形式チェック
+const isValidTotalPrice = function (documentNo, invoiceData) {
+  let totalPrice = 0
+  invoiceData.forEach((element) => {
+    if (element.docNo === documentNo) {
+      const csvColumn = element.rows.split(',')
+      // 数量
+      const quantityValue = csvColumn[15]
+      // 単価
+      const price = csvColumn[17]
+      // 小計
+      const subTotal = quantityValue * price
+      // 税率
+      const taxPercent = isTaxPercent(csvColumn[18])
+      // 税金額
+      const taxPrice = subTotal * taxPercent
+
+      totalPrice += subTotal + Math.floor(taxPrice)
+    }
+  })
+
+  if (totalPrice > constantsDefine.invoiceValidDefine.TOTALPRICEVALUE) {
+    return false
+  }
+
+  return true
+}
+
 module.exports = {
   isArray: isArray,
   isNumber: isNumber,
@@ -710,6 +753,7 @@ module.exports = {
   isQuantityValue: isQuantityValue,
   isPriceValue: isPriceValue,
   isTaxCategori: isTaxCategori,
+  isTaxPercent: isTaxPercent,
   isUserTaxCategori: isUserTaxCategori,
   isUserUnitcode: isUserUnitcode,
   isUnitcode: isUnitcode,
@@ -728,5 +772,6 @@ module.exports = {
   isDepartmentCode: isDepartmentCode,
   isContactEmail: isContactEmail,
   isValidEmail: isValidEmail,
-  isValidEmailTsUser: isValidEmailTsUser
+  isValidEmailTsUser: isValidEmailTsUser,
+  isValidTotalPrice: isValidTotalPrice
 }

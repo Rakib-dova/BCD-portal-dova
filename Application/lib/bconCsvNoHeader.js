@@ -8,7 +8,7 @@ const { exit } = require('process')
 const bconCsvTaxDefault = require('./bconCsvTax')
 const bconCsvUnitDefault = require('./bconCsvUnitcode')
 const tmpHeader =
-  '請求書番号,発行日,テナントID,支払期日,納品日,備考,取引先メールアドレス,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考'
+  '発行日,請求書番号,テナントID,支払期日,納品日,備考,取引先メールアドレス,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考'
 const dataNumber = 'データ番号'
 
 class Invoice {
@@ -365,6 +365,17 @@ class bconCsvNoHeader {
         setInvoiceLineCnt = 0
         parentInvoice = new Invoice()
         parentInvoiceStatus = 0
+
+        // 合計金額の判定
+        const isValidTotalPrice = validate.isValidTotalPrice(element.docNo, invoiceData)
+
+        // 合計金額が上限超えた場合
+        if (!isValidTotalPrice) {
+          errorData += errorData
+            ? `,${constants.invoiceErrMsg['TOTALPRICEVALUEERR000']}`
+            : `${constants.invoiceErrMsg['TOTALPRICEVALUEERR000']}`
+          resultConvert.status = -1
+        }
 
         // ユーザが設定したアップロードフォーマットと項目数が間違い場合
         if (formatFlag) {

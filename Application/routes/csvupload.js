@@ -352,12 +352,13 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
   const documentIds = []
   let numPages
   let currPage
-  let documentsURL = '/documents?stag=draft&stag=outbox&limit=10000'
+  let documentsURL =
+    '/documents?stag=draft&stag=outbox&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&limit=10000'
   try {
     do {
       if (Object.prototype.toString.call(currPage) !== '[object Undefined]') {
         currPage++
-        documentsURL = `/documents?stag=draft&stag=outbox&limit=10000&page=${currPage}`
+        documentsURL = `/documents?stag=draft&stag=outbox&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&limit=10000&page=${currPage}`
       }
       documentsList = await apiManager.accessTradeshift(_user.accessToken, _user.refreshToken, 'get', documentsURL)
       documentsList.Document.forEach((document) => {
@@ -485,7 +486,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
                 },
                 apiResult.toString()
               )
-            } else if (String(apiResult.response?.status).slice(0, 1) === '5') {
+            } else {
               // 500番エラーの場合
               invoiceList[idx].errorData = constantsDefine.invoiceErrMsg.SYSERROR
 
@@ -598,16 +599,19 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
       }
     }
 
+    let statusStr = ''
+
     const getStatusString = (status) => {
       switch (status) {
         case 0:
-          return 'success'
+          statusStr = 'success'
+          return statusStr
         case 1:
-          return 'skip'
+          statusStr = 'skip'
+          return statusStr
         case -1:
-          return 'failure'
-        default:
-          return ''
+          statusStr = 'failure'
+          return statusStr
       }
     }
 
