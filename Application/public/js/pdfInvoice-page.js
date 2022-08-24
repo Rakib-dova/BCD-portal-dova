@@ -610,9 +610,9 @@ function displayTaxGroups(existOtherTax, totalParentDiv) {
 }
 
 // 明細行追加
+// 税選択後、行を追加すると、末尾行の税が選択された状態で行が追加される（本家トレシフと同様）
 function addLine() {
   if (lines.length >= 20) return
-
   lines.push({
     lineIndex: lines.length,
     lineId: '',
@@ -620,7 +620,7 @@ function addLine() {
     unit: '',
     unitPrice: '',
     quantity: '',
-    taxType: ''
+    taxType: lines.length >= 1 && lines[lines.length - 1].taxType ? lines[lines.length - 1].taxType : ''
   })
   renderLines()
   renderInvoicecDiscount()
