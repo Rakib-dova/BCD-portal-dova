@@ -559,25 +559,23 @@ function renderTotals() {
   }
 
   // 動入力された税額が、税額欄に表示、および小計欄にラベル名ごとに合計されて表示されること、表示順は固定入力→手動入力(上から設定順)
-  // const taxLineList = []
+  const taxLineList = []
+  const otherTaxLineList = []
+  lines.forEach((line) => {
+    if (line.taxType && line.taxType === 'otherTax' && !otherTaxLineList.includes(line.taxLabel)) {
+      otherTaxLineList.push(line.taxLabel)
+    } else if (line.taxType && !taxLineList.includes(line.taxType)) taxLineList.push(line.taxType)
+  })
 
-  taxGroups.forEach((taxGroup) => {
-    // 税額が0円でも小計に表示するため
-    if (taxGroup.subTotal === 0) return
-    const template = document.getElementById('taxGroup-template')
-    const clone = template.content.cloneNode(true)
-    const taxGroupDiv = clone.querySelector('.taxGroup')
-
-    const taxGroupLabel = clone.querySelector('.taxGroupLabel')
-    const taxRate =
-      taxGroup.type === 'otherTax' && taxGroup.taxLabel ? taxGroup.taxLabel : getTaxTypeName(taxGroup.type)
-    taxGroupLabel.textContent = `${taxGroup.subTotal.toLocaleString()}円のJP ${taxRate}`
-    taxGroupDiv.appendChild(taxGroupLabel)
-
-    const taxGroupValue = clone.querySelector('.taxGroupValue')
-    taxGroupValue.textContent = taxGroup.taxGroupTotal.toLocaleString()
-    taxGroupDiv.appendChild(taxGroupValue)
-    totalParentDiv.before(taxGroupDiv)
+  taxLineList.forEach((taxLine) => {
+    const existOtherTax = taxGroups.find(({ type }) => type === taxLine)
+    if (!existOtherTax) return
+    displayTaxGroups(existOtherTax, totalParentDiv)
+  })
+  otherTaxLineList.forEach((taxLine) => {
+    const existOtherTax = taxGroups.find(({ taxLabel }) => taxLabel === taxLine)
+    if (!existOtherTax) return
+    displayTaxGroups(existOtherTax, totalParentDiv)
   })
 
   // 合計
@@ -587,6 +585,27 @@ function renderTotals() {
   // 税額合計
   const taxTotalDiv = $('#taxTotal')
   taxTotalDiv.textContent = `税額合計 ${taxTotal.toLocaleString()} 円`
+}
+
+/**
+ * 税小計の表示を追加する
+ * @param {object[]} existOtherTax 判定
+ * @param {object[]} totalParentDiv 判定
+ * @returns
+ */
+function displayTaxGroups(existOtherTax, totalParentDiv) {
+  const template = document.getElementById('taxGroup-template')
+  const clone = template.content.cloneNode(true)
+  const taxGroupDiv = clone.querySelector('.taxGroup')
+  const taxGroupLabel = clone.querySelector('.taxGroupLabel')
+  const taxRate = existOtherTax.taxLabel ? existOtherTax.taxLabel : getTaxTypeName(existOtherTax.type)
+  taxGroupLabel.textContent = `${existOtherTax.subTotal.toLocaleString()}円のJP ${taxRate}`
+  taxGroupDiv.appendChild(taxGroupLabel)
+
+  const taxGroupValue = clone.querySelector('.taxGroupValue')
+  taxGroupValue.textContent = existOtherTax.taxGroupTotal.toLocaleString()
+  taxGroupDiv.appendChild(taxGroupValue)
+  totalParentDiv.before(taxGroupDiv)
 }
 
 // 明細行追加
