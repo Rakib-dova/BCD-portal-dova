@@ -1,7 +1,11 @@
 // eslint-disable-next-line no-unused-vars
 const taxDatabase = [
   { type: 'tax10p', taxRate: 0.1 },
-  { type: 'tax8p', taxRate: 0.08 }
+  { type: 'tax8p', taxRate: 0.08 },
+  { type: 'nonTaxable' }, // '非課税'
+  { type: 'untaxable' }, // '不課税'
+  { type: 'taxExemption' }, // '免税'
+  { type: 'otherTax' } // 'その他の税'
 ]
 
 // eslint-disable-next-line no-unused-vars
@@ -55,11 +59,11 @@ function getTaxTypeName(taxType) {
     case 'tax8p':
       return '消費税 8%'
     case 'nonTaxable':
-      return '非課税'
+      return '非課税 0%'
     case 'untaxable':
-      return '不課税'
+      return '不課税 0%'
     case 'taxExemption':
-      return '免税'
+      return '免税 0%'
     case 'otherTax':
       return 'その他の消費税'
     default:
@@ -81,15 +85,40 @@ function getTaxGroups(lines, taxDatabase) {
   taxDatabase.forEach((tax) => {
     const taxGroup = { type: tax.type, subTotal: 0, taxGroupTotal: 0 }
 
-    lines.forEach((line) => {
-      if (line.taxType === tax.type) {
-        taxGroup.subTotal += Math.floor(line.unitPrice * line.quantity - getLineDiscountPrice(line))
-        taxGroup.taxGroupTotal += Math.floor(
-          (line.unitPrice * line.quantity - getLineDiscountPrice(line)) * tax.taxRate
-        )
-      }
-    })
+    if (tax.type === 'otherTax') {
+      const otherTaxGroups = []
+      lines.forEach((line) => {
+        if (!line.unitPrice || !line.quantity) return
+        if (line.taxType !== 'otherTax') return
+        const existOtherTax = otherTaxGroups.find(({ taxLabel }) => taxLabel === line.taxLabel)
 
+        if (existOtherTax) {
+          existOtherTax.taxGroupTotal += parseInt(line.taxAmount)
+        } else {
+          const othertax = {
+            type: tax.type,
+            taxLabel: line.taxLabel,
+            subTotal: Math.floor(line.unitPrice * line.quantity - getLineDiscountPrice(line)),
+            taxGroupTotal: parseInt(line.taxAmount) ? parseInt(line.taxAmount) : 0
+          }
+          otherTaxGroups.push(othertax)
+        }
+      })
+      otherTaxGroups.forEach((otherTaxGroup, index) => {
+        if (otherTaxGroup.taxGroupTotal) taxGroups.push(otherTaxGroup)
+      })
+    } else {
+      lines.forEach((line) => {
+        if (line.taxType === tax.type) {
+          taxGroup.subTotal += Math.floor(line.unitPrice * line.quantity - getLineDiscountPrice(line))
+          if (line.taxType === 'tax10p' || line.taxType === 'tax8p') {
+            taxGroup.taxGroupTotal += Math.floor(
+              (line.unitPrice * line.quantity - getLineDiscountPrice(line)) * tax.taxRate
+            )
+          }
+        }
+      })
+    }
     if (!taxGroup.subTotal) return
 
     taxGroups.push(taxGroup)
@@ -101,7 +130,9 @@ function getTaxGroups(lines, taxDatabase) {
 // eslint-disable-next-line no-unused-vars
 function getTaxTotal(taxGroups) {
   let taxTotal = 0
-  taxGroups.forEach((taxGroup) => (taxTotal += taxGroup.taxGroupTotal))
+  taxGroups.forEach((taxGroup) => {
+    taxTotal += taxGroup.taxGroupTotal
+  })
   return taxTotal
 }
 
