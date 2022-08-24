@@ -1,6 +1,6 @@
 /* global
 
- taxDatabase, $, addEvent, validate, getSubTotal, getTaxGroups, getTaxTotal, getDiscountTypeIndex, getDiscountLinePriceTotal, functionDiscountCalcs, getLineDiscountPrice,
+ taxDatabase, $, addEvent, validate, getSubTotal, getTaxGroups, getTaxTotal, getDiscountTypeIndex, getDiscountLinePriceTotal, functionDiscountCalcs, getLineDiscountPrice, taxValidate,
  savePdfInvoice, outputPdfInvoice, formatDate, isNumberString, saveRules, outputRules, getTaxTypeName, setPaymentRequired
 
 */
@@ -219,6 +219,14 @@ addEvent(document, 'change', (e, target) => {
     renderInvoice(target)
   }
 
+  // 税モーダルのラジオボタンに入力があった場合
+  if (e.target.id.match(/taxRadio/)) {
+    const taxmodaltemplate = document.getElementById('taxType-modal')
+    const radios = taxmodaltemplate.querySelectorAll('input[type=radio]')
+    // ラジオボタンがなんらか選択さていれば「適応」ボタン活性化
+    taxAcceptEnabled(getRadioChecked(radios))
+  }
+
   // 明細関連の 値更新 & レンダリング
   if (e.target.className.match(/line/)) {
     updateLineValues(e, target)
@@ -331,6 +339,10 @@ function renderLines() {
 
     const discountdelBtn = linesTbody.firstChild.querySelector('.discount-line-del-action')
     document.removeEventListener('click', discountdelBtn)
+
+    const taxSelectModal = linesTbody.firstChild.querySelector('.line-taxType')
+    document.removeEventListener('focus', taxSelectModal)
+
     linesTbody.removeChild(linesTbody.firstChild)
   }
 
@@ -358,10 +370,11 @@ function renderLines() {
     unitPriceInput.value = line.unitPrice
     // 税設定
     const taxTypeSelect = clone.querySelector('.line-taxType')
+    // 税のフォームを選択(もしくはtab等でフォーカスされた際に税モーダルをactivate)
     taxTypeSelect.addEventListener('focus', () => {
-      $('#taxType-modal').classList.add('is-active')
+      activateTaxModal(index, line)
     })
-    taxTypeSelect.selectedIndex = getTaxTypeIndex(line.taxType)
+    taxTypeSelect.value = getTaxTypeIndex(line.taxType, index)
     // 小計設定
     const subtotalTd = clone.querySelector('.line-subtotal')
     subtotalTd.textContent = Math.floor(line.unitPrice * line.quantity - getLineDiscountPrice(line)).toLocaleString()
@@ -411,6 +424,7 @@ function renderLines() {
     }
   })
 
+  // 行追加の+ボタン
   if (lines.length < 20) {
     const template = document.getElementById('line-add-btn')
     const clone = template.content.cloneNode(true)
@@ -544,15 +558,20 @@ function renderTotals() {
     totalParentDiv.before(taxGroupDiv)
   }
 
+  // 動入力された税額が、税額欄に表示、および小計欄にラベル名ごとに合計されて表示されること、表示順は固定入力→手動入力(上から設定順)
+  // const taxLineList = []
+
   taxGroups.forEach((taxGroup) => {
-    if (taxGroup.taxGroupTotal === 0) return
+    // 税額が0円でも小計に表示するため
+    if (taxGroup.subTotal === 0) return
     const template = document.getElementById('taxGroup-template')
     const clone = template.content.cloneNode(true)
     const taxGroupDiv = clone.querySelector('.taxGroup')
 
     const taxGroupLabel = clone.querySelector('.taxGroupLabel')
-    const taxRate = taxGroup.type.replace('tax', '').replace('p', '')
-    taxGroupLabel.textContent = `${taxGroup.subTotal.toLocaleString()}円のJP 消費税 ${taxRate}%`
+    const taxRate =
+      taxGroup.type === 'otherTax' && taxGroup.taxLabel ? taxGroup.taxLabel : getTaxTypeName(taxGroup.type)
+    taxGroupLabel.textContent = `${taxGroup.subTotal.toLocaleString()}円のJP ${taxRate}`
     taxGroupDiv.appendChild(taxGroupLabel)
 
     const taxGroupValue = clone.querySelector('.taxGroupValue')
@@ -626,6 +645,65 @@ function delDiscountLine(line, linenum) {
   renderTotals()
 }
 
+/**
+ * 税モーダルの「適応」の活性化/無効化処理
+ * @param {bool} enabled 判定
+ * @returns
+ */
+function taxAcceptEnabled(enabled) {
+  // 活性化してよい /よくない
+  if (enabled) {
+    document.getElementById('taxModelAccept').removeAttribute('disabled')
+    document.getElementById('taxModelAccept').style.backgroundColor = ''
+  } else {
+    document.getElementById('taxModelAccept').setAttribute('disabled', true)
+    document.getElementById('taxModelAccept').style.backgroundColor = 'gray'
+  }
+}
+
+/**
+ * ラジオボタンのチェックされているものを取得
+ * @param {object[]} radios ラジオボタンリスト
+ * @returns 選択されているラジオボタンオブジェクト
+ */
+function getRadioChecked(radios) {
+  let result = ''
+  radios.forEach((radio, index) => {
+    if (radio.checked) result = radio
+  })
+  return result
+}
+
+/**
+ * 税モーダルを表示(active化)させる
+ * @param {int} index 行番号
+ * @param {object} line 行情報
+ * @returns
+ */
+function activateTaxModal(index, line) {
+  const taxmodaltemplate = document.getElementById('taxType-modal')
+  taxmodaltemplate.classList.add('is-active')
+  taxmodaltemplate.querySelector('input[name=taxLineId]').value = index
+  const taxErrDisplays = ['taxErrEmptyMassage', 'taxLabelErr', 'taxAmountErr']
+  taxErrDisplays.forEach((display) => {
+    document.getElementById(display).textContent = ''
+  })
+  while ($('#tax-error').firstChild) $('#tax-error').removeChild($('#tax-error').firstChild)
+  if (line.taxType) {
+    taxmodaltemplate.querySelector('input[value=' + line.taxType + ']').checked = true
+    if (line.taxType === 'otherTax') {
+      taxmodaltemplate.querySelector('input[name=tax-label]').value = line.taxLabel
+      taxmodaltemplate.querySelector('input[name=tax-amount]').value = line.taxAmount
+    }
+    taxAcceptEnabled(true)
+  } else {
+    const radios = document.querySelectorAll('input[type=radio]')
+    const selectedRadio = getRadioChecked(radios)
+    selectedRadio.checked = false
+    taxAcceptEnabled(false)
+  }
+}
+
 $('#output-modal-btn')?.addEventListener('click', async () => {
   setPaymentRequired(invoice, outputRules)
   if (
@@ -661,11 +739,52 @@ $('#save-btn')?.addEventListener('click', async () => {
 })
 
 $('#taxModelCancel')?.addEventListener('click', async () => {
+  const taxmodaltemplate = document.getElementById('taxType-modal')
+  const taxLineId = taxmodaltemplate.querySelector('input[name=taxLineId]').value
+  lines[taxLineId].taxType = ''
+  lines[taxLineId].taxLabel = ''
+  lines[taxLineId].taxAmount = ''
+  const radios = taxmodaltemplate.querySelectorAll('input[type=radio]')
+  const selectedRadio = getRadioChecked(radios)
+  selectedRadio.checked = false
   $('#taxType-modal').classList.remove('is-active')
+  renderLines()
+  renderTotals()
 })
 
+// 税モーダル内「適応」
 $('#taxModelAccept')?.addEventListener('click', async () => {
-  $('#taxType-modal').classList.remove('is-active')
+  const taxmodaltemplate = document.getElementById('taxType-modal')
+  const taxLineId = document.querySelector('input[name=taxLineId]').value
+  const radios = taxmodaltemplate.querySelectorAll('input[type=radio]')
+  let validResult = true
+  const selectedRadio = getRadioChecked(radios)
+  if (selectedRadio) {
+    lines[taxLineId].taxLabel = ''
+    lines[taxLineId].taxAmount = ''
+    if (selectedRadio.value === 'otherTax') {
+      const taxData = {
+        taxLabel: taxmodaltemplate.querySelector('input[name=tax-label]').value.replace(/\r\n|\r|\n| /g, ''),
+        taxAmount: taxmodaltemplate.querySelector('input[name=tax-amount]').value
+      }
+      validResult = taxValidate(taxData)
+      if (validResult) {
+        lines[taxLineId].taxLabel = taxmodaltemplate
+          .querySelector('input[name=tax-label]')
+          .value.replace(/\r\n|\r|\n| /g, '')
+        const taxAmountValue = taxmodaltemplate.querySelector('input[name=tax-amount]').value
+        if (isNumberString(taxAmountValue)) {
+          lines[taxLineId].taxAmount = taxAmountValue
+        }
+      }
+    }
+    lines[taxLineId].taxType = selectedRadio.value
+  }
+  if (validResult) {
+    $('#taxType-modal').classList.remove('is-active')
+    renderLines()
+    renderTotals()
+  }
 })
 
 $('#output-btn')?.addEventListener('click', async () => {
@@ -688,22 +807,28 @@ $('#backButton')?.addEventListener('click', async () => {
   else location.href = `https://${location.host}/pdfInvoices/list`
 })
 
-function getTaxTypeIndex(taxType) {
+/**
+ * 税情報のマッチング
+ * @param {string} taxType 税パラメータ
+ * @param {int} lineId 行番号
+ * @returns 表示する税呼称
+ */
+function getTaxTypeIndex(taxType, lineId) {
   switch (taxType) {
-    case '':
-      return 0
     case 'tax10p':
-      return 1
+      return '消費税 10%'
     case 'tax8p':
-      return 2
+      return '消費税(軽減税率) 8%'
     case 'nonTaxable':
-      return 3
+      return '非課税 0%'
     case 'untaxable':
-      return 4
+      return '不課税 0%'
     case 'taxExemption':
-      return 5
+      return '免税 0%'
     case 'otherTax':
-      return 6
+      return lines[lineId].taxAmount ? lines[lineId].taxAmount : ''
+    default:
+      return ''
   }
 }
 
