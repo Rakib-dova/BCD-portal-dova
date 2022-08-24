@@ -154,6 +154,17 @@ block content
          div.button-area
           a.button.cancel-button(data-target="checkStatus-modal") 確認
 
+    .modal.modal-fx-fadeInscale#download-progress-modal
+      .modal-background
+      .modal-card
+        header.modal-card-head
+          p.modal-card-title 請求情報ダウンロード
+        section.modal-card-body
+          center
+            img(src="/image/loading_progress.gif")
+            p.modal-card-result#modal-card-result ダウンロードCSVファイル作成中
+        footer.modal-card-foot
+
     include footer
 
 block append scripts
