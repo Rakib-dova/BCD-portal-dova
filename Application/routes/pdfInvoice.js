@@ -494,36 +494,17 @@ const getTotal = (lines, taxDatabase) => {
 
   lines.forEach((line) => {
     let taxRate = 0
+    // 一致する税を探索
     const taxInfo = taxDatabase.find((tax) => tax.type === line.taxType)
     if (taxInfo) taxRate = taxInfo.taxRate
-    // total +=
-    //   (line.unitPrice * line.quantity - getDiscount(line, Math.floor(line.unitPrice * line.quantity))) *
-    //     (1 + taxRate)
+    // 税抜き合計
     const noTaxTotal = line.unitPrice * line.quantity - getDiscount(line, Math.floor(line.unitPrice * line.quantity))
     total += noTaxTotal
+    // 税率を適応(noTaxTotal * (1+taxRate)としてはいけない)
     if (taxRate) total += noTaxTotal * taxRate
     if (line.taxType === 'otherTax' && line.taxAmount) {
       total += line.taxAmount
     }
-    // if (total) {
-    console.log('################hhhhhh=' + total)
-    //   // eslint-disable-next-line camelcase
-    //   const pri_qu = line.unitPrice * line.quantity
-    //   console.log('line.unitPrice * line.quantity= ' + pri_qu.toLocaleString())
-    //   const disc = getDiscount(line, Math.floor(line.unitPrice * line.quantity))
-    //   console.log('disc= ' + disc.toLocaleString())
-    //   const dimath = line.unitPrice * line.quantity - getDiscount(line, Math.floor(line.unitPrice * line.quantity))
-    //   console.log('dimath= ' + dimath)
-    //   const rate = 1 + taxRate
-    //   console.log('rate= ' + rate)
-    //   console.log(
-    //     'result= ' +
-    //       (line.unitPrice * line.quantity - getDiscount(line, Math.floor(line.unitPrice * line.quantity))) *
-    //         (1 + taxRate)
-    //   )
-    //   // eslint-disable-next-line camelcase
-    //   console.log('ret2= ' + (pri_qu * taxRate + pri_qu))
-    // }
   })
 
   return total

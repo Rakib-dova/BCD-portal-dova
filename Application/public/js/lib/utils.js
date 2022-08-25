@@ -84,17 +84,20 @@ function getTaxGroups(lines, taxDatabase) {
 
   taxDatabase.forEach((tax) => {
     const taxGroup = { type: tax.type, subTotal: 0, taxGroupTotal: 0 }
-
+    // ユーザ定義の税
     if (tax.type === 'otherTax') {
       const otherTaxGroups = []
       lines.forEach((line) => {
         if (!line.unitPrice || !line.quantity) return
         if (line.taxType !== 'otherTax') return
+        // すでに同ラベルの税があるかどうか
         const existOtherTax = otherTaxGroups.find(({ taxLabel }) => taxLabel === line.taxLabel)
 
         if (existOtherTax) {
+          // 同ラベル税に額を合算
           existOtherTax.taxGroupTotal += parseInt(line.taxAmount)
         } else {
+          // 同ラベル税がない場合は追加
           const othertax = {
             type: tax.type,
             taxLabel: line.taxLabel,
@@ -108,6 +111,7 @@ function getTaxGroups(lines, taxDatabase) {
         if (otherTaxGroup.taxGroupTotal) taxGroups.push(otherTaxGroup)
       })
     } else {
+      // 税率10%と8%をそれぞれ合算
       lines.forEach((line) => {
         if (line.taxType === tax.type) {
           taxGroup.subTotal += Math.floor(line.unitPrice * line.quantity - getLineDiscountPrice(line))
