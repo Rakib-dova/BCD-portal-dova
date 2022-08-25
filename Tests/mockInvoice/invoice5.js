@@ -175,8 +175,11 @@ module.exports = {
         }
       },
       Contact: {
+        ID: {
+          value: 'noUserInfo@test.co.jp'
+        },
         ElectronicMail: {
-          value: 'jinkim@cseltd.co.jp'
+          value: 'noUserInfo@test.co.jp'
         }
       }
     }
