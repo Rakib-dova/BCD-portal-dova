@@ -267,6 +267,13 @@ const applyPaidServiceRegister = async (req, res, next) => {
   // データベースエラーは、エラーオブジェクトが返る
   if (result instanceof Error) return next(errorHelper.create(500))
 
+  // スタンダードプランの場合にタグ付け処理
+  for (const contract of result) {
+    if (contract.serviceType === serviceTypes.lightPlan) {
+      applyOrderController.tagCreate(req.user, contract.createdAt)
+    }
+  }
+
   // セッションから申込サービスリストをクリアする
   req.session.serviceList = null
 

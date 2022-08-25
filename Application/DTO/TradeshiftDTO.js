@@ -99,7 +99,10 @@ class TradeshiftDTO {
     if (stag instanceof Array === false) stag = ['sales', 'purchases', 'draft']
 
     const get = 'get'
-    let uri = `/documents?&_onlyIndex=true&${this.getQuery('page', page)}&${this.getQuery('limit', limit)}`
+    let uri = `/documents?&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&${this.getQuery(
+      'page',
+      page
+    )}&${this.getQuery('limit', limit)}`
 
     if (tag.length > 0) uri = `${uri}&${this.getQuery('tag', tag)}`
 
