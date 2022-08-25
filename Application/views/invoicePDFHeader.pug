@@ -1,15 +1,16 @@
 .columns.m-0
-  .column.is-one-fifth
-    p.title.is-10 請求書
-  .column.is-four-fifth
-    .column.text-right
-      if logoSrc
-        img(src = logoSrc width='256' height='256')
+  .column.level-left
+    p.title 請求書
+  .column.is-narrow.level-right
+    if logoSrc
+      .columns.is-vcentered.is-pulled-left.m-0.mr-5.p-0.min-height-full
+        img.img-256(src = logoSrc width='256' height='256')
 
+    .columns.is-vcentered.is-pulled-left.m-0.mr-5.p-0.min-height-full
       if sealImpSrc
         img.img-256(src = sealImpSrc width='256px' height='256px')
       else
-        a.button.mr-6.show-modal(id = 'uploadSealImpButton') 印影登録
+        a.button.show-modal(id = 'uploadSealImpButton') 印影登録
 
 div.margin-top-20#header-error
 

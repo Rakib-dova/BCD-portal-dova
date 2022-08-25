@@ -1067,3 +1067,10 @@ body > div.hero.is-small {
 .button[disabled] {
   opacity: 1;
 }
+
+.img-256 {
+  width: auto;
+  height: auto;
+  max-width: 256px;
+  max-height: 256px;
+}

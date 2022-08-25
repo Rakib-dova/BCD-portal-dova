@@ -58,6 +58,7 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
   console.log('== レンダリング開始 ============================')
 
   return `
+<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8" />
@@ -73,8 +74,10 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
     }
     .image {
       margin-left: 10px;
-      width: 120px;
-      height: 120px;
+      width: auto;
+      height: auto;
+      max-width: 120px;
+      max-height: 120px;
     }
     .container {
       padding-right: 15px;
@@ -103,7 +106,7 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
       margin: 0.75rem;
     }
     .ml-10px {
-      margin-left: 10px !important; 
+      margin-left: 10px !important;
     }
     .column {
       display: block;
@@ -199,6 +202,11 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
     .border {
       border: 1px solid;
     }
+    .image-box {
+      min-height: 120px !important;
+      display: flex !important;
+      align-items: center !important;
+    }
     pre {
       white-space: pre-wrap;
     }
@@ -232,9 +240,11 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
           </div>
         </div>
       </div>
-      <div class="column text-r width-50">
-        ${logo ? `<img src="${logo}" width="120" height="120" class="image"/>` : ''}
+      <div class="column width-50">
         ${sealImp ? setImageTag(sealImp.buffer, sealImp.type, 120) : ''}
+        ${
+          logo ? `<div class="float-r image-box"><img src="${logo}" width="120" height="120" class="image"/></div>` : ''
+        }
       </div>
     </div>
     <div class="columns">
@@ -541,9 +551,10 @@ const setTaxGroup = (taxGroups) => {
 const setImageTag = (imageBuffer, type, size = 120) => {
   if (!imageBuffer || !Buffer.isBuffer(imageBuffer)) return ''
 
-  return `<img src="data:image/${type};base64,${imageBuffer.toString(
+  return `<div class="float-r image-box">
+  <img src="data:image/${type};base64,${imageBuffer.toString(
     'base64'
-  )}" width="${size}" height="${size}" class="image" />`
+  )}" width="${size}" height="${size}" class="image" /></div>`
 }
 
 /**
