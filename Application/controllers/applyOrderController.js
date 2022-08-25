@@ -145,13 +145,16 @@ const tagCreate = async (user, createdAt) => {
   let page = 0
   let numPages = 1
   let getInvoiceErrorFlag = false
+  let getInvoiceRetryCount = 0
+
+  // ドキュメントリスト取得
   do {
     const result = await tradeshiftDTO.getDocuments(
       '',
       withouttag,
       type,
       page,
-      1,
+      10000,
       '',
       '',
       '',
@@ -164,13 +167,23 @@ const tagCreate = async (user, createdAt) => {
       stag
     )
     if (result instanceof Error) {
-      getInvoiceErrorFlag = true
-      errorInvoice = result
-      break
+      // Retry有無確認
+      if (getInvoiceRetryCount < 2) {
+        getInvoiceRetryCount += 1
+      } else {
+        logger.error(
+          { tenant: user.tenantId, stack: result.stack, status: 0 },
+          'applyOrderController_tagCreate_getDocuments_retry3_failed'
+        )
+        getInvoiceErrorFlag = true
+        errorInvoice = result
+        break
+      }
+    } else {
+      numPages = result.numPages
+      page++
+      invoiceList.push(result)
     }
-    numPages = result.numPages
-    page++
-    invoiceList.push(result)
   } while (page < numPages)
 
   if (getInvoiceErrorFlag) return errorInvoice
@@ -184,39 +197,96 @@ const tagCreate = async (user, createdAt) => {
     }
   }
 
+  let invoiceTagRetryCount = 0
+  let errorResult = ''
+
   if (checkTagDocumentList.length !== 0) {
-    for (const data of checkTagDocumentList) {
-      const invoice = await tradeshiftDTO.getDocument(data.DocumentId)
-      if (invoice instanceof Error) return invoice
+    for (let i = 0; i < checkTagDocumentList.length; i++) {
+      let invoiceTagErrorFlag = false
+      // ドキュメント情報取得
+      const invoice = await apiManager.accessTradeshift(
+        user.accessToken,
+        user.refreshToken,
+        'get',
+        `/documents/${checkTagDocumentList[i].DocumentId}`
+      )
 
-      // 担当者メールアドレス確認、ある場合はタグ追加
-      if (invoice.AccountingCustomerParty.Party.Contact.ID) {
-        if (validate.isContactEmail(invoice.AccountingCustomerParty.Party.Contact.ID.value) !== 0) {
-          logger.warn(
-            `tenantId:${user.tenantId}, DocumentId:${data.DocumentId}, msg: ${constants.FAILED_TO_CREATE_TAG}(${constants.INVOICE_CONTACT_EMAIL_NOT_VERIFY})`
-          )
-          await tradeshiftDTO.createTags(data.DocumentId, encodeURIComponent('unKnownManager'))
-        } else {
-          await tradeshiftDTO.createTags(data.DocumentId, invoice.AccountingCustomerParty.Party.Contact.ID.value)
-
-          // 企業にユーザー有無確認
-          const userInfo = await apiManager.accessTradeshift(
-            tradeshiftDTO.accessToken,
-            tradeshiftDTO.refreshToken,
-            'get',
-            `/account/users/byemail/${invoice.AccountingCustomerParty.Party.Contact.ID.value}?searchlocked=false`
-          )
-          // ユーザー情報がない場合
-          if (userInfo instanceof Error) {
-            await tradeshiftDTO.createTags(data.DocumentId, encodeURIComponent('unKnownManager'))
-          }
-        }
-      } else {
-        await tradeshiftDTO.createTags(data.DocumentId, encodeURIComponent('unKnownManager'))
+      if (invoice instanceof Error) {
+        errorResult = invoice
+        invoiceTagErrorFlag = true
       }
 
-      // 確認請求書にタグを追加
-      await tradeshiftDTO.createTags(data.DocumentId, 'tag_checked')
+      if (invoiceTagErrorFlag !== true) {
+        // 担当者メールアドレス確認、ある場合はタグ追加
+        const tagApiResult = []
+        if (invoice.AccountingCustomerParty.Party.Contact.ID) {
+          if (validate.isContactEmail(invoice.AccountingCustomerParty.Party.Contact.ID.value) !== 0) {
+            logger.warn(
+              `tenantId:${user.tenantId}, DocumentId:${checkTagDocumentList[i].DocumentId}, msg: ${constants.FAILED_TO_CREATE_TAG}(${constants.INVOICE_CONTACT_EMAIL_NOT_VERIFY})`
+            )
+            tagApiResult.push(
+              await tradeshiftDTO.createTags(checkTagDocumentList[i].DocumentId, encodeURIComponent('unKnownManager'))
+            )
+          } else {
+            tagApiResult.push(
+              await tradeshiftDTO.createTags(
+                checkTagDocumentList[i].DocumentId,
+                invoice.AccountingCustomerParty.Party.Contact.ID.value
+              )
+            )
+
+            // 企業にユーザー有無確認
+            const userInfo = await apiManager.accessTradeshift(
+              user.accessToken,
+              user.refreshToken,
+              'get',
+              `/account/users/byemail/${invoice.AccountingCustomerParty.Party.Contact.ID.value}?searchlocked=false`
+            )
+            // ユーザー情報がない場合
+            if (userInfo instanceof Error) {
+              tagApiResult.push(
+                await tradeshiftDTO.createTags(checkTagDocumentList[i].DocumentId, encodeURIComponent('unKnownManager'))
+              )
+            }
+          }
+        } else {
+          tagApiResult.push(
+            await tradeshiftDTO.createTags(checkTagDocumentList[i].DocumentId, encodeURIComponent('unKnownManager'))
+          )
+        }
+
+        // 確認請求書にタグを追加
+        tagApiResult.push(await tradeshiftDTO.createTags(checkTagDocumentList[i].DocumentId, 'tag_checked'))
+
+        // Apiエラー確認
+        for (const result of tagApiResult) {
+          if (result instanceof Error) {
+            invoiceTagErrorFlag = true
+            errorResult = result
+          }
+        }
+      }
+
+      // Retry有無確認
+      if (invoiceTagErrorFlag === true) {
+        if (invoiceTagRetryCount < 2) {
+          invoiceTagRetryCount += 1
+          i -= 1
+        } else {
+          logger.error(
+            {
+              tenant: user.tenantId,
+              documentid: checkTagDocumentList[i].DocumentId,
+              stack: errorResult.stack,
+              status: 0
+            },
+            'applyOrderController_tagCreate_tagging_retry3_failed'
+          )
+          invoiceTagRetryCount = 0
+        }
+      } else {
+        invoiceTagRetryCount = 0
+      }
     }
   }
 }
