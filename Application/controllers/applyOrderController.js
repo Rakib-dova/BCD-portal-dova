@@ -4,7 +4,8 @@ const Contract = require('../models').Contract
 const Order = require('../models').Order
 const db = require('../models')
 const contractController = require('../controllers/contractController')
-const constants = require('../constants').statusConstants
+const constantsDefine = require('../constants')
+const constants = constantsDefine.statusConstants
 const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const apiManager = require('./apiManager')
@@ -130,11 +131,16 @@ const cancelOrder = async (tenantId, orderData) => {
  * @returns
  */
 const tagCreate = async (user, createdAt) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'applyOrderController.tagCreate')
   const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(user.accessToken, user.refreshToken, user.tenantId)
+
+  // 請求書のタグ
+  const tagCheckedPortal = 'tag_checked_portal'
+  const tagUnKnownManager = 'unKnownManager'
 
   // 請求書のタグ付け有無確認
   const checkTagDocumentList = []
-  const withouttag = ['tag_checked']
+  const withouttag = [tagCheckedPortal]
   const type = ['invoice']
   const state = ['DELIVERED', 'ACCEPTED', 'PAID_UNCONFIRMED', 'PAID_CONFIRMED']
   const stag = ['purchases']
@@ -225,7 +231,7 @@ const tagCreate = async (user, createdAt) => {
               `tenantId:${user.tenantId}, DocumentId:${checkTagDocumentList[i].DocumentId}, msg: ${constants.FAILED_TO_CREATE_TAG}(${constants.INVOICE_CONTACT_EMAIL_NOT_VERIFY})`
             )
             tagApiResult.push(
-              await tradeshiftDTO.createTags(checkTagDocumentList[i].DocumentId, encodeURIComponent('unKnownManager'))
+              await tradeshiftDTO.createTags(checkTagDocumentList[i].DocumentId, encodeURIComponent(tagUnKnownManager))
             )
           } else {
             tagApiResult.push(
@@ -245,18 +251,21 @@ const tagCreate = async (user, createdAt) => {
             // ユーザー情報がない場合
             if (userInfo instanceof Error) {
               tagApiResult.push(
-                await tradeshiftDTO.createTags(checkTagDocumentList[i].DocumentId, encodeURIComponent('unKnownManager'))
+                await tradeshiftDTO.createTags(
+                  checkTagDocumentList[i].DocumentId,
+                  encodeURIComponent(tagUnKnownManager)
+                )
               )
             }
           }
         } else {
           tagApiResult.push(
-            await tradeshiftDTO.createTags(checkTagDocumentList[i].DocumentId, encodeURIComponent('unKnownManager'))
+            await tradeshiftDTO.createTags(checkTagDocumentList[i].DocumentId, encodeURIComponent(tagUnKnownManager))
           )
         }
 
         // 確認請求書にタグを追加
-        tagApiResult.push(await tradeshiftDTO.createTags(checkTagDocumentList[i].DocumentId, 'tag_checked'))
+        tagApiResult.push(await tradeshiftDTO.createTags(checkTagDocumentList[i].DocumentId, tagCheckedPortal))
 
         // Apiエラー確認
         for (const result of tagApiResult) {
@@ -289,6 +298,7 @@ const tagCreate = async (user, createdAt) => {
       }
     }
   }
+  logger.info(constantsDefine.logMessage.INF001 + 'applyOrderController.tagCreate')
 }
 
 module.exports = {
