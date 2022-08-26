@@ -43,13 +43,12 @@ const getApprover = async (accTk, refreshTk, tenantId, keyword) => {
   const keywordName = keyword.name.replace(/\s+/g, '').trim()
   const keywordEmail = keyword.email.replace(/[+]/g, '').trim()
   userAccountsArr.forEach((account) => {
-    // const nameMeiSei = `${account.FirstName}${account.LastName}`.trim()
+    const nameMeiSei = `${account.FirstName}${account.LastName}`.trim()
     const nameSeiMei = `${account.LastName}${account.FirstName}`.trim()
     const username = account.Username.replace(/[+]/g, '').trim()
     if (keywordName.length > 0 && keyword.email.trim().length > 0) {
       if (
-        // (nameMeiSei.search(keywordName) !== -1 || nameSeiMei.search(keywordName) !== -1) &&
-        nameSeiMei.search(keywordName) !== -1 &&
+        (nameMeiSei.search(keywordName) !== -1 || nameSeiMei.search(keywordName) !== -1) &&
         username.search(keywordEmail) !== -1
       ) {
         searchUsers.push({
@@ -59,8 +58,7 @@ const getApprover = async (accTk, refreshTk, tenantId, keyword) => {
         })
       }
     } else if (keywordName.length > 0 && keyword.email.trim().length === 0) {
-      // if (nameMeiSei.search(keywordName) !== -1 || nameSeiMei.search(keywordName) !== -1) {
-      if (nameSeiMei.search(keywordName) !== -1) {
+      if (nameMeiSei.search(keywordName) !== -1 || nameSeiMei.search(keywordName) !== -1) {
         searchUsers.push({
           id: account.Id,
           name: `${account.LastName} ${account.FirstName}`,
