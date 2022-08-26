@@ -890,8 +890,7 @@ const getApprovalFromRejected = async (accessToken, refreshToken, tenant, contra
     if (approval instanceof Approval === false) return false
 
     const users = await getApprover(accessToken, refreshToken, tenant, {
-      firstName: '',
-      lastName: '',
+      name: '',
       email: ''
     })
 
