@@ -378,7 +378,7 @@ describe('applyOrderControllerのテスト', () => {
       const result = await applyOrderController.tagCreate(user, new Date())
 
       // 期待結果
-      expect(result).toEqual()
+      expect(result).toBeUndefined()
       expect(errorSpy).not.toHaveBeenCalledWith(
         { tenant: user.tenantId, stack: apiError.stack, status: 0 },
         'applyOrderController_tagCreate_getDocuments_retry3_failed'
@@ -398,7 +398,7 @@ describe('applyOrderControllerのテスト', () => {
       const result = await applyOrderController.tagCreate(user, new Date())
 
       // 期待結果
-      expect(result).toEqual()
+      expect(result).toBeUndefined()
       expect(errorSpy).not.toHaveBeenCalledWith(
         { tenant: user.tenantId, stack: apiError.stack, status: 0 },
         'applyOrderController_tagCreate_getDocuments_retry3_failed'
