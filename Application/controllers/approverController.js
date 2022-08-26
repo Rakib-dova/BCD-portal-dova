@@ -40,38 +40,46 @@ const getApprover = async (accTk, refreshTk, tenantId, keyword) => {
   }
 
   const searchUsers = []
-  const keywordName = `${keyword.firstName} ${keyword.lastName}`.trim()
+  const keywordName = keyword.name.replace(/\s+/g, '').trim()
+  const keywordEmail = keyword.email.replace(/[+]/g, '').trim()
   userAccountsArr.forEach((account) => {
-    const name = `${account.FirstName} ${account.LastName}`.trim()
+    // const nameMeiSei = `${account.FirstName}${account.LastName}`.trim()
+    const nameSeiMei = `${account.LastName}${account.FirstName}`.trim()
+    const username = account.Username.replace(/[+]/g, '').trim()
     if (keywordName.length > 0 && keyword.email.trim().length > 0) {
-      if (name.search(keywordName) !== -1 && account.Username.search(keyword.email) !== -1) {
+      if (
+        // (nameMeiSei.search(keywordName) !== -1 || nameSeiMei.search(keywordName) !== -1) &&
+        nameSeiMei.search(keywordName) !== -1 &&
+        username.search(keywordEmail) !== -1
+      ) {
         searchUsers.push({
           id: account.Id,
-          name: `${account.FirstName} ${account.LastName}`,
+          name: `${account.LastName} ${account.FirstName}`,
           email: `${account.Username}`
         })
       }
     } else if (keywordName.length > 0 && keyword.email.trim().length === 0) {
-      if (name.search(keywordName) !== -1) {
+      // if (nameMeiSei.search(keywordName) !== -1 || nameSeiMei.search(keywordName) !== -1) {
+      if (nameSeiMei.search(keywordName) !== -1) {
         searchUsers.push({
           id: account.Id,
-          name: `${account.FirstName} ${account.LastName}`,
+          name: `${account.LastName} ${account.FirstName}`,
           email: `${account.Username}`
         })
       }
     } else if (keywordName.length === 0 && keyword.email.trim().length > 0) {
-      if (account.Username.search(keyword.email) !== -1) {
+      if (username.search(keywordEmail) !== -1) {
         searchUsers.push({
           id: account.Id,
-          name: `${account.FirstName} ${account.LastName}`,
+          name: `${account.LastName} ${account.FirstName}`,
           email: `${account.Username}`
         })
       }
     }
-    if (keyword.firstName.length === 0 && keyword.lastName.length === 0 && keyword.email.length === 0) {
+    if (keyword.name.length === 0 && keyword.email.length === 0) {
       searchUsers.push({
         id: account.Id,
-        name: `${account.FirstName} ${account.LastName}`,
+        name: `${account.LastName} ${account.FirstName}`,
         email: `${account.Username}`
       })
     }
