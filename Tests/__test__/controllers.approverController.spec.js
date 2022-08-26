@@ -208,8 +208,7 @@ describe('approverControllerのテスト', () => {
       const refreshToken = 'dummy-refresh-token'
       const tenantId = 'dummy-tennant'
       const keyword = {
-        firstName: 'テスト',
-        lastName: '一般2',
+        name: '一般2',
         email: 'uttest4@uttest.com'
       }
 
@@ -225,7 +224,7 @@ describe('approverControllerのテスト', () => {
       const expectResult = [
         {
           id: 'aa974511-8188-4022-bd86-45e251fd259e',
-          name: 'テスト 一般2',
+          name: '一般2 テスト',
           email: 'uttest4@uttest.com'
         }
       ]
@@ -245,8 +244,7 @@ describe('approverControllerのテスト', () => {
       const refreshToken = 'dummy-refresh-token'
       const tenantId = 'dummy-tennant'
       const keyword = {
-        firstName: '',
-        lastName: '管理者2',
+        name: '管理者2',
         email: ''
       }
 
@@ -262,7 +260,7 @@ describe('approverControllerのテスト', () => {
       const expectResult = [
         {
           id: '3b6a13d6-cb89-414b-9597-175ba89329aa',
-          name: 'テスト 管理者2',
+          name: '管理者2 テスト',
           email: 'uttest2@uttest.com'
         }
       ]
@@ -282,8 +280,7 @@ describe('approverControllerのテスト', () => {
       const refreshToken = 'dummy-refresh-token'
       const tenantId = 'dummy-tennant'
       const keyword = {
-        firstName: '',
-        lastName: '',
+        name: '',
         email: 'uttest@uttest.com'
       }
 
@@ -299,7 +296,7 @@ describe('approverControllerのテスト', () => {
       const expectResult = [
         {
           id: '53607702-b94b-4a94-9459-6cf3acd65603',
-          name: 'テスト 管理者',
+          name: '管理者 テスト',
           email: 'uttest@uttest.com'
         }
       ]
@@ -319,8 +316,7 @@ describe('approverControllerのテスト', () => {
       const refreshToken = 'dummy-refresh-token'
       const tenantId = 'dummy-tennant'
       const keyword = {
-        firstName: '',
-        lastName: '',
+        name: '',
         email: ''
       }
 
@@ -335,22 +331,22 @@ describe('approverControllerのテスト', () => {
       const expectResult = [
         {
           id: '53607702-b94b-4a94-9459-6cf3acd65603',
-          name: 'テスト 管理者',
+          name: '管理者 テスト',
           email: 'uttest@uttest.com'
         },
         {
           id: '3b6a13d6-cb89-414b-9597-175ba89329aa',
-          name: 'テスト 管理者2',
+          name: '管理者2 テスト',
           email: 'uttest2@uttest.com'
         },
         {
           id: '7fa489ad-4c50-43d6-8057-1279877c8ef5',
-          name: 'テスト 一般',
+          name: '一般 テスト',
           email: 'uttest3@uttest.com'
         },
         {
           id: 'aa974511-8188-4022-bd86-45e251fd259e',
-          name: 'テスト 一般2',
+          name: '一般2 テスト',
           email: 'uttest4@uttest.com'
         }
       ]
@@ -3774,7 +3770,7 @@ describe('approverControllerのテスト', () => {
       // 検索予想結果
       const expectResult = {
         message: 'UTテスト差し戻し',
-        name: 'テスト 一般2'
+        name: '一般2 テスト'
       }
 
       // 試験実施
