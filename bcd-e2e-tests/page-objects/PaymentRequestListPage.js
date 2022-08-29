@@ -35,6 +35,57 @@ class PaymentRequestListPage {
     return await this.actionUtils.isDisplayed(this.frame, '#form');
   }
 
+  // 検索条件を入力する
+  async inputCondition(invoiceNo, minIssueDate, maxIssueDate, sendTo, status, mail, unKnownManager) {
+    await this.addComment('「請求書番号」にて、"' + invoiceNo + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#invoiceNumber', invoiceNo);
+    await this.addComment('「発行日」にて、"' + minIssueDate + '～' + maxIssueDate + '"と入力する');
+    if (minIssueDate) {
+      await this.actionUtils.fill(this.frame, '#minIssuedate', minIssueDate);
+    }
+    if (maxIssueDate) {
+      await this.actionUtils.fill(this.frame, '#maxIssuedate', maxIssueDate);
+    }
+    await this.addComment('「送信企業」にて、"' + sendTo + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#sendTo', sendTo);
+    await this.addComment('「承認ステータス」にて、"' + status + '"を選択する');
+    let value = '';
+    if (status == '未処理') {
+      value = '80';
+    } else if (status == '支払依頼中') {
+      value = '10';
+    } else if (status == '一次承認済み') {
+      value = '11';
+    } else if (status == '二次承認済み') {
+      value = '12';
+    } else if (status == '三次承認済み') {
+      value = '13';
+    } else if (status == '四次承認済み') {
+      value = '14';
+    } else if (status == '五次承認済み') {
+      value = '15';
+    } else if (status == '六次承認済み') {
+      value = '16';
+    } else if (status == '七次承認済み') {
+      value = '17';
+    } else if (status == '八次承認済み') {
+      value = '18';
+    } else if (status == '九次承認済み') {
+      value = '19';
+    } else if (status == '十次承認済み') {
+      value = '20';
+    } else if (status == '最終承認済み') {
+      value = '00';
+    } else if (status == '差し戻し') {
+      value = '90';
+    }
+    await this.actionUtils.check(this.frame, '//input[contains(@name, "status") and @value="' + value + '"]', true);
+    await this.addComment('「担当者アドレス」にて、"' + mail + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#managerAddress', mail);
+    await this.addComment('「担当者不明の請求書」' + (unKnownManager ? 'にチェックを入れる' : 'のチェックを外す'));
+    await this.actionUtils.check(this.frame, '', unKnownManager);
+  }
+
   // 「検索機能を利用」ボタンの表示状態を確認する
   async isLightPlanShown() {
     return await this.actionUtils.isDisplayed(this.frame, '//a[@data-target="information-lightplan"]');

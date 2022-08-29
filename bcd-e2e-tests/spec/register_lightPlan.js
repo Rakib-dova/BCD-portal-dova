@@ -17,40 +17,41 @@ describe('追加オプション申込', function () {
   // 登録情報
   const user = {
     name: {
-      name:'テスト企業',
-      kana:'テストキギョウ'
+      name:'テスト企業テスト企業テスト企業テスト企業テスト企業テスト企業テスト企業テスト企業テスト企業テスト企業テスト企業テスト企業テスト企業テスト企業テスト企業テスト企業',
+      kana:'テストキギョウウウウテストキギョウウウウテストキギョウウウウテストキギョウウウウテストキギョウウウウテストキギョウウウウテストキギョウウウウテストキギョウウウウ'
     },
     address: {
       post:'1010061',
       address:'東京都千代田区神田三崎町３丁目',
-      houseNo:'４番地９号',
-      other:'水道橋エムエスビル'
+      houseNo:'４４４４４４４４４４４４４４４４４４番地',
+      other:'水道橋水道橋水道橋水道橋水道橋水'
     },
     contact: {
-      name: 'テスト連絡先担当者',
+      name: 'テテスト連絡先担当者',
       tel:'000-0000-0000',
-      mail: config.company1.user02.id
+      mail:'abcdefghij+klmnopqrst-uvwxyz_abcdefghij+klmnopqrst-uvwxyz_abcdefghij+k@example.com'
     },
     billing: {
       post:'1010061',
       address:'東京都千代田区神田三崎町３丁目',
-      houseNo:'４番地９号',
-      other:'水道橋エムエスビル',
+      houseNo:'４４４４４４４４４４４４４４４４４４番地',
+      other:'水道橋水道橋水道橋水道橋水道橋水',
       name: 'テスト請求書送付先宛',
       kana:'テストセイキュウショソウフサキアテ',
       tel:'000-0000-0000',
-      mail:config.company1.user02.id
+      mail:'abcdefghij+klmnopqrst-uvwxyz_abcdefghij+klmnopqrst-uvwxyz_abcdefghij+k@example.com'
     },
+    openingDate: '2024/08/26',
     dealer: {
       chCode:'a1b2c3d4',
-      chName:'テスト販売店',
+      chName:'テテストテストテストテスト販売店',
       customerId:'a1b2c3d4e5f',
-      deptName:'テスト課',
+      deptName:'テストテストテストテストテスト課',
       emplyeeCode:'abcd9876',
-      person:'テスト担当者',
+      person:'テテストテスト担当者',
       deptType:'その他',
       tel:'000-0000-0000',
-      mail:config.company1.user02.id
+      mail:'abcdefghij+klmnopqrst-uvwxyz_abcdefghij+klmnopqrst-uvwxyz_abcdefghij+k@example.com'
     }
   };
 
@@ -81,7 +82,32 @@ describe('追加オプション申込', function () {
   };
 
   /**
-   * STEP8_ライトプラン_No.1,3,5,7,9-11,16,18-20
+   * STEP8_ライトプラン_No.45-47
+   */
+   it("管理者以外", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+    const context = await browser.newContext(contextOption);
+    if (page != null) {
+      page.close();
+    }
+    page = await context.newPage();
+    global.reporter.setBrowserInfo(browser, page);
+
+    // ページオブジェクト
+    const { topPage }
+      = common.getPageObject(browser, page);
+
+    // デジタルトレードアプリのトップページを表示する
+    await common.gotoTop(page, config.company1.user);
+    
+    // オプションサービス申込アイコンが表示されないこと
+    expect(await topPage.isLightPlanShown()).to.equal(false, '【トップ】「追加オプション申込」が表示されないこと');
+    await page.waitForTimeout(1000);
+  });
+
+  /**
+   * STEP8_ライトプラン_No.1,3,5,7,9-11,16,18-20,49,50
    */
   it("スタンダードプラン（未契約）", async function () {
     // テストの初期化を実施
@@ -94,7 +120,7 @@ describe('追加オプション申込', function () {
     global.reporter.setBrowserInfo(browser, page);
 
     // ページオブジェクト
-    const { topPage, lightPlanMenuPage, paidServiceRegisterPage }
+    const { topPage, lightPlanMenuPage, paidServiceRegisterPage, paidServiceRegisterInputPage }
       = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページを表示する
@@ -114,13 +140,113 @@ describe('追加オプション申込', function () {
     // 「サービス紹介LP」へ遷移すること
     expect(await lightPlanMenuPage.getDetailUrl()).to.equal('https://www.ntt.com/business/services/application/crm-dm/bconnection.html', '【トップ】「サービス紹介LP」へ遷移すること');
 
-    /*
     // 申し込み画面（利用規約）に遷移すること
     await lightPlanMenuPage.clickApply();
     await paidServiceRegisterPage.waitForLoading();
     expect(await paidServiceRegisterPage.getTitle()).to.equal('有料サービス利用登録', '【有料サービス利用登録】申し込み画面（利用規約）に遷移すること');
     expect(await paidServiceRegisterPage.isStandardChecked()).to.equal(true, '【有料サービス利用登録】「ご利用希望サービス」の「スタンダードプラン」にチェックが入っていること');
-    */
+
+    // 申し込み画面（フォーム入力）に遷移すること
+    await paidServiceRegisterPage.checkAgree();
+    await paidServiceRegisterPage.clickNext();
+    await paidServiceRegisterInputPage.waitForLoading();
+    expect(await paidServiceRegisterInputPage.getSubTitle()).to.equal(paidServiceRegisterInputPage.title, '【有料サービス利用登録】申し込み画面（フォーム入力）に遷移すること');
+    expect(await paidServiceRegisterInputPage.isOpeningDateShown()).to.equal(true, '【有料サービス利用登録】「スタンダードプラン利用開始日」欄が表示されていること');
+
+    // 登録確認画面に遷移すること（必須項目のみ入力）
+    await paidServiceRegisterInputPage.inputName(user.name);
+    await paidServiceRegisterInputPage.inputAddress(user.address, false);
+    await paidServiceRegisterInputPage.inputContact(user.contact);
+    await paidServiceRegisterInputPage.inputBillingAddress(user.billing, false);
+    await paidServiceRegisterInputPage.inputBillingContact(user.billing);
+    await paidServiceRegisterInputPage.inputPassword(config.company2.user03.password);
+    await paidServiceRegisterInputPage.clickNext();
+    let actual = await paidServiceRegisterInputPage.getReuser();
+    expect(actual.name).to.equal(user.name.name, '【有料サービス利用登録】入力した契約者名（企業名）がポップアップに表示されること');
+    expect(actual.kana).to.equal(user.name.kana, '【有料サービス利用登録】入力した契約者カナ名（企業名）がポップアップに表示されること');
+    actual = await paidServiceRegisterInputPage.getReaddress();
+    expect(actual.post).to.equal(user.address.post, '【有料サービス利用登録】入力した郵便番号がポップアップに表示されること');
+    expect(actual.address).to.equal(user.address.address + user.address.houseNo, '【有料サービス利用登録】入力した住所がポップアップに表示されること');
+    actual = await paidServiceRegisterInputPage.getRecontact();
+    expect(actual.name).to.equal(user.contact.name, '【有料サービス利用登録】入力した連絡先担当者名がポップアップに表示されること');
+    expect(actual.tel).to.equal(user.contact.tel, '【有料サービス利用登録】入力した連絡先電話番号がポップアップに表示されること');
+    expect(actual.mail).to.equal(user.contact.mail, '【有料サービス利用登録】入力した連絡先メールアドレスがポップアップに表示されること');
+    actual = await paidServiceRegisterInputPage.getRebillingAddress();
+    expect(actual.post).to.equal(user.billing.post, '【有料サービス利用登録】入力した請求書送付先郵便番号がポップアップに表示されること');
+    expect(actual.address).to.equal(user.billing.address + user.billing.houseNo, '【有料サービス利用登録】入力した請求書送付先住所がポップアップに表示されること');
+    expect(actual.name).to.equal(user.billing.name, '【有料サービス利用登録】入力した請求書送付先宛名がポップアップに表示されること');
+    expect(actual.kana).to.equal(user.billing.kana, '【有料サービス利用登録】入力した請求書送付先宛カナ名がポップアップに表示されること');
+    actual = await paidServiceRegisterInputPage.getRebillingContact();
+    expect(actual.name).to.equal(user.billing.name, '【有料サービス利用登録】入力した担当者氏名がポップアップに表示されること');
+    expect(actual.tel).to.equal(user.billing.tel, '【有料サービス利用登録】入力した担当者電話番号がポップアップに表示されること');
+    expect(actual.mail).to.equal(user.billing.mail, '【有料サービス利用登録】入力した担当者メールアドレスがポップアップに表示されること');
+
+    // 登録確認画面に遷移すること（全項目入力）
+    await paidServiceRegisterInputPage.closeConfirmPopup();
+    await paidServiceRegisterInputPage.inputAddress(user.address, true);
+    await paidServiceRegisterInputPage.inputBillingAddress(user.billing, true);
+    await paidServiceRegisterInputPage.inputDealer(user.dealer);
+    await paidServiceRegisterInputPage.clickNext();
+    actual = await paidServiceRegisterInputPage.getReaddress();
+    expect(actual.post).to.equal(user.address.post, '【有料サービス利用登録】入力した郵便番号がポップアップに表示されること');
+    expect(actual.address).to.equal(user.address.address + user.address.houseNo + user.address.other, '【有料サービス利用登録】入力した住所がポップアップに表示されること');
+    actual = await paidServiceRegisterInputPage.getRebillingAddress();
+    expect(actual.post).to.equal(user.billing.post, '【有料サービス利用登録】入力した請求書送付先郵便番号がポップアップに表示されること');
+    expect(actual.address).to.equal(user.billing.address + user.billing.houseNo + user.billing.other, '【有料サービス利用登録】入力した請求書送付先住所がポップアップに表示されること');
+    expect(actual.name).to.equal(user.billing.name, '【有料サービス利用登録】入力した請求書送付先宛名がポップアップに表示されること');
+    expect(actual.kana).to.equal(user.billing.kana, '【有料サービス利用登録】入力した請求書送付先宛カナ名がポップアップに表示されること');
+    actual = await paidServiceRegisterInputPage.getRedealer();
+    expect(actual.chCode).to.equal(user.dealer.chCode, '【有料サービス利用登録】入力した販売チャネルコードがポップアップに表示されること');
+    expect(actual.chName).to.equal(user.dealer.chName, '【有料サービス利用登録】入力した販売チャネル名がポップアップに表示されること');
+    expect(actual.customerId).to.equal(user.dealer.customerId, '【有料サービス利用登録】入力した共通顧客IDがポップアップに表示されること');
+    expect(actual.deptName).to.equal(user.dealer.deptName, '【有料サービス利用登録】入力した部課名がポップアップに表示されること');
+    expect(actual.emplyeeCode).to.equal(user.dealer.emplyeeCode, '【有料サービス利用登録】入力した社員コードがポップアップに表示されること');
+    expect(actual.person).to.equal(user.dealer.person, '【有料サービス利用登録】入力した担当者名がポップアップに表示されること');
+    expect(actual.deptType).to.equal(user.dealer.deptType, '【有料サービス利用登録】入力した組織区分がポップアップに表示されること');
+    expect(actual.tel).to.equal(user.dealer.tel, '【有料サービス利用登録】入力した電話番号がポップアップに表示されること');
+    expect(actual.mail).to.equal(user.dealer.mail, '【有料サービス利用登録】入力したメールアドレスがポップアップに表示されること');
+    await page.waitForTimeout(1000);
+  });
+
+  /**
+   * STEP8_ライトプラン_No.186-190
+   */
+   it("スタンダードプラン（契約中）", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+    const context = await browser.newContext(contextOption);
+    if (page != null) {
+      page.close();
+    }
+    page = await context.newPage();
+    global.reporter.setBrowserInfo(browser, page);
+
+    // ページオブジェクト
+    const { topPage, settingMenuPage, contractDetailPage, contractCancelPage }
+      = common.getPageObject(browser, page);
+
+    // デジタルトレードアプリのトップページを表示する
+    await common.gotoTop(page, config.company1.mng);
+
+    // 継続利用サービスにスタンダードプランが「契約中」で表示されていること
+    await topPage.openSettingMenu();
+    await settingMenuPage.waitForLoading();
+    await settingMenuPage.clickContractChange();
+    await contractDetailPage.waitForLoading();
+    expect(await contractDetailPage.getStatus('スタンダード')).to.equal('契約中', '【ご契約内容】スタンダードプランが「契約中」で表示されていること');
+    expect(await contractDetailPage.getContractNo('スタンダード')).to.not.equal('ー', '【ご契約内容】スタンダードプランの契約番号が表示されていること');
+    expect(await contractDetailPage.isCancelDisabled('フリー')).to.equal(true, '【ご契約内容】フリープランの「解約申請」ボタンが非活性となっていること');
+    expect(await contractDetailPage.isCancelDisabled('スタンダード')).to.equal(false, '【ご契約内容】スタンダードプランの「解約申請」ボタンが活性となっていること');
+
+    // スタンダードプランの契約情報解約画面へ遷移すること
+    await contractDetailPage.clickCancel('スタンダード');
+    await contractCancelPage.waitForLoading();
+    expect(await contractCancelPage.getTitle()).to.equal('契約情報解約', '【契約情報解約】スタンダードプランの契約情報解約画面へ遷移すること');
+
+    // スタンダードプランの解約確認ポップアップが表示されること
+    await contractCancelPage.clickCancelModal();
+    expect(await contractCancelPage.getCancelModalTitle()).to.equal('以下の内容を解約します', '【契約情報解約】スタンダードプランの解約確認ポップアップが表示されること');
+    await contractCancelPage.closeCancelModal();
     await page.waitForTimeout(1000);
   });
 
@@ -163,14 +289,14 @@ describe('追加オプション申込', function () {
     await paidServiceRegisterPage.clickNext();
     await paidServiceRegisterInputPage.waitForLoading();
     expect(await paidServiceRegisterInputPage.getSubTitle()).to.equal('お申し込み内容入力', '【有料サービス利用登録】申し込み画面（フォーム入力）に遷移すること');
+    expect(await paidServiceRegisterInputPage.isOpeningDateShown()).to.equal(false, '【有料サービス利用登録】「スタンダードプラン利用開始日」欄が表示されていないこと');
 
     // 登録確認画面に遷移すること（必須項目のみ入力）
-    await paidServiceRegisterInputPage.inputName(user.name.name, user.name.kana);
-    await paidServiceRegisterInputPage.inputAddress(user.address.post, user.address.address, user.address.houseNo, '');
-    await paidServiceRegisterInputPage.inputContact(user.contact.name, user.contact.tel, user.contact.mail);
-    await paidServiceRegisterInputPage.inputBillingAddress(user.billing.post, user.billing.address,
-      user.billing.houseNo, '', user.billing.name, user.billing.kana);
-    await paidServiceRegisterInputPage.inputBillingContact(user.billing.name, user.billing.tel, user.billing.mail);
+    await paidServiceRegisterInputPage.inputName(user.name);
+    await paidServiceRegisterInputPage.inputAddress(user.address, false);
+    await paidServiceRegisterInputPage.inputContact(user.contact);
+    await paidServiceRegisterInputPage.inputBillingAddress(user.billing, false);
+    await paidServiceRegisterInputPage.inputBillingContact(user.billing);
     await paidServiceRegisterInputPage.inputPassword(config.company2.user03.password);
     await paidServiceRegisterInputPage.clickNext();
     let actual = await paidServiceRegisterInputPage.getReuser();
@@ -195,13 +321,9 @@ describe('追加オプション申込', function () {
 
     // 登録確認画面に遷移すること（全項目入力）
     await paidServiceRegisterInputPage.closeConfirmPopup();
-    await paidServiceRegisterInputPage.inputAddress(user.address.post, user.address.address, user.address.houseNo,
-      user.address.other);
-    await paidServiceRegisterInputPage.inputBillingAddress(user.billing.post, user.billing.address,
-      user.billing.houseNo, user.billing.other, user.billing.name, user.billing.kana);
-    await paidServiceRegisterInputPage.inputDealer(user.dealer.chCode, user.dealer.chName, user.dealer.customerId,
-      user.dealer.deptName, user.dealer.emplyeeCode, user.dealer.person, user.dealer.deptType, user.dealer.tel,
-      user.dealer.mail);
+    await paidServiceRegisterInputPage.inputAddress(user.address, true);
+    await paidServiceRegisterInputPage.inputBillingAddress(user.billing, true);
+    await paidServiceRegisterInputPage.inputDealer(user.dealer);
     await paidServiceRegisterInputPage.clickNext();
     actual = await paidServiceRegisterInputPage.getReaddress();
     expect(actual.post).to.equal(user.address.post, '【有料サービス利用登録】入力した郵便番号がポップアップに表示されること');

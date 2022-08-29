@@ -30,6 +30,11 @@ class RegistPdfInvoicePage {
     await this.actionUtils.fill(this.frame, '#invoice-invoiceNo', invoiceNo);
   }
 
+  // 請求書番号を取得する
+  async getInvoiceNo() {
+    return await this.actionUtils.getValue(this.frame, '#invoice-invoiceNo');
+  }
+
   // 宛先を入力する
   async inputReciever(name, post, pref, address, building) {
     await this.addComment('「宛先企業名」にて、"' + name + '"と入力する');
@@ -54,10 +59,10 @@ class RegistPdfInvoicePage {
     await this.addComment('「' + itemName + '」にて、"' + date + '"と入力する');
     let elm = await this.actionUtils.getElement(this.frame, selector);
     let dates = date.split('/');
-    await elm.type(dates[0], {delay:500});
-    await elm.press('Tab', {delay:500});
-    await elm.type(dates[1], {delay:500});
-    await elm.type(dates[2], {delay:500});
+    await elm.type(dates[0]);
+    await elm.press('Tab');
+    await elm.type(dates[1]);
+    await elm.type(dates[2]);
   }
 
   // 請求日を入力する
@@ -70,9 +75,19 @@ class RegistPdfInvoicePage {
     await this.inputDate('支払期限', '#invoice-paymentDate', date);
   }
 
+  // 支払期限を取得する
+  async getPaymentDate() {
+    return await this.actionUtils.getValue(this.frame, '#invoice-paymentDate');
+  }
+
   // 納品日を入力する
   async inputDeliveryDate(date) {
     await this.inputDate('納品日', '#invoice-deliveryDate', date);
+  }
+
+  // 合計金額を取得する
+  async getTotalAmount() {
+    return await this.actionUtils.getText(this.frame, '#totalAmount');
   }
 
   // 項目IDその他を入力する
@@ -88,12 +103,17 @@ class RegistPdfInvoicePage {
     await this.addComment('「単位」にて、"' + unit + '"と入力する');
     await this.actionUtils.click(this.frame, '//input[@data-prop="unit"]');
     await this.actionUtils.fill(this.frame, '//input[@data-prop="unit"]', unit);
-    await this.addComment('「単価」にて、"' + unitPrice + '"と入力する');
-    await this.actionUtils.click(this.frame, '//input[@data-prop="unitPrice"]');
-    await this.actionUtils.fill(this.frame, '//input[@data-prop="unitPrice"]', unitPrice);
+    await this.inputUnitPrice(unitPrice);
     await this.addComment('「税」にて、"' + taxType + '"を選択する');
     let elm = await this.actionUtils.getElement(this.frame, '//select[@data-prop="taxType"]');
     await elm.selectOption(taxType);
+  }
+
+  // 単価を入力する
+  async inputUnitPrice(unitPrice) {
+    await this.addComment('「単価」にて、"' + unitPrice + '"と入力する');
+    await this.actionUtils.click(this.frame, '//input[@data-prop="unitPrice"]');
+    await this.actionUtils.fill(this.frame, '//input[@data-prop="unitPrice"]', unitPrice);
   }
 
   // 割引行を追加する
@@ -152,7 +172,7 @@ class RegistPdfInvoicePage {
   async save() {
     await this.addComment('「一時保存」をクリックする');
     await this.actionUtils.click(this.frame, '#save-btn');
-    await this.page.waitForTimeout(3000);
+    await this.page.waitForTimeout(5000);
   }
 
   // 処理中メッセージを表示する

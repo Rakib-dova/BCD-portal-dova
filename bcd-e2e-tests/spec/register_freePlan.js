@@ -158,7 +158,7 @@ describe('利用登録', function () {
       = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページを表示する
-    await common.gotoTop(page, config.company1.mng);
+    await common.gotoTop(page, config.company2.user06);
 
     // ご契約内容画面に遷移すること
     await topPage.openSettingMenu();
@@ -175,14 +175,12 @@ describe('利用登録', function () {
     await contractChangePage.waitForLoading();
     expect(await contractChangePage.getTitle()).to.equal('契約情報変更', '【契約情報変更】契約変更画面へ遷移すること');
 
-    /*
     // フリープランの契約情報解約画面へ遷移すること
     await contractChangePage.back();
     await contractDetailPage.waitForLoading();
-    await contractDetailPage.clickCancel();
+    await contractDetailPage.clickCancel('フリー');
     await contractCancelPage.waitForLoading();
     expect(await contractCancelPage.getTitle()).to.equal('契約情報解約', '【契約情報解約】契約情報解約画面へ遷移すること');
-    */
     await page.waitForTimeout(1000);
   });
 });
