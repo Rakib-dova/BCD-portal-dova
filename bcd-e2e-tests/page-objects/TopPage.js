@@ -88,6 +88,11 @@ class TopPage {
     await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[text()="サポート"]/../../..')
   }
 
+  // 「追加オプション申込」が表示されているか確認する
+  async isSettingMenuShown() {
+    return await this.actionUtils.isDisplayed(this.frame, '//*[contains(@class,"box")]//*[text()="設定"]');
+  }
+
   // 「設定」メニューを開く
   async openSettingMenu() {
     await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[text()="設定"]')

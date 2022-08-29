@@ -49,6 +49,8 @@ const { RegistPdfInvoicePage } = require('../page-objects/RegistPdfInvoicePage')
 const { LightPlanMenuPage } = require('../page-objects/LightPlanMenuPage');
 const { PaidServiceRegisterPage } = require('../page-objects/PaidServiceRegisterPage');
 const { PaidServiceRegisterInputPage } = require('../page-objects/PaidServiceRegisterInputPage');
+const { CsvUploadForPdfPage } = require('../page-objects/CsvUploadForPdfPage');
+const { BulkUploadUsersPage } = require('../page-objects/BulkUploadUsersPage');
 
 // テストの準備を行う
 exports.initTest = async () => {
@@ -133,6 +135,8 @@ exports.getPageObject = (browser, page) => {
   pages.lightPlanMenuPage = new LightPlanMenuPage(browser, page);
   pages.paidServiceRegisterPage = new PaidServiceRegisterPage(browser, page);
   pages.paidServiceRegisterInputPage = new PaidServiceRegisterInputPage(browser, page);
+  pages.csvUploadForPdfPage = new CsvUploadForPdfPage(browser, page);
+  pages.bulkUploadUsersPage = new BulkUploadUsersPage(browser, page);
   this.pages = pages;
   return pages;
 }

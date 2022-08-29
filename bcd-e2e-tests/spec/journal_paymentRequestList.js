@@ -115,6 +115,7 @@ describe('仕訳情報設定_支払依頼一覧', function () {
 
   /**
    * STEP5_No.109
+   * STEP8_機能改修確認_No.
    */
   it("受領請求書への仕訳情報設定", async function () {
     // テストの初期化を実施
@@ -159,6 +160,11 @@ describe('仕訳情報設定_支払依頼一覧', function () {
       // 差出人・宛先・価格を取得する
       let cost = await paymentRequestListPage.getCost(invoiceNo);
       let sender = await paymentRequestListPage.getSender(invoiceNo);
+
+      // 請求書を検索する
+      if (await paymentRequestListPage.isFormShown()) {
+
+      }
 
       // 仕訳情報設定ページへ遷移する
       await comment('「仕訳情報設定」をクリックする');

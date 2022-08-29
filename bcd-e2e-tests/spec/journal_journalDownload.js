@@ -138,13 +138,11 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
     expect(await lightPlanMenuPage.getTitle()).to.equal('オプションサービス申込', '「オプションサービス申込」モーダルが表示されること');
     expect(await lightPlanMenuPage.getApplyEnabled()).to.equal(true, '「お申し込みフォーム」ボタンが活性状態であること');
 
-    /*
     // 申し込み画面（利用規約）に遷移すること
     await lightPlanMenuPage.clickApply();
     await paidServiceRegisterPage.waitForLoading();
     expect(await paidServiceRegisterPage.getTitle()).to.equal('有料サービス利用登録', '申し込み画面（利用規約）に遷移すること');
     expect(await paidServiceRegisterPage.isStandardChecked()).to.equal(true, '「ご利用希望サービス」の「スタンダードプラン」にチェックが入っていること');
-    */
     await page.waitForTimeout(1000);
   });
 
@@ -329,7 +327,6 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
   async function validateYayoi(csvPath, expected) {
     let actual = await getCsvData(csvPath, true, false);
     for (i = 0; i < expected.length; i++) {
-      await comment(JSON.stringify(expected[i]));
       let names = await getNames(expected[i].accountCode, expected[i].subAccountCode, expected[i].departmentCode);
       expect(actual[i][4]).to.equal(names.accountName, (i + 2) + '行目にて、5列目が借方勘定科目名であること');
       expect(actual[i][5]).to.equal(names.subAccountName, (i + 2) + '行目にて、6列目が借方補助科目名であること');
@@ -360,8 +357,6 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
     // 支払依頼一覧から、仕訳情報の詳細を取得する
     let invoiceNo = 'fcde40393';
     let expected = await getDetail(topPage, journalMenuPage, paymentRequestListPage, journalDetailPage, invoiceNo, 1);
-
-    // 仕訳情報詳細から、勘定科目名、補助科目名、部署コード名を取得する
 
     // デジタルトレードアプリのホームへ遷移する
     await journalDetailPage.clickHome();
@@ -473,7 +468,6 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
     // 仕訳情報ダウンロード画面で絞り込みをしたデータと同一の内容になっていること
     let actual = await getCsvData(csvPath, true, true);
     for (i = 0; i < expected.length; i++) {
-      await comment(JSON.stringify(actual[i]));
       expect(actual[i]['借方科目コード']).to.equal(expected[i].accountCode, (i + 2) + '行目にて、借方科目コードが出力されていること');
       expect(actual[i]['借方補助コード']).to.equal(expected[i].subAccountCode, (i + 2) + '行目にて、借方補助コードが出力されていること');
       expect(actual[i]['借方部門コード']).to.equal(expected[i].departmentCode, (i + 2) + '行目にて、借方部門コードが出力されていること');
@@ -482,6 +476,46 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
       expect(actual[i]['貸方補助コード']).to.equal(expected[i].creditSubAccountCode, (i + 2) + '行目にて、貸方補助コードが出力されていること');
       expect(actual[i]['貸方部門コード']).to.equal(expected[i].creditDepartmentCode, (i + 2) + '行目にて、貸方部門コードが出力されていること');
       expect(actual[i]['貸方金額']).to.equal(expected[i].cost.replaceAll(/,/g, ''), (i + 2) + '行目にて、貸方金額が出力されていること');
+    }
+    await page.waitForTimeout(1000);
+  });
+
+  /**
+   * STEP8_機能改修確認_No.150,151,154,157
+   */
+   it("大蔵大臣NX", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+
+    // ページオブジェクト
+    const { topPage, journalMenuPage, journalDownloadPage, paymentRequestListPage, journalDetailPage }
+      = common.getPageObject(browser, page);
+
+    // デジタルトレードアプリのトップページへ遷移する
+    await common.gotoTop(page, config.company1.mng);
+
+    // 支払依頼一覧から、仕訳情報の詳細を取得する
+    let invoiceNo = 'fcde40393';
+    let expected = await getDetail(topPage, journalMenuPage, paymentRequestListPage, journalDetailPage, invoiceNo, 1);
+
+    // デジタルトレードアプリのホームへ遷移する
+    await journalDetailPage.clickHome();
+    await topPage.waitForLoading();
+
+    // ダウンロードする
+    let csvPath = await download(topPage, journalMenuPage, journalDownloadPage, invoiceNo, '2021-08-21', '2021-08-25', null, false, '大蔵大臣NX', true);
+
+    // 仕訳情報ダウンロード画面で絞り込みをしたデータと同一の内容になっていること
+    let actual = await getCsvData(csvPath, true, false);
+    for (i = 0; i < expected.length; i++) {
+      expect(actual[i][7]).to.equal(expected[i].accountCode.substring(0, 4), (i + 1) + '行目にて、8列目が借方勘定科目名であること');
+      expect(actual[i][8]).to.equal(expected[i].subAccountCode.substring(0, 4), (i + 1) + '行目にて、9列目が借方補助科目名であること');
+      expect(actual[i][10]).to.equal(expected[i].departmentCode, (i + 1) + '行目にて、11列目が借方部門名であること');
+      expect(actual[i][15]).to.equal(expected[i].cost.replaceAll(/,/g, ''), (i + 1) + '行目にて、16列目が借方価格であること');
+      expect(actual[i][20]).to.equal(expected[i].creditAccountCode.substring(0, 4), (i + 1) + '行目にて、21列目が貸方勘定科目名であること');
+      expect(actual[i][21]).to.equal(expected[i].creditSubAccountCode.substring(0, 4), (i + 1) + '行目にて、22列目が貸方補助科目名であること');
+      expect(actual[i][23]).to.equal(expected[i].creditDepartmentCode, (i + 1) + '行目にて、24列目が貸方部門名であること');
+      expect(actual[i][28]).to.equal(expected[i].cost.replaceAll(/,/g, ''), (i + 1) + '行目にて、29列目が貸方価格であること');
     }
     await page.waitForTimeout(1000);
   });

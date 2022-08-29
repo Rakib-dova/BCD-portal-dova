@@ -24,19 +24,27 @@ class ContractCancelPage {
     return frame;
   }
 
-  // 情報変更が可能か否かを確認する
-  async ableToChange() {
-    return await this.actionUtils.isDisplayed(this.frame, '#cancelltion-button');
+  // タイトルを取得する
+  async getTitle() {
+    return await this.actionUtils.getText(this.frame, '.title');
   }
 
   // 解約する
-  async cancel() {
-    await this.addComment('「次へ」をクリックする');
-    await this.actionUtils.click(this.frame, '#cancelltion-button');
-    await this.actionUtils.waitForLoading('#submit');
-    await this.addComment('「解約」をクリックする');
-    await this.actionUtils.click('#submit');
-    await this.actionUtils.waitForLoading('p .subtitle');
+  async clickCancelModal() {
+    await this.addComment('「解約手続へ」をクリックする');
+    await this.actionUtils.click(this.frame, '//a[text()="解約手続へ"]');
+    await this.actionUtils.waitForLoading('#cancell-modal');
+  }
+
+  // 確認ダイアログのタイトルを取得する
+  async getCancelModalTitle() {
+    return await this.actionUtils.getText(this.frame, '//div[@id="cancell-modal"]//p[@class="modal-card-title"]');
+  }
+
+  // 確認ダイアログの「キャンセル」をクリックする
+  async closeCancelModal() {
+    await this.addComment('解約確認モーダルの「キャンセル」をクリックする');
+    await this.actionUtils.click(this.frame, '//div[@id="cancell-modal"]//a[contains(text(), "キャンセル")]');
   }
 }
 exports.ContractCancelPage = ContractCancelPage;

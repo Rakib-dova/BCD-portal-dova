@@ -30,80 +30,80 @@ class PaidServiceRegisterInputPage {
   }
 
   // 契約者名を入力する
-  async inputName(name, kana) {
+  async inputName(values) {
     await this.addComment('契約者名の各項目への入力');
-    await this.addComment('契約者名（企業名）にて、"' + name + '"と入力する');
-    await this.actionUtils.fill(this.frame, '#contractorName', name);
-    await this.addComment('契約者カナ名（企業名）にて、"' + name + '"と入力する');
-    await this.actionUtils.fill(this.frame, '#contractorKanaName', kana);
+    await this.addComment('契約者名（企業名）にて、"' + values.name + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#contractorName', values.name);
+    await this.addComment('契約者カナ名（企業名）にて、"' + values.kana + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#contractorKanaName', values.kana);
   }
 
   // 契約者住所を入力する
-  async inputAddress(postNo, address, houseNo, other) {
+  async inputAddress(values, inputAll) {
     await this.addComment('契約者住所の各項目への入力');
     if (await this.actionUtils.getValue(this.frame, '#postalNumber')) {
       await this.addComment('郵便番号の「クリア」をクリックする');
       await this.actionUtils.click(this.frame, '#postalClearBtn');
     }
-    await this.addComment('郵便番号にて、"' + postNo + '"と入力する');
-    await this.actionUtils.fill(this.frame, '#postalNumber', postNo);
+    await this.addComment('郵便番号にて、"' + values.post + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#postalNumber', values.post);
     await this.addComment('郵便番号の「検索」をクリックする');
     await this.actionUtils.click(this.frame, '#postalSearchBtn');
     await this.actionUtils.waitForLoading('//a[@class="resultAddress"]');
-    await this.addComment('住所の検索結果にて、"' + address + '"をクリックする');
-    await this.actionUtils.click(this.frame, '//a[contains(text(), "' + address + '")]');
+    await this.addComment('住所の検索結果にて、"' + values.address + '"をクリックする');
+    await this.actionUtils.click(this.frame, '//a[contains(text(), "' + values.address + '")]');
     await this.page.waitForTimeout(500);
-    await this.addComment('番地にて、"' + houseNo + '"と入力する');
-    await this.actionUtils.fill(this.frame, '#banch1', houseNo);
-    await this.addComment('建物等にて、"' + other + '"と入力する');
-    await this.actionUtils.fill(this.frame, '#tatemono1', other);
+    await this.addComment('番地にて、"' + values.houseNo + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#banch1', values.houseNo);
+    await this.addComment('建物等にて、"' + (inputAll ? values.other : '') + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#tatemono1', (inputAll ? values.other : ''));
   }
 
   // 契約者連絡先を入力する
-  async inputContact(name, tel, mail) {
+  async inputContact(values) {
     await this.addComment('契約者連絡先の各項目への入力');
-    await this.addComment('連絡先担当者名にて、"' + name + '"と入力する');
-    await this.actionUtils.fill(this.frame, '#contactPersonName', name);
-    await this.addComment('連絡先電話番号にて、"' + tel + '"と入力する');
-    await this.actionUtils.fill(this.frame, '#contactPhoneNumber', tel);
-    await this.addComment('連絡先メールアドレスにて、"' + mail + '"と入力する');
-    await this.actionUtils.fill(this.frame, '#contactMail', mail);
+    await this.addComment('連絡先担当者名にて、"' + values.name + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#contactPersonName', values.name);
+    await this.addComment('連絡先電話番号にて、"' + values.tel + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#contactPhoneNumber', values.tel);
+    await this.addComment('連絡先メールアドレスにて、"' + values.mail + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#contactMail', values.mail);
   }
 
   // 請求情報を入力する
-  async inputBillingAddress(postNo, address, houseNo, other, name, kana) {
+  async inputBillingAddress(values, inputAll) {
     await this.addComment('請求情報の各項目への入力');
     if (await this.actionUtils.getValue(this.frame, '#billMailingPostalNumber')) {
       await this.addComment('郵便番号の「クリア」をクリックする');
       await this.actionUtils.click(this.frame, '#billMailingClearBtn');
     }
-    await this.addComment('請求書送付先郵便番号にて、"' + postNo + '"と入力する');
-    await this.actionUtils.fill(this.frame, '#billMailingPostalNumber', postNo);
+    await this.addComment('請求書送付先郵便番号にて、"' + values.post + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#billMailingPostalNumber', values.post);
     await this.addComment('郵便番号の「検索」をクリックする');
     await this.actionUtils.click(this.frame, '#billMailingSearchBtn');
     await this.actionUtils.waitForLoading('//a[@class="resultAddress"]');
-    await this.addComment('住所の検索結果にて、"' + address + '"をクリックする');
-    await this.actionUtils.click(this.frame, '//a[contains(text(), "' + address + '")]');
+    await this.addComment('住所の検索結果にて、"' + values.address + '"をクリックする');
+    await this.actionUtils.click(this.frame, '//a[contains(text(), "' + values.address + '")]');
     await this.page.waitForTimeout(500);
-    await this.addComment('請求書送付先番地にて、"' + houseNo + '"と入力する');
-    await this.actionUtils.fill(this.frame, '#billMailingAddressBanchi1', houseNo);
-    await this.addComment('請求書送付先建物等にて、"' + other + '"と入力する');
-    await this.actionUtils.fill(this.frame, '#billMailingAddressBuilding1', other);
-    await this.addComment('請求書送付先宛名にて、"' + other + '"と入力する');
-    await this.actionUtils.fill(this.frame, '#billMailingKanaName', name);
-    await this.addComment('請求書送付先宛カナ名にて、"' + other + '"と入力する');
-    await this.actionUtils.fill(this.frame, '#billMailingName', kana);
+    await this.addComment('請求書送付先番地にて、"' + values.houseNo + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#billMailingAddressBanchi1', values.houseNo);
+    await this.addComment('請求書送付先建物等にて、"' + (inputAll ? values.other : '') + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#billMailingAddressBuilding1', (inputAll ? values.other : ''));
+    await this.addComment('請求書送付先宛名にて、"' + values.name + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#billMailingName', values.name);
+    await this.addComment('請求書送付先宛カナ名にて、"' + values.kana + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#billMailingKanaName', values.kana);
   }
 
   // 請求連絡先を入力する
-  async inputBillingContact(name, tel, mail) {
+  async inputBillingContact(values) {
     await this.addComment('請求連絡先の各項目への入力');
-    await this.addComment('担当者名にて、"' + name + '"と入力する');
-    await this.actionUtils.fill(this.frame, '#billMailingPersonName', name);
-    await this.addComment('担当者電話番号にて、"' + tel + '"と入力する');
-    await this.actionUtils.fill(this.frame, '#billMailingPhoneNumber', tel);
-    await this.addComment('担当者メールアドレスにて、"' + mail + '"と入力する');
-    await this.actionUtils.fill(this.frame, '#billMailingMailAddress', mail);
+    await this.addComment('担当者名にて、"' + values.name + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#billMailingPersonName', values.name);
+    await this.addComment('担当者電話番号にて、"' + values.tel + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#billMailingPhoneNumber', values.tel);
+    await this.addComment('担当者メールアドレスにて、"' + values.mail + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#billMailingMailAddress', values.mail);
   }
 
   // パスワードを入力する
@@ -115,27 +115,43 @@ class PaidServiceRegisterInputPage {
     await this.actionUtils.fill(this.frame, '#passwordConfirm', pwd);
   }
 
+  // スタンダードプラン利用開始日が表示されているか
+  async isOpeningDateShown() {
+    return await this.actionUtils.isDisplayed(this.frame, '#openingDate');
+  }
+
+  // スタンダードプラン利用開始日を入力する
+  async inputOpeningDate(openingDate) {
+    this.addComment('スタンダードプラン利用開始日にて、"' + openingDate + '"と入力する');
+    let dates = openingDate.split('/');
+    let elm = await this.actionUtils.getElement(this.frame, '#openingDate');
+    let i = 0;
+    for (i = 0; i < dates.length; i++) {
+      await elm.type(dates[i], { delay: 500 });
+    }
+  }
+
   // お客様担当情報を入力する
-  async inputDealer(chCode, chName, customerId, deptName, emplyeeCode, personName, deptType, tel, mail) {
+  async inputDealer(values) {
     await this.addComment('お客様担当情報の各項目への入力');
-    await this.addComment('販売チャネルコードにて、"' + chCode + '"と入力する');
-    await this.actionUtils.fill(this.frame, '#salesChannelCode', chCode);
-    await this.addComment('販売チャネル名にて、"' + chName + '"と入力する');
-    await this.actionUtils.fill(this.frame, '#salesChannelName', chName);
-    await this.addComment('共通顧客IDにて、"' + customerId + '"と入力する');
-    await this.actionUtils.fill(this.frame, '#commonCustomerId', customerId);
-    await this.addComment('部課名にて、"' + deptName + '"と入力する');
-    await this.actionUtils.fill(this.frame, '#salesChannelDeptName', deptName);
-    await this.addComment('社員コードにて、"' + emplyeeCode + '"と入力する');
-    await this.actionUtils.fill(this.frame, '#salesChannelEmplyeeCode', emplyeeCode);
-    await this.addComment('担当者名にて、"' + personName + '"と入力する');
-    await this.actionUtils.fill(this.frame, '#salesChannelPersonName', personName);
-    await this.addComment('組織区分にて、"' + deptType + '"を選択する');
-    await this.actionUtils.selectByXpath(this.frame, '//select[@id="salesChannelDeptType"]', deptType);
-    await this.addComment('電話番号にて、"' + tel + '"を選択する');
-    await this.actionUtils.fill(this.frame, '#salesChannelPhoneNumber', tel);
-    await this.addComment('メールアドレスにて、"' + mail + '"を選択する');
-    await this.actionUtils.fill(this.frame, '#salesChannelMailAddress', mail);
+    await this.addComment('販売チャネルコードにて、"' + values.chCode + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#salesChannelCode', values.chCode);
+    await this.addComment('販売チャネル名にて、"' + values.chName + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#salesChannelName', values.chName);
+    await this.addComment('共通顧客IDにて、"' + values.customerId + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#commonCustomerId', values.customerId);
+    await this.addComment('部課名にて、"' + values.deptName + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#salesChannelDeptName', values.deptName);
+    await this.addComment('社員コードにて、"' + values.emplyeeCode + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#salesChannelEmplyeeCode', values.emplyeeCode);
+    await this.addComment('担当者名にて、"' + values.person + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#salesChannelPersonName', values.person);
+    await this.addComment('組織区分にて、"' + values.deptType + '"を選択する');
+    await this.actionUtils.selectByXpath(this.frame, '//select[@id="salesChannelDeptType"]', values.deptType);
+    await this.addComment('電話番号にて、"' + values.tel + '"を選択する');
+    await this.actionUtils.fill(this.frame, '#salesChannelPhoneNumber', values.tel);
+    await this.addComment('メールアドレスにて、"' + values.mail + '"を選択する');
+    await this.actionUtils.fill(this.frame, '#salesChannelMailAddress', values.mail);
   }
 
   // 「内容確認」をクリックする
@@ -175,8 +191,8 @@ class PaidServiceRegisterInputPage {
     return {
       post: await this.actionUtils.getText(this.frame, '#rebillMailingPostalNumber'),
       address: await this.actionUtils.getText(this.frame, '#rebillMailingAddress'),
-      name: await this.actionUtils.getText(this.frame, '#rebillMailingKanaName'),
-      kana: await this.actionUtils.getText(this.frame, '#rebillMailingName')
+      name: await this.actionUtils.getText(this.frame, '#rebillMailingName'),
+      kana: await this.actionUtils.getText(this.frame, '#rebillMailingKanaName')
     };
   }
 
