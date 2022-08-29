@@ -41,8 +41,7 @@ $('#btn-search-approver').addEventListener('click', function () {
   const approverApi = new XMLHttpRequest()
   // キーワードの取得
   const searchKeyword = {
-    firstName: $('#searchModalApproveUserLastName').value,
-    lastName: $('#searchModalApproveUserFirstName').value,
+    name: $('#searchModalApproveUserName').value,
     email: $('#searchModalApproveUserMailAddress').value
   }
   const elements = document.getElementsByName('_csrf')
