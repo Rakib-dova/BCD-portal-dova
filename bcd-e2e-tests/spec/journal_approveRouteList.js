@@ -121,7 +121,7 @@ describe('仕訳情報設定_承認ルート一覧', function () {
 
       // 担当者行の担当者とメールアドレスが画面に反映されていること
       users = await registApproveRoutePage.getUsers();
-      expect(users[0].name).to.equal(authorizer.first + ' ' + authorizer.family, '承認者名が反映されること');
+      expect(users[0].name).to.equal(authorizer.family + ' ' + authorizer.first, '承認者名が反映されること');
       expect(users[0].mail).to.equal(authorizer.id, 'メールアドレスが反映されること');
       await page.waitForTimeout(1000);
     }
@@ -194,7 +194,7 @@ describe('仕訳情報設定_承認ルート一覧', function () {
       let users = await registApproveRoutePage.getUsersOnConfirm();
       for (i = 0; i < authorizers.length; i++) {
         let nameMessage = (i < authorizers.length - 1 ? (i + 1) + '次' : '最終') + '承認者が"' + authorizers[i].family + ' ' + authorizers[i].first + '"であること';
-        expect(users[i].name).to.equal(authorizers[i].first + ' ' + authorizers[i].family, nameMessage);
+        expect(users[i].name).to.equal(authorizers[i].family + ' ' + authorizers[i].first, nameMessage);
       }
       await page.waitForTimeout(1000);
     }
