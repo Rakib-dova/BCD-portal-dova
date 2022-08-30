@@ -345,6 +345,117 @@ const pdfInvoiceTestData = {
       }
     ]
   },
+  hasSealImp2HasAllTax: {
+    dataValues: {
+      invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+      invoiceNo: '111111',
+      tmpFlg: true,
+      outputDate: new Date('2022-05-12T04:16:21.170Z'),
+      billingDate: new Date('2022-05-13T00:00:00.000Z'),
+      currency: 'JPY',
+      paymentDate: new Date('2022-05-14T00:00:00.000Z'),
+      deliveryDate: new Date('2022-05-15T00:00:00.000Z'),
+      recCompany: '宛先ダミー企業',
+      recPost: '0000000',
+      recAddr1: '東京都',
+      recAddr2: '大手町',
+      recAddr3: '大手町ビル',
+      sendTenantId: '795e60d0-1cf4-4bb3-a3e5-06d94ad438af',
+      sendCompany: '送信先ダミー企業',
+      sendPost: '100-8019',
+      sendAddr1: '東京都',
+      sendAddr2: '大手町',
+      sendAddr3: '大手町プレイスウエスト',
+      sendRegistrationNo: 'T1234567890123',
+      bankName: '銀行名',
+      branchName: '支店',
+      accountType: '科目',
+      accountName: 'あああ',
+      accountNumber: '1234567',
+      note: '備考備考備考\n備考',
+      createdAt: new Date('2022-05-13T00:00:00.000Z'),
+      updatedAt: new Date('2022-05-13T00:00:00.000Z'),
+      PdfSealImp: {
+        dataValues: { invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5', image: 'dummyBuffer' }
+      }
+    },
+    PdfInvoiceLines: [
+      {
+        dataValues: {
+          invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+          lineIndex: 0,
+          lineId: 'a0001',
+          lineDescription: '内容１',
+          unit: 'KG',
+          unitPrice: 100,
+          quantity: 20,
+          taxType: 'tax8p'
+        }
+      },
+      {
+        dataValues: {
+          invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+          lineIndex: 1,
+          lineId: 'a0002',
+          lineDescription: '内容２',
+          unit: 'KG',
+          unitPrice: 200,
+          quantity: 20,
+          taxType: 'tax10p'
+        }
+      },
+      {
+        dataValues: {
+          invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+          lineIndex: 2,
+          lineId: 'a0003',
+          lineDescription: '内容3',
+          unit: 'KG',
+          unitPrice: 300,
+          quantity: 20,
+          taxType: 'nonTaxable'
+        }
+      },
+      {
+        dataValues: {
+          invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+          lineIndex: 3,
+          lineId: 'a0004',
+          lineDescription: '内容4',
+          unit: 'KG',
+          unitPrice: 400,
+          quantity: 20,
+          taxType: 'untaxable'
+        }
+      },
+      {
+        dataValues: {
+          invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+          lineIndex: 4,
+          lineId: 'a0005',
+          lineDescription: '内容5',
+          unit: 'KG',
+          unitPrice: 500,
+          quantity: 20,
+          taxType: 'taxExemption'
+        }
+      },
+      {
+        dataValues: {
+          invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+          lineIndex: 5,
+          lineId: 'a0006',
+          lineDescription: '内容6',
+          unit: 'KG',
+          unitPrice: 600,
+          quantity: 20,
+          taxType: 'otherTax',
+          taxLabel: 'taxName',
+          taxAmount: 1000
+        }
+      }
+    ]
+  },
   hasSealImpHasLineDis: {
     dataValues: {
       invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
@@ -751,6 +862,123 @@ const pdfInvoiceTestData = {
           discountDescription2: 'text2',
           discountAmount2: '5',
           discountUnit2: 'percent'
+        }
+      }
+    ]
+  },
+  noSealImpHasInvDisHaslineDisHasAllTax: {
+    dataValues: {
+      invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+      invoiceNo: '111111',
+      tmpFlg: false,
+      outputDate: new Date('2022-05-12T04:16:21.170Z'),
+      billingDate: new Date('2022-05-13T00:00:00.000Z'),
+      currency: 'JPY',
+      paymentDate: new Date('2022-05-14T00:00:00.000Z'),
+      deliveryDate: new Date('2022-05-15T00:00:00.000Z'),
+      recCompany: '宛先ダミー企業',
+      recPost: '0000000',
+      recAddr1: '東京都',
+      recAddr2: '大手町',
+      recAddr3: '大手町ビル',
+      sendTenantId: '795e60d0-1cf4-4bb3-a3e5-06d94ad438af',
+      sendCompany: '送信先ダミー企業',
+      sendPost: '100-8019',
+      sendAddr1: '東京都',
+      sendAddr2: '大手町',
+      sendAddr3: '大手町プレイスウエスト',
+      bankName: '銀行名',
+      branchName: '支店',
+      accountType: '科目',
+      accountName: 'あああ',
+      accountNumber: '1234567',
+      note: '備考備考備考\n備考',
+      createdAt: new Date('2022-05-13T00:00:00.000Z'),
+      updatedAt: new Date('2022-05-13T00:00:00.000Z'),
+      disocunts: 1,
+      discountDescription1: 'text1',
+      discountAmount1: '30',
+      discountUnit1: 'percent',
+      PdfSealImp: {
+        dataValues: { invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5', image: null }
+      }
+    },
+    PdfInvoiceLines: [
+      {
+        dataValues: {
+          invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+          lineIndex: 0,
+          lineId: 'a0001',
+          lineDescription: '内容１',
+          unit: 'KG',
+          unitPrice: 100,
+          quantity: 20,
+          taxType: 'tax8p',
+          discountDescription1: 'text1',
+          discountAmount1: '30',
+          discountUnit1: 'percent'
+        }
+      },
+      {
+        dataValues: {
+          invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+          lineIndex: 1,
+          lineId: 'a0002',
+          lineDescription: '内容２',
+          unit: 'KG',
+          unitPrice: 200,
+          quantity: 20,
+          taxType: 'tax10p'
+        }
+      },
+      {
+        dataValues: {
+          invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+          lineIndex: 2,
+          lineId: 'a0003',
+          lineDescription: '内容3',
+          unit: 'KG',
+          unitPrice: 300,
+          quantity: 20,
+          taxType: 'nonTaxable'
+        }
+      },
+      {
+        dataValues: {
+          invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+          lineIndex: 3,
+          lineId: 'a0004',
+          lineDescription: '内容4',
+          unit: 'KG',
+          unitPrice: 400,
+          quantity: 20,
+          taxType: 'untaxable'
+        }
+      },
+      {
+        dataValues: {
+          invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+          lineIndex: 4,
+          lineId: 'a0005',
+          lineDescription: '内容5',
+          unit: 'KG',
+          unitPrice: 500,
+          quantity: 20,
+          taxType: 'taxExemption'
+        }
+      },
+      {
+        dataValues: {
+          invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+          lineIndex: 5,
+          lineId: 'a0006',
+          lineDescription: '内容6',
+          unit: 'KG',
+          unitPrice: 600,
+          quantity: 20,
+          taxType: 'otherTax',
+          taxLabel: 'taxName',
+          taxAmount: 1000
         }
       }
     ]
@@ -1608,6 +1836,216 @@ const exprectedEditData = {
     logoSrc: null,
     editing: true,
     csrfToken: 'dummyCsrfToken'
+  },
+  hasSealImpHasLogoHasAllTax: {
+    title: 'PDF請求書編集',
+    engTitle: 'EDIT PDF INVOICE',
+    invoice: JSON.stringify({
+      invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+      invoiceNo: '111111',
+      tmpFlg: true,
+      outputDate: new Date('2022-05-12T04:16:21.170Z'),
+      billingDate: new Date('2022-05-13T09:00:00.000Z'),
+      currency: 'JPY',
+      paymentDate: new Date('2022-05-14T09:00:00.000Z'),
+      deliveryDate: new Date('2022-05-15T09:00:00.000Z'),
+      recCompany: '宛先ダミー企業',
+      recPost: '0000000',
+      recAddr1: '東京都',
+      recAddr2: '大手町',
+      recAddr3: '大手町ビル',
+      sendTenantId: '795e60d0-1cf4-4bb3-a3e5-06d94ad438af',
+      sendCompany: '送信先ダミー企業',
+      sendPost: '100-8019',
+      sendAddr1: '東京都',
+      sendAddr2: '大手町',
+      sendAddr3: '大手町プレイスウエスト',
+      sendRegistrationNo: 'T1234567890123',
+      bankName: '銀行名',
+      branchName: '支店',
+      accountType: '科目',
+      accountName: 'あああ',
+      accountNumber: '1234567',
+      note: '備考備考備考\n備考',
+      createdAt: new Date('2022-05-13T00:00:00.000Z'),
+      updatedAt: new Date('2022-05-13T00:00:00.000Z')
+    }),
+    lines: JSON.stringify([
+      {
+        invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+        lineIndex: 0,
+        lineId: 'a0001',
+        lineDescription: '内容１',
+        unit: 'KG',
+        unitPrice: 100,
+        quantity: 20,
+        taxType: 'tax8p'
+      },
+      {
+        invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+        lineIndex: 1,
+        lineId: 'a0002',
+        lineDescription: '内容２',
+        unit: 'KG',
+        unitPrice: 200,
+        quantity: 20,
+        taxType: 'tax10p'
+      },
+      {
+        invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+        lineIndex: 2,
+        lineId: 'a0003',
+        lineDescription: '内容3',
+        unit: 'KG',
+        unitPrice: 300,
+        quantity: 20,
+        taxType: 'nonTaxable'
+      },
+      {
+        invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+        lineIndex: 3,
+        lineId: 'a0004',
+        lineDescription: '内容4',
+        unit: 'KG',
+        unitPrice: 400,
+        quantity: 20,
+        taxType: 'untaxable'
+      },
+      {
+        invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+        lineIndex: 4,
+        lineId: 'a0005',
+        lineDescription: '内容5',
+        unit: 'KG',
+        unitPrice: 500,
+        quantity: 20,
+        taxType: 'taxExemption'
+      },
+      {
+        invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+        lineIndex: 5,
+        lineId: 'a0006',
+        lineDescription: '内容6',
+        unit: 'KG',
+        unitPrice: 600,
+        quantity: 20,
+        taxType: 'otherTax',
+        taxLabel: 'taxName',
+        taxAmount: 1000
+      }
+    ]),
+    sealImpSrc: 'data:image/png;base64,dummyBuffer',
+    logoSrc: 'https://res.cloudinary.com/tradeshift-test/image/upload/fa0cc2df-fa4f-5052-b22a-b6984d326ab6.png',
+    editing: true,
+    csrfToken: 'dummyCsrfToken'
+  },
+  noSealImpHasLogoHasInvDisHasLineDisHasAllTax: {
+    title: 'PDF請求書編集',
+    engTitle: 'EDIT PDF INVOICE',
+    invoice: JSON.stringify({
+      invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+      invoiceNo: '111111',
+      tmpFlg: false,
+      outputDate: new Date('2022-05-12T04:16:21.170Z'),
+      billingDate: new Date('2022-05-13T09:00:00.000Z'),
+      currency: 'JPY',
+      paymentDate: new Date('2022-05-14T09:00:00.000Z'),
+      deliveryDate: new Date('2022-05-15T09:00:00.000Z'),
+      recCompany: '宛先ダミー企業',
+      recPost: '0000000',
+      recAddr1: '東京都',
+      recAddr2: '大手町',
+      recAddr3: '大手町ビル',
+      sendTenantId: '795e60d0-1cf4-4bb3-a3e5-06d94ad438af',
+      sendCompany: '送信先ダミー企業',
+      sendPost: '100-8019',
+      sendAddr1: '東京都',
+      sendAddr2: '大手町',
+      sendAddr3: '大手町プレイスウエスト',
+      bankName: '銀行名',
+      branchName: '支店',
+      accountType: '科目',
+      accountName: 'あああ',
+      accountNumber: '1234567',
+      note: '備考備考備考\n備考',
+      createdAt: new Date('2022-05-13T00:00:00.000Z'),
+      updatedAt: new Date('2022-05-13T00:00:00.000Z'),
+      disocunts: 1,
+      discountDescription1: 'text1',
+      discountAmount1: '30',
+      discountUnit1: 'percent'
+    }),
+    lines: JSON.stringify([
+      {
+        invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+        lineIndex: 0,
+        lineId: 'a0001',
+        lineDescription: '内容１',
+        unit: 'KG',
+        unitPrice: 100,
+        quantity: 20,
+        taxType: 'tax8p',
+        discountDescription1: 'text1',
+        discountAmount1: '30',
+        discountUnit1: 'percent'
+      },
+      {
+        invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+        lineIndex: 1,
+        lineId: 'a0002',
+        lineDescription: '内容２',
+        unit: 'KG',
+        unitPrice: 200,
+        quantity: 20,
+        taxType: 'tax10p'
+      },
+      {
+        invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+        lineIndex: 2,
+        lineId: 'a0003',
+        lineDescription: '内容3',
+        unit: 'KG',
+        unitPrice: 300,
+        quantity: 20,
+        taxType: 'nonTaxable'
+      },
+      {
+        invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+        lineIndex: 3,
+        lineId: 'a0004',
+        lineDescription: '内容4',
+        unit: 'KG',
+        unitPrice: 400,
+        quantity: 20,
+        taxType: 'untaxable'
+      },
+      {
+        invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+        lineIndex: 4,
+        lineId: 'a0005',
+        lineDescription: '内容5',
+        unit: 'KG',
+        unitPrice: 500,
+        quantity: 20,
+        taxType: 'taxExemption'
+      },
+      {
+        invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+        lineIndex: 5,
+        lineId: 'a0006',
+        lineDescription: '内容6',
+        unit: 'KG',
+        unitPrice: 600,
+        quantity: 20,
+        taxType: 'otherTax',
+        taxLabel: 'taxName',
+        taxAmount: 1000
+      }
+    ]),
+    sealImpSrc: '/image/ts-app-digitaltrade-func-icon-pdf_stamp_select.svg',
+    logoSrc: 'https://res.cloudinary.com/tradeshift-test/image/upload/fa0cc2df-fa4f-5052-b22a-b6984d326ab6.png',
+    editing: true,
+    csrfToken: 'dummyCsrfToken'
   }
 }
 
@@ -1961,6 +2399,27 @@ describe('pdfInvoiceのテスト', () => {
       expect(response.render).toHaveBeenCalledWith(
         'pdfInvoice',
         exprectedEditData.noSealImpNoLogoHasInvDisx2HasLineDisx2
+      )
+    })
+    test('正常: 印影あり、ロゴあり、全税含む', async () => {
+      request.params.invoiceId = 'dummyId'
+      accessTradeshift.mockReturnValue(accountInfoTestData.hasLogo) // ユーザ情報正常取得を想定する
+      pdfInvoiceControllerfindInvoiceSpy.mockReturnValue(pdfInvoiceTestData.hasSealImp2HasAllTax) // DBからの正常なPDF請求書情報の取得を想定する
+
+      await pdfInvoice.pdfInvoiceEdit(request, response, next)
+
+      expect(response.render).toHaveBeenCalledWith('pdfInvoice', exprectedEditData.hasSealImpHasLogoHasAllTax)
+    })
+    test('正常: 印影なし、ロゴあり、項目割引あり、全体割引あり、全税含む', async () => {
+      request.params.invoiceId = 'dummyId'
+      accessTradeshift.mockReturnValue(accountInfoTestData.hasLogo) // ユーザ情報正常取得を想定する
+      pdfInvoiceControllerfindInvoiceSpy.mockReturnValue(pdfInvoiceTestData.noSealImpHasInvDisHaslineDisHasAllTax) // DBからの正常なPDF請求書情報の取得を想定する
+
+      await pdfInvoice.pdfInvoiceEdit(request, response, next)
+
+      expect(response.render).toHaveBeenCalledWith(
+        'pdfInvoice',
+        exprectedEditData.noSealImpHasLogoHasInvDisHasLineDisHasAllTax
       )
     })
     test('準正常: 請求書IDなしの不正リクエスト', async () => {
