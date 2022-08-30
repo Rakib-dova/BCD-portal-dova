@@ -74,11 +74,8 @@ class RegistApproveRoutePage {
 
   // 承認者検索を行う
   async searchAuthorizer(family, first, mail) {
-    if (first) {
-      await this.actionUtils.fill(this.frame, '#searchModalApproveUserLastName', first);
-    }
-    if (family) {
-      await this.actionUtils.fill(this.frame, '#searchModalApproveUserFirstName', family);
+    if (first || family) {
+      await this.actionUtils.fill(this.frame, '#searchModalApproveUserName', family + ((family && first) ? ' ' : '') + first);
     }
     if (mail) {
       await this.actionUtils.fill(this.frame, '#searchModalApproveUserMailAddress', mail);
