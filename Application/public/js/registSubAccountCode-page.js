@@ -102,7 +102,7 @@ $('#btnCheck').addEventListener('click', function (e) {
     document.querySelector('#setSubAccountCodeNameInputId').value.length > 0 &&
     document.querySelector('#setSubAccountCodeNameInputId').value.length < 41
   ) {
-    document.querySelector('#RequiredErrorMesageForName').innerHTML = '補助科目名に絵文字を含めないでください。'
+    document.querySelector('#RequiredErrorMesageForName').innerHTML = '補助科目名に絵文字は利用できません。'
     document.querySelector('#RequiredErrorMesageForName').classList.remove('is-invisible')
     errorFlag = true
   }
