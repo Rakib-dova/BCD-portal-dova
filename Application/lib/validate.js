@@ -734,7 +734,7 @@ const isValidTotalPrice = function (documentNo, invoiceData) {
  * 絵文字の入力チェック
  * @param {string} str テキストに入力された文字
  * @return {boolean} true:strに絵文字が入力された場合
- * 　　　　　　　　　false:strに絵文字が入力されていない場合
+ *                   false:strに絵文字が入力されていない場合
  */
 function isEmoji(str) {
   const ranges = [
