@@ -285,7 +285,19 @@ const duplicationCheck = function (approveUserArr) {
 
 // 未設定チェック
 const validationCheck = function (approveUserArr) {
+  // 絵文字正規式
+  const ranges = [
+    '[\ud800-\ud8ff][\ud000-\udfff]', // 基本的な絵文字除去
+    '[\ud000-\udfff]{2,}', // サロゲートペアの二回以上の繰り返しがあった場合
+    '\ud7c9[\udc00-\udfff]', // 特定のシリーズ除去
+    '[0-9|*|#][\uFE0E-\uFE0F]\u20E3', // 数字系絵文字
+    '[0-9|*|#]\u20E3', // 数字系絵文字
+    '[©|®|\u2010-\u3fff][\uFE0E-\uFE0F]', // 環境依存文字や日本語との組み合わせによる絵文字
+    '[\u2010-\u2FFF]', // 指や手、物など、単体で絵文字となるもの
+    '\uA4B3' // 数学記号の環境依存文字の除去
+  ]
   let isChecked = false
+
   // 承認ルート名チェック
   const setApproveRouteNameInputId = document.getElementById('setApproveRouteNameInputId').value
   if (setApproveRouteNameInputId === '' || setApproveRouteNameInputId === undefined) {

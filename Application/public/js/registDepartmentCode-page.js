@@ -70,7 +70,7 @@ document.getElementById('btnCheck').addEventListener('click', function (e) {
     document.querySelector('#setDepartmentCodeNameInputId').value.length > 0 &&
     document.querySelector('#setDepartmentCodeNameInputId').value.length < 41
   ) {
-    document.querySelector('#RequiredErrorMesageForName').innerHTML = '入力値が間違いました。'
+    document.querySelector('#RequiredErrorMesageForName').innerHTML = '部門名に絵文字を含めないでください。'
     document.querySelector('#RequiredErrorMesageForName').classList.remove('is-invisible')
     errorFlag = true
   }
