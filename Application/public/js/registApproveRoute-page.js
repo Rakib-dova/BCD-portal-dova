@@ -298,6 +298,13 @@ const validationCheck = function (approveUserArr) {
     document.getElementById('RequiredErrorMesageForApproveRoute').classList.remove('is-invisible')
     isChecked = true
   }
+  // 承認ルート名に絵文字が入っている場合
+  if (setApproveRouteNameInputId.match(ranges.join('|'))) {
+    document.getElementById('RequiredErrorMesageForApproveRoute').innerHTML =
+      '承認ルート名に絵文字を含めないでください。'
+    document.getElementById('RequiredErrorMesageForApproveRoute').classList.remove('is-invisible')
+    isChecked = true
+  }
 
   // 承認者未設定チェック
   const result = []
