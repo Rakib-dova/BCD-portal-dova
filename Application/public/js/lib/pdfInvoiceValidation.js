@@ -56,14 +56,18 @@ const saveRules = [
     target: 'invoice',
     displayLocation: 'header',
     prop: 'recCompany',
-    customValidator(value) {
-      if (value.match(ranges.join('|'))) {
-        this.message = '宛先企業に絵文字が含まれています。絵文字を含めず入力して下さい。'
-        return false
-      } else return true
-    },
     regexp: /^.{1,200}$/,
     message: '宛先企業は200文字以内で入力して下さい。',
+    emptyMessage: '宛先企業が空欄のため、宛先情報が不完全です。入力して下さい。',
+    required: true
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'header',
+    prop: 'recCompany',
+    customValidator: (value) => !value.match(ranges.join('|')),
+    regexp: '',
+    message: '宛先企業に絵文字は利用できません。',
     emptyMessage: '宛先企業が空欄のため、宛先情報が不完全です。入力して下さい。',
     required: true
   },
@@ -81,13 +85,17 @@ const saveRules = [
     displayLocation: 'header',
     prop: 'recAddr1',
     regexp: /^.{1,10}$/,
-    customValidator(value) {
-      if (value.match(ranges.join('|'))) {
-        this.message = '都道府県に絵文字が含まれています。絵文字を含めず入力して下さい。'
-        return false
-      } else return true
-    },
     message: '都道府県は10文字以内で入力して下さい。',
+    emptyMessage: '都道府県が空欄のため、宛先情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'header',
+    prop: 'recAddr1',
+    customValidator: (value) => !value.match(ranges.join('|')),
+    regexp: '',
+    message: '都道府県に絵文字は利用できません。',
     emptyMessage: '都道府県が空欄のため、宛先情報が不完全です。入力して下さい。',
     required: false
   },
@@ -96,13 +104,17 @@ const saveRules = [
     displayLocation: 'header',
     prop: 'recAddr2',
     regexp: /^.{1,50}$/,
-    customValidator(value) {
-      if (value.match(ranges.join('|'))) {
-        this.message = '住所に絵文字が含まれています。絵文字を含めず入力して下さい。'
-        return false
-      } else return true
-    },
     message: '住所は50文字以内で入力して下さい。',
+    emptyMessage: '住所が空欄のため、宛先情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'header',
+    prop: 'recAddr2',
+    customValidator: (value) => !value.match(ranges.join('|')),
+    regexp: '',
+    message: '住所に絵文字は利用できません。',
     emptyMessage: '住所が空欄のため、宛先情報が不完全です。入力して下さい。',
     required: false
   },
@@ -111,13 +123,17 @@ const saveRules = [
     displayLocation: 'header',
     prop: 'recAddr3',
     regexp: /^.{0,50}$/,
-    customValidator(value) {
-      if (value.match(ranges.join('|'))) {
-        this.message = 'ビル名/フロア等に絵文字が含まれています。絵文字を含めず入力して下さい。'
-        return false
-      } else return true
-    },
     message: 'ビル名/フロア等は50文字以内で入力して下さい。',
+    emptyMessage: '',
+    required: false
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'header',
+    prop: 'recAddr3',
+    customValidator: (value) => !value.match(ranges.join('|')),
+    regexp: '',
+    message: 'ビル名/フロア等に絵文字は利用できません。',
     emptyMessage: '',
     required: false
   },
@@ -134,12 +150,6 @@ const saveRules = [
     displayLocation: 'footer',
     prop: 'bankName',
     regexp: /^.{0,50}$/,
-    customValidator(value) {
-      if (value.match(ranges.join('|'))) {
-        this.message = '銀行名に絵文字が含まれています。絵文字を含めず入力して下さい。'
-        return false
-      } else return true
-    },
     message: '銀行名は50文字以内で入力して下さい。',
     emptyMessage: '銀行名が空欄のため、支払い情報が不完全です。入力して下さい。',
     required: false
@@ -147,15 +157,29 @@ const saveRules = [
   {
     target: 'invoice',
     displayLocation: 'footer',
+    prop: 'bankName',
+    customValidator: (value) => !value.match(ranges.join('|')),
+    regexp: '',
+    message: '銀行名に絵文字は利用できません。',
+    emptyMessage: '銀行名が空欄のため、支払い情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'footer',
     prop: 'branchName',
-    customValidator(value) {
-      if (value.match(ranges.join('|'))) {
-        this.message = '支店名に絵文字が含まれています。絵文字を含めず入力して下さい。'
-        return false
-      } else return true
-    },
     regexp: /^.{0,50}$/,
     message: '支店名は50文字以内で入力して下さい。',
+    emptyMessage: '支店名が空欄のため、支払い情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'footer',
+    prop: 'branchName',
+    customValidator: (value) => !value.match(ranges.join('|')),
+    regexp: '',
+    message: '支店名に絵文字は利用できません。',
     emptyMessage: '支店名が空欄のため、支払い情報が不完全です。入力して下さい。',
     required: false
   },
@@ -172,14 +196,18 @@ const saveRules = [
     target: 'invoice',
     displayLocation: 'footer',
     prop: 'accountName',
-    customValidator(value) {
-      if (value.match(ranges.join('|'))) {
-        this.message = '口座名義に絵文字が含まれています。絵文字を含めず入力して下さい。'
-        return false
-      } else return true
-    },
     regexp: /^.{0,50}$/,
     message: '口座名義は50文字以内で入力して下さい。',
+    emptyMessage: '口座名義が空欄のため、支払い情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'footer',
+    prop: 'accountName',
+    customValidator: (value) => !value.match(ranges.join('|')),
+    regexp: '',
+    message: '口座名義に絵文字は利用できません。',
     emptyMessage: '口座名義が空欄のため、支払い情報が不完全です。入力して下さい。',
     required: false
   },
@@ -204,12 +232,6 @@ const saveRules = [
     target: 'invoice-discount',
     displayLocation: 'lines',
     prop: 'discountDescription1',
-    customValidator(value) {
-      if (value.match(ranges.join('|'))) {
-        this.message = '1番目の割引の内容に絵文字が含まれています。絵文字を含めず入力して下さい。'
-        return false
-      } else return true
-    },
     regexp: /^.{0,100}$/,
     message: '1番目の割引の内容は100文字以内で入力してください。',
     emptyMessage: '1番目の割引の内容が空欄のため、明細情報が不完全です。入力して下さい。',
@@ -219,12 +241,6 @@ const saveRules = [
     target: 'invoice-discount',
     displayLocation: 'lines',
     prop: 'discountDescription2',
-    customValidator(value) {
-      if (value.match(ranges.join('|'))) {
-        this.message = '2番目の割引の内容に絵文字が含まれています。絵文字を含めず入力して下さい。'
-        return false
-      } else return true
-    },
     regexp: /^.{0,100}$/,
     message: '2番目の割引の内容は100文字以内で入力してください。',
     emptyMessage: '2番目の割引の内容が空欄のため、明細情報が不完全です。入力して下さい。',
@@ -234,12 +250,6 @@ const saveRules = [
     target: 'invoice-discount',
     displayLocation: 'lines',
     prop: 'discountDescription3',
-    customValidator(value) {
-      if (value.match(ranges.join('|'))) {
-        this.message = '3番目の割引の内容に絵文字が含まれています。絵文字を含めず入力して下さい。'
-        return false
-      } else return true
-    },
     regexp: /^.{0,100}$/,
     message: '3番目の割引の内容は100文字以内で入力してください。',
     emptyMessage: '3番目の割引の内容が空欄のため、明細情報が不完全です。入力して下さい。',
@@ -297,6 +307,16 @@ const saveRules = [
   {
     target: 'lines',
     displayLocation: 'lines',
+    prop: 'lineDescription',
+    customValidator: (value) => !value.match(ranges.join('|')),
+    regexp: '',
+    message: '内容に絵文字は利用できません。',
+    emptyMessage: '内容が空欄のため、明細情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'lines',
+    displayLocation: 'lines',
     prop: 'quantity',
     customValidator: (value) => value > 0 && value <= 999999999999.999,
     regexp: '',
@@ -310,6 +330,16 @@ const saveRules = [
     prop: 'unit',
     regexp: /^.{0,10}$/,
     message: '単位は10文字以内で入力してください。',
+    emptyMessage: '単位が空欄のため、明細情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'lines',
+    displayLocation: 'lines',
+    prop: 'unit',
+    customValidator: (value) => !value.match(ranges.join('|')),
+    regexp: '',
+    message: '単位に絵文字は利用できません。',
     emptyMessage: '単位が空欄のため、明細情報が不完全です。入力して下さい。',
     required: false
   },
@@ -344,6 +374,17 @@ const saveRules = [
   {
     target: 'lines',
     displayLocation: 'lines',
+    prop: 'discountDescription1',
+    customValidator: (value) => !value.match(ranges.join('|')),
+    regexp: '',
+    message: '項目割引1の内容に絵文字は利用できません。',
+    emptyMessage: '項目割引1の内容が空欄のため、明細情報が不完全です。入力して下さい。',
+    discount: 1,
+    required: false
+  },
+  {
+    target: 'lines',
+    displayLocation: 'lines',
     prop: 'discountDescription2',
     regexp: /^.{0,100}$/,
     message: '項目割引2の内容は100文字以内で入力してください。',
@@ -354,9 +395,31 @@ const saveRules = [
   {
     target: 'lines',
     displayLocation: 'lines',
+    prop: 'discountDescription2',
+    customValidator: (value) => !value.match(ranges.join('|')),
+    regexp: '',
+    message: '項目割引2の内容に絵文字は利用できません。',
+    emptyMessage: '項目割引2の内容が空欄のため、明細情報が不完全です。入力して下さい。',
+    discount: 2,
+    required: false
+  },
+  {
+    target: 'lines',
+    displayLocation: 'lines',
     prop: 'discountDescription3',
     regexp: /^.{0,100}$/,
     message: '項目割引3の内容は100文字以内で入力してください。',
+    emptyMessage: '項目割引3の内容が空欄のため、明細情報が不完全です。入力して下さい。',
+    discount: 3,
+    required: false
+  },
+  {
+    target: 'lines',
+    displayLocation: 'lines',
+    prop: 'discountDescription3',
+    customValidator: (value) => !value.match(ranges.join('|')),
+    regexp: '',
+    message: '項目割引3の内容に絵文字は利用できません。',
     emptyMessage: '項目割引3の内容が空欄のため、明細情報が不完全です。入力して下さい。',
     discount: 3,
     required: false
@@ -458,13 +521,17 @@ const outputRules = [
     displayLocation: 'header',
     prop: 'recCompany',
     regexp: /^.{1,200}$/,
-    cocustomValidator(value) {
-      if (value.match(ranges.join('|'))) {
-        this.message = '宛先企業に絵文字が含まれています。絵文字を含めず入力して下さい。'
-        return false
-      } else return true
-    },
     message: '宛先企業は200文字以内で入力して下さい。',
+    emptyMessage: '宛先企業が空欄のため、宛先情報が不完全です。入力して下さい。',
+    required: true
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'header',
+    prop: 'recCompany',
+    customValidator: (value) => !value.match(ranges.join('|')),
+    regexp: '',
+    message: '宛先企業に絵文字は利用できません。',
     emptyMessage: '宛先企業が空欄のため、宛先情報が不完全です。入力して下さい。',
     required: true
   },
@@ -481,12 +548,6 @@ const outputRules = [
     target: 'invoice',
     displayLocation: 'header',
     prop: 'recAddr1',
-    cocustomValidator(value) {
-      if (value.match(ranges.join('|'))) {
-        this.message = '都道府県に絵文字が含まれています。絵文字を含めず入力して下さい。'
-        return false
-      } else return true
-    },
     regexp: /^.{1,10}$/,
     message: '都道府県は10文字以内で入力して下さい。',
     emptyMessage: '都道府県が空欄のため、宛先情報が不完全です。入力して下さい。',
@@ -495,13 +556,17 @@ const outputRules = [
   {
     target: 'invoice',
     displayLocation: 'header',
+    prop: 'recAddr1',
+    customValidator: (value) => !value.match(ranges.join('|')),
+    regexp: '',
+    message: '都道府県に絵文字は利用できません。',
+    emptyMessage: '都道府県が空欄のため、宛先情報が不完全です。入力して下さい。',
+    required: true
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'header',
     prop: 'recAddr2',
-    cocustomValidator(value) {
-      if (value.match(ranges.join('|'))) {
-        this.message = '住所に絵文字が含まれています。絵文字を含めず入力して下さい。'
-        return false
-      } else return true
-    },
     regexp: /^.{1,50}$/,
     message: '住所は50文字以内で入力して下さい。',
     emptyMessage: '住所が空欄のため、宛先情報が不完全です。入力して下さい。',
@@ -510,15 +575,29 @@ const outputRules = [
   {
     target: 'invoice',
     displayLocation: 'header',
+    prop: 'recAddr2',
+    customValidator: (value) => !value.match(ranges.join('|')),
+    regexp: '',
+    message: '住所に絵文字は利用できません。',
+    emptyMessage: '住所が空欄のため、宛先情報が不完全です。入力して下さい。',
+    required: true
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'header',
     prop: 'recAddr3',
-    cocustomValidator(value) {
-      if (value.match(ranges.join('|'))) {
-        this.message = 'ビル名/フロア等に絵文字が含まれています。絵文字を含めず入力して下さい。'
-        return false
-      } else return true
-    },
     regexp: /^.{0,50}$/,
     message: 'ビル名/フロア等は50文字以内で入力して下さい。',
+    emptyMessage: '',
+    required: false
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'header',
+    prop: 'recAddr3',
+    customValidator: (value) => !value.match(ranges.join('|')),
+    regexp: '',
+    message: 'ビル名/フロア等に絵文字は利用できません。',
     emptyMessage: '',
     required: false
   },
@@ -534,12 +613,6 @@ const outputRules = [
     target: 'invoice',
     displayLocation: 'footer',
     prop: 'bankName',
-    cocustomValidator(value) {
-      if (value.match(ranges.join('|'))) {
-        this.message = '銀行名に絵文字が含まれています。絵文字を含めず入力して下さい。'
-        return false
-      } else return true
-    },
     regexp: /^.{0,50}$/,
     message: '銀行名は50文字以内で入力して下さい。',
     emptyMessage: '銀行名が空欄のため、支払い情報が不完全です。入力して下さい。',
@@ -548,15 +621,29 @@ const outputRules = [
   {
     target: 'invoice',
     displayLocation: 'footer',
+    prop: 'bankName',
+    customValidator: (value) => !value.match(ranges.join('|')),
+    regexp: '',
+    message: '銀行名に絵文字は利用できません。',
+    emptyMessage: '銀行名が空欄のため、支払い情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'footer',
     prop: 'branchName',
-    cocustomValidator(value) {
-      if (value.match(ranges.join('|'))) {
-        this.message = '支店名に絵文字が含まれています。絵文字を含めず入力して下さい。'
-        return false
-      } else return true
-    },
     regexp: /^.{0,50}$/,
     message: '支店名は50文字以内で入力して下さい。',
+    emptyMessage: '支店名が空欄のため、支払い情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'footer',
+    prop: 'branchName',
+    customValidator: (value) => !value.match(ranges.join('|')),
+    regexp: '',
+    message: '支店名に絵文字は利用できません。',
     emptyMessage: '支店名が空欄のため、支払い情報が不完全です。入力して下さい。',
     required: false
   },
@@ -573,14 +660,18 @@ const outputRules = [
     target: 'invoice',
     displayLocation: 'footer',
     prop: 'accountName',
-    cocustomValidator(value) {
-      if (value.match(ranges.join('|'))) {
-        this.message = '口座名義に絵文字が含まれています。絵文字を含めず入力して下さい。'
-        return false
-      } else return true
-    },
     regexp: /^.{0,50}$/,
     message: '口座名義は50文字以内で入力して下さい。',
+    emptyMessage: '口座名義が空欄のため、支払い情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'footer',
+    prop: 'accountName',
+    customValidator: (value) => !value.match(ranges.join('|')),
+    regexp: '',
+    message: '口座名義に絵文字は利用できません。',
     emptyMessage: '口座名義が空欄のため、支払い情報が不完全です。入力して下さい。',
     required: false
   },
@@ -605,12 +696,6 @@ const outputRules = [
     target: 'invoice-discount',
     displayLocation: 'lines',
     prop: 'discountDescription1',
-    cocustomValidator(value) {
-      if (value.match(ranges.join('|'))) {
-        this.message = '1番目の割引の内容に絵文字が含まれています。絵文字を含めず入力して下さい。'
-        return false
-      } else return true
-    },
     regexp: /^.{0,100}$/,
     message: '1番目の割引の内容は100文字以内で入力してください。',
     emptyMessage: '1番目の割引の内容が空欄のため、明細情報が不完全です。入力して下さい。',
@@ -620,12 +705,6 @@ const outputRules = [
     target: 'invoice-discount',
     displayLocation: 'lines',
     prop: 'discountDescription2',
-    cocustomValidator(value) {
-      if (value.match(ranges.join('|'))) {
-        this.message = '2番目の割引の内容に絵文字が含まれています。絵文字を含めず入力して下さい。'
-        return false
-      } else return true
-    },
     regexp: /^.{0,100}$/,
     message: '2番目の割引の内容は100文字以内で入力してください。',
     emptyMessage: '2番目の割引の内容が空欄のため、明細情報が不完全です。入力して下さい。',
@@ -635,12 +714,6 @@ const outputRules = [
     target: 'invoice-discount',
     displayLocation: 'lines',
     prop: 'discountDescription3',
-    cocustomValidator(value) {
-      if (value.match(ranges.join('|'))) {
-        this.message = '3番目の割引の内容に絵文字が含まれています。絵文字を含めず入力して下さい。'
-        return false
-      } else return true
-    },
     regexp: /^.{0,100}$/,
     message: '3番目の割引の内容は100文字以内で入力してください。',
     emptyMessage: '3番目の割引の内容が空欄のため、明細情報が不完全です。入力して下さい。',
@@ -691,13 +764,17 @@ const outputRules = [
     displayLocation: 'lines',
     prop: 'lineDescription',
     regexp: /^.{0,100}$/,
-    cocustomValidator(value) {
-      if (value.match(ranges.join('|'))) {
-        this.message = '内容は絵文字が含まれています。絵文字を含めず入力して下さい。'
-        return false
-      } else return true
-    },
     message: '内容は100文字以内で入力してください。',
+    emptyMessage: '内容が空欄のため、明細情報が不完全です。入力して下さい。',
+    required: true
+  },
+  {
+    target: 'lines',
+    displayLocation: 'lines',
+    prop: 'lineDescription',
+    customValidator: (value) => !value.match(ranges.join('|')),
+    regexp: '',
+    message: '内容に絵文字は利用できません。',
     emptyMessage: '内容が空欄のため、明細情報が不完全です。入力して下さい。',
     required: true
   },
@@ -715,14 +792,18 @@ const outputRules = [
     target: 'lines',
     displayLocation: 'lines',
     prop: 'unit',
-    cocustomValidator(value) {
-      if (value.match(ranges.join('|'))) {
-        this.message = '単位は絵文字が含まれています。絵文字を含めず入力して下さい。'
-        return false
-      } else return true
-    },
     regexp: /^.{0,10}$/,
     message: '単位は10文字以内で入力してください。',
+    emptyMessage: '単位が空欄のため、明細情報が不完全です。入力して下さい。',
+    required: true
+  },
+  {
+    target: 'lines',
+    displayLocation: 'lines',
+    prop: 'unit',
+    customValidator: (value) => !value.match(ranges.join('|')),
+    regexp: '',
+    message: '単位に絵文字は利用できません。',
     emptyMessage: '単位が空欄のため、明細情報が不完全です。入力して下さい。',
     required: true
   },
@@ -757,6 +838,17 @@ const outputRules = [
   {
     target: 'lines',
     displayLocation: 'lines',
+    prop: 'discountDescription1',
+    customValidator: (value) => !value.match(ranges.join('|')),
+    regexp: '',
+    message: '項目割引1に絵文字は利用できません。',
+    emptyMessage: '項目割引1の内容が空欄のため、明細情報が不完全です。入力して下さい。',
+    discount: 1,
+    required: true
+  },
+  {
+    target: 'lines',
+    displayLocation: 'lines',
     prop: 'discountDescription2',
     regexp: /^.{0,100}$/,
     message: '項目割引2の内容は100文字以内で入力してください。',
@@ -767,9 +859,31 @@ const outputRules = [
   {
     target: 'lines',
     displayLocation: 'lines',
+    prop: 'discountDescription2',
+    customValidator: (value) => !value.match(ranges.join('|')),
+    regexp: '',
+    message: '項目割引2に絵文字は利用できません。',
+    emptyMessage: '項目割引2の内容が空欄のため、明細情報が不完全です。入力して下さい。',
+    discount: 2,
+    required: true
+  },
+  {
+    target: 'lines',
+    displayLocation: 'lines',
     prop: 'discountDescription3',
     regexp: /^.{0,100}$/,
     message: '項目割引3の内容は100文字以内で入力してください。',
+    emptyMessage: '項目割引3の内容が空欄のため、明細情報が不完全です。入力して下さい。',
+    discount: 3,
+    required: true
+  },
+  {
+    target: 'lines',
+    displayLocation: 'lines',
+    prop: 'discountDescription3',
+    customValidator: (value) => !value.match(ranges.join('|')),
+    regexp: '',
+    message: '項目割引3に絵文字は利用できません。',
     emptyMessage: '項目割引3の内容が空欄のため、明細情報が不完全です。入力して下さい。',
     discount: 3,
     required: true
@@ -868,7 +982,7 @@ function validate(invoice, lines, rules, option = {}) {
         }
       } else if (!line[rule.prop]) return // eslint-disable-line
       else if (rule.customValidator && !rule.customValidator(line[rule.prop])) {
-        setValidationMessage(rule.message, rule.displayLocation)
+        setValidationMessage(`${i + 1}番目の` + rule.message, rule.displayLocation)
         result = false
       } else if (rule.regexp && !rule.regexp.test(line[rule.prop])) {
         setValidationMessage(`${i + 1}番目の` + rule.message, rule.displayLocation)
