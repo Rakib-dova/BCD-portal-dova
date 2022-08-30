@@ -3630,9 +3630,9 @@ describe('csvuploadのテスト', () => {
       }
 
       // DB設定
-      findByUploadFormatIdSpy.mockReturnValue(uploadFormatDetailResult)
       findByUploadFormatIdIdentifierSpy.mockReturnValue([])
       findUploadFormatIdSpy.mockReturnValue(uploadFormatNoHeaderResult)
+      findByUploadFormatIdSpy.mockReturnValue([])
 
       const resultExt = await csvupload.cbExtractInvoice(
         filePath,
