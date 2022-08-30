@@ -9,6 +9,12 @@ block content
     .columns.is-centered
       .column.is-11
         .box
+          .mt-5
+            .columns.is-mobile.mt-0.mb-0.box-large.mr-auto
+              .column-csvupload
+                p x/xx リリースよりフォーマットが変更になりました。
+                p 以前のフォーマットは利用できません。再度ダウンロードをお願いいたします。
+                p 詳細はマニュアルをご確認ください。
           .columns.is-centered.uploader-columns
             .column
               form#accountCodeUpload
@@ -33,7 +39,7 @@ block content
               .column-csvupload
                 p (手順)
                 p 1. 下記リンクをクリックし、アップロード用のCSVファイルをダウンロード
-                a(download href='../html/PDF請求書ドラフト一括作成フォーマット.csv') 　アップロード用CSVファイルダウンロード
+                a(download href='../html/PDF請求書ドラフト一括作成フォーマット_v1.1.csv') 　アップロード用CSVファイルダウンロード
                 p 2. CSVファイルに請求書データを記入
                 a(download href='../html/【Bconnectionデジタルトレードアプリ】操作マニュアル_PDF請求書ドラフト一括作成.pdf') 　作成マニュアルダウンロード
                 p 　※1ファイルで作成できる請求書の数は200まで
