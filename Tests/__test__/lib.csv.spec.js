@@ -118,7 +118,7 @@ describe('lib/csv のテスト', () => {
       const result = csv.convertToDataObject(row, '', csv.pdfInvoiceMapper)
       expect(result).toBeNull()
     })
-    test('正常: headerArrayが配列ではない', () => {
+    test('正常: pdfInvoiceMapperが配列ではない', () => {
       const row = []
       const result = csv.convertToDataObject(row, csv.invoiceHeaderArray, '')
       expect(result).toBeNull()
