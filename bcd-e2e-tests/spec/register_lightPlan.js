@@ -95,19 +95,44 @@ describe('追加オプション申込', function () {
     global.reporter.setBrowserInfo(browser, page);
 
     // ページオブジェクト
-    const { topPage }
+    const { topPage, journalMenuPage, paymentRequestListPage, journalDownloadPage, lightPlanMenuPage }
       = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページを表示する
-    await common.gotoTop(page, config.company1.user);
+    await common.gotoTop(page, config.company2.user07);
     
     // オプションサービス申込アイコンが表示されないこと
     expect(await topPage.isLightPlanShown()).to.equal(false, '【トップ】「追加オプション申込」が表示されないこと');
+
+    // 【支払依頼一覧】申込フォームボタン（スタンダード、導入支援）の両方が非活性となっていること
+    await topPage.openJournalMenu();
+    await journalMenuPage.waitForLoading();
+    await journalMenuPage.clickPaymentRequest();
+    await paymentRequestListPage.waitForLoading();
+    await paymentRequestListPage.clickLightPlan();
+    await lightPlanMenuPage.waitForLoading();
+    expect(await lightPlanMenuPage.getApplyEnabled()).to.equal(false, '【支払依頼一覧】スタンダードプランの「お申込みフォーム」が非活性となっていること');
+    await lightPlanMenuPage.clickIntroSupport();
+    expect(await lightPlanMenuPage.getApplyIntroSupportEnabled()).to.equal(false, '【支払依頼一覧】導入支援サービスの「お申込みフォーム」が非活性となっていること');
+
+    // 【仕訳情報ダウンロード】申込フォームボタン（スタンダード、導入支援）の両方が非活性となっていること
+    await lightPlanMenuPage.close();
+    await paymentRequestListPage.clickHome();
+    await topPage.waitForLoading();
+    await topPage.openJournalMenu();
+    await journalMenuPage.waitForLoading();
+    await journalMenuPage.clickJournalDownload();
+    await journalDownloadPage.waitForLoading();
+    await journalDownloadPage.clickLightPlan();
+    await lightPlanMenuPage.waitForLoading();
+    expect(await lightPlanMenuPage.getApplyEnabled()).to.equal(false, '【仕訳情報ダウンロード】スタンダードプランの「お申込みフォーム」が非活性となっていること');
+    await lightPlanMenuPage.clickIntroSupport();
+    expect(await lightPlanMenuPage.getApplyIntroSupportEnabled()).to.equal(false, '【仕訳情報ダウンロード】導入支援サービスの「お申込みフォーム」が非活性となっていること');
     await page.waitForTimeout(1000);
   });
 
   /**
-   * STEP8_ライトプラン_No.1,3,5,7,9-11,16,18-20,49,50
+   * STEP8_ライトプラン_No.1,3,5,7,9-11,16,18-20,49,50,73,171
    */
   it("スタンダードプラン（未契約）", async function () {
     // テストの初期化を実施
@@ -145,9 +170,11 @@ describe('追加オプション申込', function () {
     await paidServiceRegisterPage.waitForLoading();
     expect(await paidServiceRegisterPage.getTitle()).to.equal('有料サービス利用登録', '【有料サービス利用登録】申し込み画面（利用規約）に遷移すること');
     expect(await paidServiceRegisterPage.isStandardChecked()).to.equal(true, '【有料サービス利用登録】「ご利用希望サービス」の「スタンダードプラン」にチェックが入っていること');
+    expect(await paidServiceRegisterPage.isNextDisabled()).to.equal(true, '【有料サービス利用登録】初期状態では「申込内容入力へ」ボタンが非活性になっていること');
 
     // 申し込み画面（フォーム入力）に遷移すること
     await paidServiceRegisterPage.checkAgree();
+    expect(await paidServiceRegisterPage.isNextDisabled()).to.equal(false, '【有料サービス利用登録】「申込内容入力へ」ボタンが活性になること');
     await paidServiceRegisterPage.clickNext();
     await paidServiceRegisterInputPage.waitForLoading();
     expect(await paidServiceRegisterInputPage.getSubTitle()).to.equal(paidServiceRegisterInputPage.title, '【有料サービス利用登録】申し込み画面（フォーム入力）に遷移すること');
@@ -222,13 +249,22 @@ describe('追加オプション申込', function () {
     global.reporter.setBrowserInfo(browser, page);
 
     // ページオブジェクト
-    const { topPage, settingMenuPage, contractDetailPage, contractCancelPage }
+    const { topPage, settingMenuPage, lightPlanMenuPage, contractDetailPage, contractCancelPage }
       = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページを表示する
     await common.gotoTop(page, config.company1.mng);
+    expect(await topPage.getPlanStatus()).to.equal('スタンダードプラン', '【トップ】契約中のプランが"スタンダードプラン"であること');
+    expect(await topPage.isLightPlanShown()).to.equal(true, '【トップ】「オプションサービス申込」のアイコンが表示されていること');
+
+    // オプションサービス申込モーダルが表示されること 
+    await topPage.openLightPlan();
+    await lightPlanMenuPage.waitForLoading();
+    expect(await lightPlanMenuPage.getTitle()).to.equal('オプションサービス申込', '【オプションサービス申込】オプションサービス申込モーダルが表示されること');
+    expect(await lightPlanMenuPage.getApplyEnabled()).to.equal(false, '【オプションサービス申込】スタンダードプランの「お申込みフォーム」が非活性になっていること');
 
     // 継続利用サービスにスタンダードプランが「契約中」で表示されていること
+    await lightPlanMenuPage.close();
     await topPage.openSettingMenu();
     await settingMenuPage.waitForLoading();
     await settingMenuPage.clickContractChange();
@@ -374,13 +410,13 @@ describe('追加オプション申込', function () {
     await settingMenuPage.waitForLoading();
     await settingMenuPage.clickContractChange();
     await contractDetailPage.waitForLoading();
-    expect(await contractDetailPage.getStatus('導入支援サービス')).to.equal('申込処理中', '導入支援サービスが「申込処理中」で表示されていること');
+    expect(await contractDetailPage.getStatus('導入支援サービス')).to.equal('申込処理中', '【ご契約内容】導入支援サービスが「申込処理中」で表示されていること');
 
     // 契約プランを確認する
     let plan = (await contractDetailPage.getPlan()).includes('スタンダード') ? 'スタンダードプラン' : 'フリープラン';
     await contractDetailPage.clickHome();
     await topPage.waitForLoading();
-    expect(await topPage.getPlanStatus()).to.equal(plan, '契約プランが"' + plan + '"であること');
+    expect(await topPage.getPlanStatus()).to.equal(plan, '【トップ】契約プランが"' + plan + '"であること');
 
     // 契約プランからオプションサービス申込ダイアログを開く
     await topPage.clickPlanStatus();

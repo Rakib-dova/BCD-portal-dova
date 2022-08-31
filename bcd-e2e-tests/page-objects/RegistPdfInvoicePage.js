@@ -24,6 +24,11 @@ class RegistPdfInvoicePage {
     return frame;
   }
 
+  // タイトルを取得する
+  async getTitle() {
+    return await this.actionUtils.getText(this.frame, '.title');
+  }
+
   // 請求書番号を入力する
   async inputInvoiceNo(invoiceNo) {
     await this.addComment('「請求書番号」にて、"' + invoiceNo + '"と入力する');
@@ -47,6 +52,11 @@ class RegistPdfInvoicePage {
     await this.actionUtils.fill(this.frame, '#invoice-recAddr2', address);
     await this.addComment('「宛先」内、「ビル名/フロア等」にて、"' + building + '"と入力する');
     await this.actionUtils.fill(this.frame, '#invoice-recAddr3', building);
+  }
+
+  // 差出人を取得する
+  async getSender() {
+    return await this.actionUtils.getText(this.frame, '#invoice-sendCompany');
   }
 
   // 登録番号の活性状態を確認する
@@ -88,6 +98,24 @@ class RegistPdfInvoicePage {
   // 合計金額を取得する
   async getTotalAmount() {
     return await this.actionUtils.getText(this.frame, '#totalAmount');
+  }
+
+  // 項目を追加する
+  async addLine() {
+    await this.addComment('項目の「+」をクリックする');
+    await this.actionUtils.click(this.frame, '#btn-plus-invoice-detail');
+  }
+
+  // 項目を削除する
+  async deleteLine(lineNo) {
+    await this.addComment(lineNo + '番目の項目の「-」をクリックする');
+    await this.actionUtils.click(this.frame, '//tbody[@id="lines"]/tr[@id="' + (lineNo - 1) + '"]//a');
+  }
+
+  // 項目数を取得する
+  async getLineCount() {
+    let elms = await this.actionUtils.getElements(this.frame, '//tbody[@id="lines"]//input[@data-prop="lineId"]');
+    return elms.length;
   }
 
   // 項目IDその他を入力する

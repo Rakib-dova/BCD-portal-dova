@@ -21,7 +21,7 @@ class ActionUtils {
   // フレーム内の要素が表示されるまで待機する
   async waitForLoading(elemSelector, frameSelector = '[name="main-app-iframe"]') {
     let frame, elem, elems;
-    const timeout = 90000;
+    const timeout = 120000;
     const start = Date.now();
     while (true) {
       if ((Date.now() - start) >= timeout) {
