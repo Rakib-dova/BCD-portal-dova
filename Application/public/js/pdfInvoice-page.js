@@ -561,10 +561,13 @@ function renderTotals() {
   // 動入力された税額が、税額欄に表示、および小計欄にラベル名ごとに合計されて表示されること、表示順は固定入力→手動入力(上から設定順)
   const taxLineList = []
   const otherTaxLineList = []
+  // 「その他の税」と「定型税」をそれぞれ入力されている順に保持
   lines.forEach((line) => {
     if (line.taxType && line.taxType === 'otherTax' && !otherTaxLineList.includes(line.taxLabel)) {
       otherTaxLineList.push(line.taxLabel)
-    } else if (line.taxType && !taxLineList.includes(line.taxType)) taxLineList.push(line.taxType)
+    } else if (line.taxType && !taxLineList.includes(line.taxType) && !line.taxType === 'otherTax') {
+      taxLineList.push(line.taxType)
+    }
   })
   // 選択肢にある税から、行順に追加
   taxLineList.forEach((taxLine) => {
@@ -578,7 +581,6 @@ function renderTotals() {
     if (!existOtherTax) return
     displayTaxGroups(existOtherTax, totalParentDiv)
   })
-
   // 合計
   const totalDiv = $('#total')
   totalDiv.textContent = Math.floor(subTotal + taxTotal - invoiceDiscountTotal).toLocaleString()
