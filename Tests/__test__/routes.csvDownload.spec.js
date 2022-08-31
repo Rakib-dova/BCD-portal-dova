@@ -525,6 +525,122 @@ describe('csvDownloadのテスト', () => {
       )
     })
 
+    test('正常:受信企業あり（複数）・送信企業あり（複数）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01001',
+        buyAndSell: buyAndSell[0],
+        status: status[0],
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        sentTo: ['f783be0e-e716-4eab-a7ec-5ce36b3c7b31', 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31'], // 同一テナントIDで複数を実現
+        sentBy: ['221559d0-53aa-44a2-ab29-0c4a6cb02bde', '221559d0-53aa-44a2-ab29-0c4a6cb02bde'] // 同一テナントIDで複数を実現
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01001')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkingData = require('../mockInvoice/invoice1')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 発行日
+      expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
+      // 請求書番号
+      expect(csvBody).toContain(`${checkingData.ID.value}`)
+      // テナントID
+      expect(csvBody).toContain(`${checkingData.AccountingCustomerParty.Party.PartyIdentification[0].ID.value}`)
+      // 支払期日
+      expect(csvBody).toContain(`${checkingData.PaymentMeans[0]?.PaymentDueDate?.value ?? ''}`)
+      // 納品日
+      expect(csvBody).toContain(`${checkingData.Delivery[0].ActualDeliveryDate?.value}`)
+      // 備考
+      expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[0].ID.value}`)
+      // 銀行名
+      expect(csvBody).toContain(
+        `${
+          checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
+            .value ?? ''
+        }`
+      )
+      // 支店名
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.Name.value ?? ''}`
+      )
+      // 科目
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.AccountTypeCode?.value === 'General' ? '普通' : '当座'}`
+      )
+      // 口座番号
+      expect(csvBody).toContain(`${checkingData.PaymentMeans[0].PayeeFinancialAccount?.ID?.value ?? ''}`)
+      // 口座名義
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.Name.value ?? ''}`
+      )
+      // その他特記事項
+      expect(csvBody).toContain(`${checkingData.PaymentMeans[0].PayeeFinancialAccount?.Name?.value ?? ''}`)
+      // 明細-項目ID
+      expect(csvBody).toContain(`${checkingData.Note[0].value}`)
+      // 明細-内容
+      expect(csvBody).toContain(`${checkingData.InvoiceLine[0].Item.Description[0].value}`)
+      // 明細-数量
+      expect(csvBody).toContain(`${checkingData.InvoiceLine[0].InvoicedQuantity.value}`)
+      // 明細-単位
+      const bconCsvUnitcode = require('../../Application/lib/bconCsvUnitcode')
+      const unitCodeKeys = Object.keys(bconCsvUnitcode)
+      let resultOfUnitSearch
+      unitCodeKeys.some((item) => {
+        if (`${checkingData.InvoiceLine[0].InvoicedQuantity.unitCode}` === bconCsvUnitcode[item]) {
+          resultOfUnitSearch = item
+          return true
+        }
+        return false
+      })
+      expect(csvBody).toContain(`${resultOfUnitSearch}`)
+      // 明細-単価
+      expect(csvBody).toContain(`${checkingData.InvoiceLine[0].LineExtensionAmount.value}`)
+      // 明細-税（消費税／軽減税率／不課税／免税／非課税）
+      const taxCategory = {
+        'JP 不課税 0%': '不課税',
+        'JP 免税 0%': '免税',
+        'JP 消費税 10%': '消費税',
+        'JP 消費税(軽減税率) 8%': '軽減税率',
+        'JP 非課税 0%': '非課税'
+      }
+      expect(csvBody).toContain(
+        `${taxCategory[checkingData.InvoiceLine[0].TaxTotal[0].TaxSubtotal[0].TaxCategory.TaxScheme.Name.value]}`
+      )
+      // 明細-備考
+      expect(csvBody).toContain(
+        `${
+          checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
+        }`
+      )
+    })
+
     test('正常:受信企業あり・送信企業なし', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
