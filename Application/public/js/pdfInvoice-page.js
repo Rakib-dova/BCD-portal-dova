@@ -701,14 +701,18 @@ function getRadioChecked(radios) {
  * @returns
  */
 function activateTaxModal(index, line) {
+  // モーダルにis-activeを付与
   const taxmodaltemplate = document.getElementById('taxType-modal')
   taxmodaltemplate.classList.add('is-active')
+  // 明細の何行目の税情報か判定するために行番号を持たせる
   taxmodaltemplate.querySelector('input[name=taxLineId]').value = index
+  // エラーメッセージを初期化
   const taxErrDisplays = ['taxErrEmptyMassage', 'taxLabelErr', 'taxAmountErr']
   taxErrDisplays.forEach((display) => {
     document.getElementById(display).textContent = ''
   })
   while ($('#tax-error').firstChild) $('#tax-error').removeChild($('#tax-error').firstChild)
+  // もし選択されている税があった場合はチェック状態にする
   if (line.taxType) {
     taxmodaltemplate.querySelector('input[value=' + line.taxType + ']').checked = true
     if (line.taxType === 'otherTax') {
@@ -717,9 +721,14 @@ function activateTaxModal(index, line) {
     }
     taxAcceptEnabled(true)
   } else {
+    // もし選択されていない且つチェック状態があった場合は外す（初期化作業）
     const radios = document.querySelectorAll('input[type=radio]')
     const selectedRadio = getRadioChecked(radios)
-    selectedRadio.checked = false
+    if (selectedRadio) selectedRadio.checked = false
+    if (line.taxType === 'otherTax') {
+      taxmodaltemplate.querySelector('input[name=tax-label]').value = ''
+      taxmodaltemplate.querySelector('input[name=tax-amount]').value = ''
+    }
     taxAcceptEnabled(false)
   }
 }
@@ -763,22 +772,28 @@ $('#taxModelCancel')?.addEventListener('click', async () => {
   $('#taxType-modal').classList.remove('is-active')
 })
 
-// 税モーダル内「適応」
+// 税モーダル内「適応」ボタンの動作
 $('#taxModelAccept')?.addEventListener('click', async () => {
   const taxmodaltemplate = document.getElementById('taxType-modal')
+  // 明細の何行目の税なのかを取得
   const taxLineId = document.querySelector('input[name=taxLineId]').value
+  // ラジオボタンの要素取得
   const radios = taxmodaltemplate.querySelectorAll('input[type=radio]')
   let validResult = true
+  // チェックされているものを取得
   const selectedRadio = getRadioChecked(radios)
   if (selectedRadio) {
     lines[taxLineId].taxLabel = ''
     lines[taxLineId].taxAmount = ''
+    // その他の税が選択されていた場合
     if (selectedRadio.value === 'otherTax') {
+      // 税ラベルと税額を取得
       const taxData = {
         taxLabel: taxmodaltemplate.querySelector('input[name=tax-label]').value.replace(/\r\n|\r|\n| /g, ''),
         taxAmount: taxmodaltemplate.querySelector('input[name=tax-amount]').value
       }
       validResult = taxValidate(taxData)
+      // バリデーションが通ったら明細のデータとして入れる
       if (validResult) {
         lines[taxLineId].taxLabel = taxmodaltemplate
           .querySelector('input[name=tax-label]')
@@ -789,9 +804,11 @@ $('#taxModelAccept')?.addEventListener('click', async () => {
         }
       }
     }
+    // 明細の税タイプに選択されている税を入れる
     lines[taxLineId].taxType = selectedRadio.value
   }
   if (validResult) {
+    // バリデーション通った場合、モーダルを非活性
     $('#taxType-modal').classList.remove('is-active')
     renderLines()
     renderTotals()
