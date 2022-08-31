@@ -620,7 +620,9 @@ function addLine() {
     unit: '',
     unitPrice: '',
     quantity: '',
-    taxType: lines.length >= 1 && lines[lines.length - 1].taxType ? lines[lines.length - 1].taxType : ''
+    taxType: lines.length >= 1 && lines[lines.length - 1].taxType ? lines[lines.length - 1].taxType : '',
+    taxLabel: lines.length >= 1 && lines[lines.length - 1].taxLabel ? lines[lines.length - 1].taxLabel : '',
+    taxAmount: lines.length >= 1 && lines[lines.length - 1].taxAmount ? lines[lines.length - 1].taxAmount : ''
   })
   renderLines()
   renderInvoicecDiscount()
@@ -712,6 +714,9 @@ function activateTaxModal(index, line) {
     document.getElementById(display).textContent = ''
   })
   while ($('#tax-error').firstChild) $('#tax-error').removeChild($('#tax-error').firstChild)
+  // 税情報初期化
+  taxmodaltemplate.querySelector('input[name=tax-label]').value = ''
+  taxmodaltemplate.querySelector('input[name=tax-amount]').value = ''
   // もし選択されている税があった場合はチェック状態にする
   if (line.taxType) {
     taxmodaltemplate.querySelector('input[value=' + line.taxType + ']').checked = true
@@ -725,10 +730,6 @@ function activateTaxModal(index, line) {
     const radios = document.querySelectorAll('input[type=radio]')
     const selectedRadio = getRadioChecked(radios)
     if (selectedRadio) selectedRadio.checked = false
-    if (line.taxType === 'otherTax') {
-      taxmodaltemplate.querySelector('input[name=tax-label]').value = ''
-      taxmodaltemplate.querySelector('input[name=tax-amount]').value = ''
-    }
     taxAcceptEnabled(false)
   }
 }
