@@ -801,7 +801,7 @@ $('#taxModelAccept')?.addEventListener('click', async () => {
           .value.replace(/\r\n|\r|\n| /g, '')
         const taxAmountValue = taxmodaltemplate.querySelector('input[name=tax-amount]').value
         if (isNumberString(taxAmountValue)) {
-          lines[taxLineId].taxAmount = taxAmountValue
+          lines[taxLineId].taxAmount = Number(taxAmountValue)
         }
       }
     }
