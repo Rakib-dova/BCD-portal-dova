@@ -66,7 +66,7 @@ describe('仕訳情報設定_支払依頼一覧', function () {
   /**
    * STEP8_No.21,22,25
    */
-  it("ライトプラン未加入時の検索機能利用制限", async function () {
+  it("スタンダードプラン未加入時の検索機能利用制限", async function () {
     // テストの初期化を実施
     await initBrowser();
     const context = await browser.newContext(contextOption);
@@ -102,22 +102,21 @@ describe('仕訳情報設定_支払依頼一覧', function () {
     await lightPlanMenuPage.waitForLoading();
     expect(await lightPlanMenuPage.getTitle()).to.equal('オプションサービス申込', '「オプションサービス申込」モーダルが表示されること');
     expect(await lightPlanMenuPage.getApplyEnabled()).to.equal(true, '「お申し込みフォーム」ボタンが活性状態であること');
-    
-    /*
+
     // 申し込み画面（利用規約）に遷移すること
     await lightPlanMenuPage.clickApply();
     await paidServiceRegisterPage.waitForLoading();
     expect(await paidServiceRegisterPage.getTitle()).to.equal('有料サービス利用登録', '申し込み画面（利用規約）に遷移すること');
     expect(await paidServiceRegisterPage.isStandardChecked()).to.equal(true, '「ご利用希望サービス」の「スタンダードプラン」にチェックが入っていること');
-    */
     await page.waitForTimeout(1000);
   });
 
   /**
    * STEP5_No.109
+   * STEP8_ライトプラン_No.180
    * STEP8_機能改修確認_No.
    */
-  it("受領請求書への仕訳情報設定", async function () {
+  it("受領請求書への仕訳情報設定（スタンダードプラン加入済）", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -162,9 +161,7 @@ describe('仕訳情報設定_支払依頼一覧', function () {
       let sender = await paymentRequestListPage.getSender(invoiceNo);
 
       // 請求書を検索する
-      if (await paymentRequestListPage.isFormShown()) {
-
-      }
+      expect(await paymentRequestListPage.isFormShown()).to.equal(true, '検索条件フォームが表示されること');
 
       // 仕訳情報設定ページへ遷移する
       await comment('「仕訳情報設定」をクリックする');

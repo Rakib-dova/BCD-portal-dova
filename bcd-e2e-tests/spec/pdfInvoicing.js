@@ -43,6 +43,7 @@ describe('PDF請求書', function () {
   };
 
   /**
+   * STEP7_PDF請求書_No.2,4,17,18,76-83
    * STEP8_PDF請求書_No.37,39,41-45,49
    */
   it("PDF出力内容登録", async function () {
@@ -78,9 +79,17 @@ describe('PDF請求書', function () {
       await pdfInvoicingPage.waitForLoading();
       await pdfInvoicingPage.clickRegist();
       await registPdfInvoicePage.waitForLoading();
+      expect(await registPdfInvoicePage.getTitle()).to.equal('PDF請求書作成', '【PDF請求書作成】PDF出力内容登録画面(宛先情報入力画面) に遷移すること');
+      expect(await registPdfInvoicePage.getSender()).to.equal('WRテスト企業_2_山田_田中', '【PDF請求書作成】差出人情報が自動で入力されていること');
 
       // 差出人の登録番号が入力できる状態になっていること
       expect(await registPdfInvoicePage.isSenderNoDisabled()).to.equal(false, '【PDF請求書作成】差出人の登録番号が入力できる状態になっていること');
+
+      // 明細欄が1件追加・削除されること
+      await registPdfInvoicePage.addLine();
+      expect(await registPdfInvoicePage.getLineCount()).to.equal(2, '【PDF請求書作成】明細欄が1件追加されること');
+      await registPdfInvoicePage.deleteLine(2);
+      expect(await registPdfInvoicePage.getLineCount()).to.equal(1, '【PDF請求書作成】明細欄が1件削除されること');
 
       // 3件まで割引行が追加できること
       for(i = 0; i < 3; i++) {
@@ -109,9 +118,12 @@ describe('PDF請求書', function () {
       await pdfInvoicingPage.waitForLoading();
       expect(await pdfInvoicingPage.isInvoiceExist(invoiceNo)).to.equal(true, '【PDF請求書作成ドラフト一覧】ドラフト状態で保存されること');
 
-      // PDF出力ボタン押下後の処理中メッセージが表示されること
+      // 選択したPDF請求書のPDF出力内容登録画面に遷移すること
       await pdfInvoicingPage.edit(invoiceNo);
       await registPdfInvoicePage.waitForLoading();
+      expect(await registPdfInvoicePage.getInvoiceNo()).to.equal(invoiceNo, '【PDF請求書作成】選択したPDF請求書のPDF出力内容登録画面に遷移すること');
+      
+      // PDF出力ボタン押下後の処理中メッセージが表示されること
       await registPdfInvoicePage.clickOutputModal();
       expect(await registPdfInvoicePage.getOutputModalMsg()).to.equal('PDFを出力完了すると一覧から請求書が削除されます。', '【PDF請求書作成】処理中メッセージが表示されること');
 

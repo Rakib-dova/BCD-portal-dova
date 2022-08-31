@@ -84,6 +84,11 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
     // ダウンロード対象の選択肢が追加されていること
     expect(await journalDownloadPage.isFinalApprovalChecked()).to.equal(true, '【仕訳情報ダウンロード】ダウンロード対象の選択肢が追加されていること');
 
+    // 「出力フォーマットを選択」ボタンが表示されていないこと
+    if (dataFormat && !dataFormat.includes('既定')) {
+      expect(await journalDownloadPage.isLightPlanShown()).to.equal(false, '【仕訳情報ダウンロード】「出力フォーマットを追加」が表示されないこと');
+    }
+
     // 条件を入力する
     await journalDownloadPage.inputConditions(invoiceNo, startDate, endDate, sender, approved, dataFormat);
 
@@ -342,6 +347,7 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
 
   /**
    * STEP7_No.156,158
+   * STEP8_ライトプラン_No.183-185
    */
   it("弥生会計_明細1", async function () {
     // テストの初期化を実施
@@ -372,6 +378,7 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
 
   /**
    * STEP7_No.163,167
+   * STEP8_ライトプラン_No.183-185
    */
   it("弥生会計_明細2", async function () {
     // テストの初期化を実施
@@ -402,6 +409,7 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
 
   /**
    * STEP7_No.185,186
+   * STEP8_ライトプラン_No.183-185
    */
   it("勘定奉行クラウド", async function () {
     // テストの初期化を実施
@@ -442,6 +450,7 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
 
   /**
    * STEP7_No.190,191
+   * STEP8_ライトプラン_No.183-185
    */
   it("PCA hyper", async function () {
     // テストの初期化を実施
@@ -482,6 +491,7 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
 
   /**
    * STEP8_機能改修確認_No.150,151,154,157
+   * STEP8_ライトプラン_No.183-185
    */
    it("大蔵大臣NX", async function () {
     // テストの初期化を実施

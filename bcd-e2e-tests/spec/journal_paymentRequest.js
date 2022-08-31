@@ -74,9 +74,9 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     global.reporter.setBrowserInfo(browser, page);
   };
 
-  async function gotoList(topPage, journalMenuPage, paymentRequestListPage) {
+  async function gotoList(account, topPage, journalMenuPage, paymentRequestListPage) {
     // デジタルトレードアプリのトップページへ遷移する
-    await common.gotoTop(page, requester);
+    await common.gotoTop(page, account);
 
     // 仕訳情報管理メニューを開く
     await comment('「仕訳情報管理」をクリックする');
@@ -109,7 +109,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
       = common.getPageObject(browser, page);
 
     // 支払依頼一覧ページへ遷移する
-    await gotoList(topPage, journalMenuPage, paymentRequestListPage);
+    await gotoList(requester, topPage, journalMenuPage, paymentRequestListPage);
 
     // ステータスが「未処理」となっていること
     expect(await paymentRequestListPage.getApproveStatus('fcde40393')).to.equal('未処理', 'ステータスが「未処理」となっていること');
@@ -153,7 +153,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
       = common.getPageObject(browser, page);
 
     // 支払依頼一覧ページへ遷移する
-    await gotoList(topPage, journalMenuPage, paymentRequestListPage);
+    await gotoList(requester, topPage, journalMenuPage, paymentRequestListPage);
 
     // 仕訳情報設定ページへ遷移する
     await comment('「仕訳情報設定」をクリックする');
@@ -187,7 +187,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
       = common.getPageObject(browser, page);
 
     // 支払依頼一覧ページへ遷移する
-    await gotoList(topPage, journalMenuPage, paymentRequestListPage);
+    await gotoList(requester, topPage, journalMenuPage, paymentRequestListPage);
 
     // 仕訳情報設定ページへ遷移する
     await comment('「仕訳情報設定」をクリックする');
@@ -246,7 +246,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
       = common.getPageObject(browser, page);
 
     // 支払依頼一覧ページへ遷移する
-    await gotoList(topPage, journalMenuPage, paymentRequestListPage);
+    await gotoList(requester, topPage, journalMenuPage, paymentRequestListPage);
 
     // 仕訳情報設定ページへ遷移する
     await comment('「仕訳情報設定」をクリックする');
@@ -319,7 +319,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
 
     // 依頼者名目が自分のユーザー名となっていること
     let actual = await paymentRequestPage.getRequestingRow(1);
-    expect(actual.asignee).to.equal(requester.first + ' ' + requester.family, '依頼者名目が自分のユーザー名となっていること');
+    expect(actual.asignee).to.equal(requester.family + ' ' + requester.first, '依頼者名目が自分のユーザー名となっていること');
 
     // 承認状況に「依頼済み」と表示されていること
     expect(actual.status).to.contains('依頼済み', '承認状況に「依頼済み」と表示されていること');
@@ -369,7 +369,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
       = common.getPageObject(browser, page);
 
     // 支払依頼一覧ページへ遷移する
-    await gotoList(topPage, journalMenuPage, paymentRequestListPage);
+    await gotoList(approveRoute.authorizers[0], topPage, journalMenuPage, paymentRequestListPage);
 
     // 承認待ちタブを開く
     await comment('「承認待ち」タブを開く');
@@ -465,7 +465,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
       = common.getPageObject(browser, page);
 
     // 支払依頼一覧ページへ遷移する
-    await gotoList(topPage, journalMenuPage, paymentRequestListPage);
+    await gotoList(requester, topPage, journalMenuPage, paymentRequestListPage);
 
     // ステータスが「一次承認済み」となっていること
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('一次承認済み', 'ステータスが「一次承認済み」となっていること');
@@ -481,14 +481,14 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
 
     // 担当者名が自分のユーザー名となっていること
     let actual = await paymentRequestPage.getRequestingRow(1);
-    expect(actual.asignee).to.equal(requester.first + ' ' + requester.family, '担当者名が自分のユーザー名となっていること');
+    expect(actual.asignee).to.equal(requester.family + ' ' + requester.first, '担当者名が自分のユーザー名となっていること');
 
     // 承認状況に「依頼済み」と表示されていること
     expect(actual.status).to.contains('依頼済み', '承認状況に「依頼済み」と表示されていること');
 
     // 一次承認にて担当者名に誤りがないこと
     actual = await paymentRequestPage.getRequestingRow(2);
-    expect(actual.asignee).to.equal(approveRoute.authorizers[0].first + ' ' + approveRoute.authorizers[0].family, '一次承認にて担当者名に誤りがないこと');
+    expect(actual.asignee).to.equal(approveRoute.authorizers[0].family + ' ' + approveRoute.authorizers[0].first, '一次承認にて担当者名に誤りがないこと');
 
     // 承認された日時が表示されること
     expect(actual.status).to.contains('承認済み', '承認された日時が表示されること');
@@ -508,7 +508,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
       = common.getPageObject(browser, page);
 
     // 支払依頼一覧ページへ遷移する
-    await gotoList(topPage, journalMenuPage, paymentRequestListPage);
+    await gotoList(approveRoute.authorizers[1], topPage, journalMenuPage, paymentRequestListPage);
 
     // 承認待ちタブを開く
     await comment('「承認待ち」タブを開く');

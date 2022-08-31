@@ -45,6 +45,11 @@ class PaidServiceRegisterPage {
     await this.actionUtils.check(this.frame, '#check', true);
   }
 
+  // 「お申し込み内容入力へ」が活性状態であるか
+  async isNextDisabled() {
+    return await this.actionUtils.isDisabled(this.frame, '#next-btn');
+  }
+
   // 「お申し込み内容入力へ」をクリックする
   async clickNext() {
     await this.addComment('「お申し込み内容入力へ」をクリックする');

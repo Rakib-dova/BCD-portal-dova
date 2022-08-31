@@ -60,7 +60,7 @@ class JournalDownloadPage {
     }
   }
 
-  // 「出力フォーマット」プルダウンを展開する（フリープラン限定）
+  // 「出力フォーマット」プルダウンを展開する（スタンダードプラン限定）
   async openFormat() {
     await this.addComment('「出力フォーマット」プルダウンを展開する');
     await this.actionUtils.click(this.frame, '//input[@name="serviceDataFormat"]/..');
@@ -81,6 +81,11 @@ class JournalDownloadPage {
       result += formats[i];
     }
     return result;
+  }
+
+  // 「出力フォーマットを追加」が表示されているか
+  async isLightPlanShown() {
+    return await this.actionUtils.isDisplayed(this.frame, '//a[@data-target="information-lightplan"]');
   }
 
   // 「出力フォーマットを追加」をクリックする

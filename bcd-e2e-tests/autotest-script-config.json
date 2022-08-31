@@ -109,20 +109,26 @@
     "user04": {
       "id": "tto884756+0001@gmail.com",
       "password": "He1qXXO9mo",
-      "family": "担当者姓",
-      "first": "担当者名"
+      "family": "001",
+      "first": "WR"
     },
     "user05": {
       "id": "tto884756+0002@gmail.com",
       "password": "2BbF0BFSFT",
-      "family": "担当者姓",
-      "first": "担当者名"
+      "family": "002",
+      "first": "WR"
     },
     "user06": {
       "id": "mobyoperu@eay.jp",
       "password": "sQ7L2aS4mv",
-      "family": "担当者姓",
+      "family": "担当者性",
       "first": "担当者名"
+    },
+    "user07": {
+      "id": "0702.fkwl.034@gmail.com",
+      "password": "Webrage1234567",
+      "family": "WR",
+      "first": "検証用01"
     }
   }
 }
