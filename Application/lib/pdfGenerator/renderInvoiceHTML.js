@@ -598,7 +598,7 @@ const getTaxTypeName = (taxType, line) => {
     case 'taxExemption':
       return '免税'
     case 'otherTax':
-      return line.taxLabel
+      return line.taxAmount
     default:
       return ''
   }
