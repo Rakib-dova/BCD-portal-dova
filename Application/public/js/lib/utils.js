@@ -96,6 +96,7 @@ function getTaxGroups(lines, taxDatabase) {
         if (existOtherTax) {
           // 同ラベル税に額を合算
           existOtherTax.taxGroupTotal += parseInt(line.taxAmount)
+          existOtherTax.subTotal += Math.floor(line.unitPrice * line.quantity - getLineDiscountPrice(line))
         } else {
           // 同ラベル税がない場合は追加
           const othertax = {
