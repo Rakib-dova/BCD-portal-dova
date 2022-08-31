@@ -13,7 +13,7 @@ module.exports = {
   //   errorData
   // }
   findInvoiceDetail: async (historyId) => {
-    const functionName = 'invoiceDetailController.findInvoiceDetail'
+    const functionName = 'pdfInvoiceHistoryDetailController.findInvoiceDetail'
     logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
     let result
     try {
