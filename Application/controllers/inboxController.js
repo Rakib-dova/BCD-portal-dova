@@ -840,7 +840,9 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
     const status = keyword.status
     const contactEmail = keyword.contactEmail
     const unKnownManager = keyword.unKnownManager
-    let result = null
+    const pageId = keyword.pageId - 1 // 現在ページ
+    const onePagePerItemCount = 20 // １ページあたり表示する項目の数
+    let apiResult = null
 
     // 請求書のタグ付け有無確認
     const checkTagDocumentList = []
@@ -918,21 +920,44 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
           invoiceId,
           issueDate,
           contactEmail,
-          unKnownManager
+          unKnownManager,
+          pageId,
+          onePagePerItemCount
         )
         response.push(...result)
       }
-      result = response
+      apiResult = response
     } else {
-      result = await tradeshiftDTO.getDocumentSearch('', invoiceId, issueDate, contactEmail, unKnownManager)
+      apiResult = await tradeshiftDTO.getDocumentSearch(
+        '',
+        invoiceId,
+        issueDate,
+        contactEmail,
+        unKnownManager,
+        pageId,
+        onePagePerItemCount
+      )
     }
 
-    if (result instanceof Error) return result
+    if (apiResult instanceof Error) return apiResult
+
+    // documents全件数
+    const itemCount = apiResult.itemCount
+    // 全ページ数
+    const numPages = apiResult.numPages
+    // 現在ページ
+    const currPage = apiResult.pageId + 1
+
+    // documentList取得
+    let apiDocumentListResult = []
+    for (const document of apiResult.Document) {
+      apiDocumentListResult.push(document)
+    }
 
     // 請求書情報取得
     const document = []
-    for (let i = 0; i < result.length; i++) {
-      const documentInfo = await tradeshiftDTO.getDocument(result[i].DocumentId, '')
+    for (let i = 0; i < apiDocumentListResult.length; i++) {
+      const documentInfo = await tradeshiftDTO.getDocument(apiDocumentListResult[i].DocumentId, '')
       document.push(documentInfo)
     }
 
@@ -940,35 +965,37 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
     const contactor = await getCompanyUserInfo(document, tradeshiftDTO.accessToken, tradeshiftDTO.refreshToken)
 
     // 請求書の承認依頼検索
-    for (let i = 0; i < result.length; i++) {
+    for (let i = 0; i < apiDocumentListResult.length; i++) {
       const requestApproval = await RequestApproval.findOne({
         where: {
           contractId: contractId,
-          invoiceId: result[i].DocumentId
+          invoiceId: apiDocumentListResult[i].DocumentId
         },
         order: [['create', 'DESC']]
       })
       if (requestApproval !== null) {
-        result[i].approveStatus = requestApproval.status
+        apiDocumentListResult[i].approveStatus = requestApproval.status
       }
     }
 
     // 承認ステータスで検索
     if (status.length > 0) {
       const statusSearchResult = []
-      for (let i = 0; i < result.length; i++) {
+      for (let i = 0; i < apiDocumentListResult.length; i++) {
         for (let j = 0; j < status.length; j++) {
           if (status[j] === '80') {
-            if (!result[i].approveStatus || result[i].approveStatus === status[j]) statusSearchResult.push(result[i])
+            if (!apiDocumentListResult[i].approveStatus || apiDocumentListResult[i].approveStatus === status[j]) {
+              statusSearchResult.push(apiDocumentListResult[i])
+            }
           } else {
-            if (result[i].approveStatus === status[j]) statusSearchResult.push(result[i])
+            if (apiDocumentListResult[i].approveStatus === status[j]) statusSearchResult.push(apiDocumentListResult[i])
           }
         }
       }
-      result = statusSearchResult
+      apiDocumentListResult = statusSearchResult
     }
 
-    const documentList = result.map((document, idx) => {
+    const documentList = apiDocumentListResult.map((document, idx) => {
       const ammount = function () {
         if (document.ItemInfos[1] === undefined) return '-'
         return Math.floor(document.ItemInfos[1].value).toLocaleString('ja-JP')
@@ -1009,7 +1036,13 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
       }
     })
 
-    return documentList
+    return {
+      documentList: documentList,
+      numPages: numPages,
+      currPage: currPage,
+      itemCount: itemCount,
+      currItemCount: (currPage - 1) * 20 + documentList.length
+    }
   } catch (error) {
     return error
   }
