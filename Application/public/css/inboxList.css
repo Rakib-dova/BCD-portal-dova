@@ -264,3 +264,7 @@ td.text-center {
   padding-right: 0 !important;
   border: none !important;
 }
+
+.ml-2 {
+  margin-left: 3rem !important;
+}

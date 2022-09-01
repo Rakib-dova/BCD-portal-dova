@@ -316,10 +316,14 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
   const refreshToken = req.user.refreshToken
   const tenantId = user.tenantId
 
-  const invoiceNumber = req.body.invoiceNumber
-  const minIssuedate = req.body.minIssuedate
-  const maxIssuedate = req.body.maxIssuedate
-  const sentBy = req.body.sentBy || []
+  const companyInfo = req.body.sentBy ?? [',']
+
+  const invoiceNumber = req.body.invoiceNumber ?? ''
+  const minIssuedate = req.body.minIssuedate ?? ''
+  const maxIssuedate = req.body.maxIssuedate ?? ''
+  const companyName = companyInfo[0].split(',')[0] ?? ''
+  const sentBy = companyInfo[0].split(',')[1] ?? ''
+  const sent = req.body.sendTo ?? ''
   const status = req.body.status || []
   const contactEmail = req.body.managerAddress
   const unKnownManager = req.body.unKnownManager
@@ -347,7 +351,9 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
   const keyword = {
     invoiceNumber,
     issueDate: [minIssuedate, maxIssuedate],
+    companyName,
     sentBy,
+    sent,
     status,
     contactEmail,
     unKnownManager,
@@ -377,7 +383,8 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
       rejectedFlag: false,
       csrfToken: req.csrfToken(),
       userRole: req.session.userRole,
-      contractPlan: req.contractPlan
+      contractPlan: req.contractPlan,
+      keyword: keyword
     })
   } else {
     res.render(presentation, {
@@ -390,7 +397,8 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
       message: '条件に合致する支払依頼が見つかりませんでした。',
       csrfToken: req.csrfToken(),
       userRole: req.session.userRole,
-      contractPlan: req.contractPlan
+      contractPlan: req.contractPlan,
+      keyword: keyword
     })
   }
   logger.info(constantsDefine.logMessage.INF001 + 'cbSearchApprovedInvoice')

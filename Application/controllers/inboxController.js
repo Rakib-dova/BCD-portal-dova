@@ -912,32 +912,15 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
     }
 
     // 送信会社、請求書番号、発行日、取引先担当者(アドレス)で検索
-    if (sentByCompanies.length > 0) {
-      const response = []
-      for (const company of sentByCompanies) {
-        const result = await tradeshiftDTO.getDocumentSearch(
-          company,
-          invoiceId,
-          issueDate,
-          contactEmail,
-          unKnownManager,
-          pageId,
-          onePagePerItemCount
-        )
-        response.push(...result)
-      }
-      apiResult = response
-    } else {
-      apiResult = await tradeshiftDTO.getDocumentSearch(
-        '',
-        invoiceId,
-        issueDate,
-        contactEmail,
-        unKnownManager,
-        pageId,
-        onePagePerItemCount
-      )
-    }
+    apiResult = await tradeshiftDTO.getDocumentSearch(
+      sentByCompanies,
+      invoiceId,
+      issueDate,
+      contactEmail,
+      unKnownManager,
+      pageId,
+      onePagePerItemCount
+    )
 
     if (apiResult instanceof Error) return apiResult
 
