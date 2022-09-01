@@ -952,7 +952,10 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
       const requestApproval = await RequestApproval.findOne({
         where: {
           contractId: contractId,
-          invoiceId: apiDocumentListResult[i].DocumentId
+          invoiceId: apiDocumentListResult[i].DocumentId,
+          rejectedFlag: {
+            [Op.ne]: true
+          }
         },
         order: [['create', 'DESC']]
       })
