@@ -98,5 +98,8 @@ constantsDefine({
   APIERROR: 'APIエラーです、時間を空けて再度実行をお願いいたします。',
 
   // システムエラーメッセージ
-  SYSERROR: 'システムエラーです。（後程、接続してください）'
+  SYSERROR: 'システムエラーです。（後程、接続してください）',
+
+  // 合計金額エラーメッセージ
+  TOTALPRICEVALUEERR000: `請求書の合計金額を${invoiceValidDefine.TOTALPRICEVALUE_MESSAGE}円以下で入力してください。`
 })
