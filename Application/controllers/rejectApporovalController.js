@@ -5,6 +5,7 @@ const db = require('../models')
 const Request = db.RequestApproval
 const Approval = db.Approval
 const Status = db.ApproveStatus
+const Op = db.Sequelize.Op
 const approvalInboxController = require('./approvalInboxController')
 /**
  *
@@ -24,7 +25,10 @@ const rejectApprove = async (contractId, invoiceId, message, userId) => {
     const rejectedRequest = await Request.findOne({
       where: {
         contractId: contractId,
-        invoiceId: invoiceId
+        invoiceId: invoiceId,
+        rejectedFlag: {
+          [Op.ne]: true
+        }
       },
       order: [['create', 'DESC']]
     })
