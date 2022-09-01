@@ -323,6 +323,7 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
   const status = req.body.status || []
   const contactEmail = req.body.managerAddress
   const unKnownManager = req.body.unKnownManager
+  const pageId = ~~req.params.page
 
   switch (validate.isContactEmail(contactEmail)) {
     case -1:
@@ -349,7 +350,8 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
     sentBy,
     status,
     contactEmail,
-    unKnownManager
+    unKnownManager,
+    pageId
   }
   const resultList = await inboxController.getSearchResult(tradeshiftDTO, keyword, bcdContract.contractId, tenantId)
 
@@ -365,11 +367,13 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
   }
 
   // 支払一覧画面レンダリング
-  if (resultList.length !== 0) {
+  if (resultList.documentList.length !== 0) {
     res.render(presentation, {
-      listArr: resultList,
-      numPages: 1,
-      currPage: 1,
+      listArr: resultList.documentList,
+      numPages: resultList.numPages,
+      currPage: resultList.currPage,
+      itemCount: resultList.itemCount,
+      currItemCount: resultList.currItemCount,
       rejectedFlag: false,
       csrfToken: req.csrfToken(),
       userRole: req.session.userRole,
@@ -377,9 +381,11 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
     })
   } else {
     res.render(presentation, {
-      listArr: resultList,
+      listArr: resultList.documentList,
       numPages: 1,
       currPage: 1,
+      itemCount: 0,
+      currItemCount: 0,
       rejectedFlag: false,
       message: '条件に合致する支払依頼が見つかりませんでした。',
       csrfToken: req.csrfToken(),
