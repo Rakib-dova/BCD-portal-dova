@@ -42,7 +42,7 @@ block content
                                   .column
                                     .field.is-horizontal
                                       .field-label.is-normal
-                                        label.bulmalabel 請求書番号
+                                        label.bulmalabel 請求書番号（完全一致）
                                       .field-body
                                         .field
                                           .control.has-icons-right
@@ -165,6 +165,8 @@ block content
                     if listArr.length !== 0
                       table.table.is-fullwidth.is-hoverable.table-fixed
                         thead
+                          tr 
+                            th.text-center.th-padding= `${currItemCount}/${itemCount}`
                           tr
                             th.width-5.text-center No
                             th.width-10.text-center 請求書番号
@@ -299,7 +301,7 @@ block content
                                   .column
                                     .field.is-horizontal
                                       .field-label.is-normal
-                                        label.bulmalabel 請求書番号
+                                        label.bulmalabel 請求書番号（完全一致）
                                       .field-body
                                         .field
                                           .control.has-icons-right
@@ -421,6 +423,8 @@ block content
                     if listArr.length !== 0
                       table.table.is-fullwidth.is-hoverable.table-fixed
                         thead
+                          tr 
+                            th.text-center.th-padding= `${currItemCount}/${itemCount}`
                           tr
                             th.width-5.text-center No
                             th.width-10.text-center 請求書番号
@@ -559,6 +563,7 @@ block content
             p.modal-card-title
           section.modal-card-body
             center
+              img(src="/image/loading_progress.gif")
               p.modal-card-result#modal-card-result 処理中
           footer.modal-card-foot          
 
