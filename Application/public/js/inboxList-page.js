@@ -559,3 +559,10 @@ function managerAddressValidationCheck(managerAddress) {
   }
   return regExpResult
 }
+
+// ページリンククリック時、機能
+if (document.querySelector('.pagination-list')) {
+  document.querySelector('.pagination-list').addEventListener('click', function (e) {
+    searchProgressModal.classList.add('is-active')
+  })
+}
