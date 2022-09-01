@@ -1,11 +1,28 @@
+const modal = document.getElementById('journaldownload-progress-modal')
+
 window.onload = function () {
   document.getElementById('submit').addEventListener('click', (e) => {
+    modal.classList.add('is-active')
     document.querySelector('#RequiredErrorMesageField').classList.add('is-invisible')
     if (!checkRadioButton()) {
       return false
     }
 
-    document.querySelector('#form').submit()
+    const formData = document.querySelector('#form')
+    const csrfToken = document.querySelector('input[name="_csrf"]').value
+
+    const sender = new XMLHttpRequest()
+    sender.open('POST', formData.action, true)
+    sender.setRequestHeader('Content-Type', 'application/json')
+    sender.setRequestHeader('CSRF-Token', csrfToken)
+    sender.onreadystatechange = () => {
+      if (sender.readyState === sender.DONE) {
+        if (sender.status === 200 || sender.status === 500) {
+          modal.classList.remove('is-active')
+        }
+      }
+    }
+    sender.send(formData.submit())
   })
 }
 

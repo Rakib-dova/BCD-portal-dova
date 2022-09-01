@@ -1,5 +1,8 @@
+const modal = document.getElementById('download-progress-modal')
+
 window.onload = function () {
   document.getElementById('submit').addEventListener('click', (e) => {
+    modal.classList.add('is-active')
     let statusCheckBoxes = document.querySelectorAll("input[name='status']")
     statusCheckBoxes = Array.prototype.slice.call(statusCheckBoxes)
     if (statusCheckBoxes.filter((element) => element.checked === true).length === 0) {
@@ -8,7 +11,21 @@ window.onload = function () {
       modalCardBody.innerHTML = 'ステータスを選択してください。'
       dataTarget.classList.add('is-active')
     } else {
-      document.querySelector('#form').submit()
+      const formData = document.querySelector('#form')
+      const csrfToken = document.querySelector('input[name="_csrf"]').value
+
+      const sender = new XMLHttpRequest()
+      sender.open('POST', formData.action, true)
+      sender.setRequestHeader('Content-Type', 'application/json')
+      sender.setRequestHeader('CSRF-Token', csrfToken)
+      sender.onreadystatechange = () => {
+        if (sender.readyState === sender.DONE) {
+          if (sender.status === 200 || sender.status === 500) {
+            modal.classList.remove('is-active')
+          }
+        }
+      }
+      sender.send(formData.submit())
     }
   })
 }
