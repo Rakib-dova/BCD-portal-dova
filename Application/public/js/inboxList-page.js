@@ -289,29 +289,8 @@ function sendToSelectBtnCreate() {
   if (!document.querySelector('#allSelectSentToBtn') ?? false) {
     const allSelectBtnTemplate = document.querySelector('#templateAllSelectBtn')
     const cloneAllSelectBtnTemplate = document.importNode(allSelectBtnTemplate.content, true)
-    cloneAllSelectBtnTemplate.children[0].children[0].id = 'allSelectSentToBtn'
-    cloneAllSelectBtnTemplate.children[2].children[0].id = 'allClearSentToBtn'
-    cloneAllSelectBtnTemplate.children[4].children[0].id = 'invisibleSentToBtn'
+    cloneAllSelectBtnTemplate.children[0].children[0].id = 'invisibleSentToBtn'
     sendToSelectBtnField.appendChild(cloneAllSelectBtnTemplate)
-
-    // 全部選択ボタン機能追加
-    document.querySelector('#allSelectSentToBtn').addEventListener('click', (e) => {
-      const sendToCompanies = document.querySelectorAll('.sendToCompanies')
-      if (sendToCompanies ?? false) {
-        Array.prototype.forEach.call(sendToCompanies, (item) => {
-          item.checked = true
-        })
-      }
-    })
-    // 全部解除ボタン機能追加
-    document.querySelector('#allClearSentToBtn').addEventListener('click', (e) => {
-      const sendToCompanies = document.querySelectorAll('.sendToCompanies')
-      if (sendToCompanies ?? false) {
-        Array.prototype.forEach.call(sendToCompanies, (item) => {
-          item.checked = false
-        })
-      }
-    })
 
     // 送信企業リスト隠すボタン機能追加
     document.querySelector('#invisibleSentToBtn').addEventListener('click', function (e) {
@@ -337,10 +316,7 @@ if (document.querySelector('#sendToSearchBtn')) {
     const sendTo = document.getElementById('sendTo').value
 
     // レイアウト初期化
-    if (
-      (document.querySelector('#allSelectSentToBtn') ?? false) ||
-      (document.querySelector('#allClearSentToBtn') ?? false)
-    ) {
+    if (document.querySelector('#invisibleSentToBtn') ?? false) {
       const sendToSelectBtnFieldChildren = []
       const sendToSelectBtnField = document.querySelector('#sendToSelectBtnField')
       Array.prototype.forEach.call(sendToSelectBtnField.children, (item) => {
@@ -349,8 +325,8 @@ if (document.querySelector('#sendToSearchBtn')) {
       sendToSelectBtnFieldChildren.forEach((item) => item.remove())
     }
 
-    if (document.querySelector('#searchResultBox') ?? false) {
-      document.querySelector('#searchResultBox').remove()
+    if (document.querySelector('.searchResultBox') ?? false) {
+      document.querySelector('.searchResultBox').remove()
       document
         .querySelector('#form > article > div > div > div:nth-child(3) > div:nth-child(3)')
         .classList.add('is-invisible')
@@ -402,7 +378,10 @@ if (document.querySelector('#sendToSearchBtn')) {
                   cloneSearchResultItemTemplate.querySelector('input').id = `sendTo${idx}`
                   cloneSearchResultItemTemplate.querySelector('input').name = 'sentBy[]'
                   cloneSearchResultItemTemplate.querySelector('input').classList.add('sendToCompanies')
-                  cloneSearchResultItemTemplate.querySelector('input').value = item.CompanyAccountId
+                  cloneSearchResultItemTemplate.querySelector('input').value = [
+                    `${item.CompanyName}`,
+                    `${item.CompanyAccountId}`
+                  ]
                   cloneSearchResultBoxTemplate.querySelector('.box').appendChild(cloneSearchResultItemTemplate)
                 })
                 document
@@ -566,3 +545,43 @@ if (document.querySelector('.pagination-list')) {
     searchProgressModal.classList.add('is-active')
   })
 }
+
+// クリアボタンの機能（支払一覧検索条件クリア）
+$('#btnInboxSearchClear').addEventListener('click', function () {
+  // 請求書番号初期化
+  $('#invoiceNumber').value = ''
+
+  // 発行日初期化
+  $('#minIssuedate').value = ''
+  $('#maxIssuedate').value = ''
+
+  // 送信企業初期化
+  $('#sendTo').value = ''
+  if (document.querySelector('#invisibleSentToBtn') ?? false) {
+    const sendToSelectBtnFieldChildren = []
+    const sendToSelectBtnField = document.querySelector('#sendToSelectBtnField')
+    Array.prototype.forEach.call(sendToSelectBtnField.children, (item) => {
+      sendToSelectBtnFieldChildren.push(item)
+    })
+    sendToSelectBtnFieldChildren.forEach((item) => item.remove())
+  }
+
+  if (document.querySelector('.searchResultBox') ?? false) {
+    document.querySelector('.searchResultBox').remove()
+    document
+      .querySelector('#form > article > div > div > div:nth-child(3) > div:nth-child(3)')
+      .classList.add('is-invisible')
+    document.querySelector('#sendToSearchBtn').classList.remove('is-loading')
+  }
+
+  // 承認ステータス初期化
+  const form = document.querySelector('#form')
+  const status = form['status[]']
+  status.forEach((item) => (item.checked = false))
+
+  // 担当者アドレス初期化
+  $('#managerAddress').value = ''
+
+  // 担当者不明の請求書初期化
+  form.unKnownManager.checked = false
+})
