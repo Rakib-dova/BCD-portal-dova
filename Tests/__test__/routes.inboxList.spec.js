@@ -123,7 +123,17 @@ const searchResult1 = {
     }
   ],
   numPages: 1,
-  currPage: 1
+  currPage: 1,
+  itemCount: 4,
+  currItemCount: 4
+}
+
+const searchResult2 = {
+  list: [],
+  numPages: 1,
+  currPage: 1,
+  itemCount: 0,
+  currItemCount: 0
 }
 
 const returnRequestApproval = {
@@ -311,6 +321,8 @@ describe('inboxListのテスト', () => {
         listArr: searchResult1.list,
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
+        currItemCount: searchResult1.currItemCount,
+        itemCount: searchResult1.itemCount,
         rejectedFlag: false,
         csrfToken: dummyToken,
         contractPlan: contractPlan,
@@ -357,6 +369,8 @@ describe('inboxListのテスト', () => {
         listArr: searchResult1.list,
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
+        currItemCount: searchResult1.currItemCount,
+        itemCount: searchResult1.itemCount,
         rejectedFlag: false,
         csrfToken: dummyToken,
         contractPlan: contractPlan,
@@ -439,6 +453,8 @@ describe('inboxListのテスト', () => {
         listArr: searchResult1.list,
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
+        currItemCount: searchResult1.currItemCount,
+        itemCount: searchResult1.itemCount,
         rejectedFlag: false,
         csrfToken: dummyToken,
         contractPlan: contractPlan,
@@ -1200,20 +1216,38 @@ describe('inboxListのテスト', () => {
         unKnownManager: ''
       }
 
-      const searchResultData = [
-        {
-          ammount: '3,080,000',
-          currency: 'JPY',
-          documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
-          expire: '2021-11-10',
-          invoiceNo: 'PB1649meisai001',
-          no: 1,
-          sentBy: 'バイヤー1',
-          sentTo: 'サプライヤー1',
-          status: 0,
-          updated: '2021-12-27'
-        }
-      ]
+      const resultKeyword = {
+        companyName: '',
+        contactEmail: '',
+        invoiceNumber: 'PB1649meisai001',
+        issueDate: ['', ''],
+        pageId: 0,
+        sent: '',
+        sentBy: '',
+        status: [],
+        unKnownManager: ''
+      }
+
+      const searchResultData = {
+        numPages: 1,
+        currPage: 1,
+        itemCount: 4,
+        currItemCount: 4,
+        documentList: [
+          {
+            ammount: '3,080,000',
+            currency: 'JPY',
+            documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+            expire: '2021-11-10',
+            invoiceNo: 'PB1649meisai001',
+            no: 1,
+            sentBy: 'バイヤー1',
+            sentTo: 'サプライヤー1',
+            status: 0,
+            updated: '2021-12-27'
+          }
+        ]
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -1242,13 +1276,16 @@ describe('inboxListのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでinboxList_light_planが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('inboxList_light_plan', {
-        listArr: searchResultData,
+        listArr: searchResultData.documentList,
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
+        itemCount: searchResult1.itemCount,
+        currItemCount: searchResult1.currItemCount,
         rejectedFlag: false,
         csrfToken: dummyToken,
         contractPlan: contractPlan,
-        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        keyword: resultKeyword
       })
     })
 
@@ -1324,20 +1361,26 @@ describe('inboxListのテスト', () => {
         unKnownManager: ''
       }
 
-      const searchResultData = [
-        {
-          ammount: '3,080,000',
-          currency: 'JPY',
-          documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
-          expire: '2021-11-10',
-          invoiceNo: 'PB1649meisai001',
-          no: 1,
-          sentBy: 'バイヤー1',
-          sentTo: 'サプライヤー1',
-          status: 0,
-          updated: '2021-12-27'
-        }
-      ]
+      const searchResultData = {
+        numPages: 1,
+        currPage: 1,
+        itemCount: 4,
+        currItemCount: 4,
+        documentList: [
+          {
+            ammount: '3,080,000',
+            currency: 'JPY',
+            documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+            expire: '2021-11-10',
+            invoiceNo: 'PB1649meisai001',
+            no: 1,
+            sentBy: 'バイヤー1',
+            sentTo: 'サプライヤー1',
+            status: 0,
+            updated: '2021-12-27'
+          }
+        ]
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -1436,7 +1479,25 @@ describe('inboxListのテスト', () => {
         unKnownManager: ''
       }
 
-      const searchResultData = []
+      const resultKeyword = {
+        companyName: '',
+        contactEmail: '',
+        invoiceNumber: 'PB1649meisai001',
+        issueDate: ['', ''],
+        pageId: 0,
+        sent: '',
+        sentBy: '',
+        status: [],
+        unKnownManager: ''
+      }
+
+      const searchResultData = {
+        numPages: 1,
+        currPage: 1,
+        itemCount: 0,
+        currItemCount: 0,
+        documentList: []
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -1464,14 +1525,17 @@ describe('inboxListのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでinboxList_light_planが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('inboxList_light_plan', {
-        listArr: searchResultData,
-        numPages: searchResult1.numPages,
-        currPage: searchResult1.currPage,
+        listArr: [],
+        numPages: searchResult2.numPages,
+        currPage: searchResult2.currPage,
+        currItemCount: searchResult2.currItemCount,
+        itemCount: searchResult2.itemCount,
         rejectedFlag: false,
         message: '条件に合致する支払依頼が見つかりませんでした。',
         csrfToken: dummyToken,
         contractPlan: contractPlan,
-        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        keyword: resultKeyword
       })
     })
 
@@ -1489,20 +1553,38 @@ describe('inboxListのテスト', () => {
         unKnownManager: ''
       }
 
-      const searchResultData = [
-        {
-          ammount: '3,080,000',
-          currency: 'JPY',
-          documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
-          expire: '2021-11-10',
-          invoiceNo: 'PB1649meisai001',
-          no: 1,
-          sentBy: 'バイヤー1',
-          sentTo: 'サプライヤー1',
-          status: 0,
-          updated: '2021-12-27'
-        }
-      ]
+      const resultKeyword = {
+        companyName: '',
+        contactEmail: '"test test"@test.com',
+        invoiceNumber: 'PB1649meisai001',
+        issueDate: ['', ''],
+        pageId: 0,
+        sent: '',
+        sentBy: '',
+        status: [],
+        unKnownManager: ''
+      }
+
+      const searchResultData = {
+        numPages: 1,
+        currPage: 1,
+        itemCount: 4,
+        currItemCount: 4,
+        documentList: [
+          {
+            ammount: '3,080,000',
+            currency: 'JPY',
+            documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+            expire: '2021-11-10',
+            invoiceNo: 'PB1649meisai001',
+            no: 1,
+            sentBy: 'バイヤー1',
+            sentTo: 'サプライヤー1',
+            status: 0,
+            updated: '2021-12-27'
+          }
+        ]
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -1530,13 +1612,16 @@ describe('inboxListのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでinboxList_light_planが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('inboxList_light_plan', {
-        listArr: searchResultData,
+        listArr: searchResultData.documentList,
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
+        currItemCount: searchResult1.currItemCount,
+        itemCount: searchResult1.itemCount,
         rejectedFlag: false,
         csrfToken: dummyToken,
         contractPlan: contractPlan,
-        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        keyword: resultKeyword
       })
     })
 
@@ -1980,21 +2065,39 @@ describe('inboxListのテスト', () => {
         unKnownManager: ''
       }
 
-      const searchResultData = [
-        {
-          ammount: '3,080,000',
-          currency: 'JPY',
-          documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
-          expire: '2021-11-10',
-          invoiceNo: 'PB1649meisai001',
-          no: 1,
-          sentBy: 'バイヤー1',
-          sentTo: 'サプライヤー1',
-          status: 0,
-          updated: '2021-12-27',
-          managerInfo: { managerAddress: 'test@test.com', managerName: 'サプライヤー1管理者1' }
-        }
-      ]
+      const resultKeyword = {
+        companyName: '',
+        contactEmail: '',
+        invoiceNumber: 'PB1649meisai001',
+        issueDate: ['', ''],
+        pageId: 0,
+        sent: '',
+        sentBy: '',
+        status: [],
+        unKnownManager: ''
+      }
+
+      const searchResultData = {
+        numPages: 1,
+        currPage: 1,
+        itemCount: 4,
+        currItemCount: 4,
+        documentList: [
+          {
+            ammount: '3,080,000',
+            currency: 'JPY',
+            documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+            expire: '2021-11-10',
+            invoiceNo: 'PB1649meisai001',
+            no: 1,
+            sentBy: 'バイヤー1',
+            sentTo: 'サプライヤー1',
+            status: 0,
+            updated: '2021-12-27',
+            managerInfo: { managerAddress: 'test@test.com', managerName: 'サプライヤー1管理者1' }
+          }
+        ]
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -2023,13 +2126,16 @@ describe('inboxListのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでinboxList_light_planが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('inboxList_light_plan', {
-        listArr: searchResultData,
+        listArr: searchResultData.documentList,
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
+        currItemCount: searchResult1.currItemCount,
+        itemCount: searchResult1.itemCount,
         rejectedFlag: false,
         csrfToken: dummyToken,
         contractPlan: contractPlan,
-        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        keyword: resultKeyword
       })
     })
 
@@ -2047,21 +2153,39 @@ describe('inboxListのテスト', () => {
         unKnownManager: 'unKnownManager'
       }
 
-      const searchResultData = [
-        {
-          ammount: '3,080,000',
-          currency: 'JPY',
-          documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
-          expire: '2021-11-10',
-          invoiceNo: 'PB1649meisai001',
-          no: 1,
-          sentBy: 'バイヤー1',
-          sentTo: 'サプライヤー1',
-          status: 0,
-          updated: '2021-12-27',
-          managerInfo: { managerAddress: '-', managerName: '（ユーザー登録なし）' }
-        }
-      ]
+      const resultKeyword = {
+        companyName: '',
+        contactEmail: '',
+        invoiceNumber: 'PB1649meisai001',
+        issueDate: ['', ''],
+        pageId: 0,
+        sent: '',
+        sentBy: '',
+        status: [],
+        unKnownManager: 'unKnownManager'
+      }
+
+      const searchResultData = {
+        numPages: 1,
+        currPage: 1,
+        itemCount: 4,
+        currItemCount: 4,
+        documentList: [
+          {
+            ammount: '3,080,000',
+            currency: 'JPY',
+            documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+            expire: '2021-11-10',
+            invoiceNo: 'PB1649meisai001',
+            no: 1,
+            sentBy: 'バイヤー1',
+            sentTo: 'サプライヤー1',
+            status: 0,
+            updated: '2021-12-27',
+            managerInfo: { managerAddress: '-', managerName: '（ユーザー登録なし）' }
+          }
+        ]
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -2090,13 +2214,16 @@ describe('inboxListのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでinboxList_light_planが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('inboxList_light_plan', {
-        listArr: searchResultData,
+        listArr: searchResultData.documentList,
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
+        currItemCount: searchResult1.currItemCount,
+        itemCount: searchResult1.itemCount,
         rejectedFlag: false,
         csrfToken: dummyToken,
         contractPlan: contractPlan,
-        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        keyword: resultKeyword
       })
     })
   })

@@ -101,6 +101,8 @@ const cbGetIndex = async (req, res, next) => {
     listArr: result.list,
     numPages: result.numPages,
     currPage: result.currPage,
+    itemCount: result.itemCount,
+    currItemCount: result.currItemCount,
     rejectedFlag: rejectedFlag,
     csrfToken: req.csrfToken(),
     userRole: req.session.userRole,
