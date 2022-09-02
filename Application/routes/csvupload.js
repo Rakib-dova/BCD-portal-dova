@@ -337,6 +337,8 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
   }
 
   const invoiceList = csvObj.getInvoiceList()
+  logger.info(invoiceList)
+
   const invoiceCnt = invoiceList.length
   const setHeaders = {}
   setHeaders.Accepts = 'application/json'
@@ -385,6 +387,8 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
       return 104
     }
   }
+  logger.info(documentIdMap)
+
   if (invoiceCnt > 100) {
     logger.error(constantsDefine.logMessage.ERR001 + 'invoiceToomuch Error')
     await invoiceController.updateCount({
@@ -454,6 +458,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
       }
     }
   }
+  logger.info(promiseMap)
 
   const resultMap = {}
 
@@ -482,8 +487,10 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
   )) {
     resultMap[result.index] = result.apiResult
   }
+  logger.info(resultMap)
 
   for (let i = 0; i < invoiceList.length; i++) {
+    logger.info(i)
     // 明細表示フラグ
     let meisaiFlag = 0
 
@@ -534,6 +541,12 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
             )
           }
         }
+
+        invoices.push({
+          invoiceId: invoiceList[i].invoiceId,
+          status: 'success',
+          detailCount: meisaiLength
+        })
 
         break
       // 請求書の重複
@@ -629,15 +642,9 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
         return ''
       })
     }
-
-    if (invoiceList[i].status === 0) {
-      invoices.push({
-        invoiceId: invoiceList[i].invoiceId,
-        status: 'success',
-        detailCount: meisaiLength
-      })
-    }
   }
+
+  logger.info(invoiceDetails)
 
   // 請求書取込結果詳細の一括登録
   await invoiceDetailController.insertAll(invoiceDetails)
