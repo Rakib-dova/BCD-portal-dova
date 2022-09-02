@@ -2226,5 +2226,272 @@ describe('inboxListのテスト', () => {
         keyword: resultKeyword
       })
     })
+
+    test('正常：送信企業が選択された場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.contractPlan = contractPlan
+      request.body = {
+        invoiceNumber: null,
+        minIssuedate: null,
+        maxIssuedate: null,
+        sentBy: ['契約フロー確認用1,73a8db5c-3f91-4cae-98bf-86b50ea49c82'],
+        managerAddress: '',
+        unKnownManager: ''
+      }
+
+      const resultKeyword = {
+        companyName: '契約フロー確認用1',
+        contactEmail: '',
+        invoiceNumber: '',
+        issueDate: ['', ''],
+        pageId: 0,
+        sent: '',
+        sentBy: '73a8db5c-3f91-4cae-98bf-86b50ea49c82',
+        status: [],
+        unKnownManager: ''
+      }
+
+      const searchResultData = {
+        numPages: 1,
+        currPage: 1,
+        itemCount: 4,
+        currItemCount: 4,
+        documentList: [
+          {
+            ammount: '3,080,000',
+            currency: 'JPY',
+            documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+            expire: '2021-11-10',
+            invoiceNo: 'PB1649meisai001',
+            no: 1,
+            sentBy: 'バイヤー1',
+            sentTo: 'サプライヤー1',
+            status: 0,
+            updated: '2021-12-27',
+            managerInfo: { managerAddress: 'test@test.com', managerName: 'サプライヤー1管理者1' }
+          }
+        ]
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      getSearchResultSpy.mockReturnValueOnce(searchResultData)
+
+      // inboxControllerのgetInobox実施結果設定
+      getInboxSpy.mockReturnValue(searchResult1)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[9])
+      contractControllerFindLightPlanSpy.mockReturnValue(Contracts[9][0])
+
+      // 試験実施
+      await inboxList.cbSearchApprovedInvoice(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでinboxList_light_planが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('inboxList_light_plan', {
+        listArr: searchResultData.documentList,
+        numPages: searchResult1.numPages,
+        currPage: searchResult1.currPage,
+        currItemCount: searchResult1.currItemCount,
+        itemCount: searchResult1.itemCount,
+        rejectedFlag: false,
+        csrfToken: dummyToken,
+        contractPlan: contractPlan,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        keyword: resultKeyword
+      })
+    })
+
+    test('準正常：送信企業が選択され、テナントコードが送信されなかった場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.contractPlan = contractPlan
+      request.body = {
+        invoiceNumber: null,
+        minIssuedate: null,
+        maxIssuedate: null,
+        sentBy: ['契約フロー確認用1'],
+        managerAddress: '',
+        unKnownManager: ''
+      }
+
+      const resultKeyword = {
+        companyName: '契約フロー確認用1',
+        contactEmail: '',
+        invoiceNumber: '',
+        issueDate: ['', ''],
+        pageId: 0,
+        sent: '',
+        sentBy: '',
+        status: [],
+        unKnownManager: ''
+      }
+
+      const searchResultData = {
+        numPages: 1,
+        currPage: 1,
+        itemCount: 4,
+        currItemCount: 4,
+        documentList: [
+          {
+            ammount: '3,080,000',
+            currency: 'JPY',
+            documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+            expire: '2021-11-10',
+            invoiceNo: 'PB1649meisai001',
+            no: 1,
+            sentBy: 'バイヤー1',
+            sentTo: 'サプライヤー1',
+            status: 0,
+            updated: '2021-12-27',
+            managerInfo: { managerAddress: 'test@test.com', managerName: 'サプライヤー1管理者1' }
+          }
+        ]
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      getSearchResultSpy.mockReturnValueOnce(searchResultData)
+
+      // inboxControllerのgetInobox実施結果設定
+      getInboxSpy.mockReturnValue(searchResult1)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[9])
+      contractControllerFindLightPlanSpy.mockReturnValue(Contracts[9][0])
+
+      // 試験実施
+      await inboxList.cbSearchApprovedInvoice(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでinboxList_light_planが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('inboxList_light_plan', {
+        listArr: searchResultData.documentList,
+        numPages: searchResult1.numPages,
+        currPage: searchResult1.currPage,
+        currItemCount: searchResult1.currItemCount,
+        itemCount: searchResult1.itemCount,
+        rejectedFlag: false,
+        csrfToken: dummyToken,
+        contractPlan: contractPlan,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        keyword: resultKeyword
+      })
+    })
+
+    test('準正常：送信企業が選択され、企業名が送信されなかった場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.contractPlan = contractPlan
+      request.body = {
+        invoiceNumber: null,
+        minIssuedate: null,
+        maxIssuedate: null,
+        sentBy: [null, ''],
+        managerAddress: '',
+        unKnownManager: ''
+      }
+
+      const resultKeyword = {
+        companyName: '',
+        contactEmail: '',
+        invoiceNumber: '',
+        issueDate: ['', ''],
+        pageId: 0,
+        sent: '',
+        sentBy: '',
+        status: [],
+        unKnownManager: ''
+      }
+
+      const searchResultData = {
+        numPages: 1,
+        currPage: 1,
+        itemCount: 4,
+        currItemCount: 4,
+        documentList: [
+          {
+            ammount: '3,080,000',
+            currency: 'JPY',
+            documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+            expire: '2021-11-10',
+            invoiceNo: 'PB1649meisai001',
+            no: 1,
+            sentBy: 'バイヤー1',
+            sentTo: 'サプライヤー1',
+            status: 0,
+            updated: '2021-12-27',
+            managerInfo: { managerAddress: 'test@test.com', managerName: 'サプライヤー1管理者1' }
+          }
+        ]
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      getSearchResultSpy.mockReturnValueOnce(searchResultData)
+
+      // inboxControllerのgetInobox実施結果設定
+      getInboxSpy.mockReturnValue(searchResult1)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[9])
+      contractControllerFindLightPlanSpy.mockReturnValue(Contracts[9][0])
+
+      // 試験実施
+      await inboxList.cbSearchApprovedInvoice(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでinboxList_light_planが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('inboxList_light_plan', {
+        listArr: searchResultData.documentList,
+        numPages: searchResult1.numPages,
+        currPage: searchResult1.currPage,
+        currItemCount: searchResult1.currItemCount,
+        itemCount: searchResult1.itemCount,
+        rejectedFlag: false,
+        csrfToken: dummyToken,
+        contractPlan: contractPlan,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        keyword: resultKeyword
+      })
+    })
   })
 })
