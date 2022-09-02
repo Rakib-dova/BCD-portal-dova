@@ -2,6 +2,7 @@
 const express = require('express')
 const fs = require('fs')
 const path = require('path')
+const asyncPool = require('tiny-async-pool')
 const router = express.Router()
 const helper = require('./helpers/middleware')
 const errorHelper = require('./helpers/error')
@@ -17,6 +18,7 @@ const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const apiManager = require('../controllers/apiManager')
 const filePath = process.env.INVOICE_UPLOAD_PATH
+const maxConcurrentUpload = Number(process.env.MAX_CONCURRENT_UPLOAD)
 const constantsDefine = require('../constants')
 const { v4: uuidv4 } = require('uuid')
 
@@ -140,8 +142,6 @@ const cbPostUpload = async (req, res, next) => {
 
   // エラーメッセージを格納
   let errorText = constantsDefine.statusConstants.SUCCESS
-  // ネットワークテナントID取得時エラー確認
-  let getNetworkErrFlag = false
 
   // csvアップロード
   if (cbUploadCsv(filePath, filename, uploadCsvData) === false) {
@@ -163,21 +163,14 @@ const cbPostUpload = async (req, res, next) => {
   }
 
   // ネットワークが紐づいているテナントid検索
-  BconCsv.prototype.companyNetworkConnectionList = await getNetwork(req)
+  const connectionList = await getNetwork(req)
 
-  // ネットワークが紐づいているテナントid確認
-  if (validate.isUndefined(BconCsv.prototype.companyNetworkConnectionList)) {
-    getNetworkErrFlag = false
-    errorText = constantsDefine.statusConstants.INVOICE_VALIDATE_FAILED
-  } else {
-    getNetworkErrFlag = true
-    // ヘッダがない場合
-    BconCsvNoHeader.prototype.companyNetworkConnectionList = BconCsv.prototype.companyNetworkConnectionList
-  }
-
-  if (getNetworkErrFlag) {
+  // ネットワークテナントID取得時エラー確認
+  if (!validate.isUndefined(connectionList)) {
     // csvからデータ抽出
-    switch (await cbExtractInvoice(filePath, filename, userToken, resultInvoice?.dataValues, req, res)) {
+    switch (
+      await cbExtractInvoice(filePath, filename, userToken, resultInvoice?.dataValues, req, res, connectionList)
+    ) {
       case 101:
         errorText = constantsDefine.statusConstants.INVOICE_FAILED
         break
@@ -193,7 +186,10 @@ const cbPostUpload = async (req, res, next) => {
       default:
         break
     }
+  } else {
+    errorText = constantsDefine.statusConstants.INVOICE_VALIDATE_FAILED
   }
+
   // csv削除
   if (cbRemoveCsv(filePath, filename) === false) {
     setErrorLog(req, 500)
@@ -254,7 +250,7 @@ const cbRemoveCsv = (_deleteDataPath, _filename) => {
   }
 }
 
-const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, _res) => {
+const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, _res, connectionList) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbExtractInvoice')
 
   const extractFullpathFile = path.join(_extractDir, '/') + _filename
@@ -320,12 +316,20 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
         formatFlag,
         uploadFormatDetail,
         uploadFormatIdentifier,
-        itemRowNumber
+        itemRowNumber,
+        connectionList
       )
     } else {
       const defaultCsvPath = path.resolve('./public/html/請求書一括作成フォーマット_v1.1.csv')
       uploadData = uploadData ?? fs.readFileSync(defaultCsvPath)
-      csvObj = new BconCsv(extractFullpathFile, formatFlag, uploadFormatDetail, uploadFormatIdentifier, uploadData)
+      csvObj = new BconCsv(
+        extractFullpathFile,
+        formatFlag,
+        uploadFormatDetail,
+        uploadFormatIdentifier,
+        uploadData,
+        connectionList
+      )
     }
   } catch (error) {
     logger.error({ stack: error.stack }, error.name)
@@ -406,9 +410,9 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
   // 結果表示フラグ
   let resultFlag = 0
 
-  const promises = []
-
   const invoiceDetails = []
+
+  const promiseMap = new Map()
 
   for (let i = 0; i < invoiceList.length; i++) {
     // 明細check
@@ -446,36 +450,37 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
 
       // 正常（ステータスが0）の場合、promisesに入れる
       if (invoiceList[i].status === 0) {
-        promises.push(
-          // eslint-disable-next-line no-async-promise-executor
-          new Promise(async function (resolve) {
-            const apiResult = await apiManager.accessTradeshift(
-              _user.accessToken,
-              _user.refreshToken,
-              'put',
-              '/documents/' +
-                invoiceList[i].INVOICE.getDocumentId() +
-                '?draft=true&documentProfileId=tradeshift.invoice.1.0',
-              JSON.stringify(invoiceList[i].INVOICE.getDocument()),
-              {
-                headers: setHeaders
-              }
-            )
-            resolve({
-              index: i,
-              apiResult: apiResult
-            })
-          })
-        )
+        promiseMap.set(i, invoiceList[i])
       }
     }
   }
 
-  // アップロードの並行実施
-  const results = await Promise.all(promises)
   const resultMap = {}
-  for (const result of results) {
-    resultMap[result.index] = result
+
+  // 最大同時API呼び出し数でアップロードの並行実施
+  for await (const result of asyncPool(
+    maxConcurrentUpload,
+    promiseMap,
+    ([i, invoice]) =>
+      // eslint-disable-next-line no-async-promise-executor
+      new Promise(async (resolve) => {
+        const apiResult = await apiManager.accessTradeshift(
+          _user.accessToken,
+          _user.refreshToken,
+          'put',
+          '/documents/' + invoice.INVOICE.getDocumentId() + '?draft=true&documentProfileId=tradeshift.invoice.1.0',
+          JSON.stringify(invoice.INVOICE.getDocument()),
+          {
+            headers: setHeaders
+          }
+        )
+        resolve({
+          index: i,
+          apiResult: apiResult
+        })
+      })
+  )) {
+    resultMap[result.index] = result.apiResult
   }
 
   for (let i = 0; i < invoiceList.length; i++) {

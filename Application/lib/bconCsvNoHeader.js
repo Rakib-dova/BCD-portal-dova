@@ -314,12 +314,12 @@ class bconCsvNoHeader {
 
   #invoiceDocumentList = []
 
-  constructor(fullFilePath, formatFlag, uploadFormatDetail, uploadFormatIdentifier, itemRowNumber) {
+  constructor(fullFilePath, formatFlag, uploadFormatDetail, uploadFormatIdentifier, itemRowNumber, connectionList) {
     this.#csvFile.setFile(fullFilePath, formatFlag, uploadFormatDetail, itemRowNumber)
-    this.convertTradeshiftInvoice(uploadFormatDetail, uploadFormatIdentifier, itemRowNumber)
+    this.convertTradeshiftInvoice(uploadFormatDetail, uploadFormatIdentifier, itemRowNumber, connectionList)
   }
 
-  convertTradeshiftInvoice(uploadFormatDetail, uploadFormatIdentifier, itemRowNumber) {
+  convertTradeshiftInvoice(uploadFormatDetail, uploadFormatIdentifier, itemRowNumber, connectionList) {
     // CSVカーラム
     const resultConvert = {
       invoiceDetailId: null, // invoiceDetailテーブルのinvoiceDetailIdカーラム
@@ -578,10 +578,7 @@ class bconCsvNoHeader {
             resultConvert.status = -1
           }
 
-          const resultcheckNetworkConnection = validate.checkNetworkConnection(
-            bconCsvNoHeader.prototype.companyNetworkConnectionList,
-            csvColumn[2]
-          )
+          const resultcheckNetworkConnection = validate.checkNetworkConnection(connectionList, csvColumn[2])
 
           switch (resultcheckNetworkConnection) {
             case '':

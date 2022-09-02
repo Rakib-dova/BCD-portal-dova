@@ -38,10 +38,10 @@ const findInvoiceDetail = async (invoicesId) => {
  * @param {string} invoiceDetails[].invoicesDetailId 請求書詳細UUID
  * @param {string} invoiceDetails[].invoicesId 請求書UUID
  * @param {string} invoiceDetails[].invoiceId 請求書番号
- * @param {string} invoiceDetails[].lines 行
+ * @param {number} invoiceDetails[].lines 行
  * @param {string} invoiceDetails[].status ステータス
  * @param {string} invoiceDetails[].errorData エラー情報
- * @returns
+ * @returns 登録結果
  */
 const insertAll = async (invoiceDetails) => {
   const functionName = 'invoiceDetailController.insertAll'

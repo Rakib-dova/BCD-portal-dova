@@ -65,4 +65,8 @@ exports.config = (env) => {
   // ストレージ接続情報
   const { AZURE_STORAGE_CONNECTION_STRING } = JSON.parse(env.AZURE_STORAGE_CONNECTION_STRING.replace(/'/g, '"'))
   process.env.AZURE_STORAGE_CONNECTION_STRING = AZURE_STORAGE_CONNECTION_STRING
+
+  // 最大同時API呼び出し数情報
+  const { MAX_CONCURRENT_UPLOAD } = JSON.parse(env.MAX_CONCURRENT_API.replace(/'/g, '"'))
+  process.env.MAX_CONCURRENT_UPLOAD = MAX_CONCURRENT_UPLOAD
 }
