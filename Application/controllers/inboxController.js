@@ -64,6 +64,9 @@ const getInbox = async function (accessToken, refreshToken, pageId, tenantId, pr
     }
   }
 
+  // documents全件数
+  const itemCount = documents.itemCount
+
   // 請求書情報取得
   const document = []
   for (let i = 0; i < documents.Document.length; i++) {
@@ -174,7 +177,9 @@ const getInbox = async function (accessToken, refreshToken, pageId, tenantId, pr
   return {
     list: updated,
     numPages: numPage,
-    currPage: currPage + 1
+    currPage: currPage + 1,
+    itemCount: itemCount,
+    currItemCount: currPage * 20 + updated.length
   }
 }
 
@@ -842,7 +847,6 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
     const unKnownManager = keyword.unKnownManager
     const pageId = keyword.pageId - 1 // 現在ページ
     const onePagePerItemCount = 20 // １ページあたり表示する項目の数
-    let apiResult = null
 
     // 請求書のタグ付け有無確認
     const checkTagDocumentList = []
@@ -912,7 +916,7 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
     }
 
     // 送信会社、請求書番号、発行日、取引先担当者(アドレス)で検索
-    apiResult = await tradeshiftDTO.getDocumentSearch(
+    const apiResult = await tradeshiftDTO.getDocumentSearch(
       sentByCompanies,
       invoiceId,
       issueDate,
