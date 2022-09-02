@@ -419,6 +419,8 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
   const promiseMap = new Map()
 
   for (let i = 0; i < invoiceList.length; i++) {
+    logger.info('i:' + i)
+
     // 明細check
     const meisaiLength = invoiceList[i].INVOICE.getDocument().InvoiceLine.length
 
@@ -458,7 +460,8 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
       }
     }
   }
-  logger.info(promiseMap)
+  logger.info('invoiceDetails:' + invoiceDetails)
+  logger.info('promiseMap:' + promiseMap)
 
   const resultMap = {}
 
@@ -469,6 +472,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
     ([i, invoice]) =>
       // eslint-disable-next-line no-async-promise-executor
       new Promise(async (resolve) => {
+        logger.info('invoiceIndex:' + i)
         const apiResult = await apiManager.accessTradeshift(
           _user.accessToken,
           _user.refreshToken,
