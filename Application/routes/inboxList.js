@@ -323,8 +323,8 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
   const invoiceNumber = req.body.invoiceNumber ?? ''
   const minIssuedate = req.body.minIssuedate ?? ''
   const maxIssuedate = req.body.maxIssuedate ?? ''
-  const companyName = companyInfo[0].split(',')[0] ?? ''
-  const sentBy = companyInfo[0].split(',')[1] ?? ''
+  const companyName = companyInfo[0]?.split(',')[0] ?? ''
+  const sentBy = companyInfo[0]?.split(',')[1] ?? ''
   const sent = req.body.sendTo ?? ''
   const status = req.body.status || []
   const contactEmail = req.body.managerAddress
