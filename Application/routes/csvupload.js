@@ -468,23 +468,28 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
   // 最大同時API呼び出し数でアップロードの並行実施
   for await (const result of asyncPool(maxConcurrentUpload, promiseMap, ([i, invoice]) => {
     // eslint-disable-next-line no-async-promise-executor
-    return new Promise(async (resolve) => {
+    return new Promise(async (resolve, reject) => {
       logger.info('invoiceIndex:' + i)
-      const apiResult = await apiManager.accessTradeshift(
-        _user.accessToken,
-        _user.refreshToken,
-        'put',
-        '/documents/' + invoice.INVOICE.getDocumentId() + '?draft=true&documentProfileId=tradeshift.invoice.1.0',
-        JSON.stringify(invoice.INVOICE.getDocument()),
-        {
-          headers: setHeaders
-        }
-      )
-      logger.info('apiResult:' + apiResult)
-      resolve({
-        index: i,
-        apiResult: apiResult
-      })
+      try {
+        const apiResult = await apiManager.accessTradeshift(
+          _user.accessToken,
+          _user.refreshToken,
+          'put',
+          '/documents/' + invoice.INVOICE.getDocumentId() + '?draft=true&documentProfileId=tradeshift.invoice.1.0',
+          JSON.stringify(invoice.INVOICE.getDocument()),
+          {
+            headers: setHeaders
+          }
+        )
+        logger.info('apiResult:' + apiResult)
+        resolve({
+          index: i,
+          apiResult: apiResult
+        })
+      } catch (err) {
+        logger.error('err:' + err)
+        reject(err)
+      }
     })
   })) {
     logger.info('result' + result)
