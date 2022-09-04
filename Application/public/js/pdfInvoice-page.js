@@ -565,7 +565,8 @@ function renderTotals() {
   lines.forEach((line) => {
     if (line.taxType && line.taxType === 'otherTax' && !otherTaxLineList.includes(line.taxLabel)) {
       otherTaxLineList.push(line.taxLabel)
-    } else if (line.taxType && !taxLineList.includes(line.taxType) && !line.taxType === 'otherTax') {
+    } else if (line.taxType && !taxLineList.includes(line.taxType)) {
+      if (line.taxType === 'otherTax') return
       taxLineList.push(line.taxType)
     }
   })
@@ -857,7 +858,7 @@ function getTaxTypeIndex(taxType, lineId) {
     case 'taxExemption':
       return '免税 0%'
     case 'otherTax':
-      return lines[lineId].taxAmount ? lines[lineId].taxAmount : ''
+      return lines[lineId].taxAmount || lines[lineId].taxAmount === 0 ? lines[lineId].taxAmount : ''
     default:
       return ''
   }
