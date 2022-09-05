@@ -541,19 +541,24 @@ function managerAddressValidationCheck(managerAddress) {
 
 // ページ遷移時のsubmit処理
 function paginationSubmit(form, href) {
-  const managerAddress = form.managerAddress.value
-  form.action = href
-  if (managerAddress.length > 0) {
-    const result = managerAddressValidationCheck(managerAddress)
-    if (!result) {
-      alert('入力したメールアドレスに誤りがあります。')
+  if (form) {
+    const managerAddress = form.managerAddress.value
+    form.action = href
+    if (managerAddress.length > 0) {
+      const result = managerAddressValidationCheck(managerAddress)
+      if (!result) {
+        alert('入力したメールアドレスに誤りがあります。')
+      } else {
+        searchProgressModal.classList.add('is-active')
+        form.submit()
+      }
     } else {
       searchProgressModal.classList.add('is-active')
       form.submit()
     }
   } else {
     searchProgressModal.classList.add('is-active')
-    form.submit()
+    location.replace(href)
   }
 }
 

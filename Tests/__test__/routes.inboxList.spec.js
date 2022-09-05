@@ -2296,7 +2296,8 @@ describe('inboxListのテスト', () => {
         csrfToken: dummyToken,
         contractPlan: contractPlan,
         userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
-        keyword: resultKeyword
+        keyword: resultKeyword,
+        isSearch: true
       })
     })
 
@@ -2385,7 +2386,8 @@ describe('inboxListのテスト', () => {
         csrfToken: dummyToken,
         contractPlan: contractPlan,
         userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
-        keyword: resultKeyword
+        keyword: resultKeyword,
+        isSearch: true
       })
     })
 
@@ -2474,7 +2476,8 @@ describe('inboxListのテスト', () => {
         csrfToken: dummyToken,
         contractPlan: contractPlan,
         userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
-        keyword: resultKeyword
+        keyword: resultKeyword,
+        isSearch: true
       })
     })
   })
