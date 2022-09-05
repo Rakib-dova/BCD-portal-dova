@@ -142,24 +142,36 @@ class TradeshiftDTO {
   /**
    *
    * @param {uuid} sentByCompany 送信した企業のトレードシフトID
-   * @param {string} invoiceId 請求書番号
+   * @param {string} businessId 請求書番号
    * @param {Array} issueDate 発行日の期限['yyyy-mm-dd', 'yyyy-mm-dd']
    * @param {string} contractEmail 取引先担当者のメールアドレス
    * @param {string} unKnownManager 社内に取引先担当者の情報の存在有無条件
+   * @param {int} page ページ番号
+   * @param {int} limit 1ページあたり表示するドキュメントの数、指定ない場合10000に設定される。
    * @returns {Array<object>} 検索結果
    * https://developers.tradeshift.com/docs/api#documents-documentを参照
    */
-  async getDocumentSearch(sentByCompany, invoiceId, issueDate, contractEmail, unKnownManager) {
+  async getDocumentSearch(sentByCompany, businessId, issueDate, contractEmail, unKnownManager, page, limit) {
     sentByCompany = sentByCompany ?? ''
-    invoiceId = invoiceId ?? ''
+    businessId = businessId ?? ''
     if (issueDate instanceof Array === false) issueDate = []
     contractEmail = contractEmail ?? ''
     unKnownManager = unKnownManager ?? ''
+    page = page ?? 0
+    limit = limit ?? 10000
 
     const get = 'get'
-    let uri = `/documents?sentTo=${this.tenantId}&type=invoice&limit=10000&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false`
+    let uri = `/documents?sentTo=${
+      this.tenantId
+    }&type=invoice&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&${this.getQuery(
+      'page',
+      page
+    )}&${this.getQuery('limit', limit)}`
+
     const state = ['DELIVERED', 'ACCEPTED', 'PAID_UNCONFIRMED', 'PAID_CONFIRMED']
     const stag = ['purchases']
+
+    if (businessId.length > 0) uri = `${uri}&${this.getQuery('businessId', businessId)}`
 
     if (sentByCompany.length > 0) uri = `${uri}&${this.getQuery('sentBy', sentByCompany)}`
 
@@ -181,20 +193,10 @@ class TradeshiftDTO {
       'ascending',
       false
     )}&${this.getQuery('state', state)}&${this.getQuery('stag', stag)}`
-    const response = []
     const invoiceList = await this.accessTradeshift(get, uri)
     if (invoiceList instanceof Error) return invoiceList
 
-    for (const document of invoiceList.Document) {
-      if (document.TenantId === this.tenantId) {
-        if (invoiceId.length > 0) {
-          if (document.ID.indexOf(invoiceId) !== -1) response.push(document)
-        } else {
-          response.push(document)
-        }
-      }
-    }
-    return response
+    return invoiceList
   }
 
   /**
