@@ -3003,7 +3003,8 @@ describe('inboxControllerのテスト', () => {
         sentBy: ['011c0e85-aabb-437b-9dcd-5b941dd4e1aa'],
         status: ['80', '10', '11', '12'],
         contactEmail: 'abc@test.co.jp',
-        unKnownManager: undefined
+        unKnownManager: undefined,
+        pageId: 1
       }
 
       const resultGetDocumentSearch = {
@@ -3100,6 +3101,134 @@ describe('inboxControllerのテスト', () => {
       })
     })
 
+    test('正常:検索対象の請求書数20件', async () => {
+      // パラメータ作成
+      const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+      const invoiceId = '48c8e45e-376f-5f02-a1a4-5862c5c35baf'
+      const message = 'messege'
+      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
+      const keyword = {
+        invoiceNumber: 'buyer2',
+        issueDate: ['2022-03-01', '2022-04-01'],
+        sentBy: ['011c0e85-aabb-437b-9dcd-5b941dd4e1aa'],
+        status: ['80', '10', '11', '12'],
+        contactEmail: 'abc@test.co.jp',
+        unKnownManager: undefined,
+        pageId: 1
+      }
+
+      const documet = {
+        DocumentId: '48c8e45e-376f-5f02-a1a4-5862c5c35baf',
+        ID: 'PBI2848buyer2_入金確認済み',
+        URI: 'https://api-sandbox.tradeshift.com/tradeshift/rest/external/documents/48c8e45e-376f-5f02-a1a4-5862c5c35baf',
+        DocumentType: { type: 'invoice' },
+        State: 'LOCKED',
+        CreatedDateTime: '2021-12-16T07:34:03.248Z',
+        LastEdit: '2021-12-16T07:34:03.248Z',
+        SenderCompanyName: 'バイヤー2',
+        Actor: {
+          Created: '2021-07-27T08:58:14.266Z',
+          Modified: '2021-07-27T08:58:14.266Z',
+          FirstName: '管理者1',
+          LastName: 'サプライヤー2',
+          Email: 'dev.master.bconnection+supplier2.001@gmail.com',
+          MobileNumberVerified: false
+        },
+        ApplicationResponse: { ResponseDate: '2021-12-16' },
+        ConversationId: '48b89f82-c92e-4356-8ce7-66781b7d3d55',
+        ReceiverCompanyName: 'サプライヤー2',
+        Tags: { Tag: [] },
+        ItemInfos: [
+          { type: 'document.currency', value: 'JPY' },
+          { type: 'document.total', value: '1000.00' },
+          { type: 'document.issuedate', value: '2022-04-01' }
+        ],
+        ProcessState: 'PENDING',
+        ConversationStates: [[Object], [Object]],
+        UnifiedState: 'PAID_CONFIRMED',
+        CopyIndicator: false,
+        Deleted: false,
+        DueDate: '2021-12-23',
+        TenantId: '7e5255fe-05e6-4fc9-acf0-076574bc35f7',
+        InvoiceTypeCode: '380',
+        Properties: [],
+        SettlementBusinessIds: []
+      }
+      // 対象請求書を20件分作成
+      const documentList = []
+      for (let index = 1; index < 21; index++) {
+        const copyDocumet = Object.assign({}, documet)
+        copyDocumet.ID = 'PBI2848buyer2_入金確認済み' + index
+        documentList.push(copyDocumet)
+      }
+      const resultGetDocumentSearch = {
+        numPages: 1,
+        itemCount: 20,
+        pageId: 0,
+        Document: documentList
+      }
+      const resultGetDocument = require('../mockInvoice/invoice1')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      accessTradeshiftSpy.mockReturnValue(userInfo)
+
+      const rejectTestData = await RequestApproval.build({
+        requestId: requestId,
+        contractId: contractId,
+        approveRouteId: approveRouteId,
+        invoiceId: invoiceId,
+        requester: userId,
+        status: '10',
+        message: message,
+        create: '2021-01-25T08:45:49.803Z',
+        isSaved: true
+      })
+
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
+      tradeshiftDTOGetDocumentSearch.mockReturnValueOnce(resultGetDocumentSearch)
+      requestApprovalFindOne.mockReturnValue(rejectTestData)
+
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId, tenantId)
+
+      const resultDocumet = {
+        no: 1,
+        invoiceNo: 'PBI2848buyer2_入金確認済み',
+        status: 0,
+        currency: 'JPY',
+        ammount: '1,000',
+        sentTo: 'バイヤー2',
+        sentBy: 'サプライヤー2',
+        updated: '2021-12-16',
+        expire: '2021-12-23',
+        documentId: '48c8e45e-376f-5f02-a1a4-5862c5c35baf',
+        approveStatus: '10',
+        managerInfo: {
+          managerAddress: '-',
+          managerName: '（ユーザー登録なし）'
+        }
+      }
+      // 取得結果請求書を20件分作成
+      const resultDocumetList = []
+      for (let index = 1; index < 21; index++) {
+        const copyDocumet = Object.assign({}, resultDocumet)
+        copyDocumet.no = index
+        copyDocumet.invoiceNo = 'PBI2848buyer2_入金確認済み' + index
+        resultDocumetList.push(copyDocumet)
+      }
+
+      // 結果確認
+      expect(result).toEqual({
+        documentList: resultDocumetList,
+        numPages: 1,
+        currPage: 1,
+        itemCount: 20,
+        currItemCount: 20
+      })
+    })
+
     test('正常:担当者ユーザー情報あり', async () => {
       // パラメータ作成
       const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
@@ -3116,7 +3245,8 @@ describe('inboxControllerのテスト', () => {
         sentBy: ['011c0e85-aabb-437b-9dcd-5b941dd4e1aa'],
         status: ['80', '10', '11', '12'],
         contactEmail: 'abc@test.co.jp',
-        unKnownManager: undefined
+        unKnownManager: undefined,
+        pageId: 1
       }
 
       const resultGetDocumentSearch = {
@@ -3229,7 +3359,8 @@ describe('inboxControllerのテスト', () => {
         sentBy: ['011c0e85-aabb-437b-9dcd-5b941dd4e1aa'],
         status: ['80', '10', '11', '12'],
         contactEmail: 'abc@test.co.jp',
-        unKnownManager: undefined
+        unKnownManager: undefined,
+        pageId: 1
       }
 
       const resultGetDocumentSearch = {
@@ -3341,7 +3472,8 @@ describe('inboxControllerのテスト', () => {
         sentBy: ['011c0e85-aabb-437b-9dcd-5b941dd4e1aa'],
         status: ['80', '10', '11', '12'],
         contactEmail: 'abc@test.co.jp',
-        unKnownManager: undefined
+        unKnownManager: undefined,
+        pageId: 1
       }
 
       const resultGetDocumentSearch = {
@@ -3454,7 +3586,8 @@ describe('inboxControllerのテスト', () => {
         sentBy: [],
         status: ['80', '10', '11', '12'],
         contactEmail: 'abc@test.co.jp',
-        unKnownManager: undefined
+        unKnownManager: undefined,
+        pageId: 1
       }
 
       const resultGetDocumentSearch = {
@@ -3562,7 +3695,8 @@ describe('inboxControllerのテスト', () => {
         sentBy: [],
         status: ['80', '10', '11', '12'],
         contactEmail: 'abc@test.co.jp',
-        unKnownManager: undefined
+        unKnownManager: undefined,
+        pageId: 1
       }
 
       const resultGetDocumentSearch = {
@@ -3657,7 +3791,8 @@ describe('inboxControllerのテスト', () => {
         sentBy: ['011c0e85-aabb-437b-9dcd-5b941dd4e1aa'],
         status: ['80', '10', '11', '12'],
         contactEmail: 'abc@test.co.jp',
-        unKnownManager: 'unKnownManager'
+        unKnownManager: 'unKnownManager',
+        pageId: 1
       }
 
       const resultGetDocumentSearch = {
@@ -3770,7 +3905,8 @@ describe('inboxControllerのテスト', () => {
         sentBy: ['011c0e85-aabb-437b-9dcd-5b941dd4e1aa'],
         status: ['80', '10', '11', '12'],
         contactEmail: 'abc@test.co.jp',
-        unKnownManager: undefined
+        unKnownManager: undefined,
+        pageId: 1
       }
 
       const resultGetDocumentSearch = {
@@ -3879,7 +4015,8 @@ describe('inboxControllerのテスト', () => {
         sentBy: [],
         status: ['80', '10', '11', '12'],
         contactEmail: 'abc@test.co.jp',
-        unKnownManager: undefined
+        unKnownManager: undefined,
+        pageId: 1
       }
 
       const resultGetDocumentSearch = {
@@ -3922,7 +4059,8 @@ describe('inboxControllerのテスト', () => {
         sentBy: [],
         status: [],
         contactEmail: '',
-        unKnownManager: undefined
+        unKnownManager: undefined,
+        pageId: 1
       }
 
       tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
@@ -3980,7 +4118,8 @@ describe('inboxControllerのテスト', () => {
         sentBy: [],
         status: ['80', '10', '11', '12'],
         contactEmail: 'abc@test.co.jp',
-        unKnownManager: undefined
+        unKnownManager: undefined,
+        pageId: 1
       }
 
       const resultGetDocumentSearch = {
@@ -4095,7 +4234,8 @@ describe('inboxControllerのテスト', () => {
         sentBy: [],
         status: ['80', '10', '11', '12'],
         contactEmail: 'abc@test.co.jp',
-        unKnownManager: undefined
+        unKnownManager: undefined,
+        pageId: 1
       }
 
       const resultGetDocumentSearch = {
@@ -4210,7 +4350,8 @@ describe('inboxControllerのテスト', () => {
         sentBy: [],
         status: ['80', '10', '11', '12'],
         contactEmail: 'abc@test.co.jp',
-        unKnownManager: undefined
+        unKnownManager: undefined,
+        pageId: 1
       }
 
       const searchResultTag = {
@@ -4368,7 +4509,8 @@ describe('inboxControllerのテスト', () => {
         sentBy: [],
         status: ['80', '10', '11', '12'],
         contactEmail: 'abc@test.co.jp',
-        unKnownManager: undefined
+        unKnownManager: undefined,
+        pageId: 1
       }
 
       const resultGetDocumentSearch = null
@@ -4392,10 +4534,10 @@ describe('inboxControllerのテスト', () => {
       const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId, tenantId)
 
       // 結果確認
-      expect(result).toEqual(new Error("Cannot read property 'itemCount' of null"))
+      expect(result).toEqual(new Error("Cannot read property 'numPages' of null"))
     })
 
-    test('異常：検索結果でAPIエラーの場合（getDocumentSearch）', async () => {
+    test('異常：検索結果でAPIエラーの場合（getDocumentSearch）（承認ステータスあり）', async () => {
       // パラメータ作成
       const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
       const keyword = {
@@ -4404,7 +4546,32 @@ describe('inboxControllerのテスト', () => {
         sentBy: [],
         status: ['80', '10', '11', '12'],
         contactEmail: 'abc@test.co.jp',
-        unKnownManager: undefined
+        unKnownManager: undefined,
+        pageId: 1
+      }
+
+      const resultGetDocumentSearch = new Error()
+
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
+      tradeshiftDTOGetDocumentSearch.mockReturnValueOnce(resultGetDocumentSearch)
+
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId, tenantId)
+
+      // 結果確認
+      expect(result).toEqual(resultGetDocumentSearch)
+    })
+
+    test('異常：検索結果でAPIエラーの場合（getDocumentSearch）（承認ステータスなし）', async () => {
+      // パラメータ作成
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
+      const keyword = {
+        invoiceNumber: 'abc',
+        issueDate: ['2022-03-01', '2022-04-01'],
+        sentBy: [],
+        status: [],
+        contactEmail: 'abc@test.co.jp',
+        unKnownManager: undefined,
+        pageId: 1
       }
 
       const resultGetDocumentSearch = new Error()
@@ -4426,7 +4593,8 @@ describe('inboxControllerのテスト', () => {
         sentBy: [],
         status: [],
         contactEmail: 'abc@test.co.jp',
-        unKnownManager: undefined
+        unKnownManager: undefined,
+        pageId: 1
       }
 
       const getDocumentsError = new Error()
@@ -4451,7 +4619,8 @@ describe('inboxControllerのテスト', () => {
         sentBy: [],
         status: [],
         contactEmail: 'abc@test.co.jp',
-        unKnownManager: undefined
+        unKnownManager: undefined,
+        pageId: 1
       }
 
       const getDocumentError = new Error()

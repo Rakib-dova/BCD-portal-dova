@@ -915,41 +915,65 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
       }
     }
 
-    // 送信会社、請求書番号、発行日、取引先担当者(アドレス)で検索
-    const apiResult = await tradeshiftDTO.getDocumentSearch(
-      sentByCompanies,
-      invoiceId,
-      issueDate,
-      contactEmail,
-      unKnownManager,
-      pageId,
-      onePagePerItemCount
-    )
+    let errorInvoice = ''
+    const apiResult = []
+    let page = 0
+    let documentNumPages = 1
+    let getInvoiceErrorFlag = false
+    if (status.length > 0) {
+      do {
+        const result = await tradeshiftDTO.getDocumentSearch(
+          sentByCompanies,
+          invoiceId,
+          issueDate,
+          contactEmail,
+          unKnownManager,
+          page,
+          10000
+        )
+        if (result instanceof Error) {
+          getInvoiceErrorFlag = true
+          errorInvoice = result
+          break
+        }
+        documentNumPages = result.numPages
+        page++
+        apiResult.push(result)
+      } while (page < documentNumPages)
+    } else {
+      // 送信会社、請求書番号、発行日、取引先担当者(アドレス)で検索
+      const result = await tradeshiftDTO.getDocumentSearch(
+        sentByCompanies,
+        invoiceId,
+        issueDate,
+        contactEmail,
+        unKnownManager,
+        pageId,
+        onePagePerItemCount
+      )
+      if (result instanceof Error) {
+        getInvoiceErrorFlag = true
+        errorInvoice = result
+      }
+      apiResult.push(result)
+    }
 
-    if (apiResult instanceof Error) return apiResult
+    if (getInvoiceErrorFlag) return errorInvoice
 
     // documents全件数
-    const itemCount = apiResult.itemCount
+    let itemCount = apiResult[0].itemCount
     // 全ページ数
-    const numPages = apiResult.numPages
+    let numPages = apiResult[0].numPages
     // 現在ページ
-    const currPage = apiResult.pageId + 1
+    let currPage = apiResult[0].pageId + 1
 
     // documentList取得
     let apiDocumentListResult = []
-    for (const document of apiResult.Document) {
-      apiDocumentListResult.push(document)
+    for (const result of apiResult) {
+      for (const document of result.Document) {
+        apiDocumentListResult.push(document)
+      }
     }
-
-    // 請求書情報取得
-    const document = []
-    for (let i = 0; i < apiDocumentListResult.length; i++) {
-      const documentInfo = await tradeshiftDTO.getDocument(apiDocumentListResult[i].DocumentId, '')
-      document.push(documentInfo)
-    }
-
-    // 社内に担当者ユーザーの有無確認
-    const contactor = await getCompanyUserInfo(document, tradeshiftDTO.accessToken, tradeshiftDTO.refreshToken)
 
     // 請求書の承認依頼検索
     for (let i = 0; i < apiDocumentListResult.length; i++) {
@@ -982,8 +1006,27 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
           }
         }
       }
-      apiDocumentListResult = statusSearchResult
+      const statusList = []
+      for (let index = pageId * 20; index < statusSearchResult.length; index++) {
+        statusList.push(statusSearchResult[index])
+        if (statusList.length > 19) break
+      }
+      apiDocumentListResult = statusList
+
+      itemCount = statusSearchResult.length
+      numPages = Math.ceil(statusSearchResult.length / 20)
+      currPage = keyword.pageId
     }
+
+    // 請求書情報取得
+    const document = []
+    for (let i = 0; i < apiDocumentListResult.length; i++) {
+      const documentInfo = await tradeshiftDTO.getDocument(apiDocumentListResult[i].DocumentId, '')
+      document.push(documentInfo)
+    }
+
+    // 社内に担当者ユーザーの有無確認
+    const contactor = await getCompanyUserInfo(document, tradeshiftDTO.accessToken, tradeshiftDTO.refreshToken)
 
     const documentList = apiDocumentListResult.map((document, idx) => {
       const ammount = function () {
@@ -1011,7 +1054,7 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
       }
 
       return {
-        no: idx + 1,
+        no: onePagePerItemCount * pageId + idx + 1,
         invoiceNo: document.ID,
         status: processStatus[`${document.UnifiedState}`] ?? '-',
         currency: document.ItemInfos[0].value ?? '-',
