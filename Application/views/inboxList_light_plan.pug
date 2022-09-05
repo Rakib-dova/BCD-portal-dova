@@ -370,11 +370,11 @@ block content
                         - var page = currPage % 5 === 0 ? currPage - 4 : ~~(currPage / 5) * 5 + 1
                         - var maxPageNo = ~~(page / 5) * 5 + 5 + 1
                         if (page - 1 !== 0)
-                          a.pagination-previous(method='post' href= `/inboxList/${page - 1}`) 前のページ
+                          a.pagination-previous(href= `/inboxList/${page - 1}`) 前のページ
                         else
                           a.a-previous-none 前のページ
                         if maxPageNo < numPages
-                          a.pagination-next(method='post' href= `/inboxList/${maxPageNo}`) 次のページ
+                          a.pagination-next(href= `/inboxList/${maxPageNo}`) 次のページ
                         else
                           a.a-next-none 次のページ
 
@@ -382,9 +382,9 @@ block content
                           while page < (maxPageNo < numPages ? maxPageNo : numPages + 1)
                             li
                               if page === currPage
-                                a.pagination-link.is-current(method='post' aria-label= `${page}ページへ移動` href= `/inboxList/${page}`)= page++
+                                a.pagination-link.is-current(aria-label= `${page}ページへ移動` href= `/inboxList/${page}`)= page++
                               else
-                                a.pagination-link(method='post' aria-label= `${page}ページへ移動` href= `/inboxList/${page}`)= page++
+                                a.pagination-link(aria-label= `${page}ページへ移動` href= `/inboxList/${page}`)= page++
                     else
                      if message
                       p= message
@@ -623,11 +623,11 @@ block content
                         - var page = currPage % 5 === 0 ? currPage - 4 : ~~(currPage / 5) * 5 + 1
                         - var maxPageNo = ~~(page / 5) * 5 + 5 + 1
                         if (page - 1 !== 0)
-                          a.pagination-previous(method='post' href= `/inboxList/${page - 1}`) 前のページ
+                          a.pagination-previous(href= `/inboxList/${page - 1}`) 前のページ
                         else
                           a.a-previous-none 前のページ
                         if maxPageNo < numPages
-                          a.pagination-next(method='post' href= `/inboxList/${maxPageNo}`) 次のページ
+                          a.pagination-next(href= `/inboxList/${maxPageNo}`) 次のページ
                         else
                           a.a-next-none 次のページ
 
@@ -635,9 +635,9 @@ block content
                           while page < (maxPageNo < numPages ? maxPageNo : numPages + 1)
                             li
                               if page === currPage
-                                a.pagination-link.is-current(method='post' aria-label= `${page}ページへ移動` href= `/inboxList/${page}`)= page++
+                                a.pagination-link.is-current(aria-label= `${page}ページへ移動` href= `/inboxList/${page}`)= page++
                               else
-                                a.pagination-link(method='post' aria-label= `${page}ページへ移動` href= `/inboxList/${page}`)= page++
+                                a.pagination-link(aria-label= `${page}ページへ移動` href= `/inboxList/${page}`)= page++
                     else
                       p 現在、受領した請求書一覧はありません。
 

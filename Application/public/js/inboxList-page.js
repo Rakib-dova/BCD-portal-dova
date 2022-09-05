@@ -539,10 +539,45 @@ function managerAddressValidationCheck(managerAddress) {
   return regExpResult
 }
 
+// ページ遷移時のsubmit処理
+function paginationSubmit(form, href) {
+  const managerAddress = form.managerAddress.value
+  form.action = href
+  if (managerAddress.length > 0) {
+    const result = managerAddressValidationCheck(managerAddress)
+    if (!result) {
+      alert('入力したメールアドレスに誤りがあります。')
+    } else {
+      searchProgressModal.classList.add('is-active')
+      form.submit()
+    }
+  } else {
+    searchProgressModal.classList.add('is-active')
+    form.submit()
+  }
+}
+
 // ページリンククリック時、機能
 if (document.querySelector('.pagination-list')) {
   document.querySelector('.pagination-list').addEventListener('click', function (e) {
-    searchProgressModal.classList.add('is-active')
+    e.preventDefault()
+    paginationSubmit(document.querySelector('#form'), e.path[0].href)
+  })
+}
+
+// 前のページクリック時、機能
+if (document.querySelector('.pagination-previous')) {
+  document.querySelector('.pagination-previous').addEventListener('click', function (e) {
+    e.preventDefault()
+    paginationSubmit(document.querySelector('#form'), e.path[0].href)
+  })
+}
+
+// 次のページクリック時、機能
+if (document.querySelector('.pagination-next')) {
+  document.querySelector('.pagination-next').addEventListener('click', function (e) {
+    e.preventDefault()
+    paginationSubmit(document.querySelector('#form'), e.path[0].href)
   })
 }
 
