@@ -314,7 +314,8 @@ describe('inboxListのテスト', () => {
         rejectedFlag: false,
         csrfToken: dummyToken,
         contractPlan: contractPlan,
-        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        isSearch: false
       })
     })
 
@@ -360,7 +361,8 @@ describe('inboxListのテスト', () => {
         rejectedFlag: false,
         csrfToken: dummyToken,
         contractPlan: contractPlan,
-        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        isSearch: false
       })
     })
 
@@ -442,7 +444,8 @@ describe('inboxListのテスト', () => {
         rejectedFlag: false,
         csrfToken: dummyToken,
         contractPlan: contractPlan,
-        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        isSearch: false
       })
     })
 
@@ -474,33 +477,6 @@ describe('inboxListのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // 解約手続き中画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
-    })
-
-    test('正常：500エラー:requestApprovalエラー', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = { ...session }
-      request.user = { ...user[0] }
-      request.contractPlan = contractPlan
-
-      // DBからの正常なユーザデータの取得を想定する
-      userControllerFindOneSpy.mockReturnValue(Users[0])
-      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
-
-      const dbError = new Error('DB Conncetion Error')
-      requestApprovalControllerSpy.mockReturnValue(dbError)
-
-      // inboxControllerのgetInobox実施結果設定
-      getInboxSpy.mockReturnValue(searchResult1)
-
-      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[0])
-
-      // 試験実施
-      await inboxList.cbGetIndex(request, response, next)
-
-      // 期待結果
-      // 500エラーがエラーハンドリング「される」
-      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
     test('500エラー:不正なContractデータの場合', async () => {
@@ -895,7 +871,8 @@ describe('inboxListのテスト', () => {
         rejectedFlag: true,
         csrfToken: dummyToken,
         contractPlan: contractPlan,
-        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        isSearch: false
       })
     })
 
@@ -943,7 +920,8 @@ describe('inboxListのテスト', () => {
         rejectedFlag: true,
         csrfToken: dummyToken,
         contractPlan: contractPlan,
-        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        isSearch: false
       })
     })
 
@@ -991,7 +969,8 @@ describe('inboxListのテスト', () => {
         rejectedFlag: true,
         csrfToken: dummyToken,
         contractPlan: contractPlan,
-        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        isSearch: false
       })
     })
 
@@ -1248,7 +1227,8 @@ describe('inboxListのテスト', () => {
         rejectedFlag: false,
         csrfToken: dummyToken,
         contractPlan: contractPlan,
-        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        isSearch: true
       })
     })
 
@@ -1471,7 +1451,8 @@ describe('inboxListのテスト', () => {
         message: '条件に合致する支払依頼が見つかりませんでした。',
         csrfToken: dummyToken,
         contractPlan: contractPlan,
-        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        isSearch: true
       })
     })
 
@@ -1536,7 +1517,8 @@ describe('inboxListのテスト', () => {
         rejectedFlag: false,
         csrfToken: dummyToken,
         contractPlan: contractPlan,
-        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        isSearch: true
       })
     })
 
@@ -2029,7 +2011,8 @@ describe('inboxListのテスト', () => {
         rejectedFlag: false,
         csrfToken: dummyToken,
         contractPlan: contractPlan,
-        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        isSearch: true
       })
     })
 
@@ -2096,7 +2079,8 @@ describe('inboxListのテスト', () => {
         rejectedFlag: false,
         csrfToken: dummyToken,
         contractPlan: contractPlan,
-        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        isSearch: true
       })
     })
   })
