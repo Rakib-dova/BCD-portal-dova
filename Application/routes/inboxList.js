@@ -101,6 +101,8 @@ const cbGetIndex = async (req, res, next) => {
     listArr: result.list,
     numPages: result.numPages,
     currPage: result.currPage,
+    itemCount: result.itemCount,
+    currItemCount: result.currItemCount,
     rejectedFlag: rejectedFlag,
     csrfToken: req.csrfToken(),
     userRole: req.session.userRole,
@@ -316,13 +318,18 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
   const refreshToken = req.user.refreshToken
   const tenantId = user.tenantId
 
-  const invoiceNumber = req.body.invoiceNumber
-  const minIssuedate = req.body.minIssuedate
-  const maxIssuedate = req.body.maxIssuedate
-  const sentBy = req.body.sentBy || []
+  const companyInfo = req.body.sentBy ?? [',']
+
+  const invoiceNumber = req.body.invoiceNumber ?? ''
+  const minIssuedate = req.body.minIssuedate ?? ''
+  const maxIssuedate = req.body.maxIssuedate ?? ''
+  const companyName = companyInfo[0]?.split(',')[0] ?? ''
+  const sentBy = companyInfo[0]?.split(',')[1] ?? ''
+  const sent = req.body.sendTo ?? ''
   const status = req.body.status || []
   const contactEmail = req.body.managerAddress
   const unKnownManager = req.body.unKnownManager
+  const pageId = ~~req.params.page
 
   switch (validate.isContactEmail(contactEmail)) {
     case -1:
@@ -346,10 +353,13 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
   const keyword = {
     invoiceNumber,
     issueDate: [minIssuedate, maxIssuedate],
+    companyName,
     sentBy,
+    sent,
     status,
     contactEmail,
-    unKnownManager
+    unKnownManager,
+    pageId
   }
   const resultList = await inboxController.getSearchResult(tradeshiftDTO, keyword, bcdContract.contractId, tenantId)
 
@@ -365,26 +375,32 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
   }
 
   // 支払一覧画面レンダリング
-  if (resultList.length !== 0) {
+  if (resultList.documentList.length !== 0) {
     res.render(presentation, {
-      listArr: resultList,
-      numPages: 1,
-      currPage: 1,
+      listArr: resultList.documentList,
+      numPages: resultList.numPages,
+      currPage: resultList.currPage,
+      itemCount: resultList.itemCount,
+      currItemCount: resultList.currItemCount,
       rejectedFlag: false,
       csrfToken: req.csrfToken(),
       userRole: req.session.userRole,
-      contractPlan: req.contractPlan
+      contractPlan: req.contractPlan,
+      keyword: keyword
     })
   } else {
     res.render(presentation, {
-      listArr: resultList,
+      listArr: resultList.documentList,
       numPages: 1,
       currPage: 1,
+      itemCount: 0,
+      currItemCount: 0,
       rejectedFlag: false,
       message: '条件に合致する支払依頼が見つかりませんでした。',
       csrfToken: req.csrfToken(),
       userRole: req.session.userRole,
-      contractPlan: req.contractPlan
+      contractPlan: req.contractPlan,
+      keyword: keyword
     })
   }
   logger.info(constantsDefine.logMessage.INF001 + 'cbSearchApprovedInvoice')
