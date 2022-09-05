@@ -337,7 +337,6 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
   }
 
   const invoiceList = csvObj.getInvoiceList()
-  logger.info(invoiceList)
 
   const invoiceCnt = invoiceList.length
   const setHeaders = {}
@@ -387,7 +386,6 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
       return 104
     }
   }
-  logger.info(documentIdMap)
 
   if (invoiceCnt > 100) {
     logger.error(constantsDefine.logMessage.ERR001 + 'invoiceToomuch Error')
@@ -419,8 +417,6 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
   const promiseMap = new Map()
 
   for (let i = 0; i < invoiceList.length; i++) {
-    logger.info('i:' + i)
-
     // 明細check
     const meisaiLength = invoiceList[i].INVOICE.getDocument().InvoiceLine.length
 
@@ -460,8 +456,6 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
       }
     }
   }
-  logger.info('invoiceDetails:' + invoiceDetails)
-  logger.info('promiseMap:' + promiseMap)
 
   const resultMap = {}
 
@@ -469,36 +463,26 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
   for await (const result of asyncPool(maxConcurrentUpload, promiseMap, ([i, invoice]) => {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
-      logger.info('invoiceIndex:' + i)
-      try {
-        const apiResult = await apiManager.accessTradeshift(
-          _user.accessToken,
-          _user.refreshToken,
-          'put',
-          '/documents/' + invoice.INVOICE.getDocumentId() + '?draft=true&documentProfileId=tradeshift.invoice.1.0',
-          JSON.stringify(invoice.INVOICE.getDocument()),
-          {
-            headers: setHeaders
-          }
-        )
-        logger.info('apiResult:' + apiResult)
-        resolve({
-          index: i,
-          apiResult: apiResult
-        })
-      } catch (err) {
-        logger.error('err:' + err)
-        reject(err)
-      }
+      const apiResult = await apiManager.accessTradeshift(
+        _user.accessToken,
+        _user.refreshToken,
+        'put',
+        '/documents/' + invoice.INVOICE.getDocumentId() + '?draft=true&documentProfileId=tradeshift.invoice.1.0',
+        JSON.stringify(invoice.INVOICE.getDocument()),
+        {
+          headers: setHeaders
+        }
+      )
+      resolve({
+        index: i,
+        apiResult: apiResult
+      })
     })
   })) {
-    logger.info('result' + result)
     resultMap[result.index] = result.apiResult
   }
-  logger.info(resultMap)
 
   for (let i = 0; i < invoiceList.length; i++) {
-    logger.info(i)
     // 明細表示フラグ
     let meisaiFlag = 0
 
@@ -651,8 +635,6 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
       })
     }
   }
-
-  logger.info(invoiceDetails)
 
   // 請求書取込結果詳細の一括登録
   await invoiceDetailController.insertAll(invoiceDetails)

@@ -17,6 +17,7 @@
   }
 
 */
+process.env.MAX_CONCURRENT_UPLOAD = '20'
 
 jest.mock('../../Application/node_modules/express', () => {
   return require('jest-express')
@@ -41,8 +42,6 @@ const invoiceController = require('../../Application/controllers/invoiceControll
 const uploadFormatController = require('../../Application/controllers/uploadFormatController.js')
 const uploadFormatDetailController = require('../../Application/controllers/uploadFormatDetailController.js')
 const uploadFormatIdentifierController = require('../../Application/controllers/uploadFormatIdentifierController.js')
-const SUCCESSMESSAGE = constantsDefine.invoiceErrMsg.SUCCESS
-const SKIPMESSAGE = constantsDefine.invoiceErrMsg.SKIP
 const path = require('path')
 const fs = require('fs')
 
@@ -63,7 +62,7 @@ let request,
   findUploadFormatIdSpy
 
 let createSpyInvoices,
-  createSpyinvoicesDetail,
+  insertAllSpyinvoicesDetail,
   findOneSpyInvoice,
   findOneSypTenant,
   findByUploadFormatIdIdentifierSpy,
@@ -127,7 +126,7 @@ describe('csvuploadのテスト', () => {
       }
     })
     createSpyInvoices = jest.spyOn(invoiceController, 'insert')
-    createSpyinvoicesDetail = jest.spyOn(invoiceDetailController, 'insert')
+    insertAllSpyinvoicesDetail = jest.spyOn(invoiceDetailController, 'insertAll')
     findOneSpyInvoice = jest.spyOn(invoiceController, 'findInvoice')
     findOneSypTenant = jest.spyOn(tenantController, 'findOne')
     pathSpy = jest.spyOn(path, 'join')
@@ -149,7 +148,7 @@ describe('csvuploadのテスト', () => {
     findOneSpyContracts.mockRestore()
     invoiceListSpy.mockRestore()
     createSpyInvoices.mockRestore()
-    createSpyinvoicesDetail.mockRestore()
+    insertAllSpyinvoicesDetail.mockRestore()
     findOneSpyInvoice.mockRestore()
     findAllByContractIdSpy.mockRestore()
     findByUploadFormatIdSpy.mockRestore()
@@ -1971,7 +1970,7 @@ describe('csvuploadのテスト', () => {
       ).toString('base64')
 
       const invoicesDB = []
-      const invoiceDetailDB = []
+      let invoiceDetailDB = []
 
       request.session = {
         userContext: 'NotLoggedIn',
@@ -2026,29 +2025,8 @@ describe('csvuploadのテスト', () => {
         })
         return result
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        const invoicesId = values?.invoicesId
-
-        if (!invoicesId) {
-          return
-        }
-
-        const invoiceRow = invoiceController.findInvoice(invoicesId)
-
-        if (!invoiceRow?.dataValues.invoicesId) {
-          return
-        }
-
-        let resultToInsertInvoiceDetail
-
-        try {
-          resultToInsertInvoiceDetail = {
-            ...values,
-            invoicesId: invoiceRow?.dataValues.invoicesId
-          }
-          invoiceDetailDB.push(resultToInsertInvoiceDetail)
-        } catch (error) {}
-        return { dataValues: resultToInsertInvoiceDetail }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        invoiceDetailDB = values
       })
       invoiceController.updateCount = jest.fn(({ invoicesId, successCount, failCount, skipCount, invoiceCount }) => {
         try {
@@ -2137,7 +2115,7 @@ describe('csvuploadのテスト', () => {
       ).toString('base64')
 
       const invoicesDB = []
-      const invoiceDetailDB = []
+      let invoiceDetailDB = []
 
       request.session = {
         userContext: 'NotLoggedIn',
@@ -2192,29 +2170,8 @@ describe('csvuploadのテスト', () => {
         })
         return result
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        const invoicesId = values?.invoicesId
-
-        if (!invoicesId) {
-          return
-        }
-
-        const invoiceRow = invoiceController.findInvoice(invoicesId)
-
-        if (!invoiceRow?.dataValues.invoicesId) {
-          return
-        }
-
-        let resultToInsertInvoiceDetail
-
-        try {
-          resultToInsertInvoiceDetail = {
-            ...values,
-            invoicesId: invoiceRow?.dataValues.invoicesId
-          }
-          invoiceDetailDB.push(resultToInsertInvoiceDetail)
-        } catch (error) {}
-        return { dataValues: resultToInsertInvoiceDetail }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        invoiceDetailDB = values
       })
       invoiceController.updateCount = jest.fn(({ invoicesId, successCount, failCount, skipCount, invoiceCount }) => {
         try {
@@ -2303,7 +2260,7 @@ describe('csvuploadのテスト', () => {
       ).toString('base64')
 
       const invoicesDB = []
-      const invoiceDetailDB = []
+      let invoiceDetailDB = []
 
       request.session = {
         userContext: 'NotLoggedIn',
@@ -2358,29 +2315,8 @@ describe('csvuploadのテスト', () => {
         })
         return result
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        const invoicesId = values?.invoicesId
-
-        if (!invoicesId) {
-          return
-        }
-
-        const invoiceRow = invoiceController.findInvoice(invoicesId)
-
-        if (!invoiceRow?.dataValues.invoicesId) {
-          return
-        }
-
-        let resultToInsertInvoiceDetail
-
-        try {
-          resultToInsertInvoiceDetail = {
-            ...values,
-            invoicesId: invoiceRow?.dataValues.invoicesId
-          }
-          invoiceDetailDB.push(resultToInsertInvoiceDetail)
-        } catch (error) {}
-        return { dataValues: resultToInsertInvoiceDetail }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        invoiceDetailDB = values
       })
       invoiceController.updateCount = jest.fn(({ invoicesId, successCount, failCount, skipCount, invoiceCount }) => {
         try {
@@ -2469,7 +2405,7 @@ describe('csvuploadのテスト', () => {
       ).toString('base64')
 
       const invoicesDB = []
-      const invoiceDetailDB = []
+      let invoiceDetailDB = []
 
       request.session = {
         userContext: 'NotLoggedIn',
@@ -2524,29 +2460,8 @@ describe('csvuploadのテスト', () => {
         })
         return result
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        const invoicesId = values?.invoicesId
-
-        if (!invoicesId) {
-          return
-        }
-
-        const invoiceRow = invoiceController.findInvoice(invoicesId)
-
-        if (!invoiceRow?.dataValues.invoicesId) {
-          return
-        }
-
-        let resultToInsertInvoiceDetail
-
-        try {
-          resultToInsertInvoiceDetail = {
-            ...values,
-            invoicesId: invoiceRow?.dataValues.invoicesId
-          }
-          invoiceDetailDB.push(resultToInsertInvoiceDetail)
-        } catch (error) {}
-        return { dataValues: resultToInsertInvoiceDetail }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        invoiceDetailDB = values
       })
       invoiceController.updateCount = jest.fn(({ invoicesId, successCount, failCount, skipCount, invoiceCount }) => {
         try {
@@ -2635,7 +2550,7 @@ describe('csvuploadのテスト', () => {
       ).toString('base64')
 
       const invoicesDB = []
-      const invoiceDetailDB = []
+      let invoiceDetailDB = []
 
       request.session = {
         userContext: 'NotLoggedIn',
@@ -2690,29 +2605,8 @@ describe('csvuploadのテスト', () => {
         })
         return result
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        const invoicesId = values?.invoicesId
-
-        if (!invoicesId) {
-          return
-        }
-
-        const invoiceRow = invoiceController.findInvoice(invoicesId)
-
-        if (!invoiceRow?.dataValues.invoicesId) {
-          return
-        }
-
-        let resultToInsertInvoiceDetail
-
-        try {
-          resultToInsertInvoiceDetail = {
-            ...values,
-            invoicesId: invoiceRow?.dataValues.invoicesId
-          }
-          invoiceDetailDB.push(resultToInsertInvoiceDetail)
-        } catch (error) {}
-        return { dataValues: resultToInsertInvoiceDetail }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        invoiceDetailDB = values
       })
       invoiceController.updateCount = jest.fn(({ invoicesId, successCount, failCount, skipCount, invoiceCount }) => {
         try {
@@ -2803,7 +2697,7 @@ describe('csvuploadのテスト', () => {
       ).toString('base64')
 
       const invoicesDB = []
-      const invoiceDetailDB = []
+      let invoiceDetailDB = []
 
       request.session = {
         userContext: 'NotLoggedIn',
@@ -2858,29 +2752,8 @@ describe('csvuploadのテスト', () => {
         })
         return result
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        const invoicesId = values?.invoicesId
-
-        if (!invoicesId) {
-          return
-        }
-
-        const invoiceRow = invoiceController.findInvoice(invoicesId)
-
-        if (!invoiceRow?.dataValues.invoicesId) {
-          return
-        }
-
-        let resultToInsertInvoiceDetail
-
-        try {
-          resultToInsertInvoiceDetail = {
-            ...values,
-            invoicesId: invoiceRow?.dataValues.invoicesId
-          }
-          invoiceDetailDB.push(resultToInsertInvoiceDetail)
-        } catch (error) {}
-        return { dataValues: resultToInsertInvoiceDetail }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        invoiceDetailDB = values
       })
       invoiceController.updateCount = jest.fn(({ invoicesId, successCount, failCount, skipCount, invoiceCount }) => {
         try {
@@ -2969,7 +2842,7 @@ describe('csvuploadのテスト', () => {
       ).toString('base64')
 
       const invoicesDB = []
-      const invoiceDetailDB = []
+      let invoiceDetailDB = []
 
       request.session = {
         userContext: 'NotLoggedIn',
@@ -3024,29 +2897,8 @@ describe('csvuploadのテスト', () => {
         })
         return result
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        const invoicesId = values?.invoicesId
-
-        if (!invoicesId) {
-          return
-        }
-
-        const invoiceRow = invoiceController.findInvoice(invoicesId)
-
-        if (!invoiceRow?.dataValues.invoicesId) {
-          return
-        }
-
-        let resultToInsertInvoiceDetail
-
-        try {
-          resultToInsertInvoiceDetail = {
-            ...values,
-            invoicesId: invoiceRow?.dataValues.invoicesId
-          }
-          invoiceDetailDB.push(resultToInsertInvoiceDetail)
-        } catch (error) {}
-        return { dataValues: resultToInsertInvoiceDetail }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        invoiceDetailDB = values
       })
       invoiceController.updateCount = jest.fn(({ invoicesId, successCount, failCount, skipCount, invoiceCount }) => {
         try {
@@ -3137,7 +2989,7 @@ describe('csvuploadのテスト', () => {
       ).toString('base64')
 
       const invoicesDB = []
-      const invoiceDetailDB = []
+      let invoiceDetailDB = []
 
       request.session = {
         userContext: 'NotLoggedIn',
@@ -3192,29 +3044,8 @@ describe('csvuploadのテスト', () => {
         })
         return result
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        const invoicesId = values?.invoicesId
-
-        if (!invoicesId) {
-          return
-        }
-
-        const invoiceRow = invoiceController.findInvoice(invoicesId)
-
-        if (!invoiceRow?.dataValues.invoicesId) {
-          return
-        }
-
-        let resultToInsertInvoiceDetail
-
-        try {
-          resultToInsertInvoiceDetail = {
-            ...values,
-            invoicesId: invoiceRow?.dataValues.invoicesId
-          }
-          invoiceDetailDB.push(resultToInsertInvoiceDetail)
-        } catch (error) {}
-        return { dataValues: resultToInsertInvoiceDetail }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        invoiceDetailDB = values
       })
       invoiceController.updateCount = jest.fn(({ invoicesId, successCount, failCount, skipCount, invoiceCount }) => {
         try {
@@ -3307,7 +3138,7 @@ describe('csvuploadのテスト', () => {
       ).toString('base64')
 
       const invoicesDB = []
-      const invoiceDetailDB = []
+      let invoiceDetailDB = []
 
       request.session = {
         userContext: 'NotLoggedIn',
@@ -3362,29 +3193,8 @@ describe('csvuploadのテスト', () => {
         })
         return result
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        const invoicesId = values?.invoicesId
-
-        if (!invoicesId) {
-          return
-        }
-
-        const invoiceRow = invoiceController.findInvoice(invoicesId)
-
-        if (!invoiceRow?.dataValues.invoicesId) {
-          return
-        }
-
-        let resultToInsertInvoiceDetail
-
-        try {
-          resultToInsertInvoiceDetail = {
-            ...values,
-            invoicesId: invoiceRow?.dataValues.invoicesId
-          }
-          invoiceDetailDB.push(resultToInsertInvoiceDetail)
-        } catch (error) {}
-        return { dataValues: resultToInsertInvoiceDetail }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        invoiceDetailDB = values
       })
       invoiceController.updateCount = jest.fn(({ invoicesId, successCount, failCount, skipCount, invoiceCount }) => {
         try {
@@ -3640,7 +3450,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -3747,7 +3558,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBeTruthy()
 
@@ -3781,7 +3593,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -3802,7 +3614,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBeTruthy()
 
@@ -3844,7 +3657,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -3860,9 +3674,9 @@ describe('csvuploadのテスト', () => {
     test('準正常：請求書番号バリデーションチェック：未入力', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -3870,11 +3684,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (!values.errorData.match(SUCCESSMESSAGE) && !values.errorData.match(SKIPMESSAGE)) {
-          resultInvoiceDetailController.push(values)
-        }
-        return values
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -3895,7 +3706,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -3916,7 +3727,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -3931,16 +3743,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('請求書番号が未入力です。')
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：請求書番号バリデーションチェック：101文字以上', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -3948,11 +3760,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (!values.errorData.match(SUCCESSMESSAGE) && !values.errorData.match(SKIPMESSAGE)) {
-          resultInvoiceDetailController.push(values)
-        }
-        return values
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -3973,7 +3782,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -3994,7 +3803,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -4009,16 +3819,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('請求書番号は100文字以内で入力してください。')
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：銀行名バリデーションチェック：201文字以上', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -4026,11 +3836,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (!values.errorData.match(SUCCESSMESSAGE) && !values.errorData.match(SKIPMESSAGE)) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -4051,7 +3858,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -4072,7 +3879,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -4087,16 +3895,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual(constantsDefine.invoiceErrMsg.BANKNAMEERR000)
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：発行日バリデーションチェック：未入力', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -4104,11 +3912,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (!values.errorData.match(SUCCESSMESSAGE) && !values.errorData.match(SKIPMESSAGE)) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -4129,7 +3934,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -4150,7 +3955,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -4165,16 +3971,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('発行日が未入力です。')
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：発行日バリデーションチェック：日付', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -4182,11 +3988,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (!values.errorData.match(SUCCESSMESSAGE) && !values.errorData.match(SKIPMESSAGE)) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -4207,7 +4010,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -4228,7 +4031,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -4243,16 +4047,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('発行日は有効な日付を入力してください。')
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：発行日バリデーションチェック：形式', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -4260,11 +4064,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -4285,7 +4086,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -4306,7 +4107,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -4321,16 +4123,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('発行日はyyyy/mm/dd/形式で入力してください。')
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：テナントバリデーションチェック：未入力', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -4338,11 +4140,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -4363,7 +4162,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -4384,7 +4183,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -4399,16 +4199,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('テナントIDが未入力です。')
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：テナントバリデーションチェック：形式', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -4416,11 +4216,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -4441,7 +4238,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -4462,7 +4259,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -4479,16 +4277,16 @@ describe('csvuploadのテスト', () => {
         'テナントIDは正しいテナントIDを入力してください。,テナントIDはネットワーク接続済みのものを入力してください。'
       )
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：明細-項目IDバリデーションチェック：未入力', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -4496,11 +4294,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -4521,7 +4316,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -4542,7 +4337,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['927635b5-f469-493b-9ce0-b2bfc4062959']
       )
       expect(resultExt).toBe(104)
 
@@ -4557,16 +4353,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('明細-項目IDが未入力です。')
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：明細-項目IDバリデーションチェック：201文字以上', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -4574,11 +4370,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -4599,7 +4392,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -4620,7 +4413,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -4635,16 +4429,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual(constantsDefine.invoiceErrMsg.SELLERSITEMNUMERR000)
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：明細-内容バリデーションチェック：未入力', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -4652,11 +4446,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -4677,7 +4468,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -4698,7 +4489,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['927635b5-f469-493b-9ce0-b2bfc4062959']
       )
       expect(resultExt).toBe(104)
 
@@ -4713,16 +4505,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('明細-内容が未入力です。')
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：明細-内容バリデーションチェック：501文字以上', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -4730,11 +4522,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -4755,7 +4544,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -4776,7 +4565,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -4791,16 +4581,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual(constantsDefine.invoiceErrMsg.ITEMNAMEERR000)
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：明細-数量バリデーションチェック：未入力', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -4808,11 +4598,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -4833,7 +4620,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue([invoiceDetailData, invoiceDetailData])
+      insertAllSpyinvoicesDetail.mockReturnValue([invoiceDetailData, invoiceDetailData])
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -4854,7 +4641,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['927635b5-f469-493b-9ce0-b2bfc4062959']
       )
       expect(resultExt).toBe(104)
 
@@ -4872,16 +4660,16 @@ describe('csvuploadのテスト', () => {
       })
 
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：明細-数量バリデーションチェック：範囲以外', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -4889,11 +4677,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -4914,7 +4699,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue([invoiceDetailData, invoiceDetailData])
+      insertAllSpyinvoicesDetail.mockReturnValue([invoiceDetailData, invoiceDetailData])
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -4935,7 +4720,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -4955,16 +4741,16 @@ describe('csvuploadのテスト', () => {
       })
 
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：明細-数量バリデーションチェック：形式', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -4972,11 +4758,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -4997,7 +4780,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -5018,7 +4801,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBeTruthy()
 
@@ -5033,16 +4817,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('明細-数量は数字で入力してください。')
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：明細-単価バリデーションチェック：未入力', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -5050,11 +4834,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -5075,7 +4856,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -5096,7 +4877,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -5111,16 +4893,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('明細-単価が未入力です。')
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：明細-単価バリデーションチェック：範囲以外', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -5128,11 +4910,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -5153,7 +4932,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -5174,7 +4953,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -5189,16 +4969,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual(`${constantsDefine.invoiceErrMsg.PRICEVALUEERR000}`)
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：明細-単価バリデーションチェック：形式', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -5206,11 +4986,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -5231,7 +5008,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -5252,7 +5029,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -5267,16 +5045,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('明細-単価は数字で入力してください。')
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：支払期日バリデーションチェック：日付', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -5284,11 +5062,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -5309,7 +5084,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -5330,7 +5105,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -5345,16 +5121,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('支払期日は有効な日付を入力してください。')
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：支払期日バリデーションチェック：形式', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -5362,11 +5138,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -5387,7 +5160,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -5408,7 +5181,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -5423,16 +5197,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('支払期日はyyyy/mm/dd/形式で入力してください。')
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：納品日バリデーションチェック：日付', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -5440,11 +5214,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -5465,7 +5236,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -5486,7 +5257,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -5501,16 +5273,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('納品日は有効な日付を入力してください。')
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：納品日バリデーションチェック：形式', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -5518,11 +5290,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -5543,7 +5312,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -5564,7 +5333,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -5579,16 +5349,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('納品日はyyyy/mm/dd/形式で入力してください。')
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：備考バリデーションチェック：201文字以上', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -5596,11 +5366,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -5621,7 +5388,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -5642,7 +5409,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -5659,16 +5427,16 @@ describe('csvuploadのテスト', () => {
         constantsDefine.invoiceErrMsg.FINANCIALINSTITUTIONERR000
       )
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：支店名バリデーションチェック：201文字以上', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -5676,11 +5444,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -5701,7 +5466,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -5722,7 +5487,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -5737,16 +5503,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual(constantsDefine.invoiceErrMsg.FINANCIALNAMEERR000)
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：科目バリデーションチェック', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -5754,11 +5520,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -5779,7 +5542,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -5800,7 +5563,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -5817,16 +5581,16 @@ describe('csvuploadのテスト', () => {
         '科目はマニュアルに定義されたものの中から選択してください。'
       )
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：口座番号バリデーションチェック：8文字以上', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -5834,11 +5598,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -5859,7 +5620,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -5880,7 +5641,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -5895,16 +5657,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('口座番号は7文字で入力してください。')
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：口座番号バリデーションチェック：形式', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -5912,11 +5674,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -5937,7 +5696,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -5958,7 +5717,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -5973,16 +5733,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('口座番号は数字で入力してください。')
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：口座名義バリデーションチェック：201文字以上', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -5990,11 +5750,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -6015,7 +5772,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -6036,7 +5793,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -6051,16 +5809,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual(constantsDefine.invoiceErrMsg.ACCOUNTNAMEERR000)
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：その他特事項バリデーションチェック：1001文字以上', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -6068,11 +5826,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -6093,7 +5848,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -6114,7 +5869,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -6129,16 +5885,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual(constantsDefine.invoiceErrMsg.NOTEERR000)
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：明細-備考バリデーションチェック：1001文字以上', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -6146,11 +5902,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -6171,7 +5924,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -6192,7 +5945,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -6207,16 +5961,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual(constantsDefine.invoiceErrMsg.DESCRIPTIONERR000)
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：ヘッダーバリデーションチェック', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -6224,11 +5978,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -6249,7 +6000,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -6270,7 +6021,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -6285,16 +6037,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('ヘッダーが指定のものと異なります。')
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：ヘッダーバリデーションチェック（ユーザーフォーマット）', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -6302,11 +6054,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -6327,7 +6076,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findByUploadFormatIdSpy.mockReturnValue(uploadFormatDetailResult)
       findByUploadFormatIdIdentifierSpy.mockReturnValue([])
       findUploadFormatIdSpy.mockReturnValue(uploadFormatResultItemRoNo2)
@@ -6352,7 +6101,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -6367,16 +6117,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('ヘッダーが指定のものと異なります。')
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：ヘッダーバリデーションチェック（カラム名比較）', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -6384,11 +6134,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -6409,7 +6156,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -6430,7 +6177,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -6445,16 +6193,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual(resultInvoiceDetailController[0].errorData)
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：ヘッダーバリデーションチェック（カラム名比較（ユーザーフォーマット））', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -6462,11 +6210,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -6487,7 +6232,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findByUploadFormatIdSpy.mockReturnValue(uploadFormatDetailResult)
       findByUploadFormatIdIdentifierSpy.mockReturnValue([])
       findUploadFormatIdSpy.mockReturnValue(uploadFormatResultItemRoNo2)
@@ -6512,7 +6257,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -6527,16 +6273,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual(resultInvoiceDetailController[0].errorData)
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：20項目数バリデーションチェック', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -6544,11 +6290,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -6569,7 +6312,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -6590,7 +6333,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -6605,16 +6349,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('項目数が異なります。')
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：18項目数バリデーションチェック', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -6622,11 +6366,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
 
       request.user = user
@@ -6647,7 +6388,7 @@ describe('csvuploadのテスト', () => {
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      insertAllSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -6668,7 +6409,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -6683,16 +6425,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('項目数が異なります。')
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：単位バリデーションチェック：未入力', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -6700,14 +6442,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (
-          values.errorData !== '正常に取込ました。' &&
-          values.errorData !== '取込済みのため、処理をスキップしました。'
-        ) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
       request.user = user
       const userToken = {
@@ -6739,7 +6475,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['927635b5-f469-493b-9ce0-b2bfc4062959']
       )
       expect(resultExt).toBe(104)
 
@@ -6755,16 +6492,16 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('明細-単位が未入力です。')
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：単位バリデーションチェック', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -6772,14 +6509,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (
-          values.errorData !== '正常に取込ました。' &&
-          values.errorData !== '取込済みのため、処理をスキップしました。'
-        ) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
       request.user = user
       const userToken = {
@@ -6811,7 +6542,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['927635b5-f469-493b-9ce0-b2bfc4062959']
       )
       expect(resultExt).toBe(104)
 
@@ -6820,28 +6552,28 @@ describe('csvuploadのテスト', () => {
 
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
-      expect(resultInvoiceDetailController.length).toBe(38)
+      expect(resultInvoiceDetailController.length).toBe(76)
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
       for (let idx = 0; idx < 38; idx++) {
-        expect(resultInvoiceDetailController[idx].invoiceId).toEqual(`単位テスト${idx + 101}`)
-        expect(resultInvoiceDetailController[idx].errorData).toEqual(
+        expect(resultInvoiceDetailController[idx + 38].invoiceId).toEqual(`単位テスト${idx + 101}`)
+        expect(resultInvoiceDetailController[idx + 38].errorData).toEqual(
           '明細-単位はマニュアルに定義されたものの中から選択してください。'
         )
       }
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：明細-税（消費税／軽減税率／不課税／免税／非課税）バリデーションチェック：未入力', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -6849,14 +6581,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (
-          values.errorData !== '正常に取込ました。' &&
-          values.errorData !== '取込済みのため、処理をスキップしました。'
-        ) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
       request.user = user
       const userToken = {
@@ -6888,7 +6614,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['927635b5-f469-493b-9ce0-b2bfc4062959']
       )
       expect(resultExt).toBe(104)
 
@@ -6906,16 +6633,16 @@ describe('csvuploadのテスト', () => {
         '明細-税（消費税／軽減税率／不課税／免税／非課税）が未入力です。'
       )
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：明細-税（消費税／軽減税率／不課税／免税／非課税）バリデーションチェック', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -6923,14 +6650,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (
-          values.errorData !== '正常に取込ました。' &&
-          values.errorData !== '取込済みのため、処理をスキップしました。'
-        ) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
       request.user = user
       const userToken = {
@@ -6962,7 +6683,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['927635b5-f469-493b-9ce0-b2bfc4062959']
       )
       expect(resultExt).toBe(104)
 
@@ -6971,19 +6693,19 @@ describe('csvuploadのテスト', () => {
 
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
-      expect(resultInvoiceDetailController.length).toBe(5)
+      expect(resultInvoiceDetailController.length).toBe(10)
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
       for (let idx = 0; idx < 5; idx++) {
-        expect(resultInvoiceDetailController[idx].invoiceId).toEqual(`税テスト${idx + 11}`)
-        expect(resultInvoiceDetailController[idx].errorData).toEqual(
+        expect(resultInvoiceDetailController[idx + 5].invoiceId).toEqual(`税テスト${idx + 11}`)
+        expect(resultInvoiceDetailController[idx + 5].errorData).toEqual(
           '明細-税（消費税／軽減税率／不課税／免税／非課税）はマニュアルに定義されたものの中から選択してください。'
         )
       }
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
@@ -7000,7 +6722,7 @@ describe('csvuploadのテスト', () => {
       ).toString('base64')
 
       const invoicesDB = []
-      const invoiceDetailDB = []
+      let invoiceDetailDB = []
 
       request.session = {
         userContext: 'NotLoggedIn',
@@ -7055,29 +6777,8 @@ describe('csvuploadのテスト', () => {
         })
         return result
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        const invoicesId = values?.invoicesId
-
-        if (!invoicesId) {
-          return
-        }
-
-        const invoiceRow = invoiceController.findInvoice(invoicesId)
-
-        if (!invoiceRow?.dataValues.invoicesId) {
-          return
-        }
-
-        let resultToInsertInvoiceDetail
-
-        try {
-          resultToInsertInvoiceDetail = {
-            ...values,
-            invoicesId: invoiceRow?.dataValues.invoicesId
-          }
-          invoiceDetailDB.push(resultToInsertInvoiceDetail)
-        } catch (error) {}
-        return { dataValues: resultToInsertInvoiceDetail }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        invoiceDetailDB = values
       })
       invoiceController.updateCount = jest.fn(({ invoicesId, successCount, failCount, skipCount, invoiceCount }) => {
         try {
@@ -7153,9 +6854,9 @@ describe('csvuploadのテスト', () => {
     test('準正常：明細-税（消費税／軽減税率／不課税／免税／非課税）バリデーションチェック（ユーザーフォーマット）', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -7163,14 +6864,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (
-          values.errorData !== '正常に取込ました。' &&
-          values.errorData !== '取込済みのため、処理をスキップしました。'
-        ) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
       request.user = user
 
@@ -7206,7 +6901,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['927635b5-f469-493b-9ce0-b2bfc4062959']
       )
       expect(resultExt).toBe(104)
 
@@ -7225,16 +6921,16 @@ describe('csvuploadのテスト', () => {
         expect(resultInvoiceDetailController[idx].errorData).toEqual(constantsDefine.invoiceErrMsg.TAXERR002)
       }
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：単位バリデーションチェック（ユーザーフォーマット）', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         return values
@@ -7242,14 +6938,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (
-          values.errorData !== '正常に取込ました。' &&
-          values.errorData !== '取込済みのため、処理をスキップしました。'
-        ) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
       request.user = user
       const userToken = {
@@ -7286,7 +6976,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['927635b5-f469-493b-9ce0-b2bfc4062959']
       )
       expect(resultExt).toBe(104)
 
@@ -7305,16 +6996,16 @@ describe('csvuploadのテスト', () => {
         expect(resultInvoiceDetailController[idx].errorData).toEqual(constantsDefine.invoiceErrMsg.UNITERR002)
       }
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：ネットワーク確認バリデーションチェック', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
       const tmpApiManager = apiManager.accessTradeshift
-      const resultInvoiceDetailController = []
+      let resultInvoiceDetailController = []
 
       invoiceController.insert = jest.fn((values) => {
         const { v4: uuidv4 } = require('uuid')
@@ -7328,14 +7019,8 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return { dataValues: invoice }
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (
-          values.errorData !== '正常に取込ました。' &&
-          values.errorData !== '取込済みのため、処理をスキップしました。'
-        ) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        resultInvoiceDetailController = values
       })
       request.user = user
       const userToken = {
@@ -7367,7 +7052,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBe(104)
 
@@ -7376,26 +7062,25 @@ describe('csvuploadのテスト', () => {
 
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
-      expect(resultInvoiceDetailController.length).toBe(2)
+      expect(resultInvoiceDetailController.length).toBe(4)
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
       for (let idx = 0; idx < 2; idx++) {
-        expect(resultInvoiceDetailController[idx]?.invoiceId).toEqual(`ネットワーク確認テスト1${idx + 1}`)
-        expect(resultInvoiceDetailController[idx].errorData).toEqual(
+        expect(resultInvoiceDetailController[idx + 2]?.invoiceId).toEqual(`ネットワーク確認テスト1${idx + 1}`)
+        expect(resultInvoiceDetailController[idx + 2].errorData).toEqual(
           'テナントIDはネットワーク接続済みのものを入力してください。'
         )
       }
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：請求書テーブルDB登録失敗', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
-      const resultInvoiceDetailController = []
       request.session = {
         userContext: 'NotLoggedIn',
         userRole: 'dummy'
@@ -7420,15 +7105,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return { dataValues: invoice }
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (
-          values.errorData !== '正常に取込ました。' &&
-          values.errorData !== '取込済みのため、処理をスキップしました。'
-        ) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
-      })
+      invoiceDetailController.insertAll = jest.fn((values) => {})
       checkContractStatusSpy.mockReturnValue('00')
 
       // 試験実施
@@ -7456,7 +7133,7 @@ describe('csvuploadのテスト', () => {
     test('準正常：APIエラー（ドキュメント取得）', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
 
       request.user = user
 
@@ -7527,7 +7204,7 @@ describe('csvuploadのテスト', () => {
         }
       })
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
 
       const tmpApiManager = apiManager.accessTradeshift
       // request uplodadFormatId 空
@@ -7540,7 +7217,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       // 期待結果
       expect(resultExt).toBe(104)
@@ -7554,7 +7232,7 @@ describe('csvuploadのテスト', () => {
     test('準正常：エラー（ドキュメント取得APIの結果が正しくない場合）', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
 
       request.user = user
 
@@ -7625,7 +7303,7 @@ describe('csvuploadのテスト', () => {
         }
       })
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
 
       const tmpApiManager = apiManager.accessTradeshift
       // request uplodadFormatId 空
@@ -7638,7 +7316,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       // 期待結果
       expect(resultExt).toBe(104)
@@ -7652,7 +7331,7 @@ describe('csvuploadのテスト', () => {
     test('準正常：APIエラー（請求書登録）', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insertAll
 
       request.user = user
 
@@ -7723,7 +7402,7 @@ describe('csvuploadのテスト', () => {
         }
       })
       invoiceController.insert = tmpInsert
-      invoiceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insertAll = tmpdetailInsert
 
       const tmpApiManager = apiManager.accessTradeshift
       // request uplodadFormatId 空
@@ -7736,7 +7415,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['927635b5-f469-493b-9ce0-b2bfc4062959']
       )
       // 期待結果
       expect(resultExt).toBe(104)
@@ -7762,7 +7442,7 @@ describe('csvuploadのテスト', () => {
       ).toString('base64')
 
       const invoicesDB = []
-      const invoiceDetailDB = []
+      let invoiceDetailDB = []
 
       userController.findOne = jest.fn((userId) => {
         return dataValues
@@ -7828,29 +7508,8 @@ describe('csvuploadのテスト', () => {
           return error
         }
       })
-      invoiceDetailController.insert = jest.fn((values) => {
-        const invoicesId = values?.invoicesId
-
-        if (!invoicesId) {
-          return
-        }
-
-        const invoiceRow = invoiceController.findInvoice(invoicesId)
-
-        if (!invoiceRow?.dataValues.invoicesId) {
-          return
-        }
-
-        let resultToInsertInvoiceDetail
-
-        try {
-          resultToInsertInvoiceDetail = {
-            ...values,
-            invoicesId: invoiceRow?.dataValues.invoicesId
-          }
-          invoiceDetailDB.push(resultToInsertInvoiceDetail)
-        } catch (error) {}
-        return { dataValues: resultToInsertInvoiceDetail }
+      invoiceDetailController.insertAll = jest.fn((values) => {
+        invoiceDetailDB = values
       })
 
       request.session = {
@@ -7915,7 +7574,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBeTruthy()
 
@@ -7961,7 +7621,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBeTruthy()
 
@@ -8006,7 +7667,8 @@ describe('csvuploadのテスト', () => {
         userToken,
         invoiceParameta,
         request,
-        response
+        response,
+        ['3cfebb4f-2338-4dc7-9523-5423a027a880']
       )
       expect(resultExt).toBeTruthy()
 
@@ -8097,7 +7759,8 @@ describe('csvuploadのテスト', () => {
         formatFlag,
         uploadFormatDetail,
         uploadFormatIdentifier,
-        uploadData
+        uploadData,
+        ['927635b5-f469-493b-9ce0-b2bfc4062959']
       )
 
       const invoiceList = csvObj.getInvoiceList()
