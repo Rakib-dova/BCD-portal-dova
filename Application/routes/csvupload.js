@@ -459,8 +459,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
 
   const resultMap = {}
 
-  // 最大同時API呼び出し数でアップロードの並行実施
-  for await (const result of asyncPool(maxConcurrentUpload, promiseMap, ([i, invoice]) => {
+  const results = asyncPool(maxConcurrentUpload, promiseMap, ([i, invoice]) => {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       const apiResult = await apiManager.accessTradeshift(
@@ -478,11 +477,36 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
         apiResult: apiResult
       })
     })
-  })) {
-    logger.info('result.index' + result.index)
-    logger.info('result.apiResult' + result.apiResult)
+  })
+  logger.info(results)
+  for (const result of results) {
     resultMap[result.index] = result.apiResult
   }
+
+  // 最大同時API呼び出し数でアップロードの並行実施
+  // for await (const result of asyncPool(maxConcurrentUpload, promiseMap, ([i, invoice]) => {
+  //   // eslint-disable-next-line no-async-promise-executor
+  //   return new Promise(async (resolve, reject) => {
+  //     const apiResult = await apiManager.accessTradeshift(
+  //       _user.accessToken,
+  //       _user.refreshToken,
+  //       'put',
+  //       '/documents/' + invoice.INVOICE.getDocumentId() + '?draft=true&documentProfileId=tradeshift.invoice.1.0',
+  //       JSON.stringify(invoice.INVOICE.getDocument()),
+  //       {
+  //         headers: setHeaders
+  //       }
+  //     )
+  //     resolve({
+  //       index: i,
+  //       apiResult: apiResult
+  //     })
+  //   })
+  // })) {
+  //   logger.info('result.index' + result.index)
+  //   logger.info('result.apiResult' + result.apiResult)
+  //   resultMap[result.index] = result.apiResult
+  // }
 
   for (let i = 0; i < invoiceList.length; i++) {
     // 明細表示フラグ
