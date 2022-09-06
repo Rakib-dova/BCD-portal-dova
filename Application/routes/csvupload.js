@@ -459,7 +459,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
 
   const resultMap = {}
 
-  const results = asyncPool(maxConcurrentUpload, promiseMap, ([i, invoice]) => {
+  const results = await asyncPool(maxConcurrentUpload, promiseMap, ([i, invoice]) => {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       const apiResult = await apiManager.accessTradeshift(
