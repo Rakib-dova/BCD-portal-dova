@@ -436,6 +436,9 @@ if ($('#BtnInboxSearch')) {
     const invoiceNumber = form.invoiceNumber.value
     const minIssuedate = form.minIssuedate.value
     const maxIssuedate = form.maxIssuedate.value
+    if (form.action.split('/inboxList/')[1] !== 1) {
+      form.action = form.action.split('/inboxList/')[0] + '/inboxList/1'
+    }
     let sentBy = form['sentBy[]']
     if (sentBy !== undefined) {
       if (sentBy.length !== undefined) {
@@ -565,8 +568,69 @@ function paginationSubmit(form, href) {
 // ページリンククリック時、機能
 if (document.querySelector('.pagination-list')) {
   document.querySelector('.pagination-list').addEventListener('click', function (e) {
+    // 検索処理
+    let form = document.querySelector('#form')
+    const invoiceNumber = form.invoiceNumber.value
+    const minIssuedate = form.minIssuedate.value
+    const maxIssuedate = form.maxIssuedate.value
+    let sentBy = form['sentBy[]']
+    if (sentBy !== undefined) {
+      if (sentBy.length !== undefined) {
+        sentBy = Array.prototype.slice.call(sentBy)
+        sentBy = sentBy.filter((ele) => ele.checked === true)
+      } else {
+        sentBy = sentBy.checked === true
+      }
+
+      if (!sentBy) {
+        sentBy = []
+      }
+    } else {
+      sentBy = []
+    }
+
+    let status = form['status[]']
+    if (status !== undefined) {
+      status = Array.prototype.slice.call(status)
+      status = status.filter((ele) => ele.checked === true)
+      if (!status) {
+        status = []
+      }
+    } else {
+      status = []
+    }
+
+    let unKnownManager = form.unKnownManager.checked
+    if (unKnownManager === false) {
+      unKnownManager = undefined
+    }
+
+    const managerAddress = form.managerAddress.value
+    const validationCheck = []
+    validationCheck.push(invoiceNumber)
+    validationCheck.push(minIssuedate)
+    validationCheck.push(maxIssuedate)
+    validationCheck.push(managerAddress)
+    validationCheck.push(unKnownManager)
+    validationCheck.push(sentBy)
+    validationCheck.push(status)
+    let checkCount = 0
+    for (let i = 0; i < validationCheck.length; i++) {
+      if (i < 5) {
+        if (validationCheck[i] === '' || validationCheck[i] === undefined) {
+          ++checkCount
+        }
+      } else {
+        if (validationCheck[i].length === 0) {
+          ++checkCount
+        }
+      }
+    }
+    if (checkCount === 7) {
+      form = null
+    }
     e.preventDefault()
-    paginationSubmit(document.querySelector('#form'), e.target.href)
+    paginationSubmit(form, e.target.href)
   })
 }
 
