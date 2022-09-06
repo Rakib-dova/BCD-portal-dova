@@ -544,81 +544,81 @@ function managerAddressValidationCheck(managerAddress) {
 
 // ページ遷移時のsubmit処理
 function paginationSubmit(form, href) {
-  // 検索処理
-  const invoiceNumber = form.invoiceNumber.value
-  const minIssuedate = form.minIssuedate.value
-  const maxIssuedate = form.maxIssuedate.value
-  let sentBy = form['sentBy[]']
-  if (sentBy !== undefined) {
-    if (sentBy.length !== undefined) {
-      sentBy = Array.prototype.slice.call(sentBy)
-      sentBy = sentBy.filter((ele) => ele.checked === true)
-    } else {
-      sentBy = sentBy.checked === true
-    }
+  if (form) {
+    // 検索処理
+    const invoiceNumber = form.invoiceNumber.value
+    const minIssuedate = form.minIssuedate.value
+    const maxIssuedate = form.maxIssuedate.value
+    let sentBy = form['sentBy[]']
+    if (sentBy !== undefined) {
+      if (sentBy.length !== undefined) {
+        sentBy = Array.prototype.slice.call(sentBy)
+        sentBy = sentBy.filter((ele) => ele.checked === true)
+      } else {
+        sentBy = sentBy.checked === true
+      }
 
-    if (!sentBy) {
+      if (!sentBy) {
+        sentBy = []
+      }
+    } else {
       sentBy = []
     }
-  } else {
-    sentBy = []
-  }
 
-  let status = form['status[]']
-  if (status !== undefined) {
-    status = Array.prototype.slice.call(status)
-    status = status.filter((ele) => ele.checked === true)
-    if (!status) {
-      status = []
-    }
-  } else {
-    status = []
-  }
-
-  let unKnownManager = form.unKnownManager.checked
-  if (unKnownManager === false) {
-    unKnownManager = undefined
-  }
-
-  const managerAddress = form.managerAddress.value
-  const validationCheck = []
-  validationCheck.push(invoiceNumber)
-  validationCheck.push(minIssuedate)
-  validationCheck.push(maxIssuedate)
-  validationCheck.push(managerAddress)
-  validationCheck.push(unKnownManager)
-  validationCheck.push(sentBy)
-  validationCheck.push(status)
-  let checkCount = 0
-  for (let i = 0; i < validationCheck.length; i++) {
-    if (i < 5) {
-      if (validationCheck[i] === '' || validationCheck[i] === undefined) {
-        ++checkCount
+    let status = form['status[]']
+    if (status !== undefined) {
+      status = Array.prototype.slice.call(status)
+      status = status.filter((ele) => ele.checked === true)
+      if (!status) {
+        status = []
       }
     } else {
-      if (validationCheck[i].length === 0) {
-        ++checkCount
+      status = []
+    }
+
+    let unKnownManager = form.unKnownManager.checked
+    if (unKnownManager === false) {
+      unKnownManager = undefined
+    }
+
+    const managerAddress = form.managerAddress.value
+    const validationCheck = []
+    validationCheck.push(invoiceNumber)
+    validationCheck.push(minIssuedate)
+    validationCheck.push(maxIssuedate)
+    validationCheck.push(managerAddress)
+    validationCheck.push(unKnownManager)
+    validationCheck.push(sentBy)
+    validationCheck.push(status)
+    let checkCount = 0
+    for (let i = 0; i < validationCheck.length; i++) {
+      if (i < 5) {
+        if (validationCheck[i] === '' || validationCheck[i] === undefined) {
+          ++checkCount
+        }
+      } else {
+        if (validationCheck[i].length === 0) {
+          ++checkCount
+        }
       }
     }
-  }
-  if (checkCount === 7) {
-    form = null
-  }
-
-  if (form) {
-    const managerAddress = form.managerAddress.value
-    form.action = href
-    if (managerAddress.length > 0) {
-      const result = managerAddressValidationCheck(managerAddress)
-      if (!result) {
-        alert('入力したメールアドレスに誤りがあります。')
+    if (checkCount === 7) {
+      searchProgressModal.classList.add('is-active')
+      location.replace(href)
+    } else {
+      form.action = href
+      if (managerAddress.length > 0) {
+        const result = managerAddressValidationCheck(managerAddress)
+        if (!result) {
+          alert('入力したメールアドレスに誤りがあります。')
+        } else {
+          searchProgressModal.classList.add('is-active')
+          form.submit()
+        }
       } else {
         searchProgressModal.classList.add('is-active')
         form.submit()
       }
-    } else {
-      searchProgressModal.classList.add('is-active')
-      form.submit()
     }
   } else {
     searchProgressModal.classList.add('is-active')
