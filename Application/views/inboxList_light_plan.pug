@@ -173,7 +173,8 @@ block content
                             th.width-10.text-center 通貨
                             th.width-10.text-center 金額
                             th.width-10.text-center 送信企業
-                            th.width-10.text-center 担当者アドレス<br>（担当者名）
+                            if isSearch === true
+                              th.width-10.text-center 担当者アドレス<br>（担当者名）
                             th.width-10.text-center 支払い期限日
                             th.width-10.text-center 更新日
                             th.width-10.text-center
@@ -236,11 +237,12 @@ block content
                               td.text-center.td-overflow= item.currency
                               td.text-center.td-overflow= item.ammount
                               td.text-center.td-overflow= item.sentTo
-                              - var managerinfo = item.managerInfo.managerAddress + '<br>' + item.managerInfo.managerName
-                              if (item.managerInfo.managerName === '（ユーザー登録なし）')
-                                td.text-center.td-overflow.text-color-red!= managerinfo
-                              else 
-                                td.text-center.td-overflow!= managerinfo
+                              if isSearch === true
+                                - var managerinfo = item.managerInfo.managerAddress + '<br>' + item.managerInfo.managerName
+                                if (item.managerInfo.managerName === '（ユーザー登録なし）')
+                                  td.text-center.td-overflow.text-color-red!= managerinfo
+                                else 
+                                  td.text-center.td-overflow!= managerinfo
                               td.text-center.td-overflow= item.expire
                               td.text-center.td-overflow= item.updated
                               td.text-center.display-row-td
@@ -281,7 +283,8 @@ block content
                           th.width-10.text-center 通貨
                           th.width-10.text-center 金額
                           th.width-10.text-center 送信企業
-                          th.width-10.text-center 担当者アドレス<br>（担当者名）
+                          if isSearch === true
+                            th.width-10.text-center 担当者アドレス<br>（担当者名）
                           th.width-10.text-center 支払い期限日
                           th.width-10.text-center 更新日
                           th.width-10.text-center
@@ -374,7 +377,6 @@ block content
                                                 label.checkbo 最終承認済み
                                                 input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '90')
                                                 label.checkbox 差し戻し
-                                                                                                                                                                                                                        
                                   .column          
                                     .field.is-horizontal
                                       .field-label.is-normal
@@ -429,7 +431,8 @@ block content
                             th.width-10.text-center 通貨
                             th.width-10.text-center 金額
                             th.width-10.text-center 送信企業
-                            th.width-10.text-center 担当者アドレス<br>（担当者名）
+                            if isSearch === true
+                              th.width-10.text-center 担当者アドレス<br>（担当者名）
                             th.width-10.text-center 支払い期限日
                             th.width-10.text-center 更新日
                             th.width-10.text-center
@@ -492,11 +495,12 @@ block content
                               td.text-center.td-overflow= item.currency
                               td.text-center.td-overflow= item.ammount
                               td.text-center.td-overflow= item.sentTo
-                              - var managerinfo = item.managerInfo.managerAddress + '<br>' + item.managerInfo.managerName
-                              if (item.managerInfo.managerName === '（ユーザー登録なし）')
-                                td.text-center.td-overflow.text-color-red!= managerinfo
-                              else 
-                                td.text-center.td-overflow!= managerinfo
+                              if isSearch === true
+                                - var managerinfo = item.managerInfo.managerAddress + '<br>' + item.managerInfo.managerName
+                                if (item.managerInfo.managerName === '（ユーザー登録なし）')
+                                  td.text-center.td-overflow.text-color-red!= managerinfo
+                                else 
+                                  td.text-center.td-overflow!= managerinfo
                               td.text-center.td-overflow= item.expire
                               td.text-center.td-overflow= item.updated
                               td.text-center.display-row-td
@@ -534,7 +538,8 @@ block content
                           th.width-10.text-center 通貨
                           th.width-10.text-center 金額
                           th.width-10.text-center 送信企業
-                          th.width-10.text-center 担当者アドレス<br>（担当者名）
+                          if isSearch === true
+                            th.width-10.text-center 担当者アドレス<br>（担当者名）
                           th.width-10.text-center 支払い期限日
                           th.width-10.text-center 更新日
                           th.width-10.text-center

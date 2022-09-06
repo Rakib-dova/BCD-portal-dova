@@ -64,80 +64,11 @@ const getInbox = async function (accessToken, refreshToken, pageId, tenantId, pr
     }
   }
 
-  // 請求書情報取得
-  const document = []
-  for (let i = 0; i < documents.Document.length; i++) {
-    const result = await tradeshiftDTO.getDocument(documents.Document[i].DocumentId, '')
-    document.push(result)
-  }
-
-  // // 請求書情報取得
-  // let document = []
-  // await Promise.all(
-  //   documents.Document.map(async (key) => {
-  //     return tradeshiftDTO.getDocument(key.DocumentId)
-  //   })
-  // ).then(function (result) {
-  //   document = result
-  // })
-
-  // 社内に担当者ユーザーの有無確認
-  let contactor = []
-  if (presentation === 'inboxList_light_plan') {
-    // 社内に担当者ユーザーの有無確認
-    contactor = await getCompanyUserInfo(document, accessToken, refreshToken)
-  } else {
-    // スタンダードプランではない場合
-    // await Promise.allSettled(
-    const result = document.map((key) => {
-      let managerAddress = ''
-      if (!(key instanceof Error)) {
-        managerAddress = key.AccountingCustomerParty.Party.Contact?.ID?.value
-      }
-      if (
-        typeof managerAddress !== 'undefined' &&
-        managerAddress.trim().length !== 0 &&
-        validate.isValidEmail(managerAddress)
-      ) {
-        managerAddress = key.AccountingCustomerParty.Party.Contact?.ID?.value
-      }
-
-      return { managerAddress: managerAddress, documentId: key.documentId }
-    })
-    // ).then(function (result) {
-    contactor = result.filter(
-      (element) =>
-        element.managerAddress !== '' &&
-        element.managerAddress !== undefined &&
-        validate.isValidEmail(element.managerAddress)
-    )
-    // })
-  }
-
   // 文書をリスト化する
   const documentList = documents.Document.map((item, idx) => {
     const ammount = function () {
       if (item.ItemInfos[1] === undefined) return '-'
       return Math.floor(item.ItemInfos[1].value).toLocaleString('ja-JP')
-    }
-
-    const managerInfo = { managerAddress: '-', managerName: '（ユーザー登録なし）' }
-    for (let i = 0; i < contactor.length; i++) {
-      if (contactor[i].documentId === item.DocumentId) {
-        managerInfo.managerAddress = contactor[i].managerAddress
-        if (contactor[i].userInfo && !(contactor[i].userInfo instanceof Error)) {
-          if (
-            contactor[i].userInfo.Person.LastName.trim().length !== 0 ||
-            contactor[i].userInfo.Person.FirstName.trim().length !== 0
-          ) {
-            managerInfo.managerName = `${contactor[i].userInfo.Person.LastName} ${contactor[i].userInfo.Person.FirstName}`
-          } else {
-            managerInfo.managerName = '-'
-          }
-
-          break
-        }
-      }
     }
 
     return {
@@ -150,8 +81,7 @@ const getInbox = async function (accessToken, refreshToken, pageId, tenantId, pr
       sentBy: item.ReceiverCompanyName ?? '-',
       updated: item.LastEdit !== undefined ? item.LastEdit.substring(0, 10) : '-',
       expire: item.DueDate ?? '-',
-      documentId: item.DocumentId,
-      managerInfo: managerInfo
+      documentId: item.DocumentId
     }
   })
 
