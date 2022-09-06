@@ -27,7 +27,11 @@ exports.accessTradeshift = async (accessToken, refreshToken, method, query, body
           _body,
           _config
         )
-        return res.data
+        if (res.data) {
+          return res.data
+        } else {
+          return 'test'
+        }
       }
     } catch (error) {
       retryCount++

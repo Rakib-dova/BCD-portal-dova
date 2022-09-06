@@ -479,6 +479,8 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
       })
     })
   })) {
+    logger.info('result.index' + result.index)
+    logger.info('result.apiResult' + result.apiResult)
     resultMap[result.index] = result.apiResult
   }
 
