@@ -80,20 +80,6 @@ const cbGetIndex = async (req, res, next) => {
   const tenantId = user.tenantId
   const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId, presentation)
 
-  // 請求書の承認依頼検索
-  for (let i = 0; i < result.list.length; i++) {
-    const requestApproval = await requestApprovalController.findOneRequestApproval(
-      bcdContract.contractId,
-      result.list[i].documentId
-    )
-
-    if (requestApproval instanceof Error) return next(errorHelper.create(500))
-
-    if (requestApproval !== null) {
-      result.list[i].approveStatus = requestApproval.status
-    }
-  }
-
   const rejectedFlag = false
 
   // 受領した請求書一覧レンダリング
@@ -106,7 +92,8 @@ const cbGetIndex = async (req, res, next) => {
     rejectedFlag: rejectedFlag,
     csrfToken: req.csrfToken(),
     userRole: req.session.userRole,
-    contractPlan: req.contractPlan
+    contractPlan: req.contractPlan,
+    isSearch: false
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
@@ -247,7 +234,8 @@ const cbGetApprovals = async (req, res, next) => {
     rejectedFlag: rejectedFlag,
     csrfToken: req.csrfToken(),
     userRole: req.session.userRole,
-    contractPlan: req.contractPlan
+    contractPlan: req.contractPlan,
+    isSearch: false
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetApprovals')
@@ -386,6 +374,7 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
       csrfToken: req.csrfToken(),
       userRole: req.session.userRole,
       contractPlan: req.contractPlan,
+      isSearch: true,
       keyword: keyword
     })
   } else {
@@ -400,6 +389,7 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
       csrfToken: req.csrfToken(),
       userRole: req.session.userRole,
       contractPlan: req.contractPlan,
+      isSearch: true,
       keyword: keyword
     })
   }

@@ -228,11 +228,7 @@ const managerInfoResult = {
       sentBy: 'バイヤー1',
       updated: '2021-12-27',
       expire: '2021-11-10',
-      documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
-      managerInfo: {
-        managerAddress: 'abc@test.co.jp',
-        managerName: 'UT テスト'
-      }
+      documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591'
     },
     {
       no: 2,
@@ -244,11 +240,7 @@ const managerInfoResult = {
       sentBy: 'バイヤー1',
       updated: '2021-12-16',
       expire: '2021-12-22',
-      documentId: '0aa6c428-b1d0-5cef-8044-3fe78acb226f',
-      managerInfo: {
-        managerAddress: '-',
-        managerName: '（ユーザー登録なし）'
-      }
+      documentId: '0aa6c428-b1d0-5cef-8044-3fe78acb226f'
     },
     {
       no: 3,
@@ -260,11 +252,7 @@ const managerInfoResult = {
       sentBy: 'バイヤー1',
       updated: '2021-12-16',
       expire: '2021-12-28',
-      documentId: '5792b9b9-fe31-5b1d-a58f-9798089359fd',
-      managerInfo: {
-        managerAddress: '-',
-        managerName: '（ユーザー登録なし）'
-      }
+      documentId: '5792b9b9-fe31-5b1d-a58f-9798089359fd'
     },
     {
       no: 4,
@@ -276,11 +264,7 @@ const managerInfoResult = {
       sentBy: 'バイヤー1',
       updated: '2021-12-16',
       expire: '2021-12-28',
-      documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537',
-      managerInfo: {
-        managerAddress: '-',
-        managerName: '（ユーザー登録なし）'
-      }
+      documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537'
     }
   ],
   numPages: 1,
@@ -301,11 +285,7 @@ const noNameManagerInfoResult = {
       sentBy: 'バイヤー1',
       updated: '2021-12-27',
       expire: '2021-11-10',
-      documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
-      managerInfo: {
-        managerAddress: 'abc@test.co.jp',
-        managerName: '-'
-      }
+      documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591'
     },
     {
       no: 2,
@@ -317,11 +297,7 @@ const noNameManagerInfoResult = {
       sentBy: 'バイヤー1',
       updated: '2021-12-16',
       expire: '2021-12-22',
-      documentId: '0aa6c428-b1d0-5cef-8044-3fe78acb226f',
-      managerInfo: {
-        managerAddress: '-',
-        managerName: '（ユーザー登録なし）'
-      }
+      documentId: '0aa6c428-b1d0-5cef-8044-3fe78acb226f'
     },
     {
       no: 3,
@@ -333,11 +309,7 @@ const noNameManagerInfoResult = {
       sentBy: 'バイヤー1',
       updated: '2021-12-16',
       expire: '2021-12-28',
-      documentId: '5792b9b9-fe31-5b1d-a58f-9798089359fd',
-      managerInfo: {
-        managerAddress: '-',
-        managerName: '（ユーザー登録なし）'
-      }
+      documentId: '5792b9b9-fe31-5b1d-a58f-9798089359fd'
     },
     {
       no: 4,
@@ -349,11 +321,7 @@ const noNameManagerInfoResult = {
       sentBy: 'バイヤー1',
       updated: '2021-12-16',
       expire: '2021-12-28',
-      documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537',
-      managerInfo: {
-        managerAddress: '-',
-        managerName: '（ユーザー登録なし）'
-      }
+      documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537'
     }
   ],
   numPages: 1,
@@ -374,11 +342,7 @@ const freeManagerInfoResult = {
       sentBy: 'バイヤー1',
       updated: '2021-12-27',
       expire: '2021-11-10',
-      documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
-      managerInfo: {
-        managerAddress: 'abc@test.co.jp',
-        managerName: '（ユーザー登録なし）'
-      }
+      documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591'
     },
     {
       no: 2,
@@ -390,11 +354,7 @@ const freeManagerInfoResult = {
       sentBy: 'バイヤー1',
       updated: '2021-12-16',
       expire: '2021-12-22',
-      documentId: '0aa6c428-b1d0-5cef-8044-3fe78acb226f',
-      managerInfo: {
-        managerAddress: '-',
-        managerName: '（ユーザー登録なし）'
-      }
+      documentId: '0aa6c428-b1d0-5cef-8044-3fe78acb226f'
     },
     {
       no: 3,
@@ -406,11 +366,7 @@ const freeManagerInfoResult = {
       sentBy: 'バイヤー1',
       updated: '2021-12-16',
       expire: '2021-12-28',
-      documentId: '5792b9b9-fe31-5b1d-a58f-9798089359fd',
-      managerInfo: {
-        managerAddress: '-',
-        managerName: '（ユーザー登録なし）'
-      }
+      documentId: '5792b9b9-fe31-5b1d-a58f-9798089359fd'
     },
     {
       no: 4,
@@ -422,11 +378,7 @@ const freeManagerInfoResult = {
       sentBy: 'バイヤー1',
       updated: '2021-12-16',
       expire: '2021-12-28',
-      documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537',
-      managerInfo: {
-        managerAddress: '-',
-        managerName: '（ユーザー登録なし）'
-      }
+      documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537'
     }
   ],
   numPages: 1,
@@ -447,11 +399,7 @@ const noManagerInfoResult = {
       sentBy: 'バイヤー1',
       updated: '2021-12-27',
       expire: '2021-11-10',
-      documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
-      managerInfo: {
-        managerAddress: '-',
-        managerName: '（ユーザー登録なし）'
-      }
+      documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591'
     },
     {
       no: 2,
@@ -463,11 +411,7 @@ const noManagerInfoResult = {
       sentBy: 'バイヤー1',
       updated: '2021-12-16',
       expire: '2021-12-22',
-      documentId: '0aa6c428-b1d0-5cef-8044-3fe78acb226f',
-      managerInfo: {
-        managerAddress: '-',
-        managerName: '（ユーザー登録なし）'
-      }
+      documentId: '0aa6c428-b1d0-5cef-8044-3fe78acb226f'
     },
     {
       no: 3,
@@ -479,11 +423,7 @@ const noManagerInfoResult = {
       sentBy: 'バイヤー1',
       updated: '2021-12-16',
       expire: '2021-12-28',
-      documentId: '5792b9b9-fe31-5b1d-a58f-9798089359fd',
-      managerInfo: {
-        managerAddress: '-',
-        managerName: '（ユーザー登録なし）'
-      }
+      documentId: '5792b9b9-fe31-5b1d-a58f-9798089359fd'
     },
     {
       no: 4,
@@ -495,11 +435,7 @@ const noManagerInfoResult = {
       sentBy: 'バイヤー1',
       updated: '2021-12-16',
       expire: '2021-12-28',
-      documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537',
-      managerInfo: {
-        managerAddress: '-',
-        managerName: '（ユーザー登録なし）'
-      }
+      documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537'
     }
   ],
   numPages: 1,
@@ -669,11 +605,7 @@ const result3 = {
       sentBy: '-',
       sentTo: '-',
       status: 0,
-      updated: '-',
-      managerInfo: {
-        managerAddress: '-',
-        managerName: '（ユーザー登録なし）'
-      }
+      updated: '-'
     },
     {
       ammount: '3,080,000',
@@ -685,11 +617,7 @@ const result3 = {
       sentBy: 'バイヤー1',
       sentTo: 'サプライヤー1',
       status: '-',
-      updated: '',
-      managerInfo: {
-        managerAddress: '-',
-        managerName: '（ユーザー登録なし）'
-      }
+      updated: ''
     },
     {
       ammount: '178,320',
@@ -701,11 +629,7 @@ const result3 = {
       sentBy: 'バイヤー1',
       sentTo: 'サプライヤー1',
       status: 1,
-      updated: '2021-12-16',
-      managerInfo: {
-        managerAddress: '-',
-        managerName: '（ユーザー登録なし）'
-      }
+      updated: '2021-12-16'
     },
     {
       ammount: '-',
@@ -717,11 +641,7 @@ const result3 = {
       sentBy: 'バイヤー1',
       sentTo: 'サプライヤー1',
       status: 2,
-      updated: '2021-12-16',
-      managerInfo: {
-        managerAddress: '-',
-        managerName: '（ユーザー登録なし）'
-      }
+      updated: '2021-12-16'
     }
   ],
   numPages: 1,
@@ -876,11 +796,7 @@ const result4 = {
       sentBy: 'サプライヤー1',
       sentTo: 'バイヤー1',
       status: 0,
-      updated: '-',
-      managerInfo: {
-        managerAddress: '-',
-        managerName: '（ユーザー登録なし）'
-      }
+      updated: '-'
     },
     {
       ammount: '178,320',
@@ -892,11 +808,7 @@ const result4 = {
       sentBy: 'バイヤー1',
       sentTo: 'サプライヤー1',
       status: 1,
-      updated: '-',
-      managerInfo: {
-        managerAddress: '-',
-        managerName: '（ユーザー登録なし）'
-      }
+      updated: '-'
     },
     {
       ammount: '-',
@@ -908,11 +820,7 @@ const result4 = {
       sentBy: 'バイヤー1',
       sentTo: 'サプライヤー1',
       status: 2,
-      updated: '-',
-      managerInfo: {
-        managerAddress: '-',
-        managerName: '（ユーザー登録なし）'
-      }
+      updated: '-'
     },
     {
       ammount: '3,080,000',
@@ -924,11 +832,7 @@ const result4 = {
       sentBy: 'バイヤー1',
       sentTo: 'サプライヤー1',
       status: '-',
-      updated: '-',
-      managerInfo: {
-        managerAddress: '-',
-        managerName: '（ユーザー登録なし）'
-      }
+      updated: '-'
     }
   ],
   numPages: 1,
