@@ -49,6 +49,7 @@ const optionProps = [
  * @returns {string} 請求書HTML
  */
 const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
+  const sendRegistrationNoData = input.sendRegistrationNo ? input.sendRegistrationNo : ''
   if (!validateInvoiceInput(input)) return console.log('PDF生成バリデーションの失敗')
   padOptionProps(input)
 
@@ -288,7 +289,7 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
         <p class="p width-250px" id="invoice-sendAddr1">${input.sendAddr1}</p>
         <p class="p width-250px" id="invoice-sendAddr2">${input.sendAddr2}</p>
         <p class="p width-250px" id="invoice-sendAddr3">${input.sendAddr3}</p>
-        <p class="p width-250px" id="invoice-sendAddr3">${input.sendRegistrationNo}</p>
+        <p class="p width-250px" id="invoice-sendAddr3">${sendRegistrationNoData}</p>
       </div>
     </div>
     <div class="columns">
@@ -318,7 +319,7 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
           <p class="text-r width-50" id="subTotal">${Math.floor(input.subTotal).toLocaleString()}</p>
         </div>
         ${setDiscountInvoice(input)}
-        ${setTaxGroup(input.taxGroups)}
+        ${setTaxGroup(input.taxGroups, input.lines)}
         <div class="flex">
           <p class="text-l width-50 font-bold">合計 ￥</p>
           <p class="text-r width-50 font-bold" id="total">${Math.floor(
@@ -549,15 +550,39 @@ const getDiscountInvoiceTotal = (input) => {
  * @param {object[]} taxGroups 消費税区分グループオブジェクト
  * @returns {string} 消費税区分グループタグ
  */
-const setTaxGroup = (taxGroups) => {
+const setTaxGroup = (taxGroups, lines) => {
   let tags = ''
-
-  taxGroups.forEach((group) => {
-    const taxRate = group.type === 'otherTax' && group.taxLabel ? group.taxLabel : getTaxTypeName(group.type)
+  // 動入力された税額が、税額欄に表示、および小計欄にラベル名ごとに合計されて表示されること、表示順は固定入力→手動入力(上から設定順)
+  const taxTypeList = []
+  const otherTaxLineList = []
+  // 「その他の税」と「定型税」をそれぞれ入力されている順に保持
+  lines.forEach((line) => {
+    if (line.taxType && line.taxType === 'otherTax' && !otherTaxLineList.includes(line.taxLabel)) {
+      otherTaxLineList.push(line.taxLabel)
+    } else if (line.taxType && !taxTypeList.includes(line.taxType)) {
+      if (line.taxType === 'otherTax') return
+      taxTypeList.push(line.taxType)
+    }
+  })
+  // 選択肢にある税から、行順に追加
+  taxTypeList.forEach((taxType) => {
+    const existTax = taxGroups.find(({ type }) => type === taxType)
+    if (!existTax) return
     tags += `<div class="flex">
-               <p class="text-l width-50 taxGroupLabel">${group.subTotal.toLocaleString()}円のJP ${taxRate}</p>
-               <p class="text-r width-50 taxGroupValue">${group.taxGroupTotal.toLocaleString()}</p>
-            </div>`
+    <p class="text-l width-50 taxGroupLabel">${existTax.subTotal.toLocaleString()}円のJP ${getTaxTypeName(taxType)}</p>
+    <p class="text-r width-50 taxGroupValue">${existTax.taxGroupTotal.toLocaleString()}</p>
+ </div>`
+  })
+  // 「その他」を行順に追加
+  otherTaxLineList.forEach((taxLine) => {
+    const existOtherTax = taxGroups.find(({ taxLabel }) => taxLabel === taxLine)
+    if (!existOtherTax) return
+    tags += `<div class="flex">
+    <p class="text-l width-50 taxGroupLabel">${existOtherTax.subTotal.toLocaleString()}円のJP ${
+      existOtherTax.taxLabel
+    }</p>
+    <p class="text-r width-50 taxGroupValue">${existOtherTax.taxGroupTotal.toLocaleString()}</p>
+    </div>`
   })
 
   return tags
