@@ -561,7 +561,7 @@ function paginationSubmit(form, href) {
 if (document.querySelector('.pagination-list')) {
   document.querySelector('.pagination-list').addEventListener('click', function (e) {
     e.preventDefault()
-    paginationSubmit(document.querySelector('#form'), e.path[0].href)
+    paginationSubmit(document.querySelector('#form'), e.target.href)
   })
 }
 
@@ -569,7 +569,7 @@ if (document.querySelector('.pagination-list')) {
 if (document.querySelector('.pagination-previous')) {
   document.querySelector('.pagination-previous').addEventListener('click', function (e) {
     e.preventDefault()
-    paginationSubmit(document.querySelector('#form'), e.path[0].href)
+    paginationSubmit(document.querySelector('#form'), e.target.href)
   })
 }
 
@@ -577,7 +577,7 @@ if (document.querySelector('.pagination-previous')) {
 if (document.querySelector('.pagination-next')) {
   document.querySelector('.pagination-next').addEventListener('click', function (e) {
     e.preventDefault()
-    paginationSubmit(document.querySelector('#form'), e.path[0].href)
+    paginationSubmit(document.querySelector('#form'), e.target.href)
   })
 }
 
