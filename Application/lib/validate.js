@@ -498,6 +498,30 @@ const isValidTotalPrice = function (documentNo, invoiceData) {
   return true
 }
 
+/**
+ * 絵文字の入力チェック
+ * @param {string} str テキストに入力された文字
+ * @return {boolean} true:strに絵文字が入力された場合
+ *                   false:strに絵文字が入力されていない場合
+ */
+function isEmoji(str) {
+  const ranges = [
+    '[\ud800-\ud8ff][\ud000-\udfff]', // 基本的な絵文字除去
+    '[\ud000-\udfff]{2,}', // サロゲートペアの二回以上の繰り返しがあった場合
+    '\ud7c9[\udc00-\udfff]', // 特定のシリーズ除去
+    '[0-9|*|#][\uFE0E-\uFE0F]\u20E3', // 数字系絵文字
+    '[0-9|*|#]\u20E3', // 数字系絵文字
+    '[©|®|\u2010-\u3fff][\uFE0E-\uFE0F]', // 環境依存文字や日本語との組み合わせによる絵文字
+    '[\u2010-\u2FFF]', // 指や手、物など、単体で絵文字となるもの
+    '\uA4B3' // 数学記号の環境依存文字の除去
+  ]
+  if (str.match(ranges.join('|'))) {
+    return true
+  } else {
+    return false
+  }
+}
+
 module.exports = {
   isArray: isArray,
   isNumber: isNumber,
@@ -537,5 +561,6 @@ module.exports = {
   isCode: isCode,
   isName: isName,
   isDepartmentCode: isDepartmentCode,
-  isValidTotalPrice: isValidTotalPrice
+  isValidTotalPrice: isValidTotalPrice,
+  isEmoji: isEmoji
 }
