@@ -12,7 +12,7 @@ const requiredProps = [
   'sendAddr1',
   'sendAddr2',
   'sendAddr3',
-  'sendRegistrationNo',
+  // 'sendRegistrationNo',
 
   'invoiceNo',
   'currency',
@@ -51,7 +51,7 @@ const optionProps = [
 const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
   // 合計
   const total = Math.floor(input.total - getDiscountInvoiceTotal(input)).toLocaleString()
-
+  const sendRegistrationNoData = input.sendRegistrationNo ? input.sendRegistrationNo : ''
   if (!validateInvoiceInput(input)) return console.log('PDF生成バリデーションの失敗')
   padOptionProps(input)
 
@@ -263,7 +263,7 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
         <p class="p width-250px" id="invoice-sendAddr1">${input.sendAddr1}</p>
         <p class="p width-250px" id="invoice-sendAddr2">${input.sendAddr2}</p>
         <p class="p width-250px" id="invoice-sendAddr3">${input.sendAddr3}</p>
-        <p class="p width-250px" id="invoice-sendAddr3">${input.sendRegistrationNo}</p>
+        <p class="p width-250px" id="invoice-sendAddr3">${sendRegistrationNoData}</p>
       </div>
     </div>
     <div class="columns">
@@ -301,7 +301,7 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
           <p class="text-r width-50" id="subTotal">${Math.floor(input.subTotal).toLocaleString()}</p>
         </div>
         ${setDiscountInvoice(input)}
-        ${setTaxGroup(input.taxGroups)}
+        ${setTaxGroup(input.taxGroups, input.lines)}
         <div class="flex">
           <p class="text-l width-50 font-bold">合計 ￥</p>
           <p class="text-r width-50 font-bold" id="total">${total}</p>
@@ -344,7 +344,10 @@ const validateInvoiceInput = (input) => {
 
   for (let i = 0; i < requiredProps.length; i++) {
     // eslint-disable-next-line no-prototype-builtins
-    if (!input.hasOwnProperty(requiredProps[i])) return false
+    if (!input.hasOwnProperty(requiredProps[i])) {
+      console.log('not exist Props =' + requiredProps[i])
+      return false
+    }
   }
 
   return true
@@ -418,7 +421,10 @@ const setLines = (lines) => {
         <td class="text-center"><p class="line-unitPrice" data-prop="unitPrice">${parseInt(
           line.unitPrice
         ).toLocaleString()}</p></td>
-        <td class="text-center"><p class="line-taxType" data-prop="taxType">${getTaxTypeName(line.taxType)}</p></td>
+        <td class="text-center"><p class="line-taxType" data-prop="taxType">${getTaxTypeName(
+          line.taxType,
+          line
+        )}</p></td>
         <td class="text-right line-subtotal"><p class="line-subtotal" data-prop="subtotal">${subTotal.toLocaleString()}</p></td>
       </tr>`
     for (let i = 1; i <= line.discounts; i++) {
@@ -526,15 +532,39 @@ const getDiscountInvoiceTotal = (input) => {
  * @param {object[]} taxGroups 消費税区分グループオブジェクト
  * @returns {string} 消費税区分グループタグ
  */
-const setTaxGroup = (taxGroups) => {
+const setTaxGroup = (taxGroups, lines) => {
   let tags = ''
-
-  taxGroups.forEach((group) => {
-    const taxRate = group.type.replace('tax', '').replace('p', '')
+  // 動入力された税額が、税額欄に表示、および小計欄にラベル名ごとに合計されて表示されること、表示順は固定入力→手動入力(上から設定順)
+  const taxTypeList = []
+  const otherTaxLineList = []
+  // 「その他の税」と「定型税」をそれぞれ入力されている順に保持
+  lines.forEach((line) => {
+    if (line.taxType && line.taxType === 'otherTax' && !otherTaxLineList.includes(line.taxLabel)) {
+      otherTaxLineList.push(line.taxLabel)
+    } else if (line.taxType && !taxTypeList.includes(line.taxType)) {
+      if (line.taxType === 'otherTax') return
+      taxTypeList.push(line.taxType)
+    }
+  })
+  // 選択肢にある税から、行順に追加
+  taxTypeList.forEach((taxType) => {
+    const existTax = taxGroups.find(({ type }) => type === taxType)
+    if (!existTax) return
     tags += `<div class="flex">
-               <p class="text-l width-50 taxGroupLabel">${group.subTotal.toLocaleString()}円のJP 消費税 ${taxRate}%</p>
-               <p class="text-r width-50 taxGroupValue">${group.taxGroupTotal.toLocaleString()}</p>
-            </div>`
+    <p class="text-l width-50 taxGroupLabel">${existTax.subTotal.toLocaleString()}円のJP ${getTaxTypeName(taxType)}</p>
+    <p class="text-r width-50 taxGroupValue">${existTax.taxGroupTotal.toLocaleString()}</p>
+ </div>`
+  })
+  // 「その他」を行順に追加
+  otherTaxLineList.forEach((taxLine) => {
+    const existOtherTax = taxGroups.find(({ taxLabel }) => taxLabel === taxLine)
+    if (!existOtherTax) return
+    tags += `<div class="flex">
+    <p class="text-l width-50 taxGroupLabel">${existOtherTax.subTotal.toLocaleString()}円のJP ${
+      existOtherTax.taxLabel
+    }</p>
+    <p class="text-r width-50 taxGroupValue">${existOtherTax.taxGroupTotal.toLocaleString()}</p>
+    </div>`
   })
 
   return tags
@@ -563,7 +593,7 @@ const setImageTag = (imageBuffer, type, size = 120) => {
  * @param {string} taxType 消費税区分文字列
  * @returns {string} 消費税区名 (日本語)
  */
-const getTaxTypeName = (taxType) => {
+const getTaxTypeName = (taxType, line) => {
   switch (taxType) {
     case 'tax10p':
       return '消費税 10%'
@@ -576,7 +606,7 @@ const getTaxTypeName = (taxType) => {
     case 'taxExemption':
       return '免税'
     case 'otherTax':
-      return 'その他の消費税'
+      return line.taxAmount
     default:
       return ''
   }

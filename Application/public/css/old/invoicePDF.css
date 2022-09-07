@@ -40,6 +40,10 @@ input.width-330px {
   display: none;
 }
 
+#sealImp {
+  cursor: pointer;
+}
+
 .items {
   display: flex;
   flex-wrap: wrap;
@@ -79,7 +83,7 @@ input.width-330px {
 .discount-table {
   border: 0px none;
   width: 100%;
-}
+} 
 
 .discount-table td,
 .discount-table th {
@@ -88,52 +92,4 @@ input.width-330px {
 
 pre {
   white-space: pre-wrap;
-}
-
-/*税率設定追加分*/
-#taxType-modal header {
-  background-color: #3298dc;
-  color: #fff;
-}
-#taxType-modal header p {
-  color: #fff;
-  font-weight: bold;
-}
-#taxType-modal .modalWidth {
-  width: 80%;
-  margin: 2rem auto;
-}
-#taxType-modal .taxTbox {
-  background-color: white;
-  border: #dbdbdb 1px solid;
-  border-radius: 4px;
-  color: #363636;
-  padding: 0.5rem;
-  width: 430px;
-  display: inline-block;
-  margin-bottom: 0.5rem;
-}
-#taxType-modal .taxT:checked ~ label {
-  background-color: #b8dcf4;
-}
-.taxInfo {
-  display: none;
-}
-#taxType-modal input.yesCheck:checked ~ .taxInfo {
-  display: block;
-}
-#taxType-modal .taxLabel {
-  width: 427px;
-  margin: 0.25rem auto auto 1.5rem;
-}
-.button-area .control a,
-.button-area .control button {
-  width: 120px;
-}
-.border {
-  border: 1px solid;
-}
-
-.min-height-full {
-  min-height: 100% !important;
 }

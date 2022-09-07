@@ -3,6 +3,7 @@
 const headerErrorDiv = $('#header-error')
 const linesErrorDiv = $('#lines-error')
 const footerErrorDiv = $('#footer-error')
+const taxModalErrorDiv = $('#tax-error')
 // 絵文字正規式
 const ranges = [
   '[\ud800-\ud8ff][\ud000-\udfff]', // 基本的な絵文字除去
@@ -942,6 +943,27 @@ const outputRules = [
   }
 ]
 
+const taxRules = [
+  {
+    displayLocation: 'tax',
+    exDisplayLocation: 'taxLabelErr',
+    prop: 'taxLabel',
+    regexp: /^.{0,10}$/,
+    message: '税額のラベル名は10文字以内で入力してください。',
+    emptyMessage: '入力必須',
+    required: true
+  },
+  {
+    displayLocation: 'tax',
+    exDisplayLocation: 'taxAmountErr',
+    prop: 'taxAmount',
+    regexp: /^[0-9]{0,12}$/,
+    message: '税額は整数 0 ～ 999999999999 の範囲で入力してください。',
+    emptyMessage: '入力必須',
+    required: true
+  }
+]
+
 // eslint-disable-next-line no-unused-vars
 function validate(invoice, lines, rules, option = {}) {
   let result = true
@@ -990,7 +1012,7 @@ function validate(invoice, lines, rules, option = {}) {
       }
     })
 
-    if (line['unitPrice'] && line['quantity'] && line['unitPrice'] * line['quantity'] > 9000000000000000) {
+    if (line.unitPrice && line.quantity && line.unitPrice * line.quantity > 9000000000000000) {
       // eslint-disable-line
       setValidationMessage(
         `${i + 1}番目の` +
@@ -1056,6 +1078,34 @@ function validate(invoice, lines, rules, option = {}) {
 }
 
 // eslint-disable-next-line no-unused-vars
+function taxValidate(tax) {
+  let result = true
+
+  const taxErrDisplays = ['taxErrEmptyMassage', 'taxLabelErr', 'taxAmountErr']
+  taxErrDisplays.forEach((display) => {
+    document.getElementById(display).textContent = ''
+  })
+  while (taxModalErrorDiv.firstChild) taxModalErrorDiv.removeChild(taxModalErrorDiv.firstChild)
+
+  taxRules.forEach((rule) => {
+    if (!tax[rule.prop] && rule.required) {
+      document.getElementById(rule.exDisplayLocation).textContent = rule.emptyMessage
+      document.getElementById('taxErrEmptyMassage').textContent = '未入力の項目があります。'
+      result = false
+    } else if (!tax[rule.prop]) return // eslint-disable-line
+    else if (rule.customValidator && !rule.customValidator(tax[rule.prop])) {
+      setValidationMessage(rule.message, rule.displayLocation)
+      result = false
+    } else if (rule.regexp && !rule.regexp.test(tax[rule.prop])) {
+      setValidationMessage(rule.message, rule.displayLocation)
+      result = false
+    }
+  })
+  console.log('=====  税モーダルバリデーションの結果: ', result)
+  return result
+}
+
+// eslint-disable-next-line no-unused-vars
 function setValidationMessage(message, displayLocation) {
   const messageP = document.createElement('p')
   messageP.className = 'has-text-danger'
@@ -1063,6 +1113,7 @@ function setValidationMessage(message, displayLocation) {
   if (displayLocation === 'header') return headerErrorDiv.appendChild(messageP)
   else if (displayLocation === 'lines') return linesErrorDiv.appendChild(messageP)
   else if (displayLocation === 'footer') return footerErrorDiv.appendChild(messageP)
+  else if (displayLocation === 'tax') return taxModalErrorDiv.appendChild(messageP)
 }
 
 // eslint-disable-next-line no-unused-vars

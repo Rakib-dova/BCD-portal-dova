@@ -72,7 +72,10 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
   let defaultCsvData
   try {
     uploadFileData = req.file.buffer.toString('UTF-8') // CSV文字列データ
-    defaultCsvData = fs.readFileSync(path.resolve('./public/html/PDF請求書ドラフト一括作成フォーマット.csv'), 'utf8') // アップロードフォーマット文字列データ
+    defaultCsvData = fs.readFileSync(
+      path.resolve('./public/html/PDF請求書ドラフト一括作成フォーマット_v1.1.csv'),
+      'utf8'
+    ) // アップロードフォーマット文字列データ
   } catch (error) {
     logger.info(error)
     return res.status(500).send(JSON.stringify({ message: 'システムエラーです。（後程、接続してください）' }))

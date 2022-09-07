@@ -19,7 +19,8 @@ const storageCommon = require('../lib/storageCommon')
 
 const taxDatabase = [
   { type: 'tax10p', taxRate: 0.1 },
-  { type: 'tax8p', taxRate: 0.08 }
+  { type: 'tax8p', taxRate: 0.08 },
+  { type: 'otherTax', taxRate: 0 } // 'その他の税'
 ]
 
 const pdfInvoiceList = async (req, res, next) => {
@@ -44,7 +45,7 @@ const pdfInvoiceList = async (req, res, next) => {
     invoice.paymentDate = invoice.paymentDate ? formatDate(invoice.paymentDate, 'YYYY年MM月DD日') : ''
   })
 
-  console.log('==  加工後 invoices  ===================\n', invoices)
+  // console.log('==  加工後 invoices  ===================\n', invoices)
 
   res.render('pdfInvoiceList', {
     title: 'PDF請求書作成ドラフト一覧',
@@ -443,14 +444,21 @@ const getDateJST = async (target) => {
 
 const getTotal = (lines, taxDatabase) => {
   let total = 0
-  console.log('====  getTotal  =======', lines, taxDatabase)
+  // console.log('====  getTotal  =======', lines, taxDatabase)
 
   lines.forEach((line) => {
     let taxRate = 0
+    // 一致する税を探索
     const taxInfo = taxDatabase.find((tax) => tax.type === line.taxType)
     if (taxInfo) taxRate = taxInfo.taxRate
-    total +=
-      (line.unitPrice * line.quantity - getDiscount(line, Math.floor(line.unitPrice * line.quantity))) * (1 + taxRate)
+    // 税抜き合計
+    const noTaxTotal = line.unitPrice * line.quantity - getDiscount(line, Math.floor(line.unitPrice * line.quantity))
+    total += noTaxTotal
+    // 税率を適応(noTaxTotal * (1+taxRate)としてはいけない)
+    if (taxRate) total += noTaxTotal * taxRate
+    if (line.taxType === 'otherTax' && line.taxAmount) {
+      total += line.taxAmount
+    }
   })
 
   return total

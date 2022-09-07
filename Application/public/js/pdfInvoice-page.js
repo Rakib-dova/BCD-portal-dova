@@ -1,6 +1,6 @@
 /* global
 
- taxDatabase, $, addEvent, validate, getSubTotal, getTaxGroups, getTaxTotal, getDiscountTypeIndex, getDiscountLinePriceTotal, functionDiscountCalcs, getLineDiscountPrice,
+ taxDatabase, $, addEvent, validate, getSubTotal, getTaxGroups, getTaxTotal, getDiscountTypeIndex, getDiscountLinePriceTotal, functionDiscountCalcs, getLineDiscountPrice, taxValidate,
  savePdfInvoice, outputPdfInvoice, formatDate, isNumberString, saveRules, outputRules, getTaxTypeName, setPaymentRequired
 
 */
@@ -216,6 +216,14 @@ addEvent(document, 'change', (e, target) => {
     renderInvoice(target)
   }
 
+  // 税モーダルのラジオボタンに入力があった場合
+  if (e.target.id.match(/taxRadio/)) {
+    const taxmodaltemplate = document.getElementById('taxType-modal')
+    const radios = taxmodaltemplate.querySelectorAll('input[type=radio]')
+    // ラジオボタンがなんらか選択さていれば「適応」ボタン活性化
+    taxAcceptEnabled(getRadioChecked(radios))
+  }
+
   // 明細関連の 値更新 & レンダリング
   if (e.target.className.match(/line/)) {
     updateLineValues(e, target)
@@ -308,6 +316,10 @@ function renderLines() {
 
     const discountdelBtn = linesTbody.firstChild.querySelector('.discount-line-del-action')
     document.removeEventListener('click', discountdelBtn)
+
+    const taxSelectModal = linesTbody.firstChild.querySelector('.line-taxType')
+    document.removeEventListener('focus', taxSelectModal)
+
     linesTbody.removeChild(linesTbody.firstChild)
   }
 
@@ -335,7 +347,11 @@ function renderLines() {
     unitPriceInput.value = line.unitPrice
     // 税設定
     const taxTypeSelect = clone.querySelector('.line-taxType')
-    taxTypeSelect.selectedIndex = getTaxTypeIndex(line.taxType)
+    // 税のフォームを選択(もしくはtab等でフォーカスされた際に税モーダルをactivate)
+    taxTypeSelect.addEventListener('focus', () => {
+      activateTaxModal(index, line)
+    })
+    taxTypeSelect.value = getTaxTypeIndex(line.taxType, index)
     // 小計設定
     const subtotalTd = clone.querySelector('.line-subtotal')
     subtotalTd.textContent = Math.floor(line.unitPrice * line.quantity - getLineDiscountPrice(line)).toLocaleString()
@@ -385,6 +401,7 @@ function renderLines() {
     }
   })
 
+  // 行追加の+ボタン
   if (lines.length < 20) {
     const template = document.getElementById('line-add-btn')
     const clone = template.content.cloneNode(true)
@@ -518,39 +535,64 @@ function renderTotals() {
     totalParentDiv.before(taxGroupDiv)
   }
 
-  taxGroups.forEach((taxGroup) => {
-    if (taxGroup.taxGroupTotal === 0) return
-    const template = document.getElementById('taxGroup-template')
-    const clone = template.content.cloneNode(true)
-    const taxGroupDiv = clone.querySelector('.taxGroup')
-
-    const taxGroupLabel = clone.querySelector('.taxGroupLabel')
-    const taxRate = taxGroup.type.replace('tax', '').replace('p', '')
-    taxGroupLabel.textContent = `${taxGroup.subTotal.toLocaleString()}円のJP 消費税 ${taxRate}%`
-    taxGroupDiv.appendChild(taxGroupLabel)
-
-    const taxGroupValue = clone.querySelector('.taxGroupValue')
-    taxGroupValue.textContent = taxGroup.taxGroupTotal.toLocaleString()
-    taxGroupDiv.appendChild(taxGroupValue)
-    totalParentDiv.before(taxGroupDiv)
+  // 動入力された税額が、税額欄に表示、および小計欄にラベル名ごとに合計されて表示されること、表示順は固定入力→手動入力(上から設定順)
+  const taxLineList = []
+  const otherTaxLineList = []
+  // 「その他の税」と「定型税」をそれぞれ入力されている順に保持
+  lines.forEach((line) => {
+    if (line.taxType && line.taxType === 'otherTax' && !otherTaxLineList.includes(line.taxLabel)) {
+      otherTaxLineList.push(line.taxLabel)
+    } else if (line.taxType && !taxLineList.includes(line.taxType)) {
+      if (line.taxType === 'otherTax') return
+      taxLineList.push(line.taxType)
+    }
   })
-
+  // 選択肢にある税から、行順に追加
+  taxLineList.forEach((taxLine) => {
+    const existOtherTax = taxGroups.find(({ type }) => type === taxLine)
+    if (!existOtherTax) return
+    displayTaxGroups(existOtherTax, totalParentDiv)
+  })
+  // 「その他」を行順に追加
+  otherTaxLineList.forEach((taxLine) => {
+    const existOtherTax = taxGroups.find(({ taxLabel }) => taxLabel === taxLine)
+    if (!existOtherTax) return
+    displayTaxGroups(existOtherTax, totalParentDiv)
+  })
   // 合計
-  const total = Math.floor(subTotal + taxTotal - invoiceDiscountTotal).toLocaleString()
   const totalDiv = $('#total')
-  totalDiv.textContent = total
-  const totalAmountDiv = $('#totalAmount')
-  totalAmountDiv.textContent = total
+  totalDiv.textContent = Math.floor(subTotal + taxTotal - invoiceDiscountTotal).toLocaleString()
 
   // 税額合計
   const taxTotalDiv = $('#taxTotal')
   taxTotalDiv.textContent = `税額合計 ${taxTotal.toLocaleString()} 円`
 }
 
+/**
+ * 税小計の表示を追加する
+ * @param {object[]} existOtherTax 判定
+ * @param {object[]} totalParentDiv 判定
+ * @returns
+ */
+function displayTaxGroups(existOtherTax, totalParentDiv) {
+  const template = document.getElementById('taxGroup-template')
+  const clone = template.content.cloneNode(true)
+  const taxGroupDiv = clone.querySelector('.taxGroup')
+  const taxGroupLabel = clone.querySelector('.taxGroupLabel')
+  const taxRate = existOtherTax.taxLabel ? existOtherTax.taxLabel : getTaxTypeName(existOtherTax.type)
+  taxGroupLabel.textContent = `${existOtherTax.subTotal.toLocaleString()}円のJP ${taxRate}`
+  taxGroupDiv.appendChild(taxGroupLabel)
+
+  const taxGroupValue = clone.querySelector('.taxGroupValue')
+  taxGroupValue.textContent = existOtherTax.taxGroupTotal.toLocaleString()
+  taxGroupDiv.appendChild(taxGroupValue)
+  totalParentDiv.before(taxGroupDiv)
+}
+
 // 明細行追加
+// 税選択後、行を追加すると、末尾行の税が選択された状態で行が追加される（本家トレシフと同様）
 function addLine() {
   if (lines.length >= 20) return
-
   lines.push({
     lineIndex: lines.length,
     lineId: '',
@@ -558,7 +600,9 @@ function addLine() {
     unit: '',
     unitPrice: '',
     quantity: '',
-    taxType: ''
+    taxType: lines.length >= 1 && lines[lines.length - 1].taxType ? lines[lines.length - 1].taxType : '',
+    taxLabel: lines.length >= 1 && lines[lines.length - 1].taxLabel ? lines[lines.length - 1].taxLabel : '',
+    taxAmount: lines.length >= 1 && lines[lines.length - 1].taxAmount ? lines[lines.length - 1].taxAmount : ''
   })
   renderLines()
   renderInvoicecDiscount()
@@ -603,6 +647,73 @@ function delDiscountLine(line, linenum) {
   renderTotals()
 }
 
+/**
+ * 税モーダルの「適応」の活性化/無効化処理
+ * @param {bool} enabled 判定
+ * @returns
+ */
+function taxAcceptEnabled(enabled) {
+  // 活性化してよい /よくない
+  if (enabled) {
+    document.getElementById('taxModelAccept').removeAttribute('disabled')
+    document.getElementById('taxModelAccept').style.backgroundColor = ''
+  } else {
+    document.getElementById('taxModelAccept').setAttribute('disabled', true)
+    document.getElementById('taxModelAccept').style.backgroundColor = 'gray'
+  }
+}
+
+/**
+ * ラジオボタンのチェックされているものを取得
+ * @param {object[]} radios ラジオボタンリスト
+ * @returns 選択されているラジオボタンオブジェクト
+ */
+function getRadioChecked(radios) {
+  let result = ''
+  radios.forEach((radio, index) => {
+    if (radio.checked) result = radio
+  })
+  return result
+}
+
+/**
+ * 税モーダルを表示(active化)させる
+ * @param {int} index 行番号
+ * @param {object} line 行情報
+ * @returns
+ */
+function activateTaxModal(index, line) {
+  // モーダルにis-activeを付与
+  const taxmodaltemplate = document.getElementById('taxType-modal')
+  taxmodaltemplate.classList.add('is-active')
+  // 明細の何行目の税情報か判定するために行番号を持たせる
+  taxmodaltemplate.querySelector('input[name=taxLineId]').value = index
+  // エラーメッセージを初期化
+  const taxErrDisplays = ['taxErrEmptyMassage', 'taxLabelErr', 'taxAmountErr']
+  taxErrDisplays.forEach((display) => {
+    document.getElementById(display).textContent = ''
+  })
+  while ($('#tax-error').firstChild) $('#tax-error').removeChild($('#tax-error').firstChild)
+  // 税情報初期化
+  taxmodaltemplate.querySelector('input[name=tax-label]').value = ''
+  taxmodaltemplate.querySelector('input[name=tax-amount]').value = ''
+  // もし選択されている税があった場合はチェック状態にする
+  if (line.taxType) {
+    taxmodaltemplate.querySelector('input[value=' + line.taxType + ']').checked = true
+    if (line.taxType === 'otherTax') {
+      taxmodaltemplate.querySelector('input[name=tax-label]').value = line.taxLabel
+      taxmodaltemplate.querySelector('input[name=tax-amount]').value = line.taxAmount
+    }
+    taxAcceptEnabled(true)
+  } else {
+    // もし選択されていない且つチェック状態があった場合は外す（初期化作業）
+    const radios = document.querySelectorAll('input[type=radio]')
+    const selectedRadio = getRadioChecked(radios)
+    if (selectedRadio) selectedRadio.checked = false
+    taxAcceptEnabled(false)
+  }
+}
+
 $('#output-modal-btn')?.addEventListener('click', async () => {
   setPaymentRequired(invoice, outputRules)
   if (
@@ -637,6 +748,54 @@ $('#save-btn')?.addEventListener('click', async () => {
   }
 })
 
+// 税モーダルのキャンセルボタン動作(×と同じ)
+$('#taxModelCancel')?.addEventListener('click', async () => {
+  $('#taxType-modal').classList.remove('is-active')
+})
+
+// 税モーダル内「適応」ボタンの動作
+$('#taxModelAccept')?.addEventListener('click', async () => {
+  const taxmodaltemplate = document.getElementById('taxType-modal')
+  // 明細の何行目の税なのかを取得
+  const taxLineId = document.querySelector('input[name=taxLineId]').value
+  // ラジオボタンの要素取得
+  const radios = taxmodaltemplate.querySelectorAll('input[type=radio]')
+  let validResult = true
+  // チェックされているものを取得
+  const selectedRadio = getRadioChecked(radios)
+  if (selectedRadio) {
+    lines[taxLineId].taxLabel = ''
+    lines[taxLineId].taxAmount = ''
+    // その他の税が選択されていた場合
+    if (selectedRadio.value === 'otherTax') {
+      // 税ラベルと税額を取得
+      const taxData = {
+        taxLabel: taxmodaltemplate.querySelector('input[name=tax-label]').value.replace(/\r\n|\r|\n| /g, ''),
+        taxAmount: taxmodaltemplate.querySelector('input[name=tax-amount]').value
+      }
+      validResult = taxValidate(taxData)
+      // バリデーションが通ったら明細のデータとして入れる
+      if (validResult) {
+        lines[taxLineId].taxLabel = taxmodaltemplate
+          .querySelector('input[name=tax-label]')
+          .value.replace(/\r\n|\r|\n| /g, '')
+        const taxAmountValue = taxmodaltemplate.querySelector('input[name=tax-amount]').value
+        if (isNumberString(taxAmountValue)) {
+          lines[taxLineId].taxAmount = Number(taxAmountValue)
+        }
+      }
+    }
+    // 明細の税タイプに選択されている税を入れる
+    lines[taxLineId].taxType = selectedRadio.value
+  }
+  if (validResult) {
+    // バリデーション通った場合、モーダルを非活性
+    $('#taxType-modal').classList.remove('is-active')
+    renderLines()
+    renderTotals()
+  }
+})
+
 $('#output-btn')?.addEventListener('click', async () => {
   const modal = document.getElementById('request-progress-modal')
   modal.classList.add('is-active')
@@ -661,22 +820,28 @@ $('#uploadSealImpButton')?.addEventListener('click', async () => {
   $('#uploadSealImp-modal').classList.add('is-active')
 })
 
-function getTaxTypeIndex(taxType) {
+/**
+ * 税情報のマッチング
+ * @param {string} taxType 税パラメータ
+ * @param {int} lineId 行番号
+ * @returns 表示する税呼称
+ */
+function getTaxTypeIndex(taxType, lineId) {
   switch (taxType) {
-    case '':
-      return 0
     case 'tax10p':
-      return 1
+      return '消費税 10%'
     case 'tax8p':
-      return 2
+      return '消費税(軽減税率) 8%'
     case 'nonTaxable':
-      return 3
+      return '非課税 0%'
     case 'untaxable':
-      return 4
+      return '不課税 0%'
     case 'taxExemption':
-      return 5
+      return '免税 0%'
     case 'otherTax':
-      return 6
+      return lines[lineId].taxAmount || lines[lineId].taxAmount === 0 ? lines[lineId].taxAmount : ''
+    default:
+      return ''
   }
 }
 

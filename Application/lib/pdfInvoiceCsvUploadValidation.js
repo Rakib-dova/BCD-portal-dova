@@ -306,8 +306,8 @@ const lineRules = [
   },
   {
     prop: 'taxType',
-    regexp: /消費税|軽減税率|不課税|免税|非課税/,
-    message: '明細-税は消費税／軽減税率／不課税／免税／非課税で入力して下さい。',
+    regexp: /^消費税$|^軽減税率$|^不課税$|^免税$|^非課税$|^その他の消費税$/,
+    message: '明細-税は消費税／軽減税率／不課税／免税／非課税／その他の消費税で入力して下さい。',
     colName: '明細-税',
     required: true
   },
@@ -463,6 +463,42 @@ const lineRules = [
     },
     message: '',
     colName: '明細-割引種別3'
+  },
+  {
+    prop: 'taxLabel',
+    customValidator(value, model) {
+      // 税種別が'その他の消費税'以外はスキップ
+      if (model.taxType !== 'その他の消費税') return true
+      else {
+        if (!value) {
+          this.message = `${this.colName}は必須です。`
+          return false
+        } else if (/^.{0,10}$/.test(value) === false) {
+          this.message = `${this.colName}は10文字以内で入力してください。`
+          return false
+        } else return true
+      }
+    },
+    message: '',
+    colName: '明細-その他税ラベル'
+  },
+  {
+    prop: 'taxAmount',
+    customValidator(value, model) {
+      // 税種別が'その他の消費税'以外はスキップ
+      if (model.taxType !== 'その他の消費税') return true
+      else {
+        if (!value) {
+          this.message = `${this.colName}は必須です。`
+          return false
+        } else if (!Number.isSafeInteger(Number(value)) || !(value >= 0 && value <= 999999999999)) {
+          this.message = `${this.colName}は整数 0 ～ 999999999999 の範囲で入力してください。`
+          return false
+        } else return true
+      }
+    },
+    message: '',
+    colName: '明細-その他税額'
   }
 ]
 
