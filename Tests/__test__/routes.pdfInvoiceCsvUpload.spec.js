@@ -295,7 +295,7 @@ const exprectedResultData = {
     resultArr: [
       {
         index: 1,
-        date: '2022-05-01T00:00:00.000Z',
+        date: '2022/05/01 09:00:00',
         filename: 'PDF請求書ドラフト一括作成フォーマット1.csv',
         invoicesAll: 6,
         invoicesCount: 6,
@@ -307,7 +307,7 @@ const exprectedResultData = {
       },
       {
         index: 2,
-        date: '2022-12-11T12:59:59.000Z',
+        date: '2022/12/11 21:59:59',
         filename: 'PDF請求書ドラフト一括作成フォーマット2.csv',
         invoicesAll: 9,
         invoicesCount: 0,
