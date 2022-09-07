@@ -284,9 +284,9 @@ describe('lib/csv のテスト', () => {
           {
             sendTenantId: 'tenant001',
             invoiceNo: '160',
-            billingDate: new Date('2022-08-11T15:00:00.000Z'),
-            paymentDate: new Date('2022-08-09T15:00:00.000Z'),
-            deliveryDate: new Date('2022-08-13T15:00:00.000Z'),
+            billingDate: new Date('2022/08/11'),
+            paymentDate: new Date('2022/08/09'),
+            deliveryDate: new Date('2022/08/13'),
             currency: 'JPY',
             recCompany: 'テスト企業',
             recPost: '100-0004',
