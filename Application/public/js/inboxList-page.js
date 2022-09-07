@@ -545,31 +545,7 @@ function managerAddressValidationCheck(managerAddress) {
 // ページ遷移時のsubmit処理
 function paginationSubmit(form, href) {
   if (form) {
-    const managerAddress = form.managerAddress.value
-    form.action = href
-    if (managerAddress.length > 0) {
-      const result = managerAddressValidationCheck(managerAddress)
-      if (!result) {
-        alert('入力したメールアドレスに誤りがあります。')
-      } else {
-        searchProgressModal.classList.add('is-active')
-        form.submit()
-      }
-    } else {
-      searchProgressModal.classList.add('is-active')
-      form.submit()
-    }
-  } else {
-    searchProgressModal.classList.add('is-active')
-    location.replace(href)
-  }
-}
-
-// ページリンククリック時、機能
-if (document.querySelector('.pagination-list')) {
-  document.querySelector('.pagination-list').addEventListener('click', function (e) {
     // 検索処理
-    let form = document.querySelector('#form')
     const invoiceNumber = form.invoiceNumber.value
     const minIssuedate = form.minIssuedate.value
     const maxIssuedate = form.maxIssuedate.value
@@ -627,10 +603,34 @@ if (document.querySelector('.pagination-list')) {
       }
     }
     if (checkCount === 7) {
-      form = null
+      searchProgressModal.classList.add('is-active')
+      location.replace(href)
+    } else {
+      form.action = href
+      if (managerAddress.length > 0) {
+        const result = managerAddressValidationCheck(managerAddress)
+        if (!result) {
+          alert('入力したメールアドレスに誤りがあります。')
+        } else {
+          searchProgressModal.classList.add('is-active')
+          form.submit()
+        }
+      } else {
+        searchProgressModal.classList.add('is-active')
+        form.submit()
+      }
     }
+  } else {
+    searchProgressModal.classList.add('is-active')
+    location.replace(href)
+  }
+}
+
+// ページリンククリック時、機能
+if (document.querySelector('.pagination-list')) {
+  document.querySelector('.pagination-list').addEventListener('click', function (e) {
     e.preventDefault()
-    paginationSubmit(form, e.target.href)
+    paginationSubmit(document.querySelector('#form'), e.target.href)
   })
 }
 
