@@ -236,6 +236,17 @@ const pdfInvoiceCsvUploadResult = async (req, res, next) => {
   const result = await uploadController.findforTenant(req.user.tenantId)
 
   try {
+    const timeStamp = (date) => {
+      const now = new Date(date)
+      const year = now.getFullYear()
+      const month = now.getMonth() + 1 < 10 ? '0' + (now.getMonth() + 1) : now.getMonth() + 1
+      const day = now.getDate() < 10 ? '0' + now.getDate() : now.getDate()
+      const hour = now.getHours() < 10 ? '0' + now.getHours() : now.getHours()
+      const min = now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes()
+      const sec = now.getSeconds() < 10 ? '0' + now.getSeconds() : now.getSeconds()
+      const stamp = `${year}/${month}/${day} ${hour}:${min}:${sec}`
+      return stamp
+    }
     result.forEach((currVal, index) => {
       const invoice = currVal
       const invoiceAll =
@@ -246,7 +257,7 @@ const pdfInvoiceCsvUploadResult = async (req, res, next) => {
       }
       resultArr.push({
         index: index + 1,
-        date: invoice.dataValues.updatedAt,
+        date: timeStamp(invoice.dataValues.updatedAt),
         filename: invoice.dataValues.csvFileName,
         invoicesAll: invoiceAll,
         invoicesCount: invoice.dataValues.invoiceCount,
