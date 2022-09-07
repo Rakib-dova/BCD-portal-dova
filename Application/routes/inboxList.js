@@ -80,6 +80,18 @@ const cbGetIndex = async (req, res, next) => {
   const tenantId = user.tenantId
   const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId, presentation)
 
+  // 請求書の承認依頼検索
+  for (let i = 0; i < result.list.length; i++) {
+    const requestApproval = await requestApprovalController.findOneRequestApproval(
+      bcdContract.contractId,
+      result.list[i].documentId
+    )
+    if (requestApproval instanceof Error) return next(errorHelper.create(500))
+    if (requestApproval !== null) {
+      result.list[i].approveStatus = requestApproval.status
+    }
+  }
+
   const rejectedFlag = false
 
   // 受領した請求書一覧レンダリング
