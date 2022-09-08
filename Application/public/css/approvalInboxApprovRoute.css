@@ -1,0 +1,115 @@
+@charset "UTF-8";
+#invoiceFlow h3 {
+  font-size: 15px;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+#invoiceFlow h3 span {
+  font-weight: normal;
+  padding-left: 30px;
+}
+
+#invoiceFlow .invoiceFlow {
+  margin-bottom: 30px;
+  border: 1px solid #363636;
+}
+
+#invoiceFlow .invoiceFlow .include-InvoiceFlow .invoiceFlowBox {
+  background-color: #3298dc;
+  padding: 15px 0 15px 20px;
+  text-align: left;
+  width: 100%;
+  border: none;
+}
+
+#invoiceFlow .invoiceFlow .include-InvoiceFlow .invoiceFlowBox::after {
+  top: 1.3rem;
+}
+
+#invoiceFlow .invoiceFlow .include-InvoiceFlow .invoiceFlowBox span {
+  font-size: 15px;
+  font-weight: bold;
+  color: #fff;
+}
+
+#invoiceFlow .invoiceFlow .include-InvoiceFlow .invoiceFlowBox .btn-status {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: bold;
+  padding: 5px 20px;
+  margin-left: 30px;
+  width: auto;
+}
+
+#invoiceFlow .invoiceFlow .include-InvoiceFlow .invoiceFlowBox .btn-status.st-redback {
+  background-color: #f14668;
+  color: #fff;
+}
+
+#invoiceFlow .invoiceFlow .include-InvoiceFlow .invoiceFlowBox .btn-status.st-redback::after {
+  content: '差し戻し';
+}
+
+#invoiceFlow .invoiceFlow .include-InvoiceFlow .invoiceFlowBox .btn-status.st-yellowfont {
+  background-color: white;
+  border: 1px solid #ff971e;
+  outline-offset: -1px;
+  color: #ff971e;
+}
+
+#invoiceFlow .invoiceFlow .include-InvoiceFlow .invoiceFlowBox .btn-status.st-yellowfont::after {
+  content: '依頼済み';
+}
+
+#invoiceFlow .invoiceFlow .include-InvoiceFlow .invoiceFlowBox .btn-status.st-greenfont {
+  background-color: white;
+  border: 1px solid #48c774;
+  outline-offset: -1px;
+  color: #48c774;
+}
+
+#invoiceFlow .invoiceFlow .include-InvoiceFlow .invoiceFlowBox .btn-status.st-greenback {
+  background-color: #48c774;
+  color: #fff;
+}
+
+#invoiceFlow .invoiceFlow .include-InvoiceFlow .invoiceFlowBox .btn-status.st-greenback::after {
+  content: '最終承認済み';
+}
+
+#invoiceFlow .invoiceFlow .invoiceFlowWrap {
+  font-size: 15px;
+  padding: 0 30px 0.5rem;
+  overflow: auto;
+  height: 100%;
+}
+
+#invoiceFlow .invoiceFlow .invoiceFlowWrap .is-flex .is-inline-block {
+  white-space: nowrap;
+}
+
+#invoiceFlow .invoiceFlow .invoiceFlowWrap table {
+  width: 100%;
+  text-align: center;
+  font-size: 15px;
+  font-weight: normal;
+}
+
+#invoiceFlow .invoiceFlow .invoiceFlowWrap table .tTitle td {
+  border-top: 1px solid #363636;
+  border-bottom: 1px solid #363636;
+}
+
+#invoiceFlow .invoiceFlow .invoiceFlowWrap table td {
+  padding: 10px;
+}
+
+#invoiceFlow .invoiceFlow .invoiceFlowWrap table tr:nth-child(even) td {
+  background-color: #f5f5f5;
+}
+
+.w-1000 {
+  max-width: 100%;
+  display: inline-block;
+}

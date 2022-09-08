@@ -1632,7 +1632,7 @@ $('#checkApproval').addEventListener('click', function () {
   while (checkApproveRoute.firstChild) {
     checkApproveRoute.removeChild(checkApproveRoute.firstChild)
   }
-  const displayRequestApprovaRoute = $('#displayRequestApprovaRoute')
+  const displayRequestApprovaRoute = $('#invoiceFlow')
   const cloneDiplay = document.importNode(displayRequestApprovaRoute, true)
   $('#check-request-approve-route').appendChild(cloneDiplay)
 
@@ -1672,7 +1672,7 @@ $('#rejectApproval').addEventListener('click', function () {
   while (checkApproveRoute.firstChild) {
     checkApproveRoute.removeChild(checkApproveRoute.firstChild)
   }
-  const displayRequestApprovaRoute = $('#displayRequestApprovaRoute')
+  const displayRequestApprovaRoute = $('#invoiceFlow')
   const cloneDiplay = document.importNode(displayRequestApprovaRoute, true)
   checkApproveRoute.appendChild(cloneDiplay)
 
