@@ -14,12 +14,12 @@ class UploadSubAccountCodePage {
 
   // コメントする
   async addComment(message) {
-    await comment('【' + this.title + '】' + message);
+    await comment(`【${this.title}】${message}`);
   }
 
   // ページが表示されるまで待機する
   async waitForLoading() {
-    let frame = await this.actionUtils.waitForLoading('//*[@class="hero-body-noImage"]/*[contains(text(),"補助科目一括作成")]')
+    let frame = await this.actionUtils.waitForLoading(`//*[@class="hero-body-noImage"]/*[contains(text(),"${this.title}")]`);
     this.frame = frame;
     return frame;
   }
@@ -31,12 +31,13 @@ class UploadSubAccountCodePage {
 
   // アップロード用CSVファイルをダウンロードする
   async downloadCsv() {    
+    await this.addComment('「アップロード用CSVファイルダウンロード」をクリックする');
     return await this.actionUtils.downloadFile(this.frame, '//a[contains(text(),"アップロード用CSVファイルダウンロード")]');
   }
 
   // 補助科目CSVファイルをアップロードする
   async uploadCsv(csvPath) {
-    await this.addComment('ファイル"' + csvPath + '"を選択する');
+    await this.addComment(`ファイル"${csvPath}"を選択する`);
     await this.actionUtils.uploadFile(this.frame, '//input[@name="bulkSubAccountCode"]', csvPath);
     await this.addComment('「アップロード開始」をクリックする');
     await this.actionUtils.click(this.frame, '//a[contains(text(), "アップロード開始")]');

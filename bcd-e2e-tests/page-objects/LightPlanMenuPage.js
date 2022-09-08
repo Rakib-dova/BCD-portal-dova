@@ -13,12 +13,12 @@ class LightPlanMenuPage {
 
   // コメントする
   async addComment(message) {
-    await comment('【' + this.title + '】' + message);
+    await comment(`【${this.title}】${message}`);
   }
 
   // ページが表示されるまで待機する
   async waitForLoading() {
-    let frame = await this.actionUtils.waitForLoading('//*[text()="オプションサービス申込"]');
+    let frame = await this.actionUtils.waitForLoading(`//*[text()="${this.title}"]`);
     this.frame = frame;
     return frame;
   }

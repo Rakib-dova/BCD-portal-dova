@@ -13,12 +13,12 @@ class ContractDetailPage {
 
   // コメントする
   async addComment(message) {
-    await comment('【' + this.title + '】' + message);
+    await comment(`【${this.title}】${message}`);
   }
 
   // ページが表示されるまで待機する
   async waitForLoading() {
-    let frame = await this.actionUtils.waitForLoading('//*[@id="form"]//h2[text()="' + this.title + '"]')
+    let frame = await this.actionUtils.waitForLoading(`//*[@id="form"]//h2[text()="${this.title}"]`);
     this.frame = frame;
     return frame;
   }
@@ -41,29 +41,29 @@ class ContractDetailPage {
 
   // ステータスを取得する
   async getStatus(planName) {
-    return await this.actionUtils.getText(this.frame, '//span[contains(text(), "' + planName + '")]/../../../td/span[contains(@class, "btn-status")]');
+    return await this.actionUtils.getText(this.frame, `//span[contains(text(), "${planName}")]/../../../td/span[contains(@class, "btn-status")]`);
   }
 
   // 契約番号を取得する
   async getContractNo(planName) {
-    return await this.actionUtils.getText(this.frame, '//span[contains(text(), "' + planName + '")]/../../../td[3]');
+    return await this.actionUtils.getText(this.frame, `//span[contains(text(), "${planName}")]/../../../td[3]`);
   }
 
   // 契約変更を行う
   async clickChange(planName) {
-    await this.addComment(planName + 'の「契約変更」をクリックする');
-    await this.actionUtils.click(this.frame, '//span[contains(text(), "' + planName + '")]/../../../td/button[contains(text(), "契約変更")]');
+    await this.addComment(`${planName}の「契約変更」をクリックする`);
+    await this.actionUtils.click(this.frame, `//span[contains(text(), "${planName}")]/../../../td/button[contains(text(), "契約変更")]`);
   }
 
   // 解約申請を行う
   async clickCancel(planName) {
-    await this.addComment(planName + 'の「解約申請」をクリックする');
-    await this.actionUtils.click(this.frame, '//span[contains(text(), "' + planName + '")]/../../../td/button[contains(text(), "解約申請")]');
+    await this.addComment(`${planName}の「解約申請」をクリックする`);
+    await this.actionUtils.click(this.frame, `//span[contains(text(), "${planName}")]/../../../td/button[contains(text(), "解約申請")]`);
   }
 
   // 解約申請ボタンが非活性状態か
   async isCancelDisabled(planName) {
-    return await this.actionUtils.isDisabled(this.frame, '//span[contains(text(), "' + planName + '")]/../../../td/button[contains(text(), "解約申請")]');
+    return await this.actionUtils.isDisabled(this.frame, `//span[contains(text(), "${planName}")]/../../../td/button[contains(text(), "解約申請")]`);
   }
 }
 exports.ContractDetailPage = ContractDetailPage;

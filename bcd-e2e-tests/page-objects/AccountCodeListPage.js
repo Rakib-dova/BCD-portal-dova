@@ -14,7 +14,7 @@ class AccountCodeListPage {
 
   // コメントする
   async addComment(message) {
-    await comment('【' + this.title + '】' + message);
+    await comment(`【${this.title}】${message}`);
   }
 
   // ページが表示されるまで待機する
@@ -38,14 +38,14 @@ class AccountCodeListPage {
 
   // 勘定科目確認・変更ページへ遷移する
   async clickEdit(accountCode) {
-    await this.addComment('勘定科目コード"' + accountCode + '"の「確認・変更する」をクリックする');
-    await this.actionUtils.click(this.frame, '//td[contains(text(), "' + accountCode + '")]/..//a[contains(text(),"確認・変更する")]');
+    await this.addComment(`勘定科目コード"${accountCode}"の「確認・変更する」をクリックする`);
+    await this.actionUtils.click(this.frame, `//td[contains(text(), "${accountCode}")]/..//a[contains(text(),"確認・変更する")]`);
   }
 
   // 勘定科目を削除する
   async delete(accountCode) {
-    await this.addComment('勘定科目コード"' + accountCode + '"の「削除」をクリックする');
-    await this.actionUtils.click(this.frame, '//td[contains(text(), "' + accountCode + '")]/..//a[contains(text(),"削除")]');
+    await this.addComment(`勘定科目コード"${accountCode}"の「削除」をクリックする`);
+    await this.actionUtils.click(this.frame, `//td[contains(text(), "${accountCode}")]/..//a[contains(text(),"削除")]`);
     await this.addComment('ポップアップの「削除」をクリックする');
     await this.actionUtils.click(this.frame, '#modalCodeDelBtn');
     await this.waitPopup();
@@ -71,7 +71,7 @@ class AccountCodeListPage {
 
   // 勘定科目を検索する
   async hasRow(accountCode, accountName) {
-    return await this.actionUtils.isExist(this.frame, '//td[contains(text(), "' + accountCode + '")]/../td[contains(text(), "' + accountName + '")]');
+    return await this.actionUtils.isExist(this.frame, `//td[contains(text(), "${accountCode}")]/../td[contains(text(), "${accountName}")]`);
   }
 
   // メッセージが表示されるまで待機する

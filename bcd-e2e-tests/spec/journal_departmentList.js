@@ -62,7 +62,6 @@ describe('仕訳情報設定_部門データ一覧', function () {
     await journalMenuPage.waitForLoading();
 
     // 部門データ一覧ページへ遷移する
-    await comment('「部門データ設定」をクリックする');
     await journalMenuPage.clickDepartment();
     await departmentListPage.waitForLoading();
   };
@@ -119,8 +118,8 @@ describe('仕訳情報設定_部門データ一覧', function () {
       await registDepartmentPage.waitForLoading();
 
       // 詳細が表示されること
-      expect(await registDepartmentPage.getCode()).to.equal(departments[0].code, '【部門データ確認・変更】部門コードが表示されること');
-      expect(await registDepartmentPage.getName()).to.equal(departments[0].name, '【部門データ確認・変更】部門名が表示されること');
+      expect(await registDepartmentPage.getCode()).to.equal(departments[0].code, `【${registDepartmentPage.title}】部門コードが表示されること`);
+      expect(await registDepartmentPage.getName()).to.equal(departments[0].name, `【${registDepartmentPage.title}】部門名が表示されること`);
 
       // 部門データを変更する
       await registDepartmentPage.regist(departments[1].code, departments[1].name);
@@ -130,7 +129,7 @@ describe('仕訳情報設定_部門データ一覧', function () {
       await departmentListPage.waitPopup();
 
       // 変更が反映されること
-      expect(await departmentListPage.hasRow(departments[1].code, departments[1].name)).to.equal(true, '【部門データ一覧】変更が反映されること');
+      expect(await departmentListPage.hasRow(departments[1].code, departments[1].name)).to.equal(true, `【${departmentListPage.title}】変更が反映されること`);
 
       // 部門データを削除する
       await departmentListPage.delete(departments[1].code);
@@ -185,7 +184,7 @@ describe('仕訳情報設定_部門データ一覧', function () {
         // CSVファイルをアップロードする
         await uploadDepartmentPage.uploadCsv(files[i]);
         await departmentListPage.waitPopup();
-        expect(await departmentListPage.getPopupMessage()).to.equal('部門データ取込が完了しました。', '【部門データ一覧】「部門データ取込が完了しました」のメッセージが表示されること');
+        expect(await departmentListPage.getPopupMessage()).to.equal('部門データ取込が完了しました。', `【${departmentListPage.title}】「部門データ取込が完了しました」のメッセージが表示されること`);
 
         // ポップアップを閉じる
         await departmentListPage.closePopup();
@@ -194,7 +193,7 @@ describe('仕訳情報設定_部門データ一覧', function () {
         // 正しくすべてのデータが一覧に反映されること
         let csvData = await getCsvData(files[i]);
         for (j = 0; j < csvData.length; j++) {
-          expect(await departmentListPage.hasRow(csvData[j]['部門コード'], csvData[j]['部門名'])).to.equal(true, '【部門データ一覧】' + (j + 2) + '行目のデータが一覧に反映されること');
+          expect(await departmentListPage.hasRow(csvData[j]['部門コード'], csvData[j]['部門名'])).to.equal(true, `【${departmentListPage.title}】' + (j + 2) + '行目のデータが一覧に反映されること`);
 
           // 確認し終えたデータを削除する
           await departmentListPage.delete(csvData[j]['部門コード']);

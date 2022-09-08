@@ -116,6 +116,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
     // 支払い依頼ページへ遷移する
     await comment('「支払依頼へ」をクリックする');
     await journalDetailPage.clickPaymentRequest();
+    await journalDetailPage.acceptPaymentRequest(true);
     await paymentRequestPage.waitForLoading();
 
     // 承認ルート選択ダイアログを表示する
@@ -134,10 +135,10 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
     await comment('支払依頼を行う');
     await paymentRequestPage.submit();
     await paymentRequestListPage.waitForLoading();
+    authorizerNo = 0;
 
     // 再度申請ができること
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('支払依頼中', 'ステータスが「承認依頼中」となっていること');
-    authorizerNo = 0;
 
     // 承認待ちタブを開く
     await comment('「承認待ち」タブを開く');
@@ -186,11 +187,11 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
 
     // 「承認を完了しました。」のメッセージが表示されていること
     expect(await paymentRequestListPage.getPopupMessage()).to.contains('承認を完了しました。', '「承認を完了しました。」のメッセージが表示されていること');
+    authorizerNo = no + 1;
 
     // 請求書一覧画面にて承認ステータスに変更されていること
     await paymentRequestListPage.waitForLoading();
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal(status, '請求書一覧画面にて承認ステータスに変更されていること');
-    authorizerNo = no + 1;
     await page.waitForTimeout(1000);
   }
 
@@ -355,6 +356,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
 
     // 「支払依頼を差し戻しました。」と表示されること
     expect(await paymentRequestListPage.getPopupMessage()).to.contains('支払依頼を差し戻しました。', '「支払依頼を差し戻しました。」と表示されること');
+    authorizerNo = -1;
 
     // ポップアップを閉じる
     await comment('ポップアップメッセージを閉じる');
@@ -363,7 +365,6 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
 
     // 差し戻しができること
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('差し戻し', '差し戻しができること');
-    authorizerNo = -1;
 
     // 承認待ちタブを開く
     await comment('「承認待ち」タブを開く');

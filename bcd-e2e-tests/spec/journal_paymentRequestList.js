@@ -16,7 +16,7 @@ webdriverUtils.setReporter();
 describe('仕訳情報設定_支払依頼一覧', function () {
 
   // テストデータ：請求書番号
-  const invoiceNo = 'fcde40393';
+  const invoiceNo = 'fcde40391';
 
   beforeAll(async function () {
     // テストのタイムアウト時間を設定する（1時間）
@@ -84,12 +84,10 @@ describe('仕訳情報設定_支払依頼一覧', function () {
     await common.gotoTop(page, config.company2.user06);
 
     // 仕訳情報管理メニューを開く
-    await comment('「仕訳情報管理」をクリックする');
     await topPage.openJournalMenu();
     await journalMenuPage.waitForLoading();
 
     // 支払依頼一覧ページへ遷移する
-    await comment('「支払依頼一覧」をクリックする');
     await journalMenuPage.clickPaymentRequest();
     await paymentRequestListPage.waitForLoading();
 
@@ -100,23 +98,72 @@ describe('仕訳情報設定_支払依頼一覧', function () {
     // 「オプションサービス申込」モーダルが表示されること
     await paymentRequestListPage.clickLightPlan();
     await lightPlanMenuPage.waitForLoading();
-    expect(await lightPlanMenuPage.getTitle()).to.equal('オプションサービス申込', '「オプションサービス申込」モーダルが表示されること');
+    expect(await lightPlanMenuPage.getTitle()).to.equal(lightPlanMenuPage.title, '「オプションサービス申込」モーダルが表示されること');
     expect(await lightPlanMenuPage.getApplyEnabled()).to.equal(true, '「お申し込みフォーム」ボタンが活性状態であること');
 
     // 申し込み画面（利用規約）に遷移すること
     await lightPlanMenuPage.clickApply();
     await paidServiceRegisterPage.waitForLoading();
-    expect(await paidServiceRegisterPage.getTitle()).to.equal('有料サービス利用登録', '申し込み画面（利用規約）に遷移すること');
+    expect(await paidServiceRegisterPage.getTitle()).to.equal(paidServiceRegisterPage.title, '申し込み画面（利用規約）に遷移すること');
     expect(await paidServiceRegisterPage.isStandardChecked()).to.equal(true, '「ご利用希望サービス」の「スタンダードプラン」にチェックが入っていること');
     await page.waitForTimeout(1000);
   });
 
   /**
-   * STEP5_No.109
    * STEP8_ライトプラン_No.180
    * STEP8_機能改修確認_No.
    */
-  it("受領請求書への仕訳情報設定（スタンダードプラン加入済）", async function () {
+  it("検索機能", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+
+    // 各アカウントごとにテストを実施
+    for (const account of accounts) {
+      const context = await browser.newContext(contextOption);
+      if (page != null) {
+        page.close();
+      }
+      page = await context.newPage();
+
+      global.reporter.setBrowserInfo(browser, page);
+      if (account.type == 'manager') {
+        await comment('---------- 管理者アカウント ----------')
+      } else if (account.type == 'user') {
+        await comment('---------- 一般ユーザー ----------')
+      } else {
+        await comment('---------- その他アカウント ----------')
+        await comment('その他アカウントは対象外です。')
+        continue;
+      }
+
+      // ページオブジェクト
+      const { topPage, journalMenuPage, paymentRequestListPage }
+        = common.getPageObject(browser, page);
+
+      // デジタルトレードアプリのトップページへ遷移する
+      await common.gotoTop(page, account);
+
+      // 仕訳情報管理メニューを開く
+      await comment('「仕訳情報管理」をクリックする');
+      await topPage.openJournalMenu();
+      await journalMenuPage.waitForLoading();
+
+      // 支払依頼一覧ページへ遷移する
+      await comment('「支払依頼一覧」をクリックする');
+      await journalMenuPage.clickPaymentRequest();
+      await paymentRequestListPage.waitForLoading();
+
+      // 請求書を検索する
+      expect(await paymentRequestListPage.isFormShown()).to.equal(true, '検索条件フォームが表示されること');
+      await page.waitForTimeout(1000);
+    }
+  });
+
+  /**
+   * STEP5_No.109
+   * STEP8_機能改修確認_No.118
+   */
+   it("支払依頼情報確認（仕訳情報未設定）", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -152,7 +199,6 @@ describe('仕訳情報設定_支払依頼一覧', function () {
       await journalMenuPage.waitForLoading();
 
       // 支払依頼一覧ページへ遷移する
-      await comment('「支払依頼一覧」をクリックする');
       await journalMenuPage.clickPaymentRequest();
       await paymentRequestListPage.waitForLoading();
 
@@ -164,7 +210,6 @@ describe('仕訳情報設定_支払依頼一覧', function () {
       expect(await paymentRequestListPage.isFormShown()).to.equal(true, '検索条件フォームが表示されること');
 
       // 仕訳情報設定ページへ遷移する
-      await comment('「仕訳情報設定」をクリックする');
       await paymentRequestListPage.clickDetail(invoiceNo);
       await journalDetailPage.waitForLoading();
 
@@ -172,6 +217,9 @@ describe('仕訳情報設定_支払依頼一覧', function () {
       expect(await journalDetailPage.getInvoiceNo()).to.equal(invoiceNo, '請求書番号が一覧ページのものと合致すること');
       expect(await journalDetailPage.getSender()).to.equal(sender, '差出人が一覧ページのものと合致すること');
       expect(await journalDetailPage.getCost()).to.equal(cost, '価格が一覧ページのものと合致すること');
+
+      // 「支払依頼へ」ボタンが非活性となっていること
+      expect(await journalDetailPage.isPaymentRequestDisabled()).to.equal(false, '「支払依頼へ」ボタンが非活性となっていること');
       await page.waitForTimeout(1000);
     }
   });

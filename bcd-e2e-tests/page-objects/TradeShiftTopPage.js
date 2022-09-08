@@ -1,5 +1,9 @@
 const { ActionUtils } = require('../utils/action-utils');
+const comment = require('../utils/chai-with-reporting').comment;
+
+// トレードシフト トップページ
 class TradeShiftTopPage {
+  title = 'トレードシフト';
 
   constructor(browser, page) {
     this.browser = browser;
@@ -7,25 +11,32 @@ class TradeShiftTopPage {
     this.actionUtils = new ActionUtils(browser, page);
   }
 
+  // コメントする
+  async addComment(message) {
+    await comment(`【${this.title}】${message}`);
+  }
+
   // ページが表示されるまで待機する
   async waitForLoading() {
-    await this.actionUtils.waitForLoading('"文書"')
+    await this.actionUtils.waitForLoading('"文書"');
   }
 
   // デジタルトレードアプリをクリックする
   async clickBcdApp(appName) {
-    if(await this.actionUtils.isExist(this.page, '//*[contains(@data-tooltip,"' + appName + '")]')) {
-      await this.actionUtils.click(this.page, '//*[contains(@data-tooltip,"' + appName + '")]');
+    this.addComment(`「${appName}」アイコンをクリックする`);
+    if(await this.actionUtils.isExist(this.page, `//*[contains(@data-tooltip,"${appName}")]`)) {
+      await this.actionUtils.click(this.page, `//*[contains(@data-tooltip,"${appName}")]`);
       await this.page.mouse.move(0, 100); // tooltipを消す
     } else {
       await this.actionUtils.click(this.page, '//*[contains(@data-tooltip,"すべてのアプリ")]');
-      await this.actionUtils.waitForLoading('//span[contains(text(), "' + appName + '")]');
-      await this.actionUtils.click(this.page, '//span[contains(text(), "' + appName + '")]');
+      await this.actionUtils.waitForLoading(`//span[contains(text(), "${appName}")]`);
+      await this.actionUtils.click(this.page, `//span[contains(text(), "${appName}")]`);
     }
   }
 
   // ログアウトする
   async logout() {
+    this.addComment('ログアウトする');
     await this.actionUtils.click(this.page, '//div[contains(@class, "userimage-icon")]');
     await this.page.waitForTimeout(500);
     await this.actionUtils.click(this.page, '//span[contains(text(), "ログアウト")]');

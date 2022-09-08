@@ -14,7 +14,7 @@ class ApproveRouteListPage {
 
   // コメントする
   async addComment(message) {
-    await comment('【' + this.title + '】' + message);
+    await comment(`【${this.title}】${message}`);
   }
 
   // ページタイトルを取得する
@@ -48,27 +48,27 @@ class ApproveRouteListPage {
 
   // 承認ルートの有無を確認する
   async hasRow(routeName) {
-    return await this.actionUtils.isExist(this.frame, '//td[contains(text(), "' + routeName + '")]');
+    return await this.actionUtils.isExist(this.frame, `//td[contains(text(), "${routeName}")]`);
   }
 
   // 承認ルートの行内容を取得する
   async getRow(routeName) {
     return {
-      no: await this.actionUtils.getText(this.frame, '//td[contains(text(), "' + routeName + '")]/../th'),
-      authCount: await this.actionUtils.getText(this.frame, '//td[contains(text(), "' + routeName + '")]/../td[2]')
+      no: await this.actionUtils.getText(this.frame, `//td[contains(text(), "${routeName}")]/../th`),
+      authCount: await this.actionUtils.getText(this.frame, `//td[contains(text(), "${routeName}")]/../td[2]`)
     };
   }
 
   // 承認ルートの「確認・変更する」をクリックする
   async clickEdit(routeName) {
-    await this.addComment('承認ルート名"' + routeName + '"の「確認・変更する」をクリックする');
-    await this.actionUtils.click(this.frame, '//td[contains(text(), "' + routeName + '")]/..//a[contains(text(), "確認・変更する")]');
+    await this.addComment(`承認ルート名"${routeName}"の「確認・変更する」をクリックする`);
+    await this.actionUtils.click(this.frame, `//td[contains(text(), "${routeName}")]/..//a[contains(text(), "確認・変更する")]`);
   }
 
   // 承認ルートの「削除」をクリックする
   async deleteRoute(routeName) {
-    await this.addComment('承認ルート名"' + routeName + '"の「削除」をクリックする');
-    await this.actionUtils.click(this.frame, '//td[contains(text(), "' + routeName + '")]/..//a[contains(text(), "削除")]');
+    await this.addComment(`承認ルート名"${routeName}"の「削除」をクリックする`);
+    await this.actionUtils.click(this.frame, `//td[contains(text(), "${routeName}")]/..//a[contains(text(), "削除")]`);
     await this.actionUtils.waitForLoading('#modalDelBtn');
   }
 

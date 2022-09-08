@@ -14,7 +14,7 @@ class JournalMenuPage {
 
   // コメントする
   async addComment(message) {
-    await comment('【' + this.title + '】' + message);
+    await comment(`【${this.title}】${message}`);
   }
 
   // ページが表示されるまで待機する
@@ -32,8 +32,8 @@ class JournalMenuPage {
 
   // メニュー項目をクリックする
   async clickMenu(menuLabel) {
-    await this.addComment('「' + menuLabel + '」をクリックする');
-    await this.actionUtils.click(this.frame, '//*[@id="registAccountCode-modal"]//section//*[contains(text(),"' + menuLabel + '")]');
+    await this.addComment(`「${menuLabel}」をクリックする`);
+    await this.actionUtils.click(this.frame, `//*[@id="registAccountCode-modal"]//section//*[contains(text(),"${menuLabel}")]`);
   }
 
   // 勘定科目設定ページに遷移する

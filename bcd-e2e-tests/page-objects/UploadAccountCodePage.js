@@ -14,12 +14,12 @@ class UploadAccountCodePage {
 
   // コメントする
   async addComment(message) {
-    await comment('【' + this.title + '】' + message);
+    await comment(`【${this.title}】${message}`);
   }
 
   // ページが表示されるまで待機する
   async waitForLoading() {
-    let frame = await this.actionUtils.waitForLoading('//*[@class="hero-body-noImage"]/*[contains(text(),"勘定科目一括作成")]')
+    let frame = await this.actionUtils.waitForLoading(`//*[@class="hero-body-noImage"]/*[contains(text(),"${this.title}")]`);
     this.frame = frame;
     return frame;
   }
@@ -32,7 +32,7 @@ class UploadAccountCodePage {
 
   // 勘定科目CSVファイルをアップロードする
   async uploadCsv(csvPath) {
-    await this.addComment('ファイル"' + csvPath + '"を選択する');
+    await this.addComment(`ファイル"${csvPath}"を選択する`);
     await this.actionUtils.uploadFile(this.frame, '//input[@name="bulkAccountCode"]', csvPath);
     await this.addComment('「アップロード開始」をクリックする');
     await this.actionUtils.click(this.frame, '//a[contains(text(), "アップロード開始")]');

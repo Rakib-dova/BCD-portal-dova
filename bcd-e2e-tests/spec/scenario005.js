@@ -97,7 +97,7 @@ describe('リグレッションテスト', function () {
       after1dayDate.setDate(after1dayDate.getDate() + 1);
       expect((uploadDate >= before1dayDate) && (uploadDate <= after1dayDate)).to.equal(true, '取込日時が正しく表示されていること');
       // アップロード日時以外を確認する
-      expectedVal = '["tmp_invoice_default.csv","NG","7","3","5","1","1"]'
+      expectedVal = '["tmp_invoice_default.csv","NG","8","3","5","1","2"]'
       expect(JSON.stringify(uploadResults)).to.equal(expectedVal, '取込結果が正しく表示されていること');
 
       // 取り込み結果詳細ページに遷移する
@@ -110,12 +110,12 @@ describe('リグレッションテスト', function () {
 
       // 取り込み結果サマリを確認する
       let summaryResult = JSON.stringify(await uploadListDetailPage.getSummaryResults());
-      expectedVal = '["7件","3件","5件","1件","1件"]'
+      expectedVal = '["8件","3件","5件","1件","2件"]'
       expect(summaryResult).to.equal(expectedVal, '取込結果サマリが正しく表示されていること');
 
       // 全体タブの取り込み結果詳細を確認する
       let allResult = JSON.stringify(await uploadListDetailPage.getAllResults());
-      expectedVal = `["1","${itemNames[0]}","成功","正常に取込ました。","2","${itemNames[1]}","成功","正常に取込ました。","3","${itemNames[2]}","成功","正常に取込ました。","4","${itemNames[3]}","スキップ","取込済みのため、処理をスキップしました。","5","${itemNames[4]}","成功","正常に取込ました。","6","${itemNames[5]}","失敗","明細-税（消費税／軽減税率／不課税／免税／非課税）が未入力です。","7","${itemNames[6]}","成功","正常に取込ました。"]`
+      expectedVal = `["1","${itemNames[0]}","成功","正常に取込ました。","2","${itemNames[1]}","成功","正常に取込ました。","3","${itemNames[2]}","成功","正常に取込ました。","4","${itemNames[3]}","スキップ","取込済みのため、処理をスキップしました。","5","${itemNames[4]}","成功","正常に取込ました。","6","${itemNames[5]}","失敗","明細-税（消費税／軽減税率／不課税／免税／非課税）が未入力です。","7","${itemNames[6]}","成功","正常に取込ました。","8","${itemNames[7]}","失敗","取引先メールアドレスが未入力です。"]`
       expect(allResult).to.equal(expectedVal, '全体タブに取込結果詳細が正しく表示されていること');
 
       // 成功タブの取り込み結果詳細を確認する
@@ -133,7 +133,7 @@ describe('リグレッションテスト', function () {
       // 失敗タブの取り込み結果詳細を確認する
       await uploadListDetailPage.clickTab('失敗');
       allResult = JSON.stringify(await uploadListDetailPage.getAllResults());
-      expectedVal = `["6","${itemNames[5]}","失敗","明細-税（消費税／軽減税率／不課税／免税／非課税）が未入力です。"]`
+      expectedVal = `["6","${itemNames[5]}","失敗","明細-税（消費税／軽減税率／不課税／免税／非課税）が未入力です。","8","${itemNames[7]}","失敗","取引先メールアドレスが未入力です。"]`
       expect(allResult).to.equal(expectedVal, '失敗タブに取込結果詳細が正しく表示されていること');
 
       // 取り込み結果詳細ページを閉じる

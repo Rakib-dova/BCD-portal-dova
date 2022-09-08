@@ -23,10 +23,7 @@ class ActionUtils {
     let frame, elem, elems;
     const timeout = 120000;
     const start = Date.now();
-    while (true) {
-      if ((Date.now() - start) >= timeout) {
-        break;
-      }
+    while ((Date.now() - start) < timeout) {
       try {
         elem = await this.getElement(this.page, frameSelector);
         frame = await elem.contentFrame();
@@ -184,12 +181,19 @@ class ActionUtils {
   // 要素が表示されているか
   async isDisplayed(target, selector) {
     const elems = await this.getElements(target, selector);
-    return (elems.length > 0) && (await target.evaluate(node => window.getComputedStyle(node).display, elems[0]) != 'none')
+    let result = (elems.length > 0) && (await target.evaluate(node => window.getComputedStyle(node).display, elems[0]) != 'none');
+    if (result) {
+      await elems[0].hover();
+    }
+    return result;
   }
 
   // 要素が非活性状態であるか
   async isDisabled(target, selector) {
     const elems = await this.getElements(target, selector);
+    if ((elems.length > 0) && (await target.evaluate(node => window.getComputedStyle(node).display, elems[0]) != 'none')) {
+      await elems[0].hover();
+    }
     return (elems.length > 0) && (await elems[0].isDisabled());
   }
 

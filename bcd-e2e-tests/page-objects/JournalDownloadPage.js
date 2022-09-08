@@ -14,12 +14,12 @@ class JournalDownloadPage {
 
   // コメントする
   async addComment(message) {
-    await comment('【' + this.title + '】' + message);
+    await comment(`【${this.title}】${message}`);
   }
 
   // ページが表示されるまで待機する
   async waitForLoading() {
-    let frame = await this.actionUtils.waitForLoading('//*[@class="hero-body-noImage"]/*[contains(text(),"仕訳情報ダウンロード")]')
+    let frame = await this.actionUtils.waitForLoading(`//*[@class="hero-body-noImage"]/*[contains(text(),"${this.title}")]`);
     this.frame = frame;
     return frame;
   }
@@ -32,14 +32,14 @@ class JournalDownloadPage {
   // 条件絞り込みへ条件を入力する
   async inputConditions(invoiceNo, minIssuedate, maxIssuedate, sendTo, approved, dataFormat) {
     if (invoiceNo) {
-      await this.addComment('「請求書番号」にて、"' + invoiceNo + '"と入力する');
+      await this.addComment(`「請求書番号」にて、"${invoiceNo}"と入力する`);
       await this.actionUtils.fill(this.frame, '#invoiceNumber', invoiceNo);
     }
-    await this.addComment('「発行日」にて、"' + minIssuedate + '～' + maxIssuedate + '"と入力する');
+    await this.addComment(`「発行日」にて、"${minIssuedate}～${maxIssuedate}"と入力する`);
     await this.actionUtils.fill(this.frame, '#minIssuedate', minIssuedate);
     await this.actionUtils.fill(this.frame, '#maxIssuedate', maxIssuedate);
     if (sendTo) {
-      await this.addComment('「送信企業」にて、"' + sendTo + '"を選択する');
+      await this.addComment(`「送信企業」にて、"${sendTo}"を選択する`);
       await this.actionUtils.fill(this.frame, '#sendTo', sendTo);
       await this.actionUtils.click(this.frame, '#sendToSearchBtn');
       await this.actionUtils.waitForLoading('//div[@id="searchResultBox"]//input');
@@ -50,12 +50,12 @@ class JournalDownloadPage {
       await this.actionUtils.click(this.frame, '//label[contains(text(), "仕訳済みの請求書")]');
     }
     if (dataFormat) {
-      await this.addComment('「出力フォーマット」にて、"' + dataFormat + '"を選択する');
+      await this.addComment(`「出力フォーマット」にて、"${dataFormat}"を選択する`);
       if (await this.actionUtils.isExist(this.frame, '//select[@name="serviceDataFormat"]')) {
         await this.actionUtils.selectByXpath(this.frame, '//select[@name="serviceDataFormat"]', dataFormat);
       } else {
         await this.actionUtils.click(this.frame, '//input[@name="serviceDataFormat"]/..');
-        await this.actionUtils.click(this.frame, '//input[@name="serviceDataFormat"]/../ul/li//span[contains(text(), "' + dataFormat + '")]');
+        await this.actionUtils.click(this.frame, `//input[@name="serviceDataFormat"]/../ul/li//span[contains(text(), "${dataFormat}")]`);
       }
     }
   }
@@ -72,7 +72,7 @@ class JournalDownloadPage {
     let result = '';
     let i = 0;
     for (i = 0; i < formats.length; i++) {
-      if (!(await this.actionUtils.isExist(this.frame, '//input[@name="serviceDataFormat"]/../ul/li[contains(@class, "enabled")]//span[contains(text(), "' + formats[i] + '")]'))) {
+      if (!(await this.actionUtils.isExist(this.frame, `//input[@name="serviceDataFormat"]/../ul/li[contains(@class, "enabled")]//span[contains(text(), "${formats[i]}")]`))) {
         continue;
       }
       if (result) {

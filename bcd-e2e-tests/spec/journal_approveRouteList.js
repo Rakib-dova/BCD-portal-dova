@@ -51,7 +51,6 @@ describe('仕訳情報設定_承認ルート一覧', function () {
     await journalMenuPage.waitForLoading();
 
     // 承認ルート一覧ページへ遷移する
-    await comment('「承認ルート一覧」をクリックする');
     await journalMenuPage.clickApproveRoute();
     await approveRouteListPage.waitForLoading();
   };
@@ -95,12 +94,7 @@ describe('仕訳情報設定_承認ルート一覧', function () {
 
       // 最終承認者を検索する
       let authorizer = config.company1.mng;
-      await comment('最終承認者の「検索」をクリックする');
       await registApproveRoutePage.clickBtnSearch(1);
-      await comment(
-        '承認者名（姓）へ"' + authorizer.family
-        + '"と、承認者名（名）へ"' + authorizer.first
-        + '"と、メールアドレスへ"' + authorizer.id + '"と入力し、「検索」をクリックする');
       await registApproveRoutePage.searchAuthorizer(authorizer.family, authorizer.first, authorizer.id);
 
       // 対象のアカウントが表示されること
@@ -114,15 +108,13 @@ describe('仕訳情報設定_承認ルート一覧', function () {
           break;
         }
       }
-      expect(isCorrect).to.equal(true, '対象のアカウントが検索結果に表示されること');
-
-      await comment('検索結果の先頭行をクリックする');
-      await registApproveRoutePage.selectAuthorizer();
+      expect(isCorrect).to.equal(true, `【${registApproveRoutePage.title}】対象のアカウントが検索結果に表示されること`);
 
       // 担当者行の担当者とメールアドレスが画面に反映されていること
+      await registApproveRoutePage.selectAuthorizer();
       users = await registApproveRoutePage.getUsers();
-      expect(users[0].name).to.equal(authorizer.family + ' ' + authorizer.first, '承認者名が反映されること');
-      expect(users[0].mail).to.equal(authorizer.id, 'メールアドレスが反映されること');
+      expect(users[0].name).to.equal(`${authorizer.family} ${authorizer.first}`, `【${registApproveRoutePage.title}】承認者名が反映されること`);
+      expect(users[0].mail).to.equal(authorizer.id, `【${registApproveRoutePage.title}】メールアドレスが反映されること`);
       await page.waitForTimeout(1000);
     }
   });
@@ -168,10 +160,7 @@ describe('仕訳情報設定_承認ルート一覧', function () {
       // 承認者を選択する
       for (i = 0; i < authorizers.length; i++) {
         if (i < authorizers.length - 1) {
-          await comment(authorizers[i].family + ' ' + authorizers[i].first + 'を' + (i + 1) + '次承認者に設定する');
           await registApproveRoutePage.addAuthorizer();
-        } else {
-          await comment(authorizers[i].family + ' ' + authorizers[i].first + 'を最終承認者に設定する');
         }
         await registApproveRoutePage.clickBtnSearch(i + 1);
         await registApproveRoutePage.searchAuthorizer(authorizers[i].family, authorizers[i].first, null);
@@ -180,20 +169,18 @@ describe('仕訳情報設定_承認ルート一覧', function () {
 
       // 10件まで承認者設定行が追加されること（10次承認者まで追加する場合に確認する）
       if (authorizers.length > 10) {
-        await comment('「承認者追加」をクリックする');
         await registApproveRoutePage.addAuthorizer();
         let users = await registApproveRoutePage.getUsers();
-        expect(users.length).to.equal(11, '10件まで承認者設定行が追加されること');
+        expect(users.length).to.equal(11, `【${registApproveRoutePage.title}】10件まで承認者設定行が追加されること`);
       }
 
       // 承認ルートの登録を確認する
-      await comment('「確認」をクリックする');
       await registApproveRoutePage.clickConfirm();
 
       // 確認ポップアップにて、承認ルートが表示されること
       let users = await registApproveRoutePage.getUsersOnConfirm();
       for (i = 0; i < authorizers.length; i++) {
-        let nameMessage = (i < authorizers.length - 1 ? (i + 1) + '次' : '最終') + '承認者が"' + authorizers[i].family + ' ' + authorizers[i].first + '"であること';
+        let nameMessage = `${(i < authorizers.length - 1 ? (i + 1) + '次' : '最終')}承認者が"${authorizers[i].family} ${authorizers[i].first}"であること`;
         expect(users[i].name).to.equal(authorizers[i].family + ' ' + authorizers[i].first, nameMessage);
       }
       await page.waitForTimeout(1000);
@@ -273,7 +260,6 @@ describe('仕訳情報設定_承認ルート一覧', function () {
 
       // 承認ルート名を入力する
       let routeName = '承認ルートﾃｽﾄ123456789abcdefghijklmnopqrstuvw';
-      await comment('「承認ルート名」へ"' + routeName + '"と入力する');
       await registApproveRoutePage.inputName(routeName);
 
       // 承認者を選択する
@@ -283,10 +269,7 @@ describe('仕訳情報設定_承認ルート一覧', function () {
       ];
       for (i = 0; i < users.length; i++) {
         if (i < users.length - 1) {
-          await comment(users[i].family + ' ' + users[i].first + 'を' + (i + 1) + '次承認者に設定する');
           await registApproveRoutePage.addAuthorizer();
-        } else {
-          await comment(users[i].family + ' ' + users[i].first + 'を最終承認者に設定する');
         }
         await registApproveRoutePage.clickBtnSearch(i + 1);
         await registApproveRoutePage.searchAuthorizer(users[i].family, users[i].first, null);
@@ -298,7 +281,7 @@ describe('仕訳情報設定_承認ルート一覧', function () {
       await registApproveRoutePage.clickConfirm();
 
       // 入力したルート名が確認画面に表示されていること
-      expect(await registApproveRoutePage.getRouteNameOnConfirm()).to.equal(routeName, '入力したルート名が確認画面に表示されていること');
+      expect(await registApproveRoutePage.getRouteNameOnConfirm()).to.equal(routeName, `【${registApproveRoutePage.title}】入力したルート名が確認画面に表示されていること`);
 
       // 確定する
       await comment('「登録」をクリックする');
@@ -306,17 +289,16 @@ describe('仕訳情報設定_承認ルート一覧', function () {
       await approveRouteListPage.waitPopup();
 
       // 「承認ルートを登録しました。」と表示されていること
-      expect(await approveRouteListPage.getPopupMessage()).to.equal('承認ルートを登録しました。', '「承認ルートを登録しました。」と表示されていること');
+      expect(await approveRouteListPage.getPopupMessage()).to.equal('承認ルートを登録しました。', `【${approveRouteListPage.title}】「承認ルートを登録しました。」と表示されていること`);
 
       // ポップアップを閉じる
-      await comment('ポップアップメッセージを閉じる');
       await approveRouteListPage.closePopup();
       await approveRouteListPage.waitForLoading();
 
       // 「No.、承認ルート名、登録されている承認者数、確認・変更ボタン、削除ボタン」が表示されていること
       let row = await approveRouteListPage.getRow(routeName);
-      expect(row.no).to.equal('1', '承認ルート"' + routeName + '"のNo.が1であること');
-      expect(row.authCount).to.equal(users.length.toString(), '承認ルート"' + routeName + '"の承認者数が' + users.length + 'であること');
+      expect(row.no).to.equal('1', `【${approveRouteListPage.title}】承認ルート"${routeName}"のNo.が1であること`);
+      expect(row.authCount).to.equal(users.length.toString(), `【${approveRouteListPage.title}】承認ルート"${routeName}"の承認者数が${users.length}であること`);
 
       // 承認ルートの「確認・変更する」をクリックする
       let rowData = await approveRouteListPage.getRow(routeName);
@@ -324,10 +306,10 @@ describe('仕訳情報設定_承認ルート一覧', function () {
       await registApproveRoutePage.waitForLoading();
 
       // 確認・変更画面に遷移すること
-      expect(await registApproveRoutePage.getPageTitle()).to.equal('承認ルート確認・変更', '確認・変更画面に遷移すること');
-      expect(await registApproveRoutePage.getName()).to.equal(routeName, '承認ルート名が"' + routeName + '"であること');
+      expect(await registApproveRoutePage.getPageTitle()).to.equal('承認ルート確認・変更', `【${registApproveRoutePage.title}】確認・変更画面に遷移すること`);
+      expect(await registApproveRoutePage.getName()).to.equal(routeName, `【${registApproveRoutePage.title}】承認ルート名が"${routeName}"であること`);
       let actualUsers = await registApproveRoutePage.getUsers();
-      expect(actualUsers.length.toString()).to.equal(rowData.authCount, '承認者数が"' + rowData.authCount + '"であること');
+      expect(actualUsers.length.toString()).to.equal(rowData.authCount, `【${registApproveRoutePage.title}】承認者数が"${rowData.authCount}"であること`);
 
       // 承認ルート一覧ページへ戻る
       await comment('「戻る」をクリックする');
@@ -335,19 +317,19 @@ describe('仕訳情報設定_承認ルート一覧', function () {
       await approveRouteListPage.waitForLoading();
 
       // 承認ルート一覧画面に遷移すること
-      expect(await approveRouteListPage.getPageTitle()).to.equal('承認ルート一覧', '承認ルート一覧画面に遷移すること');
+      expect(await approveRouteListPage.getPageTitle()).to.equal('承認ルート一覧', `【${approveRouteListPage.title}】承認ルート一覧画面に遷移すること`);
 
       // 承認ルートの「削除」をクリックする
       await approveRouteListPage.deleteRoute(routeName);
 
       // 「削除しますか？」のポップアップが表示されること
-      expect(await approveRouteListPage.getDelMessage()).to.equal('削除しますか？', '「削除しますか？」のポップアップが表示されること');
+      expect(await approveRouteListPage.getDelMessage()).to.equal('削除しますか？', `【${approveRouteListPage.title}】「削除しますか？」のポップアップが表示されること`);
 
       // 削除確認ポップアップの「削除」をクリックする
       await approveRouteListPage.deleteOnConfirm();
 
       // 承認ルートが削除されること
-      expect(await approveRouteListPage.hasRow(routeName)).to.equal(false, '承認ルートが削除されること');
+      expect(await approveRouteListPage.hasRow(routeName)).to.equal(false, `【${approveRouteListPage.title}】承認ルートが削除されること`);
       await page.waitForTimeout(1000);
     }
   });
@@ -390,7 +372,7 @@ describe('仕訳情報設定_承認ルート一覧', function () {
       await topPage.waitForLoading();
 
       // Home画面に遷移すること
-      expect(await topPage.getInformationTab()).to.equal('お知らせ', 'Home画面に遷移すること');
+      expect(await topPage.getInformationTab()).to.equal('お知らせ', `【${topPage.title}】Home画面に遷移すること`);
       await page.waitForTimeout(1000);
     }
   });
