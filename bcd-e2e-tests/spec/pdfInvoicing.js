@@ -205,13 +205,13 @@ describe('PDF請求書', function () {
         // 編集を行う
         await registPdfInvoicePage.inputUnitPrice('1000');
         await registPdfInvoicePage.save();
-        let totalAmount = await registPdfInvoicePage.getTotalAmount();
+        let totalAmount = await registPdfInvoicePage.getTotal();
         await registPdfInvoicePage.back();
         await pdfInvoicingPage.waitForLoading();
         expect(await pdfInvoicingPage.getTotal(invoiceNo)).to.equal(totalAmount, '【PDF請求書作成ドラフト一覧】請求書番号"' + invoiceNo + '"の金額が変更されること');
         await pdfInvoicingPage.edit(invoiceNo);
         await registPdfInvoicePage.waitForLoading();
-        expect(await registPdfInvoicePage.getTotalAmount()).to.equal(totalAmount, '【PDF請求書作成】編集保存した内容が反映されていること');
+        expect(await registPdfInvoicePage.getTotal()).to.equal(totalAmount, '【PDF請求書作成】編集保存した内容が反映されていること');
 
         // PDFがダウンロードされること
         await registPdfInvoicePage.clickOutputModal();

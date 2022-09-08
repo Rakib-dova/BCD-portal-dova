@@ -13,7 +13,7 @@ class TopPage {
 
   // コメントする
   async addComment(message) {
-    await comment('【' + this.title + '】' + message);
+    await comment(`【${this.title}】${message}`);
   }
 
   // ページが表示されるまで待機する
@@ -30,6 +30,7 @@ class TopPage {
 
   // 「ご利用中プラン」をクリックする
   async clickPlanStatus() {
+    await this.addComment('「ご利用中プラン」をクリックする');
     await this.actionUtils.click(this.frame, '//div[contains(@class, "planStatus")]//a');
   }
 
@@ -75,11 +76,13 @@ class TopPage {
 
   // 「仕訳情報管理」メニューを開く
   async openJournalMenu() {
+    await this.addComment('「仕訳情報管理」をクリックする');
     await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[contains(text(),"仕訳情報管理")]');
   }
 
   // 「PDF請求書作成」メニューを開く
   async openPdfInvoicing() {
+    await this.addComment('「PDF請求書作成」をクリックする');
     await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[contains(text(),"PDF請求書作成")]');
   }
 
@@ -95,6 +98,7 @@ class TopPage {
 
   // 「設定」メニューを開く
   async openSettingMenu() {
+    await this.addComment('「設定」をクリックする');
     await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[text()="設定"]')
   }
 

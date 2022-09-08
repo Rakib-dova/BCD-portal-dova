@@ -14,7 +14,7 @@ class RegistAccountCodePage {
 
   // コメントする
   async addComment(message) {
-    await comment('【' + this.title + '】' + message);
+    await comment(`【${this.title}】${message}`);
   }
 
   // ページが表示されるまで待機する
@@ -26,9 +26,9 @@ class RegistAccountCodePage {
 
   // 勘定科目を登録する
   async regist(accountCode, accountName) {
-    await this.addComment('「勘定科目コード」にて、"' + accountCode + '"と入力する');
+    await this.addComment(`「勘定科目コード」にて、"${accountCode}"と入力する`);
     await this.actionUtils.fill(this.frame, '#setAccountCodeInputId', accountCode);
-    await this.addComment('「勘定科目名」にて、"' + accountName + '"と入力する');
+    await this.addComment(`「勘定科目名」にて、"${accountName}"と入力する`);
     await this.actionUtils.fill(this.frame, '#setAccountCodeNameInputId', accountName);
     await this.addComment('「登録」をクリックする');
     await this.actionUtils.click(this.frame, "#btnCheck");

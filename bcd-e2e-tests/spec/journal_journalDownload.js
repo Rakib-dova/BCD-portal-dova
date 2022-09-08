@@ -58,7 +58,6 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
 
   // 支払依頼一覧から、仕訳情報の詳細を取得する
   async function getDetail(topPage, journalMenuPage, paymentRequestListPage, journalDetailPage, invoiceNo, lineNo) {
-    await comment('「仕訳情報管理」をクリックする');
     await topPage.openJournalMenu();
     await journalMenuPage.waitForLoading();
     await journalMenuPage.clickPaymentRequest();
@@ -72,12 +71,9 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
   async function download(topPage, journalMenuPage, journalDownloadPage,
       invoiceNo, startDate, endDate, sender, approved, dataFormat, hasData) {
 
-    // 仕訳情報管理メニューを開く
-    await comment('「仕訳情報管理」をクリックする');
+    // 仕訳情報ダウンロードページへ遷移する
     await topPage.openJournalMenu();
     await journalMenuPage.waitForLoading();
-
-    // 仕訳情報ダウンロードページへ遷移する
     await journalMenuPage.clickJournalDownload();
     await journalDownloadPage.waitForLoading();
 
@@ -123,12 +119,9 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
     // デジタルトレードアプリのトップページへ遷移する
     await common.gotoTop(page, config.company2.user06);
 
-    // 仕訳情報管理メニューを開く
-    await comment('「仕訳情報管理」をクリックする');
+    // 仕訳情報ダウンロードページへ遷移する
     await topPage.openJournalMenu();
     await journalMenuPage.waitForLoading();
-
-    // 仕訳情報ダウンロードページへ遷移する
     await journalMenuPage.clickJournalDownload();
     await journalDownloadPage.waitForLoading();
 

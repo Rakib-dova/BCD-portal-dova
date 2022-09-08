@@ -3,6 +3,7 @@ const { comment } = require('../utils/chai-with-reporting');
 
 // 補助科目一覧
 class SubAccountCodeListPage {
+  title = '補助科目一覧';
 
   // コンストラクタ
   constructor(browser, page) {
@@ -11,31 +12,40 @@ class SubAccountCodeListPage {
     this.actionUtils = new ActionUtils(browser, page);
   }
 
+  // コメントする
+  async addComment(message) {
+    await comment(`【${this.title}】${message}`);
+  }
+
   // ページが表示されるまで待機する
   async waitForLoading() {
-    let frame = await this.actionUtils.waitForLoading('//*[@class="hero-body-noImage"]/*[contains(text(),"補助科目一覧")]')
+    let frame = await this.actionUtils.waitForLoading(`//*[@class="hero-body-noImage"]/*[contains(text(),"${this.title}")]`);
     this.frame = frame;
     return frame;
   }
   
   // ホームへ遷移する
   async clickHome() {
+    await this.addComment('「Home」をクリックする');
     await this.actionUtils.click(this.frame, '//*[contains(text(), "Home")]');
   }
 
   // 補助科目登録ページへ遷移する
   async clickRegist() {
+    await this.addComment('「新規登録する」をクリックする');
     await this.actionUtils.click(this.frame, '//a[contains(text(),"新規登録する")]');
   }
 
   // 補助科目確認・変更ページへ遷移する
   async clickEdit(subAccountCode, accountName) {
-    await this.actionUtils.click(this.frame, '//td[contains(text(), "' + subAccountCode + '")]/../td[contains(text(), "' + accountName + '")]/..//a[contains(text(),"確認・変更する")]');
+    await this.addComment(`勘定科目名"${accountName}"、補助科目コード"${subAccountCode}"の「確認・変更する」をクリックする`);
+    await this.actionUtils.click(this.frame, `//td[contains(text(), "${subAccountCode}")]/../td[contains(text(), "${accountName}")]/..//a[contains(text(),"確認・変更する")]`);
   }
 
   // 補助科目を削除する
   async delete(subAccountCode, accountName) {
-    await this.actionUtils.click(this.frame, '//td[contains(text(), "' + subAccountCode + '")]/../td[contains(text(), "' + accountName + '")]/..//a[contains(text(),"削除")]');
+    await this.addComment(`勘定科目名"${accountName}"、補助科目コード"${subAccountCode}"の「削除」をクリックする`);
+    await this.actionUtils.click(this.frame, `//td[contains(text(), "${subAccountCode}")]/../td[contains(text(), "${accountName}")]/..//a[contains(text(),"削除")]`);
     await this.actionUtils.click(this.frame, '#modalCodeDelBtn');
     await this.waitPopup();
   }
@@ -43,6 +53,7 @@ class SubAccountCodeListPage {
   // 補助科目をすべて削除する
   async deleteAll() {
     let rows;
+    await this.addComment('補助科目をすべて削除する');
     while((rows = await this.actionUtils.getElements(this.frame, '//tr//a[contains(text(),"削除")]')).length > 0) {
       await rows[0].click();
       await this.actionUtils.click(this.frame, '#modalCodeDelBtn');
@@ -53,6 +64,7 @@ class SubAccountCodeListPage {
 
   // 補助科目一括作成ページへ遷移する
   async clickUpload() {
+    await this.addComment('「補助科目一括作成」をクリックする');
     await this.actionUtils.click(this.frame, '//a[contains(text(), "補助科目一括作成")]');
   }
 
@@ -79,6 +91,7 @@ class SubAccountCodeListPage {
 
   // ポップアップを閉じる
   async closePopup() {
+    await this.addComment('メッセージを閉じる');
     await this.actionUtils.click(this.frame, '//*[@class="notification is-info animate__animated animate__faster"]/button');
     await this.frame.waitForTimeout(500);
   }

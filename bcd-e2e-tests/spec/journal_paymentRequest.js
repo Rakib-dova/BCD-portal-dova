@@ -84,7 +84,6 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     await journalMenuPage.waitForLoading();
 
     // 支払依頼一覧ページへ遷移する
-    await comment('「支払依頼一覧」をクリックする');
     await journalMenuPage.clickPaymentRequest();
     await paymentRequestListPage.waitForLoading();
   };
@@ -112,10 +111,9 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     await gotoList(requester, topPage, journalMenuPage, paymentRequestListPage);
 
     // ステータスが「未処理」となっていること
-    expect(await paymentRequestListPage.getApproveStatus('fcde40393')).to.equal('未処理', 'ステータスが「未処理」となっていること');
+    expect(await paymentRequestListPage.getApproveStatus('fcde40391')).to.equal('未処理', 'ステータスが「未処理」となっていること');
 
     // 仕訳情報設定ページへ遷移する
-    await comment('「仕訳情報設定」をクリックする');
     let cost = await paymentRequestListPage.getCost(invoiceNo);
     let sender = await paymentRequestListPage.getSender(invoiceNo);
     let status = await paymentRequestListPage.getApproveStatus(invoiceNo);
@@ -124,6 +122,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
 
     // 支払い依頼ページへ遷移する
     await journalDetailPage.clickPaymentRequest();
+    await journalDetailPage.acceptPaymentRequest(true);
     await paymentRequestPage.waitForLoading();
 
     // 請求書番号、宛先、差出人が確認できること
@@ -156,18 +155,16 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     await gotoList(requester, topPage, journalMenuPage, paymentRequestListPage);
 
     // 仕訳情報設定ページへ遷移する
-    await comment('「仕訳情報設定」をクリックする');
     await paymentRequestListPage.clickDetail(invoiceNo);
     await journalDetailPage.waitForLoading();
 
     // 支払い依頼ページへ遷移する
-    await comment('「支払依頼へ」をクリックする');
     await journalDetailPage.clickPaymentRequest();
+    await journalDetailPage.acceptPaymentRequest(true);
     await paymentRequestPage.waitForLoading();
 
     // メッセージを入力する
     let message = 'メッセージテスト123456789abcdefghijklmnopqrstuvwxyz';
-    await comment('メッセージへ"' + message + '"と入力する');
     await paymentRequestPage.setMessage(message);
 
     // 入力したデータが正しく反映されること
@@ -190,28 +187,24 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     await gotoList(requester, topPage, journalMenuPage, paymentRequestListPage);
 
     // 仕訳情報設定ページへ遷移する
-    await comment('「仕訳情報設定」をクリックする');
     await paymentRequestListPage.clickDetail(invoiceNo);
     await journalDetailPage.waitForLoading();
 
     // 支払い依頼ページへ遷移する
-    await comment('「支払依頼へ」をクリックする');
     await journalDetailPage.clickPaymentRequest();
+    await journalDetailPage.acceptPaymentRequest(true);
     await paymentRequestPage.waitForLoading();
 
     // 承認ルート選択ダイアログを表示する
-    await comment('「承認ルート選択」をクリックする');
     await paymentRequestPage.clickRouteSearch();
 
     // 承認ルートを検索する
-    await comment('承認ルート"' + approveRoute.name + '"を検索する');
     await paymentRequestPage.searchRoute(approveRoute.name);
 
     // 検索モーダルにて検索した承認ルートが表示されること
     expect(await paymentRequestPage.hasRouteRow(approveRoute.name)).to.equal(true, '検索モーダルにて検索した承認ルートが表示されること');
 
     // 当該承認ルートの詳細画面に遷移されること
-    await comment('承認ルート"' + approveRoute.name + '"の「承認ルート確認」をクリックする');
     await paymentRequestPage.confirmRoute(approveRoute.name);
     expect(await paymentRequestPage.getRouteNameOnConfirm()).to.equal(approveRoute.name, '該当承認ルートの詳細画面に遷移されること');
 
@@ -227,7 +220,6 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     await paymentRequestPage.closeConfirm();
 
     // 承認ルートを設定できること
-    await comment('承認ルート"' + approveRoute.name + '"を選択する');
     await paymentRequestPage.selectRoute(approveRoute.name);
     expect(await paymentRequestPage.getRouteName()).to.equal(approveRoute.name, '承認ルートを設定できること');
     await page.waitForTimeout(1000);
@@ -236,6 +228,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
   /**
    * STEP6_No.65,78-81,140,144,222
    * STEP7_No.27,37,38,39
+   * STEP8_機能改修確認_No.119-123
    */
   it("支払依頼ページ_依頼", async function () {
     // テストの初期化を実施
@@ -249,7 +242,6 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     await gotoList(requester, topPage, journalMenuPage, paymentRequestListPage);
 
     // 仕訳情報設定ページへ遷移する
-    await comment('「仕訳情報設定」をクリックする');
     await paymentRequestListPage.clickDetail(invoiceNo);
     await journalDetailPage.waitForLoading();
 
@@ -268,21 +260,38 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     await journalDetailPage.save();
     await page.waitForTimeout(5000);
 
-    // 支払い依頼ページへ遷移する
+    // 「支払依頼へ」ボタンが活性になっていること
+    expect(await journalDetailPage.isPaymentRequestDisabled()).to.equal(false, '「支払依頼へ」ボタンが活性になっていること');
+
+    // ポップアップが表示されること
     await journalDetailPage.clickPaymentRequest();
+    expect(await journalDetailPage.getPaymentRequestMsg()).to.equal('保存していない仕訳情報はクリアされます。', 'ポップアップが表示されること');
+
+    // ポップアップが閉じ、仕訳情報設定画面のままであること
+    await journalDetailPage.acceptPaymentRequest(false);
+    expect(await journalDetailPage.getTitle()).to.equal(journalDetailPage.title, 'ポップアップが閉じ、仕訳情報設定画面のままであること');
+
+    // 「支払依頼へ」ボタンが活性のままであること
+    await journalDetailPage.back();
+    await paymentRequestListPage.waitForLoading();
+    await paymentRequestListPage.clickDetail(invoiceNo);
+    await journalDetailPage.waitForLoading();
+    expect(await journalDetailPage.isPaymentRequestDisabled()).to.equal(false, '「支払依頼へ」ボタンが活性のままであること');
+
+    // 支払依頼画面に遷移すること
+    await journalDetailPage.clickPaymentRequest();
+    await journalDetailPage.acceptPaymentRequest(true);
     await paymentRequestPage.waitForLoading();
+    expect(await paymentRequestPage.getTitle()).to.equal(paymentRequestPage.title, '支払依頼画面に遷移すること');
 
     // メッセージを入力する
     let message = '承認依頼メッセージ';
-    await comment('メッセージへ"' + message + '"と入力する');
     await paymentRequestPage.setMessage(message);
 
     // 承認ルート選択ダイアログを表示する
-    await comment('「承認ルート選択」をクリックする');
     await paymentRequestPage.clickRouteSearch();
 
     // 承認ルートを検索する
-    await comment('承認ルート"' + approveRoute.name + '"を検索する');
     await paymentRequestPage.searchRoute(approveRoute.name);
     await paymentRequestPage.selectRoute(approveRoute.name);
 
@@ -299,18 +308,13 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('支払依頼中', '依頼がされること');
     authorizerNo++;
 
-    // 承認待ちタブを開く
-    await comment('「承認待ち」タブを開く');
+    // 承認待ちタブに支払依頼の請求書があること
     await paymentRequestListPage.clickConstruct();
-
-    // 支払依頼の請求書があること
     expect(await paymentRequestListPage.hasConstructRow(invoiceNo)).to.equal(true, '支払依頼の請求書があること');
     
-    // 支払依頼ページへ遷移する
+    // 詳細画面に遷移すること
     await paymentRequestListPage.clickConstructDetail(invoiceNo);
     await paymentRequestPage.waitForLoading();
-
-    // 詳細画面に遷移すること
     expect(await paymentRequestPage.getNo()).to.equal(invoiceNo, '詳細画面に遷移すること');
 
     // 仕訳情報が表示されること
@@ -372,11 +376,9 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     await gotoList(approveRoute.authorizers[0], topPage, journalMenuPage, paymentRequestListPage);
 
     // 承認待ちタブを開く
-    await comment('「承認待ち」タブを開く');
     await paymentRequestListPage.clickConstruct();
 
     // 支払依頼ページへ遷移する
-    await comment(invoiceNo + 'の「依頼内容確認」をクリックする');
     await paymentRequestListPage.clickConstructDetail(invoiceNo);
     await paymentRequestPage.waitForLoading();
 
@@ -434,6 +436,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
 
     // 「承認を完了しました。」のメッセージが表示されていること
     expect(await paymentRequestListPage.getPopupMessage()).to.contains('承認を完了しました。', '「承認を完了しました。」のメッセージが表示されていること');
+    authorizerNo = 1;
 
     // ポップアップを閉じる
     await paymentRequestListPage.closePopup();
@@ -441,7 +444,6 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
 
     // 請求書一覧画面にて承認ステータスに変更されていること
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('一次承認済み', '請求書一覧画面にて承認ステータスに変更されていること');
-    authorizerNo = 1;
 
     // 仕訳情報設定ページへ遷移する
     await comment('「仕訳情報設定」をクリックする');
@@ -471,11 +473,9 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('一次承認済み', 'ステータスが「一次承認済み」となっていること');
     
     // 承認待ちタブを開く
-    await comment('「承認待ち」タブを開く');
     await paymentRequestListPage.clickConstruct();
 
     // 支払依頼ページへ遷移する
-    await comment(invoiceNo + 'の「依頼内容確認」をクリックする');
     await paymentRequestListPage.clickConstructDetail(invoiceNo);
     await paymentRequestPage.waitForLoading();
 
@@ -508,24 +508,22 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
       = common.getPageObject(browser, page);
 
     // 支払依頼一覧ページへ遷移する
-    await gotoList(approveRoute.authorizers[1], topPage, journalMenuPage, paymentRequestListPage);
+    await gotoList(approveRoute.authorizers[authorizerNo], topPage, journalMenuPage, paymentRequestListPage);
 
     // 承認待ちタブを開く
-    await comment('「承認待ち」タブを開く');
     await paymentRequestListPage.clickConstruct();
 
     // 支払依頼ページへ遷移する
-    await comment('「依頼内容確認」をクリックする');
     await paymentRequestListPage.clickConstructDetail(invoiceNo);
     await paymentRequestPage.waitForLoading();
 
     // 差し戻す
-    await comment('差し戻す');
     await paymentRequestPage.reject();
     await paymentRequestListPage.waitPopup();
 
     // 「支払依頼を差し戻しました。」と表示されること
     expect(await paymentRequestListPage.getPopupMessage()).to.contains('支払依頼を差し戻しました。', '「支払依頼を差し戻しました。」と表示されること');
+    authorizer = -1;
 
     // ポップアップを閉じる
     await comment('ポップアップメッセージを閉じる');
@@ -534,7 +532,6 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
 
     // 差し戻しができること
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('差し戻し', '差し戻しができること');
-    authorizer = -1;
 
     // 承認待ちタブを開く
     await comment('「承認待ち」タブを開く');

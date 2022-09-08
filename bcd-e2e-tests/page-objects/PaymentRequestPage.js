@@ -19,9 +19,14 @@ class PaymentRequestPage {
 
   // ページが表示されるまで待機する
   async waitForLoading() {
-    let frame = await this.actionUtils.waitForLoading('//*[@class="hero-body-noImage"]/*[contains(text(),"支払依頼")]')
+    let frame = await this.actionUtils.waitForLoading('//h4[contains(text(),"支払依頼")]');
     this.frame = frame;
     return frame;
+  }
+
+  // ページタイトルを取得する
+  async getTitle() {
+    return await this.actionUtils.getText(this.frame, 'h4');
   }
 
   // 請求書番号を取得する
@@ -46,6 +51,7 @@ class PaymentRequestPage {
 
   // メッセージを入力する
   async setMessage(message) {
+    await this.addComment('「メッセージ」にて、"' + message + '"と入力する');
     await this.actionUtils.fill(this.frame, '#inputMsg', message);
   }
 
@@ -173,32 +179,32 @@ class PaymentRequestPage {
 
   // 仕訳情報入力フォームにて、指定の勘定科目、補助科目、部門コードが入力されているものを検索する
   async hasBreakdown(lineNo, acNo, isCredit, accountCode, subAccountCode, departmentCode) {
-    let xpathBase = '//div[@id="lineNo' + lineNo + '"]/div[position()=' + (acNo + 1) + ']/div[position()=' + (isCredit ? '3' : '1') + ']/table/tbody';
-    let xpathAccountCode = '/tr[position()=1]//input[@type="text"]';
-    let xpathSubAccountCode = '/tr[position()=2]//input[@type="text"]';
-    let xpathDepartmentCode = '/tr[position()=3]//input[@type="text"]';
-    return await this.actionUtils.getValue(this.frame, xpathBase + xpathAccountCode) == accountCode
-        && await this.actionUtils.getValue(this.frame, xpathBase + xpathSubAccountCode) == subAccountCode
-        && await this.actionUtils.getValue(this.frame, xpathBase + xpathDepartmentCode) == departmentCode;
+    let xpathBase = `//div[@id="lineNo${lineNo}"]/div[position()=${(acNo + 1)}]/div[position()=${(isCredit ? '3' : '1')}]/table/tbody`;
+    return await this.actionUtils.getValue(this.frame, `${xpathBase}/tr[position()=1]//input[@type="text"]`) == accountCode
+        && await this.actionUtils.getValue(this.frame, `${xpathBase}/tr[position()=2]//input[@type="text"]`) == subAccountCode
+        && await this.actionUtils.getValue(this.frame, `${xpathBase}/tr[position()=3]//input[@type="text"]`) == departmentCode;
   }
 
   // 仕訳情報入力フォームの計上価格を入力する
   async inputBreakdownCost(lineNo, acNo, cost) {
-    await this.addComment('「仕訳情報」の「計上価格」にて、"' + cost + '"と入力する');
-    await this.actionUtils.click(this.frame, '//a[@data-input="lineNo' + lineNo + '_lineAccountCode' + acNo + '_input_amount"]');
+    await this.addComment(`「仕訳情報」の「計上価格」にて、"${cost}"と入力する`);
+    await this.actionUtils.click(this.frame, `//a[@data-input="lineNo${lineNo}_lineAccountCode${acNo}_input_amount"]`);
     await this.actionUtils.fill(this.frame, '#inputInstallmentAmount', cost);
     await this.actionUtils.click(this.frame, '#btn-insert');
   }
 
   // 承認ルートの検索ポップアップを表示する
   async clickRouteSearch() {
+    await this.addComment('「承認ルート選択」をクリックする');
     await this.actionUtils.click(this.frame, '#btn-approveRouteInsert');
     await this.actionUtils.waitForLoading('#btnSearchApproveRoute');
   }
 
   // 承認ルートを検索する
   async searchRoute(routeName) {
+    await this.addComment(`「承認ルート名」にて、"${routeName}"と入力する`);
     await this.actionUtils.fill(this.frame, '#searchModalApproveRoute', routeName);
+    await this.addComment('「検索」をクリックする');
     await this.actionUtils.click(this.frame, '#btnSearchApproveRoute');
     await this.actionUtils.waitForLoading('//tbody[@id="displayFieldApproveRouteResultBody"]/tr');
   }
@@ -210,7 +216,8 @@ class PaymentRequestPage {
 
   // 承認ルートを確認する
   async confirmRoute(routeName) {
-    await this.actionUtils.click(this.frame, '//tbody[@id="displayFieldApproveRouteResultBody"]//td[contains(text(), "' + routeName + '")]/..//a[contains(text(), "承認ルート確認")]');
+    await this.addComment(`承認ルート"${routeName}"にて、「承認ルート確認」をクリックする`);
+    await this.actionUtils.click(this.frame, `//tbody[@id="displayFieldApproveRouteResultBody"]//td[contains(text(), "${routeName}")]/..//a[contains(text(), "承認ルート確認")]`);
     await this.actionUtils.waitForLoading('#detail-approveRoute-modal');
   }
 
@@ -232,13 +239,15 @@ class PaymentRequestPage {
 
   // 承認ルート確認ポップアップを閉じる
   async closeConfirm() {
+    await this.addComment('承認ルート確認ポップアップを閉じる');
     await this.actionUtils.click(this.frame, '//div[@id="detail-approveRoute-modal"]//a[@class="button cancel-button"]');
     await this.frame.waitForTimeout(1000);
   }
 
   // 承認ルートを選択する
   async selectRoute(routeName) {
-    await this.actionUtils.click(this.frame, '//tbody[@id="displayFieldApproveRouteResultBody"]//td[contains(text(), "' + routeName + '")]/..//a[contains(text(), "選択")]');
+    await this.addComment('承認ルート"' + routeName + '"にて、「選択」をクリックする');
+    await this.actionUtils.click(this.frame, `//tbody[@id="displayFieldApproveRouteResultBody"]//td[contains(text(), "${routeName}")]/..//a[contains(text(), "選択")]`);
     await this.actionUtils.waitForLoading('#approveRouteName');
   }
 
@@ -257,20 +266,23 @@ class PaymentRequestPage {
   // 支払依頼中の承認ルートテーブルにて、担当者と承認状況を取得する
   async getRequestingRow(no) {
     return {
-      asignee: await this.actionUtils.getText(this.frame, '//section[@id="displayDetailApproveRouteTable"]/div[not(contains(@class, "header"))][' + no + ']/div[2]'),
-      status: await this.actionUtils.getText(this.frame, '//section[@id="displayDetailApproveRouteTable"]/div[not(contains(@class, "header"))][' + no + ']/div[3]')
+      asignee: await this.actionUtils.getText(this.frame, `//section[@id="displayDetailApproveRouteTable"]/div[not(contains(@class, "header"))][${no}]/div[2]`),
+      status: await this.actionUtils.getText(this.frame, `//section[@id="displayDetailApproveRouteTable"]/div[not(contains(@class, "header"))][${no}]/div[3]`)
     };
   }
 
   // 差し戻す
   async reject() {
+    await this.addComment('「差し戻し」をクリックする');
     await this.actionUtils.click(this.frame, '#rejectApproval');
     await this.actionUtils.waitForLoading('#btn-reject');
+    await this.addComment('「差し戻し」をクリックする');
     await this.actionUtils.click(this.frame, '#btn-reject');
   }
 
   // 承認確認を行う
   async checkApproval() {
+    await this.addComment('「承認」をクリックする');
     await this.actionUtils.click(this.frame, '#checkApproval');
     await this.actionUtils.waitForLoading('#btn-approve');
   }
@@ -281,10 +293,9 @@ class PaymentRequestPage {
     return elements.length;
   }
 
-
   // 承認確認ポップアップにて、指定の勘定科目、補助科目、部門コードが入力されているものを検索する
   async hasBreakdownOnApproval(lineNo, acNo, isCredit, accountCode, subAccountCode, departmentCode) {
-    let xpathBase = '//div[@id="check-approval-modal"]//input[@id="lineNo' + lineNo + '_line' + (isCredit ? 'Credit' : '') + 'AccountCode' + acNo + '_';
+    let xpathBase = `//div[@id="check-approval-modal"]//input[@id="lineNo${lineNo}_line${(isCredit ? 'Credit' : '')}AccountCode${acNo}_`;
     let xpathAccountCode = xpathBase + (isCredit ? 'creditAccountCode"]' : 'accountCode"]');
     let xpathSubAccountCode = xpathBase + (isCredit ? 'creditSubAccountCode"]' : 'subAccountCode"]');
     let xpathDepartmentCode = xpathBase + (isCredit ? 'creditDepartmentCode"]' : 'departmentCode"]');
@@ -295,12 +306,14 @@ class PaymentRequestPage {
 
   // 承認をキャンセルする
   async cancelApproval() {
+    await this.addComment('「キャンセル」をクリックする');
     await this.actionUtils.click(this.frame, '//div[@id="check-approval-modal"]//a[text()="キャンセル"]');
     await this.frame.waitForTimeout(1000);
   }
 
   // 承認する
   async approve() {
+    await this.addComment('「承認」をクリックする');
     await this.actionUtils.click(this.frame, '#btn-approve');
   }
 }

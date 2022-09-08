@@ -53,13 +53,9 @@ describe('仕訳情報設定_勘定科目一覧', function () {
     // トップページを表示する
     await common.gotoTop(page, account);
 
-    // 仕訳情報管理メニューを開く
-    await comment('「仕訳情報管理」をクリックする');
+    // 勘定科目一覧ページへ遷移する
     await topPage.openJournalMenu();
     await journalMenuPage.waitForLoading();
-
-    // 勘定科目一覧ページへ遷移する
-    await comment('「勘定科目設定」をクリックする');
     await journalMenuPage.clickAccount();
     await accountCodeListPage.waitForLoading();
   };
@@ -106,12 +102,12 @@ describe('仕訳情報設定_勘定科目一覧', function () {
       await accountCodeListPage.waitPopup();
 
       // 登録後、勘定科目一覧画面に戻って「勘定科目を登録しました」のポップアップメッセージ表示される
-      expect(await accountCodeListPage.getPopupMessage()).to.equal('勘定科目を登録しました。', '【勘定科目一覧】「勘定科目を登録しました」のポップアップメッセージ表示されること');
+      expect(await accountCodeListPage.getPopupMessage()).to.equal('勘定科目を登録しました。', `【${accountCodeListPage.title}】「勘定科目を登録しました」のポップアップメッセージ表示されること`);
       
       // ポップアップメッセージを閉じる
       await accountCodeListPage.closePopup();
       await accountCodeListPage.waitForLoading();
-      expect(await accountCodeListPage.hasRow(accountSets[0].code, accountSets[0].name)).to.equal(true, '【勘定科目一覧】登録した勘定科目コード、勘定科目名、最新更新日が正しいこと');
+      expect(await accountCodeListPage.hasRow(accountSets[0].code, accountSets[0].name)).to.equal(true, `【${accountCodeListPage.title}】登録した勘定科目コード、勘定科目名、最新更新日が正しいこと`);
 
       // 勘定科目確認・変更ページへ遷移する
       await accountCodeListPage.clickEdit(accountSets[0].code);
@@ -127,15 +123,15 @@ describe('仕訳情報設定_勘定科目一覧', function () {
       await accountCodeListPage.waitForLoading();
 
       // 変更が反映されること
-      expect(await accountCodeListPage.hasRow(accountSets[1].code, accountSets[1].name)).to.equal(true, '【勘定科目一覧】変更が反映されること');
+      expect(await accountCodeListPage.hasRow(accountSets[1].code, accountSets[1].name)).to.equal(true, `【${accountCodeListPage.title}】変更が反映されること`);
 
       // 勘定科目を削除する
       await accountCodeListPage.delete(accountSets[1].code);
 
       // 「勘定科目を削除しました」のメッセージが表示され、一覧から削除されていること
-      expect(await accountCodeListPage.getPopupMessage()).to.equal('勘定科目を削除しました。', '【勘定科目一覧】「勘定科目を削除しました」のメッセージが表示される');
+      expect(await accountCodeListPage.getPopupMessage()).to.equal('勘定科目を削除しました。', `【${accountCodeListPage.title}】「勘定科目を削除しました」のメッセージが表示される`);
       await accountCodeListPage.closePopup();
-      expect(await accountCodeListPage.hasRow(accountSets[1].code, accountSets[1].name)).to.equal(false, '【勘定科目一覧】一覧から削除されていること');
+      expect(await accountCodeListPage.hasRow(accountSets[1].code, accountSets[1].name)).to.equal(false, `【${accountCodeListPage.title}】一覧から削除されていること`);
       await page.waitForTimeout(1000);
     }
   });
@@ -181,7 +177,7 @@ describe('仕訳情報設定_勘定科目一覧', function () {
       let fmtPath = await uploadAccountCodePage.downloadCsv();
 
       // 勘定科目一括作成フォーマット.csvがダウンロードできること
-      expect(await fs.existsSync(fmtPath)).to.equal(true, '【勘定科目一括作成】勘定科目一括作成フォーマット.csvがダウンロードできること');
+      expect(await fs.existsSync(fmtPath)).to.equal(true, `【${uploadAccountCodePage.title}】勘定科目一括作成フォーマット.csvがダウンロードできること`);
 
       // CSVファイルをアップロードする
       const csvPath = 'testdata/upload/勘定科目一括アップロード試験１.csv';
@@ -189,12 +185,12 @@ describe('仕訳情報設定_勘定科目一覧', function () {
       await accountCodeListPage.waitPopup();
 
       // 正しくすべてのデータが一覧に反映されること
-      expect(await accountCodeListPage.getPopupMessage()).to.equal('勘定科目取込が完了しました。', '【勘定科目一覧】「勘定科目取込が完了しました」のメッセージが表示されること');
+      expect(await accountCodeListPage.getPopupMessage()).to.equal('勘定科目取込が完了しました。', `【${uploadAccountCodePage.title}】「勘定科目取込が完了しました」のメッセージが表示されること`);
       await accountCodeListPage.closePopup();
       await accountCodeListPage.waitForLoading();
       let csvData = await getCsvData(csvPath);
       for (i = 0; i < csvData.length; i++) {
-        expect(await accountCodeListPage.hasRow(csvData[i]['勘定科目コード'], csvData[i]['勘定科目名'])).to.equal(true, '【勘定科目一覧】' + (i + 2) + '行目のデータが一覧に反映されること');
+        expect(await accountCodeListPage.hasRow(csvData[i]['勘定科目コード'], csvData[i]['勘定科目名'])).to.equal(true, `【${uploadAccountCodePage.title}】${(i + 2)}行目のデータが一覧に反映されること`);
 
         // 確認し終えたデータを削除する
         await accountCodeListPage.delete(csvData[i]['勘定科目コード']);

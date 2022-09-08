@@ -96,8 +96,8 @@ class RegistPdfInvoicePage {
   }
 
   // 合計金額を取得する
-  async getTotalAmount() {
-    return await this.actionUtils.getText(this.frame, '#totalAmount');
+  async getTotal() {
+    return await this.actionUtils.getText(this.frame, '#total');
   }
 
   // 項目を追加する
@@ -133,8 +133,12 @@ class RegistPdfInvoicePage {
     await this.actionUtils.fill(this.frame, '//input[@data-prop="unit"]', unit);
     await this.inputUnitPrice(unitPrice);
     await this.addComment('「税」にて、"' + taxType + '"を選択する');
-    let elm = await this.actionUtils.getElement(this.frame, '//select[@data-prop="taxType"]');
-    await elm.selectOption(taxType);
+    await this.actionUtils.click(this.frame, '#taxType-modal-form');
+    await this.actionUtils.click(this.frame, '#taxType-modal-form');
+    await this.actionUtils.waitForLoading('//div[@id="taxType-modal" and contains(@class, "is-active")]');
+    await this.actionUtils.check(this.frame, '//div[@id="taxType-modal"]//input[@value="' + taxType + '"]', true);
+    await this.actionUtils.click(this.frame, '#taxModelAccept');
+    await this.page.waitForTimeout(500);
   }
 
   // 単価を入力する
