@@ -26,7 +26,7 @@
                     .is-inline-block.py-4 【依頼者】
                     .is-inline-block.py-4.mr-4 #{requestApproval.requester.name}
                     .is-inline-block.py-4 【メッセージ】
-                    a.py-4.w-1000.td-overflow #{requestApproval.requester.message}
+                    a.py-4.w-1000.td-overflow.moreMessage(data-target='more-message-modal' data-info=`${requestApproval.requester.message}`) #{requestApproval.requester.message}
                   table.is-fullwidth.is-hoverable.table-fixed
                     tr.tTitle
                       td 承認順
@@ -49,10 +49,10 @@
                           td ユーザー登録なし
                         else
                           td #{user.lastName} #{user.firstName}
-                        td.has-text-left.td-overflow
+                        td.has-text-left.td-overflow.moreMessageUser(data-target='more-message-modal' data-info=`${user.message}`)
                           a #{user.message}
       else
-        .invoiceFlow
+        #accordion.invoiceFlow
           ul.include-InvoiceFlow
             li.userGuide-feature
               button.accordionBtn.userGuide-feature-title(type='button').invoiceFlowBox
@@ -71,7 +71,7 @@
                     .is-inline-block.py-4 【依頼者】
                     .is-inline-block.py-4.mr-4 #{requestApproval.requester.name}
                     .is-inline-block.py-4 【メッセージ】
-                    a.py-4.w-1000.td-overflow #{requestApproval.requester.message}
+                    a.py-4.w-1000.td-overflow.moreMessage(data-target='more-message-modal' data-info=`${requestApproval.requester.message}`) #{requestApproval.requester.message}
                   table.is-fullwidth.is-hoverable.table-fixed
                     tr.tTitle
                       td 承認順
@@ -94,8 +94,16 @@
                           td ユーザー登録なし
                         else
                           td #{user.lastName} #{user.firstName}
-                        td.has-text-left.td-overflow
+                        td.has-text-left.td-overflow.moreMessageUser(data-target='more-message-modal' data-info=`${user.message}`)
                           a #{user.message}
+
+  .modal#more-message-modal
+    .modal-background.cancel-button(data-target='more-message-modal')
+    .modal-card.is-family-noto-sans
+      header.modal-card-head.color-link-modal-header
+        p.modal-card-title メッセージ詳細
+        a.delete(data-target='more-message-modal')
+      section.modal-card-body.radius-modal#more-message-modal-body
 
 block append scripts
   link(rel='stylesheet', type='text/css', href='/css/approvalInboxApprovRoute.css')
