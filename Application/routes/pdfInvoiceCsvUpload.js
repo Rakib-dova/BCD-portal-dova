@@ -126,7 +126,7 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
       })
     )
   }
-  console.log('==  csvRowObjects  ======================\n', csvRowObjects)
+  // console.log('==  csvRowObjects  ======================\n', csvRowObjects)
 
   // CSV行データオブジェクトに空情報(null)が含まれている場合
   if (csvRowObjects.filter((row) => !row).length) {
@@ -150,9 +150,10 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
     senderInfo,
     req.user.tenantId
   )
-  console.log('==  pdfInvoices  ======================\n', pdfInvoices)
-  console.log('==  pdfInvoiceLines  ======================\n', pdfInvoiceLines)
-  if (!pdfInvoices || !pdfInvoiceLines) {
+  // console.log('==  pdfInvoices  ======================\n', pdfInvoices)
+  // console.log('==  pdfInvoiceLines  ======================\n', pdfInvoiceLines)
+  // if (!pdfInvoices || !pdfInvoiceLines) {
+  if (!pdfInvoices) {
     return res.status(500).send(
       JSON.stringify({
         message: 'CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。'
@@ -167,13 +168,22 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
       })
     )
   }
-  if (pdfInvoiceLines.length > 20) {
-    return res.status(400).send(
-      JSON.stringify({
-        message: '一つの請求書で作成できる明細数は20までです。CSVファイルの内容を確認の上、再度実行をお願いします。'
-      })
-    )
+  for (let i = 0; i < pdfInvoices.length; i++) {
+    if (pdfInvoices[i].lines.length > 20) {
+      return res.status(400).send(
+        JSON.stringify({
+          message: '一つの請求書で作成できる明細数は20までです。CSVファイルの内容を確認の上、再度実行をお願いします。'
+        })
+      )
+    }
   }
+  // if (pdfInvoiceLines.length > 20) {
+  //   return res.status(400).send(
+  //     JSON.stringify({
+  //       message: '一つの請求書で作成できる明細数は20までです。CSVファイルの内容を確認の上、再度実行をお願いします。'
+  //     })
+  //   )
+  // }
   // バリデーション
   const { validInvoices, validLines, uploadHistory, csvRows } = await validation.validate(
     pdfInvoices,
@@ -181,10 +191,10 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
     req.user.tenantId,
     req.file.originalname
   )
-  console.log('==  validInvoices  ======================\n', validInvoices)
-  console.log('==  validLines  ======================\n', validLines)
-  console.log('==  uploadHistory  ======================\n', uploadHistory)
-  console.log('==  csvRows  ======================\n', csvRows)
+  // console.log('==  validInvoices  ======================\n', validInvoices)
+  // console.log('==  validLines  ======================\n', validLines)
+  // console.log('==  uploadHistory  ======================\n', uploadHistory)
+  // console.log('==  csvRows  ======================\n', csvRows)
 
   if (!validInvoices || !validLines || !uploadHistory || !csvRows) {
     return res.status(500).send(
@@ -267,7 +277,7 @@ const pdfInvoiceCsvUploadResult = async (req, res, next) => {
       })
     })
 
-    console.log('==  resultArr  ======================\n', resultArr)
+    // console.log('==  resultArr  ======================\n', resultArr)
   } catch (error) {
     logger.error({ page: functionName, msg: '請求書を取得失敗しました。' })
     logger.error(error)
