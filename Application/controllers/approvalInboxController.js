@@ -34,6 +34,7 @@ const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId
     const request = []
 
     for (let i = 0; i < requestApproval.length; i++) {
+      let updatedAt
       const approval = await DbApproval.findOne({
         where: {
           requestId: requestApproval[i].requestId
@@ -61,11 +62,13 @@ const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId
               userAccounts.message = approvalData[`message${no}`]
               if (approvalData[`approvalAt${no}`] !== null) {
                 userAccounts.status = '承認済み'
-                userAccounts.approvedAt = approvalData[`approvalAt${no}`]
+                userAccounts.approvedAt = await setDate(approvalData[`approvalAt${no}`])
+                updatedAt = userAccounts.approvedAt
               } else if (approvalData.rejectedUser && approvalData.rejectedUser === approvalData[`approveUser${no}`]) {
                 userAccounts.status = '差し戻し'
-                userAccounts.approvedAt = approvalData.rejectedAt
+                userAccounts.approvedAt = await setDate(approvalData.rejectedAt)
                 userAccounts.message = approvalData.rejectedMessage
+                updatedAt = userAccounts.approvedAt
               } else {
                 const status = ~~approvalData.approveStatus - 9
                 if (no === 'Last' && status === approvalData.approveUserCount) {
@@ -73,8 +76,9 @@ const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId
                   userAccounts.approvedAt = ''
                 } else if (approvalData.rejectedUser && approvalData.rejectedUser === approvalData.approveUserLast) {
                   userAccounts.status = '差し戻し'
-                  userAccounts.approvedAt = approvalData.rejectedAt
+                  userAccounts.approvedAt = await setDate(approvalData.rejectedAt)
                   userAccounts.message = approvalData.rejectedMessage
+                  updatedAt = userAccounts.approvedAt
                 } else {
                   if (status === ~~no) {
                     userAccounts.status = '処理中'
@@ -108,11 +112,8 @@ const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId
           name: requester.getName(),
           status: '依頼済み',
           message: requestApproval[i].message,
-          requestedAt: `${requestApproval[i].create.getFullYear()}-${
-            requestApproval[i].create.getMonth() + 1
-          }-${requestApproval[i].create.getDate()} ${requestApproval[i].create.getHours()}:${requestApproval[
-            i
-          ].create.getMinutes()}:${requestApproval[i].create.getSeconds()}`
+          requestedAt: await setDate(requestApproval[i].create),
+          updatedAt: updatedAt ?? (await setDate(requestApproval[i].create))
         }
       })
     }
@@ -176,6 +177,16 @@ const hasPowerOfEditing = async (contractId, userId, requestId) => {
 const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => {
   const inboxController = require('./inboxController')
   return await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
+}
+
+const setDate = async (date) => {
+  const setDate = `${date.getFullYear()}.${('0' + (date.getMonth() + 1)).slice(-2)}.${('0' + date.getDate()).slice(
+    -2
+  )} - ${('0' + date.getHours()).slice(-2)}:${('0' + date.getMinutes()).slice(-2)}:${('0' + date.getSeconds()).slice(
+    -2
+  )}`
+
+  return setDate
 }
 
 module.exports = {

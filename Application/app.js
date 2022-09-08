@@ -201,7 +201,9 @@ app.use(function (req, res, next) {
     url.match('/approvalInbox/') === null &&
     url.match('/favicon.ico') === null &&
     url.match('/inbox/getCode') === null &&
-    url.match('/inbox/department') === null
+    url.match('/inbox/department') === null &&
+    url.match('/css/accordion.css') === null &&
+    url.match('/js/accordion.js') === null
   ) {
     delete req.session.requestApproval
   }

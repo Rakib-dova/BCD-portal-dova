@@ -9,7 +9,7 @@ block content
       include readonlyApprovalInboxInvoiceLines
       include readonlyApprovalInvoiceFooter
       if (requestApprovals.length !== 0)
-        include readonlyApprovalInboxApprovRoute
+        include approvalInboxApprovRoute
       .grouped-button
         a.button.mr-6(href='/inboxList/1')  戻る
 
