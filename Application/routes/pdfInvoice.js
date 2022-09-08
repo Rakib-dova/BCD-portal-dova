@@ -305,6 +305,14 @@ const outputPdfInvoice = async (req, res, next) => {
   }
   console.log('== PDF生成完了 ====================')
 
+  // アプリ効果測定
+  const jsonLog = {
+    tenantId: req.user.tenantId,
+    action: 'downloadedPdfInvoice',
+    downloadedPdfInvoiceCount: 1
+  }
+  logger.info(jsonLog)
+
   res.set({ 'Content-Disposition': 'attachment;' })
   res.status(200).send(pdfBuffer)
 }

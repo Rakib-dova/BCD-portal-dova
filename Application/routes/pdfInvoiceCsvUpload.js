@@ -207,6 +207,15 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
     return res.status(500).send(JSON.stringify({ message: 'システムエラーです。（後程、接続してください）' }))
   }
 
+  // アプリ効果測定
+  const jsonLog = {
+    tenantId: req.user.tenantId,
+    action: 'csvUploadedPdfInvoice',
+    csvUploadedPdfInvoiceCount: validInvoices.length,
+    invoices: validInvoices
+  }
+  logger.info(jsonLog)
+
   if (uploadHistory?.failCount > 0 || (uploadHistory?.skipCount > 0 && uploadHistory?.successCount === 0)) {
     return res.status(200).send(
       JSON.stringify({
