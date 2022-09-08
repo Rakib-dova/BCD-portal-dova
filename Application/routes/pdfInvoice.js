@@ -398,6 +398,14 @@ const deleteAndOutputPdfInvoice = async (req, res, next) => {
   }
   console.log('== PDF生成完了 ====================')
 
+  // アプリ効果測定
+  const jsonLog = {
+    tenantId: req.user.tenantId,
+    action: 'downloadedPdfInvoice',
+    downloadedPdfInvoiceCount: 1
+  }
+  logger.info(jsonLog)
+
   console.log('== PDF請求書レコード削除 開始 ====================')
   try {
     const deleteInvoice = await pdfInvoiceController.deleteInvoice(req.params.invoiceId)
