@@ -1,0 +1,204 @@
+﻿extends layout
+
+block content
+  .max-width
+    section.hero.is-small.is-com
+      .hero-body-noImage
+        .title.is-family-noto-sans ご利用ガイド
+        .subtitle.is-family-noto-sans USER GUIDE
+
+
+  .section.userGuide
+    .is-family-noto-sans.contractWidth.mb-5
+        article.panel.is-info
+          h2.has-text-centered.panel-heading デジタルトレードご利用ガイド
+          .panel-block
+            .container
+              .lead カテゴリ
+              .columns.m-0.userGuide-category.mb-5
+                .column
+                  a.button-hover(href='#feature')
+                    img(src=src='../image/userGuide-icon-feature.svg')
+                    | 各種機能について
+                .column
+                  a.button-hover(href='https://support.ntt.com/bconnection/faq/search' target='_blank')
+                    img(src='../image/userGuide-icon-qa.svg')
+                    | よくある質問
+                .column
+                  a.button-hover(href='#inquiry')
+                    img(src='../image/userGuide-icon-inquiry.svg')
+                    | お問い合わせ
+              
+              .anchor-wrap#feature
+                h3.mb-4 各種機能について
+              #accordion
+                ul.include-accordion.scroll-control
+                  li#invoice.include-accordion-wrap.userGuide-feature.anchor-wrap                  
+                    button.accordionBtn.userGuide-feature-title(type='button') 
+                      span 請求書一括作成
+                    ul
+                      li
+                        .userGuide-feature-contants.columns.m-0
+                          .userGuide-feature-contants-box.column
+                            h5
+                              span.panel-icon
+                                i.fas.fa-file-pdf
+                              | PDFマニュアル
+                            ul
+                              li
+                                a(href='https://bcd-portal.tsdev.biz/html/【Bconnectionデジタルトレードアプリ】操作マニュアル_請求書一括作成.pdf' target='blank') 一括作成方法
+                          .userGuide-feature-contants-box.column
+                            h5
+                              span.panel-icon
+                                i.fas.fa-caret-square-right
+                              | 動画マニュアル
+                            ul
+                              li
+                                a(href='https://www.youtube.com/watch?v=CLjxKjJDnXU' target='blank') 請求書一括作成
+                              li
+                                a(href='https://www.youtube.com/watch?v=HbHp8xwXMjU' target='blank') 取込結果一覧 OKの場合とNGの場合
+                              li
+                                a(href='https://www.youtube.com/watch?v=nC6VJJNpRPU' target='blank') 文書管理から請求書を送信する手順          
+                              li
+                                a(href='https://www.youtube.com/watch?v=QnLZCtvvL0Q' target='blank') 独自のCSVでの請求書一括作成                        
+                  li#journal.include-accordion-wrap.userGuide-feature
+                    button.accordionBtn.userGuide-feature-title(type='button') 
+                      span 仕訳情報管理
+                    ul
+                      li
+                        .userGuide-feature-contants.columns.m-0
+                          .userGuide-feature-contants-box.column
+                            h5
+                              span.panel-icon
+                                i.fas.fa-file-pdf
+                              | PDFマニュアル
+                          .userGuide-feature-contants-box.column
+                            h5
+                              span.panel-icon
+                                i.fas.fa-caret-square-right
+                              | 動画マニュアル
+                            ul
+                              li
+                                a(href='https://www.youtube.com/watch?v=A2xTl6j5ejM' target='blank') 外部会計ソフトへの請求書データの連携手順_項目設定
+                              li
+                                a(href='https://www.youtube.com/watch?v=a5jZcPSNzr4' target='blank') 外部会計ソフトへの請求書データの連携手順_承認ルート設定 仕訳情報設定
+                              li
+                                a(href='https://www.youtube.com/watch?v=B9LvRT8A9F0' target='blank') 外部会計ソフトへの請求書データの連携手順_csvダウンロード手順
+                  li#pdfInvoice.include-accordion-wrap.userGuide-feature
+                    button.accordionBtn.userGuide-feature-title(type='button') 
+                      span PDF請求書
+                    ul
+                      li
+                        .userGuide-feature-contants.columns.m-0
+                          .userGuide-feature-contants-box.column
+                            h5
+                              span.panel-icon
+                                i.fas.fa-file-pdf
+                              | PDFマニュアル
+                            ul
+                              li
+                                a(href='https://bcd-portal.tsdev.biz/html/【Bconnectionデジタルトレードアプリ】操作マニュアル_PDF請求書ドラフト一括作成.pdf' target='blank') PDF請求書ドラフト一括作成
+                          .userGuide-feature-contants-box.column
+                            h5
+                              span.panel-icon
+                                i.fas.fa-caret-square-right
+                              | 動画マニュアル
+                  li#cloud.include-accordion-wrap.userGuide-feature
+                    button.accordionBtn.userGuide-feature-title(type='button') 
+                      span 商奉行クラウド連携
+                    ul
+                      li
+                        .userGuide-feature-contants.columns.m-0
+                          .userGuide-feature-contants-box.column
+                            h5
+                              span.panel-icon
+                                i.fas.fa-file-pdf
+                              | PDFマニュアル
+                          .userGuide-feature-contants-box.column
+                            h5
+                              span.panel-icon
+                                i.fas.fa-caret-square-right
+                              | 動画マニュアル
+                            ul
+                              li
+                                a(href='https://www.youtube.com/watch?v=SGx6eeP8Tw0' target='blank') 商奉行クラウド連携
+                              li
+                                a(href='https://www.youtube.com/watch?v=NAwj5QCE3OA' target='blank') 商奉行クラウド発行先とフォーマットの選択
+                              li
+                                a(href='https://www.youtube.com/watch?v=ZJAeg6sdZKw' target='blank') 商奉行クラウド上の未発行請求書の発行
+                              li
+                                a(href='https://www.youtube.com/watch?v=wXaVj2Sgr_I' target='blank') 商奉行クラウド請求書フォーマット管理
+                              li
+                                a(href='https://www.youtube.com/watch?v=aync2K0U6xI' target='blank') 商奉行クラウド請求書フォーマット作成
+                  li#basic.include-accordion-wrap.userGuide-feature
+                    button.accordionBtn.userGuide-feature-title(type='button') 
+                      span 基本機能
+                    ul
+                      li
+                        .userGuide-feature-contants.columns.m-0
+                          .userGuide-feature-contants-box.column
+                            h5
+                              span.panel-icon
+                                i.fas.fa-file-pdf
+                              | PDFマニュアル
+                            ul
+                              li
+                                a(href='https://support.ntt.com/bconnection/download/search' target='blank') アカウント作成マニュアル
+                              li
+                                a(href='https://nttcom.app.box.com/s/58dgqphwx9tg56jtpo7jc3xy9f38pibk' target='blank') デジタルトレード操作マニュアル
+                          .userGuide-feature-contants-box.column
+                            h5
+                              span.panel-icon
+                                i.fas.fa-caret-square-right
+                              | 動画マニュアル
+                            ul
+                              li
+                                a(href='https://www.youtube.com/watch?v=gHGJBYjyJus' target='blank') dアカウント連携ユーザー向けBconnecitionご利用開始マニュアル
+                              li
+                                a(href='https://www.youtube.com/watch?v=iwcaTj3h9zU' target='blank') TradeShiftアカウント作成
+                              li
+                                a(href='https://www.youtube.com/watch?v=fJYWo5gdWFU' target='blank') アプリケーションの有効化
+                              li
+                                a(href='https://www.youtube.com/watch?v=Vy6ZvIDQhpg' target='blank') アプリケーションの申込
+                              li
+                                a(href='https://www.youtube.com/watch?v=kcZoK0at2uA' target='blank') 会社プロフィール作成
+                              li
+                                a(href='https://www.youtube.com/watch?v=0lIzGBdd5yI' target='blank') ネットワーク接続とTradeShiftテナントID確認                   
+                              li
+                                a(href='https://www.youtube.com/watch?v=poBJEXeGdHc' target='blank') 手入力での請求書発行
+
+              h3.mt-6.mb-4 よくある質問
+              .userGuide-feature.p-4
+                p.mb-3 お客さまから寄せられるご質問をまとめました。お問い合わせの前に、一度ご確認ください。
+                a.button.is-success.is-fullwidth(href='https://support.ntt.com/bconnection/faq/search' target='_blank')
+                  span.external-link よくある質問へ
+
+              .anchor-wrap#inquiry
+                h3.mt-6.mb-4 お問い合わせ
+              .userGuide-feature.p-4
+                if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d" && numberN !== '')
+                  p お問い合わせの際は、問い合わせフォームに以下のお客様番号をご入力ください。
+                  .columns.m-0
+                    .column.is-7.pb-0
+                      .field.has-addons
+                        .control.is-expanded
+                          input.input#numberN(type='text' value=numberN)
+                        .control
+                          a.button#copy-btn(data-clipboard-target="#numberN")
+                            |Copy
+                    .column.pb-0
+                      a.button.is-success.is-fullwidth(href='https://support.ntt.com/bconnection/inquiry/input/pid2200000saa' target='_blank')
+                        span.external-link お問い合わせフォームへ
+                else if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d" && numberN === '')
+                  p 現在お客様番号払出中です。
+                  p 払出後、本画面からお問い合わせが可能となります。
+                else
+                  p お問い合わせは、テナント管理者のみ可能です。
+                  p テナント管理者にご相談の上、お問い合わせください。
+
+    include footer
+
+block append scripts
+  link(rel='stylesheet', type='text/css', href='/css/userGuide.css')
+  link(rel='stylesheet', type='text/css', href='/css/accordion.css')
+  script(src="/js/accordion.js")

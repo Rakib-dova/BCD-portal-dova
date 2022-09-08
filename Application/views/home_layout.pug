@@ -16,25 +16,9 @@ html
       link(rel='stylesheet', type='text/css', href='/css/style.css')
       link(rel='stylesheet', type='text/css', href='/css/animate.min.css')
 
-  body.has-navbar-fixed-top
-    .navbar.is-dark.is-fixed-top
-        .navbar-brand.is-family-noto-sans-bold
-          if title !== 'ポータル'
-            .navbar-item BConnectionデジタルトレード
-            //- a.navbar-brand(href='/') BConnectionデジタルトレード
-            a.navbar-item(href='/') 
-              span.fas.fa-home
-                | Home
-          .navbar-item.right
-            if title && (title === 'PDF請求書編集' || title === 'PDF請求書')
-              img.ncom-logo(src='../../image/ts-app-digitaltrade-ncom-logo.svg')
-            else
-              img.ncom-logo(src='../image/ts-app-digitaltrade-ncom-logo.svg')
-    a(href="userGuide").button-hover.userguide-btn
-      span.panel-icon
-        i.fas.fa-question-circle
-      | ご利用ガイド
-
+  body
+    
+    
     block vars
       - var inputPattarnZenkakuHiragana = '^[^ -~｡-ﾟ\t]+$' // 全角ひらがな
       - var inputPattarnZenkaku = '^[ぁ-んァ-ヶａ-ｚＡ-Ｚー　－‐―−—・，．＆’０-９\u4E00-\u9FFF\u3005-\u3007\u309d\u309e]+$' // 全角文字

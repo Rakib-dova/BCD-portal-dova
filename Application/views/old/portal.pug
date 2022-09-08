@@ -1,10 +1,6 @@
-﻿extends home_layout
+﻿extends layout
 
 block content
-  .topTop.is-flex
-    img(src="../image/ts-app-digitaltrade-banner.svg")
-    img(src="../image/ts-app-digitaltrade-ncom-logo.svg")
-  .heroBefore
   .hero.is-small
     .hero-body.is-logo
       .container
@@ -13,11 +9,10 @@ block content
   input(type="hidden" name="_csrf" value=csrfToken)
   //- 会員サイト連携開発追加
 
-  .container.is-max-widescreen.newCmn
+  .container.is-max-widescreen
     //- .level-left.is-family-sans-serif
     //-   .level-item
     //-     p.title.mb-4 Apps
-
     columns.is-centered
       .column.is-12.menu
         .is-justify-content-start.planStatus
@@ -31,13 +26,19 @@ block content
       .column.is-12.menu
         .approvalNotification
           .approvalNotificationMessage 承認・差し戻し件数を取得しています。
-
-      .columns.infoWrap    
-        .column.is-6
-          .box
-            .media-content
-              .has-text-centered.infoTitle お知らせ
-              .is-active#informationTab
+      .column.is-12.menu
+        .box
+          .media-content
+            .tabs.is-centered.is-boxed.is-medium
+              ul
+                li.is-active
+                  a#informationTab
+                    span お知らせ
+                li
+                  a#constructTab
+                    span 工事・故障情報
+            .tab-content
+              .tab-pane.is-active#informationTab
                 if newsDataArrSize==0
                   p.text-center=newsDataArr[0].message
                 else
@@ -48,15 +49,10 @@ block content
                           td.newsDate=item.date
                           td.newsTitle
                             a.has-text-right(href=item.link target='_blank')=item.title
-            .media-contentMore
-              a.button.is-block(href='https://support.ntt.com/bconnection/information/search' target='_blank') もっと見る 
+                .mt-1.has-text-right
+                  a.button.is-link.is-light(href='https://support.ntt.com/bconnection/information/search' target='_blank') もっと見る 
 
-
-        .column.is-6
-          .box
-            .media-content
-              .has-text-centered.infoTitle 工事・故障情報        
-              .is-active#constructTab
+              .tab-pane#constructTab
                 if constructDataArrSize==0
                   p.text-center=constructDataArr[0].message
                 else
@@ -67,153 +63,123 @@ block content
                           td.newsDate=item.date
                           td.newsTitle
                             a.has-text-right(href=item.link target='_blank')=item.title
-              .media-contentMore
-                a.button.is-block(href='https://support.ntt.com/bconnection/maintenance/search' target='_blank') もっと見る                   
-
-      h2.topTitle 機能一覧
-
+                .mt-1.has-text-right
+                  a.button.is-link.is-light(href='https://support.ntt.com/bconnection/maintenance/search' target='_blank') もっと見る 
       .column.is-12.menu
         .columns.is-desktop.is-family-noto-sans
-          .column
+          .column.hvr-float
             .box.iconBox.textOverflow
-              .media.appdesc.is-align-items-flex-end.mb-4.ml-4
-                .media-left
-                  img.app-icon(src='../image/ts-app-digitaltrade-func-icon-csv_upload-type2c.svg')
-                .media-content
-                  p.title.is-5 請求書一括作成
-                  img(src='../image/ts-app-issueonly_status.svg')
-              p 指定ファイルをアップロードすることで、複数のドラフト状態の請求書を一括で作成できます。 
-              a(href='/csvupload')  請求書一括作成
-              a(href='/uploadFormatList') 独自フォーマット登録
-              a(href='/userGuide#invoice') 操作マニュアル
-          .column
+              a.show-modal(data-target='csvupload-modal')
+                .media.appdesc
+                  .media-left
+                    img.app-icon(src='../image/ts-app-digitaltrade-func-icon-csv_upload-type2c.svg')
+                  .media-content
+                    p.title.is-5 請求書一括作成
+                    p 指定ファイルをアップロードすることで、複数のドラフト状態の請求書を一括で作成できます。 
+          .column.hvr-float
             .box.iconBox.textOverflow
-              .media.appdesc.is-align-items-flex-end.mb-4.ml-4
-                .media-left
-                  img.app-icon(src='../image/ts-app-digitaltrade-func-icon-csv_download.svg')
-                .media-content
-                  p.title.is-5 請求情報ダウンロード
-                  img(src='../image/ts-app-digitaltrade-func-icon-siwake-type3_status.svg')
-              p 送受信した請求情報をCSV形式でダウンロードできます。 
-              a(href='/csvDownload')  仕訳情報ダウンロード
-          .column
-            .box.iconBox.textOverflow
-              .media.appdesc.is-align-items-flex-end.mb-4.ml-4
-                .media-left
-                  img.app-icon(src='../image/ts-app-digitaltrade-func-icon-siwake-type3.svg')
-                .media-content
-                  p.title.is-5 仕訳情報管理
-                  img(src='../image/ts-app-digitaltrade-func-icon-siwake-type3_status.svg')
-              p 請求書に対して勘定科目などの仕訳情報を設定できます。また、仕訳情報をCSV形式でダウンロードできます。  
-              a.show-modal(data-target='registAccountCode-modal')  各種コード設定
-              a(href='/inboxList/1') 支払依頼
-              a(href='/journalDownload') 仕訳情報ダウンロード
-              a(href='/approveRouteList') 承認ルート登録
-              a(href='/userGuide#journal') 操作マニュアル
-              
-        .columns.is-desktop.is-family-noto-sans
-          .column
-            .box.iconBox.textOverflow
-              .media.appdesc.is-align-items-flex-end.mb-4.ml-4
-                .media-left
-                  img.app-icon(src='../image/ts-app-digitaltrade-func-icon-pdf_invoices.svg')
-                .media-content
-                  p.title.is-5 PDF請求書作成
-                  img(src='../image/ts-app-issueonly_status.svg')
-              p Tradeshift非導入企業へ送付可能なPDFを出力できます。
-              a(href='/pdfInvoices/register') 新規作成
-              a(href='/pdfInvoices/list') ドラフト一覧
-              a(href='/pdfInvoiceCsvUpload') ドラフト一括作成
-              a(href='/imprintUpload') 印影登録
-              a(href='/userGuide#pdfInvoice') 操作マニュアル
-              .smaTx ※この機能で作成した請求書はTradeshiftの文書管理アプリの管理外となります。        
-          .column
-            .box.iconBox.textOverflow
-              .media.appdesc.is-align-items-flex-end.mb-4.ml-4
-                .media-left
-                  img.app-icon(src='../obc/images/ts-app-digitaltrade-appicon.svg')
-                .media-content
-                  p.title.is-5 商奉行#[sup &reg;]クラウド連携
-
-                  img(src='../image/ts-app-issueonly_status.svg')
-              p 請求書情報を商奉行クラウド間で連携できます。  
-              a(href='/bugyo/menu' target='_top')  利用開始
-              a(href='/userGuide#cloud') 操作マニュアル
-
-          .column
-            .box.iconBox.textOverflow
-              .media.appdesc.mb-4.ml-4
-                .media-left
-                  img.app-icon(src='../image/ts-app-digitaltrade-func-icon-support.svg')
-                .media-content
-                  p.title.is-5 サポート
-              p 設定方法、利用方法に関するお問い合わせが無料で利用できます。その他FAQを参照できます。
-              a(href='/userGuide') ご利用ガイド
-              a(href='https://support.ntt.com/bconnection/faq/search' target='_blank') 
-                span.external-link よくある質問
-              a(href='/userGuide#inquiry')  各種お問い合わせ
-              
-
+              a(href='/csvDownload')
+                .media.appdesc
+                  .media-left
+                    img.app-icon(src='../image/ts-app-digitaltrade-func-icon-csv_download.svg')
+                  .media-content
+                    p.title.is-5 請求情報ダウンロード
+                    p 送受信した請求情報をCSV形式でダウンロードできます。
+          .column.hvr-float
+              .box.iconBox.textOverflow
+                a.show-modal(data-target='registAccountCode-modal')
+                  .media.appdesc
+                    .media-left
+                      img.app-icon(src='../image/ts-app-digitaltrade-func-icon-siwake-type3.svg')
+                    .media-content
+                      p.title.is-5 仕訳情報管理
+                      p 請求書に対して勘定科目などの仕訳情報を設定できます。また、仕訳情報をCSV形式でダウンロードできます。
 
         .columns.is-desktop.is-family-noto-sans
-          .column.is-one-third
+          .column.hvr-float
             .box.iconBox.textOverflow
-              .media.appdesc.mb-4.ml-4
-                .media-left
-                  img.app-icon(src='../image/ts-app-digitaltrade-func-icon-setting.svg')
-                .media-content
-                  p.title.is-5 設定
-              p 契約情報変更と解約を行うことができます。#[br]解約の場合は取り消しはできません。  
-              a(href='/contractDetail')  ご契約内容
-              a(href='/uploadUsers') ユーザー一括登録
-              a(href='/')  企業一括登録        
-          .column.is-one-third
+              a.show-modal(data-target='bugyo-modal')
+                .media.appdesc
+                  .media-left
+                    img.app-icon(src='../obc/images/ts-app-digitaltrade-appicon.svg')
+                  .media-content
+                    p.title.is-5 商奉行#[sup &reg;]クラウド連携
+                    p 請求書情報を商奉行クラウド間で連携できます。
+          .column.hvr-float
             .box.iconBox.textOverflow
-              .media.appdesc.mb-4
-                .media-left
-                  img.app-icon(src='../image/ts-app-digitaltrade-func-icon-add.svg')
-                .media-content
-                  p.title.is-5 追加オプション申込
-              p オプションサービスの新規申し込みを行うことができます。  
-              a.show-modal(data-target='information-lightplan') オプション詳細・申込
+              a.href(href="/pdfInvoices/list") 
+                .media.appdesc
+                  .media-left
+                    img.app-icon(src='../image/ts-app-digitaltrade-func-icon-pdf_invoices.svg')
+                  .media-content
+                    p.title.is-5 PDF請求書作成
+                    p Tradeshift非導入企業へ送付可能なPDFを出力できます。
+                    p.content-coution-font-size ※この機能で作成した請求書はTradeshiftの文書管理アプリの管理外となります。
+          .column.hvr-float
+            .box.iconBox.textOverflow
+              a.show-modal(data-target='support-modal')
+                .media.appdesc
+                  .media-left
+                    img.app-icon(src='../image/ts-app-digitaltrade-func-icon-support.svg')
+                  .media-content
+                    p.title.is-5 サポート
+                    p 設定方法、利用方法に関するお問い合わせが無料で利用できます。その他FAQを参照できます。
 
-      h2.topTitle 提携サービス
+        .columns.is-desktop.is-family-noto-sans
+          .column.hvr-float
+            if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
+              .box.iconBox.textOverflow
+                a.show-modal(data-target='config-modal')
+                  .media.appdesc
+                    .media-left
+                      img.app-icon(src='../image/ts-app-digitaltrade-func-icon-setting.svg')
+                    .media-content
+                      p.title.is-5 設定
+                      p 契約情報変更と解約を行うことができます。
+                      p 解約の場合は取り消しはできません。
+          .column.hvr-float
+            if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
+              .box.iconBox.textOverflow
+                a.show-modal(data-target='information-lightplan')
+                  .media.appdesc
+                    .media-left
+                      img.app-icon(src='../image/ts-app-digitaltrade-func-icon-add.svg')
+                    .media-content
+                      p.title-law 追加オプション申込
+                      p オプションサービスの新規申し込みを行うことができます。
+          .column.hvr-float
 
       .column.is-12.menu
+      p.olta-title-font-size 提携サービス
         .columns.is-desktop.is-family-noto-sans
-          .column
-            .box.iserviceBox.pt-2.pr-0
+          .column.hvr-float
+            .box.iconBox.textOverflow
               a.show-modal(data-target='factoring-modal')
-                .columns
-                  .column.is-4.py-0.pl-0
+                .media.appdesc
+                  .media-left
                     img.app-icon(src='../image/ts-app-digitaltrade-func-icon-olta-type1.svg')
-                  .column.py-0.pl-0
-                    div.mb-1 ファクタリング
-                    p.mb-2 請求書（売掛金）を買い取らせていただくことで素早く簡単に現金化ができるサービスです。
-                  .column.is-1.py-0.px-0.mt-4.pt-5
-                    img(src='../image/r-arrow_big.svg')  
-          .column
-            .box.iserviceBox.pt-2.pr-0
+                  .media-content
+                    p.title.is-5 ファクタリング
+                    p 請求書（売掛金）を買い取らせていただくことで素早く簡単に現金化ができるサービスです。
+          .column.hvr-float
+            .box.iconBox.textOverflow
               a.show-modal(data-target='law-modal')
-                .columns
-                  .column.is-4.py-0.pl-0
+                .media.appdesc
+                  .media-left
                     img.app-icon(src='../image/ben.svg')
-                  .column.py-0.pl-0
-                    div.mb-1 法律・会計税務の#[br]サポート
-                    p.mb-2 企業の法律や会計税務に関する悩みについて、専門家に相談することから、最適な方をご紹介することまで可能。
-                  .column.is-1.py-0.px-0.mt-4.pt-5
-                    img(src='../image/r-arrow_big.svg')        
-          .column
-            .box.iserviceBox.pt-2.pr-0
+                  .media-content
+                    p.title-law 法律・会計税務の
+                    p.title.is-5.margin-bottom-02rem サポート
+                    p 企業の法律や会計税務に関する悩みについて、専門家に相談することから、最適な方をご紹介することまで可能。                     
+          .column.hvr-float
+            .box.iconBox.textOverflow
               a.show-modal(data-target='settlement-modal')
-                .columns
-                  .column.is-4.py-0.pl-0
+                .media.appdesc
+                  .media-left
                     img.app-icon(src='../image/ts-app-digitaltrade-func-icon-nttsmarttrade.svg')
-                  .column.py-0.pl-0
-                    div.mb-1 銀行振込消込
-                    p.mb-2 専用の振込口座をご利用いただくことで振込名義人によらず請求先を特定できるサービスです。
-                  .column.is-1.py-0.px-0.mt-4.pt-5
-                    img(src='../image/r-arrow_big.svg')                                   
+                  .media-content
+                    p.title.is-5 銀行振込消込
+                    p 専用の振込口座をご利用いただくことで振込名義人によらず請求先を特定できるサービスです。
 
     .modal#support-modal
       .modal-background.cancel-button(data-target='support-modal')
@@ -233,6 +199,31 @@ block content
               p 設定方法、ご利用方法のお問い合わせ
         footer.modal-card-foot
       
+    .modal#csvupload-modal
+      .modal-background.cancel-button(data-target='csvupload-modal')
+      .modal-card.is-family-noto-sans
+        header.modal-card-head
+          p.modal-card-title.title.mb-0 請求書一括作成
+          button.delete(data-target="csvupload-modal")
+        section.modal-card-body
+          nav.panel
+            a.panel-block(href='/csvupload') 
+              span.panel-icon
+                i.fas.fa-file
+              p 請求書一括作成
+            a.panel-block(href='/uploadFormatList') 
+              span.panel-icon
+                i.fas.fa-file
+              p 請求書アップロードフォーマット一覧
+            a.panel-block(download href="../html/請求書一括作成フォーマット_v1.1.csv")
+              span.panel-icon
+                i.fas.fa-file
+              p アップロード用請求書フォーマットcsvダウンロード
+            a.panel-block(download href="../html/【Bconnectionデジタルトレードアプリ】操作マニュアル_請求書一括作成.pdf")
+              span.panel-icon
+                i.fas.fa-file
+              p 操作マニュアルダウンロード
+        footer.modal-card-foot
 
     .modal#support-confirmation-modal
       .modal-background.cancel-button(data-target='support-confirmation-modal')
@@ -276,8 +267,51 @@ block content
               span.panel-icon
                 i.fas.fa-file
               p 部門データ設定 
+            a.panel-block(id='moveInboxList' href='/inboxList/1')
+              span.panel-icon
+                i.fas.fa-file
+              p 支払依頼一覧
+            a.panel-block(href='/journalDownload')
+             span.panel-icon
+               i.fas.fa-file
+             p 仕訳情報ダウンロード
+            a.panel-block(href='/approveRouteList')
+             span.panel-icon
+               i.fas.fa-file
+             p 承認ルート一覧
         footer.modal-card-foot
 
+    .modal#csvDownload-modal
+      .modal-background.cancel-button(data-target='csvDownload-modal')
+      .modal-card.is-family-noto-sans
+        header.modal-card-head
+          p.modal-card-title 請求情報ダウンロード
+          button.delete(data-target="csvDownload-modal")
+        section.modal-card-body
+          nav.panel
+            a.panel-block(href='/csvDownload')
+              span.panel-icon
+                i.fas.fa-file
+              p 請求情報ダウンロード
+        footer.modal-card-foot
+
+    .modal#config-modal
+      .modal-background.cancel-button(data-target='config-modal')
+      .modal-card.is-family-noto-sans
+        header.modal-card-head
+          p.modal-card-title 設定
+          button.delete(data-target="config-modal")
+        section.modal-card-body
+          nav.panel
+            a.panel-block(href='/contractDetail')
+              span.panel-icon
+                i.fas.fa-file
+              p ご契約内容
+            a.panel-block(href='/uploadUsers') 
+              span.panel-icon
+                i.fas.fa-file
+              p ユーザー一括登録
+        footer.modal-card-foot
     
     .modal.modal-fx-fadeInscale#loading-progress-modal
           .modal-background
@@ -389,6 +423,24 @@ block content
           br
           p  お問合せ・お申込みは下記リンクから。※リンク先は外部サイトとなります。
           a.olta-link-underline(href='https://www.nttsmarttrade.co.jp/bconnection_lp/' target='_blank') https://www.nttsmarttrade.co.jp/bconnection_lp/
+        footer.modal-card-foot
+    
+    .modal#bugyo-modal
+      .modal-background.cancel-button(data-target='bugyo-modal')
+      .modal-card.is-family-noto-sans
+        header.modal-card-head
+          p.modal-card-title.title.mb-0 商奉行クラウド連携
+          button.delete(data-target="bugyo-modal")
+        section.modal-card-body
+          nav.panel
+            a.panel-block(href='/bugyo/menu' target='_top')
+              span.panel-icon
+                i.fas.fa-file
+              p 利用開始
+            a.panel-block(download href="../html/【Bconnectionデジタルトレードアプリ】操作マニュアル_商奉行クラウド連携機能.pdf")
+              span.panel-icon
+                i.fas.fa-file
+              p 操作マニュアルダウンロード
         footer.modal-card-foot
 
     include informationLightplanModal

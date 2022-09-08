@@ -30,11 +30,7 @@ html
               img.ncom-logo(src='../../image/ts-app-digitaltrade-ncom-logo.svg')
             else
               img.ncom-logo(src='../image/ts-app-digitaltrade-ncom-logo.svg')
-    a(href="userGuide").button-hover.userguide-btn
-      span.panel-icon
-        i.fas.fa-question-circle
-      | ご利用ガイド
-
+    
     block vars
       - var inputPattarnZenkakuHiragana = '^[^ -~｡-ﾟ\t]+$' // 全角ひらがな
       - var inputPattarnZenkaku = '^[ぁ-んァ-ヶａ-ｚＡ-Ｚー　－‐―−—・，．＆’０-９\u4E00-\u9FFF\u3005-\u3007\u309d\u309e]+$' // 全角文字
