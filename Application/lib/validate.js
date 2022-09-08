@@ -1,5 +1,6 @@
 // See https://qiita.com/standard-software/items/0b2617062b2e4c7f1abb
 const constantsDefine = require('../constants')
+const contractStatuses = constantsDefine.statusConstants.contractStatuses
 
 const assert = function (value, message) {
   if (typeof message === 'undefined' || message === null) {
@@ -139,6 +140,24 @@ const isStatusForSimpleChange = function (contractStatus, deleteFlag) {
   return true
 }
 
+/**
+ * デジトレ契約が解約手続き中か判定する
+ * @param {*} contract デジトレ契約情報
+ * @returns
+ */
+const isBcdCancelling = (bcdContract) => {
+  // deleteFlag: false & 契約ステータスが解約着手待ち(30)or解約対応中(31) の場合
+  if (
+    !bcdContract.deleteFlag &&
+    (bcdContract.contractStatus === contractStatuses.cancellationOrder ||
+      bcdContract.contractStatus === contractStatuses.cancellationReceive)
+  ) {
+    return true
+  } else {
+    return false
+  }
+}
+
 // CSVファイルのバリデーションチェック（現在行～）
 // 請求書番号
 const isInvoiceId = function (invoiceId) {
@@ -256,6 +275,21 @@ const isPriceValue = function (priceValue) {
 // 明細-税
 const isTaxCategori = function (category) {
   const taxCategory = require('./bconCsvTax')
+  // 値の存在有無確認
+  if (category.length < 1) {
+    return 'TAXERR001'
+  }
+
+  if (!taxCategory[category]) {
+    return 'TAXERR000'
+  }
+
+  return taxCategory[category]
+}
+
+// 明細-税
+const isTaxPercent = function (category) {
+  const taxCategory = require('./bconCsvTaxPercent')
   // 値の存在有無確認
   if (category.length < 1) {
     return 'TAXERR001'
@@ -597,6 +631,129 @@ const isValidEmail = function (emailAddress) {
   return true
 }
 
+// トレードシフトのユーザアカウント用に使用するメールアドレスの形式チェック
+const isValidEmailTsUser = function (emailAddress) {
+  const emailType = typeof emailAddress
+
+  if (emailType === 'undefined' || emailAddress.length === 0) return false
+  // 255文字まで
+  if (emailAddress.length > 255) return false
+
+  const getCharCode = function (character) {
+    return character.charCodeAt()
+  }
+
+  // 取引担当者メールアドレスが配列形式で受け取った場合
+  if (emailType !== 'string') return false
+
+  if (emailAddress.match(/@/g) === null || emailAddress.match(/@/g).length !== 1) return false
+  const emailParty = emailAddress.split('@')
+
+  let local = null
+  let domain = null
+
+  if (emailParty.length === 1) return false
+
+  if (emailParty.length === 2) {
+    local = emailParty[0]
+    domain = emailParty[1]
+  } else {
+    local = ''
+    for (let idx = emailParty.length - 1; idx >= 0; idx--) {
+      if ((idx = emailParty.length - 1)) {
+        domain = emailParty[idx]
+      } else {
+        if (emailParty[idx].length === 0) return false
+        local += emailParty[idx]
+      }
+    }
+  }
+
+  if (typeof domain === 'undefined') return false
+
+  // @より前：64文字以下、後：190文字以下
+  if (local.length > 64) return false
+  if (domain.length > 190) return false
+
+  // @より前のチェック
+  for (const character of local) {
+    const code = getCharCode(character)
+    // 半角英数字以外場合エラー発生
+    // 利用不可の特殊文字コード設定("<>():,@;)
+    const disabledCharacterCode = [34, 60, 62, 40, 41, 58, 44, 59]
+    if (code > 127 || disabledCharacterCode.indexOf(code) > -1) {
+      return false
+    }
+  }
+
+  // @より後のチェック
+  // 「.」が存在しない場合、エラー
+  if (domain.indexOf('.') === -1) return false
+  // 文字種チェック
+  const pattern = /^[A-Za-z0-9.]{1,190}$/
+  if (!pattern.test(domain)) return false
+
+  // 先頭、末尾のドットはNG
+  if (local.indexOf('.') === 0) return false
+  if (local.lastIndexOf('.') === local.length - 1) return false
+  if (domain.indexOf('.') === 0) return false
+  if (domain.lastIndexOf('.') === domain.length - 1) return false
+
+  return true
+}
+
+// トレードシフトのユーザアカウント用に使用するメールアドレスの形式チェック
+const isValidTotalPrice = function (documentNo, invoiceData) {
+  let totalPrice = 0
+  invoiceData.forEach((element) => {
+    if (element.docNo === documentNo) {
+      const csvColumn = element.rows.split(',')
+      // 数量
+      const quantityValue = csvColumn[15]
+      // 単価
+      const price = csvColumn[17]
+      // 小計
+      const subTotal = quantityValue * price
+      // 税率
+      const taxPercent = isTaxPercent(csvColumn[18])
+      // 税金額
+      const taxPrice = subTotal * taxPercent
+
+      totalPrice += subTotal + Math.floor(taxPrice)
+    }
+  })
+
+  if (totalPrice > constantsDefine.invoiceValidDefine.TOTALPRICEVALUE) {
+    return false
+  }
+
+  return true
+}
+
+/**
+ * 絵文字の入力チェック
+ * @param {string} str テキストに入力された文字
+ * @return {boolean} true:strに絵文字が入力された場合
+ *                   false:strに絵文字が入力されていない場合
+ */
+function isEmoji(str) {
+  const ranges = [
+    '[\ud800-\ud8ff][\ud000-\udfff]', // 基本的な絵文字除去
+    '[\ud000-\udfff]{2,}', // サロゲートペアの二回以上の繰り返しがあった場合
+    '\ud7c9[\udc00-\udfff]', // 特定のシリーズ除去
+    '[0-9|*|#][\uFE0E-\uFE0F]\u20E3', // 数字系絵文字
+    '[0-9|*|#]\u20E3', // 数字系絵文字
+    '[©|®|\u2010-\u3fff][\uFE0E-\uFE0F]', // 環境依存文字や日本語との組み合わせによる絵文字
+    '[\u2010-\u2FFF]', // 指や手、物など、単体で絵文字となるもの
+    '\uA4B3' // 数学記号の環境依存文字の除去
+  ]
+  if (str.match(ranges.join('|'))) {
+    return true
+  } else {
+    return false
+  }
+}
+
 module.exports = {
   isArray: isArray,
   isNumber: isNumber,
@@ -611,6 +768,7 @@ module.exports = {
   isStatusForRegister: isStatusForRegister,
   isStatusForCancel: isStatusForCancel,
   isStatusForSimpleChange: isStatusForSimpleChange,
+  isBcdCancelling: isBcdCancelling,
   isInvoiceId: isInvoiceId,
   isBankName: isBankName,
   isDate: isDate,
@@ -619,6 +777,7 @@ module.exports = {
   isQuantityValue: isQuantityValue,
   isPriceValue: isPriceValue,
   isTaxCategori: isTaxCategori,
+  isTaxPercent: isTaxPercent,
   isUserTaxCategori: isUserTaxCategori,
   isUserUnitcode: isUserUnitcode,
   isUnitcode: isUnitcode,
@@ -636,5 +795,8 @@ module.exports = {
   isName: isName,
   isDepartmentCode: isDepartmentCode,
   isContactEmail: isContactEmail,
-  isValidEmail: isValidEmail
+  isValidEmail: isValidEmail,
+  isValidEmailTsUser: isValidEmailTsUser,
+  isValidTotalPrice: isValidTotalPrice,
+  isEmoji: isEmoji
 }

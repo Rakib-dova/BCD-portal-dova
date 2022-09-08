@@ -18,6 +18,8 @@ const path = require('path')
 const filePath = process.env.INVOICE_UPLOAD_PATH
 const multer = require('multer')
 const upload = multer({ dest: process.env.INVOICE_UPLOAD_PATH })
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
 let uploadData
 
 const cbPostIndex = async (req, res, next) => {
@@ -108,8 +110,8 @@ const cbPostIndex = async (req, res, next) => {
   } else {
     let headlessItems = ''
     let idx = 0
-    while (idx < 19) {
-      if (idx !== 18) {
+    while (idx < 20) {
+      if (idx !== 19) {
         headlessItems += `項目${idx + 1},`
       } else {
         headlessItems += `項目${idx + 1}`
@@ -376,7 +378,7 @@ const cbPostIndex = async (req, res, next) => {
   }
 
   const emptyselectedFormatData = []
-  for (let i = 0; i < 19; i++) {
+  for (let i = 0; i < 20; i++) {
     emptyselectedFormatData.push('')
   }
 
@@ -390,7 +392,8 @@ const cbPostIndex = async (req, res, next) => {
     selectedFormatData: emptyselectedFormatData,
     itemRowNo: req.body.uploadFormatNumber,
     dataStartRowNo: req.body.defaultNumber,
-    checkItemNameLine: req.body.checkItemNameLine
+    checkItemNameLine: req.body.checkItemNameLine,
+    csrfToken: req.csrfToken()
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
@@ -564,6 +567,10 @@ const cbPostConfirmIndex = async (req, res, next) => {
     }
   }
 
+  // アプリ効果測定用ログ出力
+  const jsonLog = { tenantId: req.user.tenantId, action: 'registerUploadFormat' }
+  logger.info(jsonLog)
+
   // 画面移動
   req.flash('info', 'フォーマットの登録が完了しました。')
   res.redirect(303, '/uploadFormatList')
@@ -705,10 +712,10 @@ const cbGetCheckFormat = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetCheckFormat')
 }
 
-router.post('/', upload.single('dataFile'), cbPostIndex)
-router.post('/cbPostConfirmIndex', cbPostConfirmIndex)
-router.delete('/:uploadFormatId', cbDeleteFormat)
-router.get('/:uploadFormatId', cbGetCheckFormat)
+router.post('/', upload.single('dataFile'), csrfProtection, cbPostIndex)
+router.post('/cbPostConfirmIndex', csrfProtection, cbPostConfirmIndex)
+router.delete('/:uploadFormatId', csrfProtection, cbDeleteFormat)
+router.get('/:uploadFormatId', csrfProtection, cbGetCheckFormat)
 module.exports = {
   router: router,
   cbPostIndex: cbPostIndex,

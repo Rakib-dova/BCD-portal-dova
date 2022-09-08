@@ -1,0 +1,88 @@
+extends layout
+
+block content
+  .max-width
+    section.hero.is-small.is-com
+      .hero-body-noImage
+        .title.is-family-noto-sans #{title}
+        .subtitle.is-family-noto-sans #{engTitle}
+
+  .container
+    div.title-box-journallzing
+      h4.title-text-journallzing.text-inbox 出力内容登録
+    .box
+      include invoicePDFHeader
+      include invoicePDFLines
+      include invoicePDFFooter
+      .grouped-button.margin-top-40p
+        if editing
+          a.button.mr-6.show-modal(id = 'backButton') 戻る
+          a.button.mr-6.is-success#save-btn 一時保存
+        else
+          a.button.mr-6(href='/pdfInvoices/list') 戻る
+        a.button.is-link.show-modal#output-modal-btn 出力
+        //- a.button.is-link#delete-btn 削除(デバック要)
+  
+  include footer
+
+  div#invoice-json(hidden="true") #{invoice}
+  div#lines-json(hidden="true") #{lines}
+
+  .modal#back-modal
+    .modal-background.cancel-button(data-target='back-modal')
+    .modal-card.is-family-noto-sans
+      header.modal-card-head
+        p.modal-card-title.title.mb-0 注意
+        button.delete(data-target='back-modal')
+      section.modal-card-body
+        p 画面を離れると入力した内容が失われます。画面を離れますか？
+      footer.modal-card-foot
+        div.button-area
+          a.button#cancel-btn.cancel-button(data-target='back-modal') キャンセル
+          a.button.is-link.mr-6(href='/pdfInvoices/list') 離れる 
+
+  .modal#uploadSealImp-modal
+    .modal-background.cancel-button(data-target='uploadSealImp-modal')
+    .modal-card.is-family-noto-sans
+      header.modal-card-head
+        p.modal-card-title.title.mb-0 注意
+        button.delete(data-target='uploadSealImp-modal')
+      section.modal-card-body
+        p 画面を離れると入力した内容が失われます。画面を離れますか？
+      footer.modal-card-foot
+        div.button-area
+          a.button#cancel-btn.cancel-button(data-target='uploadSealImp-modal') キャンセル
+          a.button.is-link.mr-6(href='/imprintUpload') 印影登録
+
+  .modal#output-modal
+    .modal-background.cancel-button(data-target='output-modal')
+    .modal-card.is-family-noto-sans
+      header.modal-card-head
+        p.modal-card-title.title.mb-0 処理中
+        button.delete(data-target='output-modal')
+      section.modal-card-body
+        p PDFを出力完了すると一覧から請求書が削除されます。
+        p 出力されたPDFの保管をお願いいたします。
+        p ※ 確定ボタン押下後、約5秒でPDFがダウンロードされます。
+      footer.modal-card-foot
+        div.button-area
+          a.button#cancel-btn.cancel-button(data-target='output-modal') キャンセル
+          a.button.is-link.mr-6#output-btn 確定 
+      
+      .modal.modal-fx-fadeInscale#request-progress-modal
+        .modal-background
+        .modal-card
+          header.modal-card-head
+            p.modal-card-title
+          section.modal-card-body
+            center
+              p.modal-card-result#modal-card-result 処理中
+          footer.modal-card-foot
+
+block append scripts
+  script(src="/js/lib/utils.js")
+  script(src="/js/lib/pdfInvoiceValidation.js")
+  script(src="/js/services/pdfInvoice.js")
+  script(src="/js/pdfInvoice-page.js")
+  link(rel='stylesheet', type='text/css', href='/css/inbox.css')
+  link(rel='stylesheet', type='text/css', href='/css/invoicePDF.css')

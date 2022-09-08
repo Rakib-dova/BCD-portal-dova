@@ -61,4 +61,8 @@ exports.config = (env) => {
   process.env.MAIL_CIPHERS = MAIL_CIPHERS
   process.env.MAIL_USER = MAIL_USER
   process.env.MAIL_PASS = MAIL_PASS
+
+  // ストレージ接続情報
+  const { AZURE_STORAGE_CONNECTION_STRING } = JSON.parse(env.AZURE_STORAGE_CONNECTION_STRING.replace(/'/g, '"'))
+  process.env.AZURE_STORAGE_CONNECTION_STRING = AZURE_STORAGE_CONNECTION_STRING
 }

@@ -11,6 +11,10 @@ const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
 const inboxController = require('../controllers/inboxController')
 const notiTitle = '仕分け情報設定'
+const approvalInboxController = require('../controllers/approvalInboxController')
+
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
 
 const bodyParser = require('body-parser')
 router.use(
@@ -61,6 +65,7 @@ const cbGetIndex = async (req, res, next) => {
   // ページ取得
   const accessToken = req.user.accessToken
   const refreshToken = req.user.refreshToken
+  const tenantId = contract.tenantId
   const invoiceId = req.params.invoiceId
   let result
   try {
@@ -173,8 +178,19 @@ const cbGetIndex = async (req, res, next) => {
   const isRequestApproval = await inboxController.getRequestApproval(contractId, invoiceId)
   let presentation = 'inbox'
 
+  let requestApproval = []
   if (isRequestApproval) {
     presentation = 'readonlyInbox'
+    requestApproval = await approvalInboxController.getRequestApproval(
+      accessToken,
+      refreshToken,
+      contractId,
+      invoiceId,
+      tenantId,
+      true
+    )
+
+    if (requestApproval === null) return next(errorHelper.create(500))
   }
 
   res.render(presentation, {
@@ -187,7 +203,9 @@ const cbGetIndex = async (req, res, next) => {
     optionLine6: optionLine6,
     optionLine7: optionLine7,
     optionLine8: optionLine8,
-    documentId: invoiceId
+    documentId: invoiceId,
+    requestApprovals: requestApproval,
+    csrfToken: req.csrfToken()
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
@@ -416,10 +434,10 @@ const cbPostDepartment = async (req, res, next) => {
   }
 }
 
-router.post('/department', helper.isAuthenticated, cbPostDepartment)
-router.get('/:invoiceId', helper.isAuthenticated, cbGetIndex)
-router.post('/getCode', helper.isAuthenticated, cbPostGetCode)
-router.post('/:invoiceId', helper.isAuthenticated, cbPostIndex)
+router.post('/department', helper.isAuthenticated, csrfProtection, cbPostDepartment)
+router.get('/:invoiceId', helper.isAuthenticated, csrfProtection, cbGetIndex)
+router.post('/getCode', helper.isAuthenticated, csrfProtection, cbPostGetCode)
+router.post('/:invoiceId', helper.isAuthenticated, csrfProtection, cbPostIndex)
 
 module.exports = {
   router: router,

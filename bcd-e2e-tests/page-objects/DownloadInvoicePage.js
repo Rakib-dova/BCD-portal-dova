@@ -208,12 +208,12 @@ class DownloadInvoicePage {
 
   // CSVダウンロードボタンが存在するか
   async isCsvDownloadBtnExist() {
-    return await this.actionUtils.isExist(this.frame, '"CSVダウンロード"');
+    return await this.actionUtils.isExist(this.frame, '#submit');
   }
 
   // CSVダウンロードボタンをクリックする
   async clickCsvDownloadBtn() {
-    return await this.actionUtils.downloadFile(this.frame, '"CSVダウンロード"');
+    return await this.actionUtils.downloadFile(this.frame, '#submit');
   }
 
   // Homeへ戻る

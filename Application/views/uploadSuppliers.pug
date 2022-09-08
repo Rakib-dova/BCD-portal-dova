@@ -1,0 +1,59 @@
+extends layout
+
+block content
+  .max-width
+    section.hero.is-small.is-com
+      .hero-body-noImage
+        .title.is-family-noto-sans #{uploadCommonLayoutTitle}
+        .subtitle.is-family-noto-sans #{uploadCommonLayoutEngTitle}
+    
+    .columns.is-centered
+      .column.is-11
+        .box
+          .columns.is-centered.uploader-columns
+            .column
+              form#suppliersUpload(action= suppliersUpload method='POST' enctype='multipart/form-data')
+                input(type="hidden" name="_csrf" value=csrfToken)
+                .file.is-centered.is-medium.is-boxed.has-name.is-border.is-white
+                  label.file-label.has-text-centered
+                    input.file-input(type='file' name= fileInputName accept='.csv').is-purple
+                    span.file-cta.inbox-size-selected-file
+                      span.file-idForCodeInput
+                        i.fas.fa-upload.fa-3x.title-selected-file-icon.up-selected-file-title
+                      span.file-label.up-selected-file-title
+                        p.td-overflow.font-is-macSystem.title-selected-file #{cautionForSelectedFile}
+                      span
+                        a.button.btn-primary.is-small.is-family-noto-sans.pt-0.pb-0.up-selected-file-title ファイル選択
+                    span.file-name
+                      p.td-overflow.is-family-noto-sans#filename             
+
+              .mt-5.has-text-centered
+                a.button.box-large.is-outlined.is-medium.is-family-noto-sans.is-link#upload(disabled='disabled') アップロード開始
+
+
+              if procedureContents
+                .mt-5
+                  label.is-family-noto-sans-bold.tip-title #{procedureContents.procedureTitle}
+                  .columns.is-centered.mt-0.mb-0
+                    .column-csvupload
+                      p.border #{procedureContents.procedureComment1}
+                      a.border(download href= formatFileLocation) 　#{formatFileLinkText}
+                      p.border #{procedureContents.procedureComment2}
+                      each child, idx in procedureContents.procedureComment2Children
+                        p.border 　#{child}
+                      p.border #{procedureContents.procedureComment3}
+                      p.border #{procedureContents.procedureComment4}               
+
+    .modal.modal-fx-fadeInscale#upload-progress-modal
+        .modal-background
+        .modal-card
+          header.modal-card-head
+            p.modal-card-title
+          section.modal-card-body
+            center
+              p.modal-card-result#modal-card-result アップロード中
+          footer.modal-card-foot
+    include footer
+
+block append scripts
+  script(src="/js/uploadSuppliers-page.js")

@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const { parse } = require('csv-parse/sync');
 const { stringify } = require('csv-stringify/sync');
+const comment = require('../utils/chai-with-reporting').comment;
 
 const { LoginPage } = require('../page-objects/LoginPage.js');
 const { TradeShiftTopPage } = require('../page-objects/TradeShiftTopPage.js');
@@ -18,7 +19,9 @@ const { UploadFormatSettingPage } = require('../page-objects/UploadFormatSetting
 const { UploadFormatConfirmPage } = require('../page-objects/UploadFormatConfirmPage');
 const { UploadFormatModPage } = require('../page-objects/UploadFormatModPage');
 const { SettingMenuPage } = require('../page-objects/SettingMenuPage');
+const { ContractCancelPage } = require('../page-objects/ContractCancelPage');
 const { ContractChangePage } = require('../page-objects/ContractChangePage');
+const { ContractDetailPage } = require('../page-objects/ContractDetailPage');
 const { UploadListPage } = require('../page-objects/UploadListPage');
 const { UploadListDetailPage } = require('../page-objects/UploadListDetailPage');
 const { SettlementPage } = require('../page-objects/SettlementPage');
@@ -40,6 +43,14 @@ const { UploadAccountCodePage } = require('../page-objects/UploadAccountCodePage
 const { UploadSubAccountCodePage } = require('../page-objects/UploadSubAccountCodePage');
 const { UploadDepartmentPage } = require('../page-objects/UploadDepartmentPage');
 const { JournalDownloadPage } = require('../page-objects/JournalDownloadPage');
+const { RegisterPage } = require('../page-objects/RegisterPage');
+const { PdfInvoicingPage } = require('../page-objects/PdfInvoicingPage');
+const { RegistPdfInvoicePage } = require('../page-objects/RegistPdfInvoicePage');
+const { LightPlanMenuPage } = require('../page-objects/LightPlanMenuPage');
+const { PaidServiceRegisterPage } = require('../page-objects/PaidServiceRegisterPage');
+const { PaidServiceRegisterInputPage } = require('../page-objects/PaidServiceRegisterInputPage');
+const { CsvUploadForPdfPage } = require('../page-objects/CsvUploadForPdfPage');
+const { BulkUploadUsersPage } = require('../page-objects/BulkUploadUsersPage');
 
 // テストの準備を行う
 exports.initTest = async () => {
@@ -94,7 +105,9 @@ exports.getPageObject = (browser, page) => {
   pages.uploadFormatConfirmPage = new UploadFormatConfirmPage(browser, page);
   pages.uploadFormatModPage = new UploadFormatModPage(browser, page);
   pages.settingMenuPage = new SettingMenuPage(browser, page);
+  pages.contractCancelPage = new ContractCancelPage(browser, page);
   pages.contractChangePage = new ContractChangePage(browser, page);
+  pages.contractDetailPage = new ContractDetailPage(browser, page);
   pages.uploadListPage = new UploadListPage(browser, page);
   pages.uploadListDetailPage = new UploadListDetailPage(browser, page);
   pages.settlementPage = new SettlementPage(browser, page);
@@ -116,6 +129,14 @@ exports.getPageObject = (browser, page) => {
   pages.uploadSubAccountCodePage = new UploadSubAccountCodePage(browser, page);
   pages.uploadDepartmentPage = new UploadDepartmentPage(browser, page);
   pages.journalDownloadPage = new JournalDownloadPage(browser, page);
+  pages.registerPage = new RegisterPage(browser, page);
+  pages.pdfInvoicingPage = new PdfInvoicingPage(browser, page);
+  pages.registPdfInvoicePage = new RegistPdfInvoicePage(browser, page);
+  pages.lightPlanMenuPage = new LightPlanMenuPage(browser, page);
+  pages.paidServiceRegisterPage = new PaidServiceRegisterPage(browser, page);
+  pages.paidServiceRegisterInputPage = new PaidServiceRegisterInputPage(browser, page);
+  pages.csvUploadForPdfPage = new CsvUploadForPdfPage(browser, page);
+  pages.bulkUploadUsersPage = new BulkUploadUsersPage(browser, page);
   this.pages = pages;
   return pages;
 }
@@ -299,19 +320,20 @@ exports.uploadFormat = async (formatPath, hasHeader, headerRow, dataRow, startCo
     paymentDate: startColumn + 3,
     deliveryDate: startColumn + 4,
     documentDescription: startColumn + 5,
-    bankName: startColumn + 6,
-    financialName: startColumn + 7,
-    accountType: startColumn + 8,
-    accountId: startColumn + 9,
-    accountName: startColumn + 10,
-    note: startColumn + 11,
-    sellersItemNum: startColumn + 12,
-    itemName: startColumn + 13,
-    quantityValue: startColumn + 14,
-    quantityUnitCode: startColumn + 15,
-    priceValue: startColumn + 16,
-    taxRate: startColumn + 17,
-    description: startColumn + 18
+    mailAddress: startColumn + 6,
+    bankName: startColumn + 7,
+    financialName: startColumn + 8,
+    accountType: startColumn + 9,
+    accountId: startColumn + 10,
+    accountName: startColumn + 11,
+    note: startColumn + 12,
+    sellersItemNum: startColumn + 13,
+    itemName: startColumn + 14,
+    quantityValue: startColumn + 15,
+    quantityUnitCode: startColumn + 16,
+    priceValue: startColumn + 17,
+    taxRate: startColumn + 18,
+    description: startColumn + 19
   }
   await this.pages.uploadFormatSettingPage.setNumbers(numbers);
 
@@ -328,4 +350,177 @@ exports.uploadFormat = async (formatPath, hasHeader, headerRow, dataRow, startCo
   await this.pages.topPage.waitForLoading();
 
   return itemName;
+}
+
+// デジタルトレードアプリのトップページを表示する
+exports.gotoTop = async (page, account) => {
+
+    // 指定したURLに遷移する
+    await comment('Tradeshiftログインページへ移動する');
+    await page.goto(config.baseUrl);
+
+    // ログインを行う
+    await comment('ユーザ"' + account.id + '"でログインする');
+    await this.pages.loginPage.doLogin(account.id, account.password);
+    await this.pages.tradeShiftTopPage.waitForLoading();
+
+    // デジタルトレードアプリをクリックする
+    let appName = process.env.APP ? process.env.APP : config.appName;
+    appName = appName.replace(/\"/g, '');
+    await comment('アイコン「' + appName + '」をクリックする');
+    await this.pages.tradeShiftTopPage.clickBcdApp(appName);
+    await this.pages.topPage.waitForLoading();
+}
+
+// 支払依頼一覧のテストに使用する勘定科目・補助科目・部門データを登録する
+exports.registJournalData = async (page, account, journalData, approveRoute) => {
+
+  // トップページへ移動する
+  await this.gotoTop(page, account);
+
+  // 勘定科目を登録する
+  await comment('「仕訳情報管理」をクリックする');
+  await this.pages.topPage.openJournalMenu();
+  await this.pages.journalMenuPage.waitForLoading();
+  await this.pages.journalMenuPage.clickAccount();
+  await this.pages.accountCodeListPage.waitForLoading();
+  for (let acSet of journalData.accountCodes) {
+    if (await this.pages.accountCodeListPage.hasRow(acSet.code, acSet.name)) {
+      continue;
+    }
+    await this.pages.accountCodeListPage.clickRegist();
+    await this.pages.registAccountCodePage.waitForLoading();
+    await this.pages.registAccountCodePage.regist(acSet.code, acSet.name);
+    await this.pages.registAccountCodePage.clickPopupOK();
+    await this.pages.accountCodeListPage.waitPopup();
+    await this.pages.accountCodeListPage.closePopup();
+    await this.pages.accountCodeListPage.waitForLoading();
+  }
+
+  // 補助科目を登録する
+  await this.pages.accountCodeListPage.clickHome();
+  await this.pages.topPage.waitForLoading();
+  await comment('「仕訳情報管理」をクリックする');
+  await this.pages.topPage.openJournalMenu();
+  await this.pages.journalMenuPage.waitForLoading();
+  await this.pages.journalMenuPage.clickSubAccount();
+  await this.pages.subAccountCodeListPage.waitForLoading();
+  for (let acSet of journalData.accountCodes) {
+    if (await this.pages.subAccountCodeListPage.hasRow(acSet.subCode, acSet.subName)) {
+      continue;
+    }
+    await comment('「新規登録する」をクリックする');
+    await this.pages.subAccountCodeListPage.clickRegist();
+    await this.pages.registSubAccountCodePage.waitForLoading();
+    await comment('勘定科目"' + acSet.code + '"を選択する');
+    await this.pages.registSubAccountCodePage.selectAccount(acSet.code);
+    await comment('補助科目コード"' + acSet.subCode + '"、補助科目名"' + acSet.subName + '"を登録する');
+    await this.pages.registSubAccountCodePage.regist(acSet.subCode, acSet.subName);
+    await this.pages.registSubAccountCodePage.clickPopupOK();
+    await this.pages.subAccountCodeListPage.waitPopup();
+    await comment('ポップアップメッセージを閉じる');
+    await this.pages.subAccountCodeListPage.closePopup();
+    await this.pages.subAccountCodeListPage.waitForLoading();
+  }
+
+  // 部門データを登録する
+  await comment('「Home」をクリックする');
+  await this.pages.subAccountCodeListPage.clickHome();
+  await this.pages.topPage.waitForLoading();
+  await comment('「仕訳情報管理」をクリックする');
+  await this.pages.topPage.openJournalMenu();
+  await this.pages.journalMenuPage.waitForLoading();
+  await this.pages.journalMenuPage.clickDepartment();
+  await this.pages.departmentListPage.waitForLoading();
+  for(let department of journalData.departments) {
+    if (await this.pages.departmentListPage.hasRow(department.code, department.name)) {
+      continue;
+    }
+    await this.pages.departmentListPage.clickRegist();
+    await this.pages.registDepartmentPage.waitForLoading();
+    await this.pages.registDepartmentPage.regist(department.code, department.name);
+    await this.pages.registDepartmentPage.clickPopupOK();
+    await this.pages.departmentListPage.waitPopup();
+    await this.pages.departmentListPage.closePopup();
+    await this.pages.departmentListPage.waitForLoading();
+  }
+
+  // 承認ルートを登録する
+  if (!approveRoute) {
+    await page.waitForTimeout(1000);
+    return;
+  }
+  await this.pages.departmentListPage.clickHome();
+  await this.pages.topPage.waitForLoading();
+  await comment('「仕訳情報管理」をクリックする');
+  await this.pages.topPage.openJournalMenu();
+  await this.pages.journalMenuPage.waitForLoading();
+  await comment('「承認ルート一覧」をクリックする');
+  await this.pages.journalMenuPage.clickApproveRoute();
+  await this.pages.approveRouteListPage.waitForLoading();
+  if (!await this.pages.approveRouteListPage.hasRow(approveRoute.name)) {
+    await comment('「新規登録する」をクリックする');
+    await this.pages.approveRouteListPage.clickRegist();
+    await this.pages.registApproveRoutePage.waitForLoading();
+    await comment('承認ルート名へ"' + approveRoute.name + '"と入力する');
+    await this.pages.registApproveRoutePage.inputName(approveRoute.name);
+    for (i = 0; i < approveRoute.authorizers.length; i++) {
+      if (i < approveRoute.authorizers.length - 1) {
+        await comment(approveRoute.authorizers[i].family + ' ' + approveRoute.authorizers[i].first + 'を' + (i + 1) + '次承認者に設定する');
+        await this.pages.registApproveRoutePage.addAuthorizer();
+      } else {
+        await comment(approveRoute.authorizers[i].family + ' ' + approveRoute.authorizers[i].first + 'を最終承認者に設定する');
+      }
+      await this.pages.registApproveRoutePage.clickBtnSearch(i + 1);
+      await this.pages.registApproveRoutePage.searchAuthorizer(approveRoute.authorizers[i].family, approveRoute.authorizers[i].first, null);
+      await this.pages.registApproveRoutePage.selectAuthorizer();
+    }
+    await comment('「確認」をクリックする');
+    await this.pages.registApproveRoutePage.clickConfirm();
+    await comment('「登録」をクリックする');
+    await this.pages.registApproveRoutePage.submit();
+    await this.pages.approveRouteListPage.waitForLoading();
+  }
+  await page.waitForTimeout(1000);
+}
+
+// 支払依頼一覧のテストに使用する勘定科目・補助科目・部門データを削除する
+exports.deleteJournalData = async (page, account, approveRouteName) => {
+
+  // トップページへ移動する
+  await this.gotoTop(page, account);
+
+  // 勘定科目をすべて削除する
+  await comment('「仕訳情報管理」をクリックする');
+  await this.pages.topPage.openJournalMenu();
+  await this.pages.journalMenuPage.waitForLoading();
+  await this.pages.journalMenuPage.clickAccount();
+  await this.pages.accountCodeListPage.waitForLoading();
+  await this.pages.accountCodeListPage.deleteAll();
+
+  // 部門データをすべて削除する
+  await this.pages.accountCodeListPage.clickHome();
+  await this.pages.topPage.waitForLoading();
+  await comment('「仕訳情報管理」をクリックする');
+  await this.pages.topPage.openJournalMenu();
+  await this.pages.journalMenuPage.waitForLoading();
+  await this.pages.journalMenuPage.clickDepartment();
+  await this.pages.departmentListPage.waitForLoading();
+  await this.pages.departmentListPage.deleteAll();
+
+  // 承認ルートを削除する
+  if (!approveRouteName) {
+    await page.waitForTimeout(1000);
+    return;
+  }
+  await this.pages.departmentListPage.clickHome();
+  await this.pages.topPage.waitForLoading();
+  await comment('「仕訳情報管理」をクリックする');
+  await this.pages.topPage.openJournalMenu();
+  await this.pages.journalMenuPage.waitForLoading();
+  await this.pages.journalMenuPage.clickApproveRoute();
+  await this.pages.approveRouteListPage.waitForLoading();
+  await this.pages.approveRouteListPage.deleteRoute(approveRouteName);
+  await this.pages.approveRouteListPage.deleteOnConfirm();
+  await page.waitForTimeout(1000);
 }

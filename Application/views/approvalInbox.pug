@@ -7,12 +7,12 @@ block content
       input.input(type='hidden' name='requestId' value=`${requestId}`)
     .box
       form#form(method='POST')
-        include approvalInboxpreApproverMessage
         include approvalInboxHeader
         include approvalInboxInvoiceLines
         include approvalInvoiceFooter
         include approvaInboxMessage
-        include approvalInboxApprovRoute
+        if (requestApprovals.length !== 0)
+          include approvalInboxApprovRoute
         .grouped-button
           a.button.mr-6(href='/inboxList/1')  戻る
           a.button.is-danger.mr-6#rejectApproval 差し戻し
@@ -747,6 +747,7 @@ block content
         a.delete(data-target='check-approval-modal')
       section.modal-card-body
         form#approval(method='POST', action=`/approvalInbox/${documentId}`)
+          input(type='hidden' name='_csrf' value=csrfToken)
           include invoiceHeader
           .box#journal-list
           include invoiceFooter
@@ -774,6 +775,7 @@ block content
           a.delete(data-target='reject-approval-modal')
         section.modal-card-body
           form#reject(method='POST' action=`/rejectApproval/${documentId}`)
+            input(type='hidden' name='_csrf' value=csrfToken)
             include invoiceHeader
             .box#journal-list-reject-modal
             include invoiceFooter

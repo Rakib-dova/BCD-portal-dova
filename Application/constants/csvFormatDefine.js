@@ -54,6 +54,7 @@ constantsDefine({
     { columnName: '支払期日', item: '', value: '' },
     { columnName: '納品日', item: '', value: '' },
     { columnName: '備考', item: '', value: '' },
+    { columnName: '取引先メールアドレス', item: '', value: '' },
     { columnName: '銀行名', item: '', value: '' },
     { columnName: '支店名', item: '', value: '' },
     { columnName: '科目', item: '', value: '' },

@@ -1,4 +1,6 @@
 const { ActionUtils } = require('../utils/action-utils');
+
+// 契約情報変更
 class ContractChangePage {
 
   constructor(browser, page) {
@@ -19,5 +21,9 @@ class ContractChangePage {
     return await this.actionUtils.getText(this.frame, 'section .title')
   }
 
+  // 「戻る」をクリックする
+  async back() {
+    await this.actionUtils.click(this.frame, '#return-btn');
+  }
 }
 exports.ContractChangePage = ContractChangePage;

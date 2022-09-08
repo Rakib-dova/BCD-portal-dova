@@ -1,5 +1,9 @@
 const { ActionUtils } = require('../utils/action-utils');
+const comment = require('../utils/chai-with-reporting').comment;
+
+// デジタルトレードアプリ Home
 class TopPage {
+  title = 'Home';
 
   constructor(browser, page) {
     this.browser = browser;
@@ -7,11 +11,26 @@ class TopPage {
     this.actionUtils = new ActionUtils(browser, page);
   }
 
+  // コメントする
+  async addComment(message) {
+    await comment('【' + this.title + '】' + message);
+  }
+
   // ページが表示されるまで待機する
   async waitForLoading() {
     let frame = await this.actionUtils.waitForLoading('//*[contains(@class,"box")]//*[text()="請求書一括作成"]')
     this.frame = frame;
     return frame;
+  }
+
+  // 「ご利用中プラン」を取得する
+  async getPlanStatus() {
+    return await this.actionUtils.getText(this.frame, '//div[contains(@class, "planStatus")]//a');
+  }
+
+  // 「ご利用中プラン」をクリックする
+  async clickPlanStatus() {
+    await this.actionUtils.click(this.frame, '//div[contains(@class, "planStatus")]//a');
   }
 
   // 「お知らせ」タブを取得する
@@ -59,9 +78,19 @@ class TopPage {
     await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[contains(text(),"仕訳情報管理")]');
   }
 
+  // 「PDF請求書作成」メニューを開く
+  async openPdfInvoicing() {
+    await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[contains(text(),"PDF請求書作成")]');
+  }
+
   // 「サポート」メニューを開く
   async openSupportMenu() {
     await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[text()="サポート"]/../../..')
+  }
+
+  // 「追加オプション申込」が表示されているか確認する
+  async isSettingMenuShown() {
+    return await this.actionUtils.isDisplayed(this.frame, '//*[contains(@class,"box")]//*[text()="設定"]');
   }
 
   // 「設定」メニューを開く
@@ -69,9 +98,33 @@ class TopPage {
     await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[text()="設定"]')
   }
 
+  // 「追加オプション申込」が表示されているか確認する
+  async isLightPlanShown() {
+    return await this.actionUtils.isDisplayed(this.frame, '//*[contains(@class,"box")]//*[contains(text(),"追加オプション申込")]');
+  }
+
+  // 「追加オプション申込」メニューを開く
+  async openLightPlan() {
+    await this.addComment('「追加オプション申込」をクリックする');
+    await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[contains(text(),"追加オプション申込")]');
+  }
+
   // 「銀行振込消印」ダイアログを開く
   async openSettlementDialog() {
     await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[text()="銀行振込消込"]')
+  }
+
+  // メッセージが表示されるまで待機する
+  async waitPopup() {
+    await this.actionUtils.waitForLoading('//*[@class="notification is-info animate__animated animate__faster"]');
+    await this.frame.waitForTimeout(500);
+  }
+
+  // メッセージを閉じる
+  async closePopup() {
+    await this.addComment('メッセージを閉じる');
+    await this.actionUtils.click(this.frame, '//*[@class="notification is-info animate__animated animate__faster"]/button');
+    await this.frame.waitForTimeout(500);
   }
 }
 exports.TopPage = TopPage;

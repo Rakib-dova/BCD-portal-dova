@@ -48,7 +48,7 @@ class RequestApprovalDAO extends DAO {
     return requstApproval
   }
 
-  async createRequestApproval(requester, invoiceId, approveRouteId, status, message) {
+  async createRequestApproval(requester, invoiceId, approveRouteId, status, message, version = 1) {
     const createRequestApproval = this.DTO.build({
       contractId: this.contractId,
       requester,
@@ -56,7 +56,8 @@ class RequestApprovalDAO extends DAO {
       approveRouteId,
       status: status,
       message,
-      isSaved: true
+      version: version,
+      rejectedFlag: false
     })
     return createRequestApproval
   }
@@ -66,12 +67,8 @@ class RequestApprovalDAO extends DAO {
     return statusCode
   }
 
-  async updateRequestApproval(requestApproval, requester, approverRouteId, status, message) {
-    requestApproval.requester = requester
-    requestApproval.approveRouteId = approverRouteId
-    requestApproval.status = status
-    requestApproval.message = message
-    requestApproval.isSaved = true
+  async updateRequestApproval(requestApproval) {
+    requestApproval.rejectedFlag = true
     return requestApproval
   }
 

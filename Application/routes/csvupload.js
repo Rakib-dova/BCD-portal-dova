@@ -18,6 +18,9 @@ const filePath = process.env.INVOICE_UPLOAD_PATH
 const constantsDefine = require('../constants')
 const { v4: uuidv4 } = require('uuid')
 
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
+
 const bodyParser = require('body-parser')
 router.use(
   bodyParser.json({
@@ -71,7 +74,8 @@ const cbGetIndex = async (req, res, next) => {
 
   // ユーザ権限も画面に送る
   res.render('csvupload', {
-    formatkindsArr: formatkindsArr
+    formatkindsArr: formatkindsArr,
+    csrfToken: req.csrfToken()
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
@@ -319,7 +323,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
         itemRowNumber
       )
     } else {
-      const defaultCsvPath = path.resolve('./public/html/請求書一括作成フォーマット.csv')
+      const defaultCsvPath = path.resolve('./public/html/請求書一括作成フォーマット_v1.1.csv')
       uploadData = uploadData ?? fs.readFileSync(defaultCsvPath)
       csvObj = new BconCsv(extractFullpathFile, formatFlag, uploadFormatDetail, uploadFormatIdentifier, uploadData)
     }
@@ -348,12 +352,13 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
   const documentIds = []
   let numPages
   let currPage
-  let documentsURL = '/documents?stag=draft&stag=outbox&limit=10000'
+  let documentsURL =
+    '/documents?stag=draft&stag=outbox&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&limit=10000'
   try {
     do {
       if (Object.prototype.toString.call(currPage) !== '[object Undefined]') {
         currPage++
-        documentsURL = `/documents?stag=draft&stag=outbox&limit=10000&page=${currPage}`
+        documentsURL = `/documents?stag=draft&stag=outbox&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&limit=10000&page=${currPage}`
       }
       documentsList = await apiManager.accessTradeshift(_user.accessToken, _user.refreshToken, 'get', documentsURL)
       documentsList.Document.forEach((document) => {
@@ -481,7 +486,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
                 },
                 apiResult.toString()
               )
-            } else if (String(apiResult.response?.status).slice(0, 1) === '5') {
+            } else {
               // 500番エラーの場合
               invoiceList[idx].errorData = constantsDefine.invoiceErrMsg.SYSERROR
 
@@ -520,8 +525,6 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
           failCount += invoiceList[idx].failCount
           break
       }
-
-      // == TS にアップロード済み ========================================
 
       const invoiceLines = invoiceList[idx].INVOICE.getDocument().InvoiceLine
       const invoiceId = invoiceList[idx].invoiceId
@@ -596,16 +599,19 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
       }
     }
 
+    let statusStr = ''
+
     const getStatusString = (status) => {
       switch (status) {
         case 0:
-          return 'success'
+          statusStr = 'success'
+          return statusStr
         case 1:
-          return 'skip'
+          statusStr = 'skip'
+          return statusStr
         case -1:
-          return 'failure'
-        default:
-          return ''
+          statusStr = 'failure'
+          return statusStr
       }
     }
 
@@ -745,8 +751,8 @@ const setErrorLog = async (req, errorCode) => {
   logger.error(logMessage, err.name)
 }
 
-router.get('/', helper.isAuthenticated, cbGetIndex)
-router.post('/', helper.isAuthenticated, cbPostUpload)
+router.get('/', helper.isAuthenticated, csrfProtection, cbGetIndex)
+router.post('/', helper.isAuthenticated, csrfProtection, cbPostUpload)
 
 module.exports = {
   router: router,

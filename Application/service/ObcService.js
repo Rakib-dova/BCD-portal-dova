@@ -184,6 +184,7 @@ class ObcService {
     return mappedObctoHeader
   }
 
+  // 借方
   convertDebitTaxCategory(_taxCategory) {
     let debitCategory
 
@@ -197,15 +198,16 @@ class ObcService {
       case 'JP 不課税 0%':
       case 'JP 免税 0%':
       case 'JP 非課税 0%':
-        debitCategory = ['0000', '0', '']
+        debitCategory = ['0000', '', '']
         break
       default:
-        debitCategory = ['9999', '0', '']
+        debitCategory = ['9999', '', '']
     }
 
     return debitCategory
   }
 
+  // 貸方
   convertCreditTaxCategory(_taxCategory) {
     let creditCategory
 
@@ -214,15 +216,19 @@ class ObcService {
         creditCategory = ['0060', '10', '0']
         break
       case 'JP 消費税(軽減税率) 8%':
-        creditCategory = ['0060', '8', '0']
+        creditCategory = ['0060', '8', '1']
         break
       case 'JP 不課税 0%':
+        creditCategory = ['0000', '', '']
+        break
       case 'JP 免税 0%':
+        creditCategory = ['0090', '', '']
+        break
       case 'JP 非課税 0%':
-        creditCategory = ['0000', '0', '']
+        creditCategory = ['0080', '', '']
         break
       default:
-        creditCategory = ['9999', '0', '']
+        creditCategory = ['9999', '', '']
     }
 
     return creditCategory

@@ -1,0 +1,693 @@
+﻿extends layout
+
+block content
+  .max-width
+    section.hero.is-small.is-com
+      .hero-body-noImage
+        .title.is-family-noto-sans 支払依頼一覧
+        .subtitle.is-family-noto-sans PAYMENT REQUEST LIST
+
+    .columns.is-centered
+      .column.is-11
+        .box
+          .media-content
+              .tabs.is-boxed.is-medium
+                ul
+                  if rejectedFlag !== true
+                    li.is-active
+                      a#informationTab
+                        span 支払依頼
+                    li
+                      a#constructTab
+                        span 承認待ち
+                  else
+                    li
+                      a#informationTab
+                        span 支払依頼
+                    li.is-active
+                      a#constructTab
+                        span 承認待ち                  
+              .tab-content
+                if rejectedFlag !== true
+                  .tab-pane.is-active#informationTab
+                    .box
+                      h2.title 支払依頼検索
+                      .columns.is-centered
+                        .column                        
+                          form#form(method="POST" action=`/inboxList/${currPage}`)
+                            input(type="hidden" name="_csrf" value=csrfToken)
+                            article.panel.no-box-shadow.is-info                            
+                              .panel-block
+                                .container
+                                  .column
+                                    .field.is-horizontal
+                                      .field-label.is-normal
+                                        label.bulmalabel 請求書番号（完全一致）
+                                      .field-body
+                                        .field
+                                          .control.has-icons-right
+                                            p.control.is-expanded
+                                              if keyword
+                                                input.input#invoiceNumber(type='text' name='invoiceNumber' maxlength="100" value=keyword.invoiceNumber)
+                                              else
+                                                input.input#invoiceNumber(type='text' name='invoiceNumber' maxlength="100")
+                                  .column
+                                    .field.is-horizontal
+                                      .field-label.is-normal
+                                        label.bulmalabel 発行日
+                                      .field-body
+                                        .field.is-grouped.is-grouped-multiline
+                                          .control.is-expanded
+                                            if keyword
+                                              input.input#minIssuedate.itemForSearch(type="date" name="minIssuedate" pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$" value=keyword.issueDate[0])
+                                            else
+                                              input.input#minIssuedate.itemForSearch(type="date" name="minIssuedate" pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$")
+                                          .control
+                                            div ～
+                                          .control.is-expanded
+                                            if keyword
+                                              input.input#maxIssuedate.itemForSearch(type="date" name="maxIssuedate" pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$" value=keyword.issueDate[1])  
+                                            else
+                                              input.input#maxIssuedate.itemForSearch(type="date" name="maxIssuedate" pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$")                                               
+                                  .column          
+                                    .field.is-horizontal
+                                      .field-label.is-normal
+                                        label.bulmalabel 送信企業
+                                      .field-body
+                                        .field.has-addons
+                                          p.control.is-expanded
+                                            if keyword
+                                              input.input#sendTo(type='text' name="sendTo" maxlength="100" value=keyword.sent)
+                                            else
+                                              input.input#sendTo(type='text' name="sendTo" maxlength="100")
+                                          p.control
+                                            a.button.is-info#sendToSearchBtn 検索 
+                                    if keyword
+                                      if (keyword.companyName !== '')
+                                        .field.is-horizontal
+                                          .field-label.is-normal
+                                          .field-body#sendToSelectBtnField
+                                            p.control
+                                              a.button#invisibleSentToBtn ▲
+
+                                        .field.is-horizontal
+                                          .field-label.is-normal
+                                          .field-body.level
+                                            .container#displaySendToSearchResultField
+                                              .box.searchResultBox
+                                                .field.is-horizontal
+                                                  .field-body
+                                                    p.control
+                                                      label.checkbox
+                                                        input.m-3.p-1(type='radio' checked=true value=keyword.companyName)
+                                                        label= keyword.companyName
+                                      else 
+                                        .field.is-horizontal
+                                          .field-label.is-normal
+                                          .field-body#sendToSelectBtnField
+
+                                        .field.is-horizontal.is-invisible
+                                          .field-label.is-normal
+                                          .field-body.level
+                                            .container#displaySendToSearchResultField   
+                                    else 
+                                      .field.is-horizontal
+                                        .field-label.is-normal
+                                        .field-body#sendToSelectBtnField
+
+                                      .field.is-horizontal.is-invisible
+                                        .field-label.is-normal
+                                        .field-body.level
+                                          .container#displaySendToSearchResultField                                                                                                                       
+                                  .column
+                                    .field.is-horizontal
+                                      .field-label.is-normal
+                                        label.bulmalabel 承認ステータス
+                                      .field-body
+                                        .field
+                                          .box
+                                            .control.has-icons-right
+                                              .is-fullwidth.is-multiple
+                                                if keyword
+                                                  if (keyword.status.includes('80'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '80')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '80')
+                                                  label.checkbox.margin-right29 未処理
+                                                  if (keyword.status.includes('10'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '10')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '10')
+                                                  label.checkbox.margin-right13 支払依頼中
+                                                  if (keyword.status.includes('11'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '11')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '11')
+                                                  label.checkbox 一次承認済み
+                                                  if (keyword.status.includes('12'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '12')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '12')
+                                                  label.checkbox 二次承認済み
+                                                  if (keyword.status.includes('13'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '13')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '13')
+                                                  label.checkbox 三次承認済み
+                                                  if (keyword.status.includes('14'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '14')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '14')
+                                                  label.checkbox 四次承認済み
+                                                  if (keyword.status.includes('15'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '15')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '15')
+                                                  label.checkbox 五次承認済み 
+                                                else
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '80')
+                                                  label.checkbox.margin-right29 未処理
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '10')
+                                                  label.checkbox.margin-right13 支払依頼中
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '11')
+                                                  label.checkbox 一次承認済み
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '12')
+                                                  label.checkbox 二次承認済み
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '13')
+                                                  label.checkbox 三次承認済み
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '14')
+                                                  label.checkbox 四次承認済み
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '15')
+                                                  label.checkbox 五次承認済み 
+                                            .control.has-icons-right
+                                              .is-fullwidth.is-multiple
+                                                if keyword
+                                                  if (keyword.status.includes('16'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '16')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '16')                                                                                                                         
+                                                  label.checkbox 六次承認済み                                                                                       
+                                                  if (keyword.status.includes('17'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '17')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '17')
+                                                  label.checkbox 七次承認済み                                            
+                                                  if (keyword.status.includes('18'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '18')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '18')
+                                                  label.checkbox 八次承認済み
+                                                  if (keyword.status.includes('19'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '19')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '19')
+                                                  label.checkbox 九次承認済み
+                                                  if (keyword.status.includes('20'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '20')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '20')
+                                                  label.checkbox 十次承認済み
+                                                  if (keyword.status.includes('00'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '00')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '00')
+                                                  label.checkbox 最終承認済み
+                                                  if (keyword.status.includes('90'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '90')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '90')
+                                                  label.checkbox 差し戻し
+                                                else                                                                                                                         
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '16')
+                                                  label.checkbox 六次承認済み                                                                                       
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '17')
+                                                  label.checkbox 七次承認済み                                            
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '18')
+                                                  label.checkbox 八次承認済み
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '19')
+                                                  label.checkbox 九次承認済み
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '20')
+                                                  label.checkbox 十次承認済み
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '00')
+                                                  label.checkbox 最終承認済み
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '90')
+                                                  label.checkbox 差し戻し
+                                                                                                                                                                                                                        
+                                  .column          
+                                    .field.is-horizontal
+                                      .field-label.is-normal
+                                        label.bulmalabel 担当者アドレス
+                                      .field-body
+                                        .field.has-addons
+                                          p.control.is-expanded
+                                            if keyword
+                                              input.input#managerAddress(type='text' name='managerAddress' maxlength=128 pattern=inputPattarnManagerAddress placeholder='例：bcd@gma.com　※省略不可' value=keyword.contactEmail)
+                                            else
+                                              input.input#managerAddress(type='text' name='managerAddress' maxlength=128 pattern=inputPattarnManagerAddress placeholder='例：bcd@gma.com　※省略不可')
+                                  .column
+                                    .field.is-horizontal
+                                      .field-label.is-normal
+                                        label.bulmalabel 担当者不明の請求書
+                                      .field-body
+                                        .field
+                                          .control.has-icons-right
+                                            .is-fullwidth.is-multiple
+                                              if keyword
+                                                if keyword.unKnownManager
+                                                  input.m-3.p-1(type="checkbox" name="unKnownManager" checked=true value= 'unKnownManager')
+                                                else
+                                                  input.m-3.p-1(type="checkbox" name="unKnownManager" checked=false value= 'unKnownManager')
+                                              else
+                                                input.m-3.p-1(type="checkbox" name="unKnownManager" checked=false value= 'unKnownManager')
+                                  .column          
+                                    .field.is-horizontal                                        
+                                      .field-body.m-1.is-4.text-center.width-45percent
+                                        .field
+                                          div.button-area
+                                            a.button.is-link.btn-search-main#BtnInboxSearch(type='submit') 検索
+                                            .button.is-danger.ml-2#btnInboxSearchClear(type="button") クリア
+                                                          
+                          template#templateAllSelectBtn
+                              p.control
+                                a.button ▲
+
+                          template#templateSearchResultBox
+                              .box.searchResultBox
+
+                          template#templateSearchResultItem
+                            .field.is-horizontal
+                              .field-body
+                                p.control
+                                  label.checkbox
+                                    input.m-3.p-1(type='radio' checked=false) 
+                                 
+                    if listArr.length !== 0
+                      table.table.is-fullwidth.is-hoverable.table-fixed
+                        thead
+                          tr 
+                            th.text-center.th-padding= `${currItemCount}/${itemCount}`
+                          tr
+                            th.width-5.text-center No
+                            th.width-10.text-center 請求書番号
+                            th.width-10.text-center 請求書ステータス
+                            th.width-10.text-center 承認ステータス
+                            th.width-10.text-center 通貨
+                            th.width-10.text-center 金額
+                            th.width-10.text-center 送信企業
+                            if isSearch === true
+                              th.width-10.text-center 担当者アドレス<br>（担当者名）
+                            th.width-10.text-center 支払い期限日
+                            th.width-10.text-center 更新日
+                            th.width-10.text-center
+                        tbody.display-row
+                          each item in listArr
+                            tr
+                              th.text-center.td-overflow= item.no
+                              td.text-center.td-overflow= item.invoiceNo
+                              td.text-center.td-overflow
+                                if item.status === 0
+                                  a.a-status-PAID_UNCONFIRMED 入金確認済み
+                                else if item.status === 1
+                                  a.a-status-PAID_CONFIRMED 送金済み
+                                else if item.status === 2
+                                  a.a-status-ACCEPTED 受理済み
+                                else if item.status === 3
+                                  a.a-status-DELIVERED 受信済み
+                              if item.approveStatus === '10'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-WAITING 支払依頼中
+                              else if item.approveStatus === '11'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-APPROVING 一次承認済み
+                              else if item.approveStatus === '12'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-APPROVING 二次承認済み
+                              else if item.approveStatus === '13'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-APPROVING 三次承認済み
+                              else if item.approveStatus === '14'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-APPROVING 四次承認済み
+                              else if item.approveStatus === '15'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-APPROVING 五次承認済み
+                              else if item.approveStatus === '16'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-APPROVING 六次承認済み
+                              else if item.approveStatus === '17'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-APPROVING 七次承認済み
+                              else if item.approveStatus === '18'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-APPROVING 八次承認済み
+                              else if item.approveStatus === '19'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-APPROVING 九次承認済み
+                              else if item.approveStatus === '20'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-APPROVING 十次承認済み
+                              else if item.approveStatus === '00'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-APPROVED 最終承認済み
+                              else if item.approveStatus === '90'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-RETURNED 差し戻し
+                              else
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-UNTREATED 未処理
+                              td.text-center.td-overflow= item.currency
+                              td.text-center.td-overflow= item.ammount
+                              td.text-center.td-overflow= item.sentTo
+                              if isSearch === true
+                                - var managerinfo = item.managerInfo.managerAddress + '<br>' + item.managerInfo.managerName
+                                if (item.managerInfo.managerName === '（ユーザー登録なし）')
+                                  td.text-center.td-overflow.text-color-red!= managerinfo
+                                else 
+                                  td.text-center.td-overflow!= managerinfo
+                              td.text-center.td-overflow= item.expire
+                              td.text-center.td-overflow= item.updated
+                              td.text-center.display-row-td
+                                a.button.is-success.td-overflow.display-row-td-button(href=`/inbox/${item.documentId}`) 仕訳情報設定
+                      nav.pagination.is-centered(role='navigation' aria-label='pagination')
+                        - var page = currPage % 5 === 0 ? currPage - 4 : ~~(currPage / 5) * 5 + 1
+                        - var maxPageNo = ~~(page / 5) * 5 + 5 + 1
+                        if (page - 1 !== 0)
+                          a.pagination-previous(href= `/inboxList/${page - 1}`) 前のページ
+                        else
+                          a.a-previous-none 前のページ
+                        if maxPageNo < numPages
+                          a.pagination-next(href= `/inboxList/${maxPageNo}`) 次のページ
+                        else
+                          a.a-next-none 次のページ
+
+                        ul.pagination-list
+                          while page < (maxPageNo < numPages ? maxPageNo : numPages + 1)
+                            li
+                              if page === currPage
+                                a.pagination-link.is-current(aria-label= `${page}ページへ移動` href= `/inboxList/${page}`)= page++
+                              else
+                                a.pagination-link(aria-label= `${page}ページへ移動` href= `/inboxList/${page}`)= page++
+                    else
+                     if message
+                      p= message
+                     else
+                      p 現在、受領した請求書一覧はありません。
+
+                  .tab-pane#constructTab
+                    table.table.is-fullwidth.is-hoverable.table-fixed
+                      thead
+                        tr
+                          th.width-5.text-center No
+                          th.width-10.text-center 請求書番号
+                          th.width-10.text-center 請求書ステータス
+                          th.width-10.text-center 承認ステータス
+                          th.width-10.text-center 通貨
+                          th.width-10.text-center 金額
+                          th.width-10.text-center 送信企業
+                          if isSearch === true
+                            th.width-10.text-center 担当者アドレス<br>（担当者名）
+                          th.width-10.text-center 支払い期限日
+                          th.width-10.text-center 更新日
+                          th.width-10.text-center
+                      tbody.display-row           
+                else
+                  .tab-pane#informationTab
+                    .box
+                      h2.title 支払依頼検索
+                      .columns.is-centered
+                        .column                        
+                          form#form(method="POST" action=`/inboxList/${currPage}`)
+                            article.panel.is-info                            
+                              .panel-block
+                                .container
+                                  .column
+                                    .field.is-horizontal
+                                      .field-label.is-normal
+                                        label.bulmalabel 請求書番号（完全一致）
+                                      .field-body
+                                        .field
+                                          .control.has-icons-right
+                                            p.control.is-expanded
+                                              input.input#invoiceNumber(type='text' name='invoiceNumber' maxlength="100") 
+                                  .column
+                                    .field.is-horizontal
+                                      .field-label.is-normal
+                                        label.bulmalabel 発行日
+                                      .field-body
+                                        .field.is-grouped.is-grouped-multiline
+                                          .control.is-expanded
+                                            input.input#minIssuedate.itemForSearch(type="date" name="minIssuedate" pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$")
+                                          .control
+                                            div ～
+                                          .control.is-expanded
+                                            input.input#maxIssuedate.itemForSearch(type="date" name="maxIssuedate" pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$")                                                
+                                  .column          
+                                    .field.is-horizontal
+                                      .field-label.is-normal
+                                        label.bulmalabel 送信企業
+                                      .field-body
+                                        .field.has-addons
+                                          p.control.is-expanded
+                                            input.input#sendTo(type='text' maxlength="100")
+                                          p.control
+                                            a.button.is-info#sendToSearchBtn 検索 
+                                    .field.is-horizontal
+                                      .field-label.is-normal
+                                      .field-body#sendToSelectBtnField
+
+                                    .field.is-horizontal.is-invisible
+                                      .field-label.is-normal
+                                      .field-body.level
+                                        .container#displaySendToSearchResultField                                                                                                                           
+                                  .column
+                                    .field.is-horizontal
+                                      .field-label.is-normal
+                                        label.bulmalabel 承認ステータス
+                                      .field-body
+                                        .field
+                                          .box
+                                            .control.has-icons-right
+                                              .is-fullwidth.is-multiple
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '80')
+                                                label.checkbox.margin-right29 未処理
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '10')
+                                                label.checkbox.margin-right13 支払依頼中
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '11')
+                                                label.checkbo 一次承認済み
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '12')
+                                                label.checkbox 二次承認済み
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '13')
+                                                label.checkbo 三次承認済み
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '14')
+                                                label.checkbox 四次承認済み
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '15')
+                                                label.checkbo 五次承認済み 
+                                            .control.has-icons-right
+                                              .is-fullwidth.is-multiple                                                                                                                                       
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '16')
+                                                label.checkbox 六次承認済み                                                                                       
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '17')
+                                                label.checkbo 七次承認済み                                            
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '18')
+                                                label.checkbox 八次承認済み
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '19')
+                                                label.checkbo 九次承認済み
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '20')
+                                                label.checkbox 十次承認済み
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '00')
+                                                label.checkbo 最終承認済み
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '90')
+                                                label.checkbox 差し戻し
+                                  .column          
+                                    .field.is-horizontal
+                                      .field-label.is-normal
+                                        label.bulmalabel 担当者アドレス
+                                      .field-body
+                                        .field.has-addons
+                                          p.control.is-expanded
+                                            input.input#managerAddress(type='text' name='managerAddress' maxlength=128 placeholder='例：bcd@gma.com　※省略不可')
+                                  .column
+                                    .field.is-horizontal
+                                      .field-label.is-normal
+                                        label.bulmalabel 担当者不明の請求書
+                                      .field-body
+                                        .field
+                                          .control.has-icons-right
+                                            .is-fullwidth.is-multiple
+                                              input.m-3.p-1(type="checkbox" name="unKnownManager" checked=false value= 'unKnownManager')
+                                  .column          
+                                    .field.is-horizontal                                        
+                                      .field-body.m-1.is-4.text-center.width-45percent
+                                        .field
+                                          div.button-area
+                                            a.button.is-link.btn-search-main#BtnInboxSearch(type='submit') 検索
+                                            .button.is-danger.ml-2#btnInboxSearchClear(type="button") クリア
+                                                          
+                          template#templateAllSelectBtn
+                              p.control
+                                a.button ▲
+
+                          template#templateSearchResultBox
+                              .box.searchResultBox
+
+                          template#templateSearchResultItem
+                            .field.is-horizontal
+                              .field-body
+                                p.control
+                                  label.checkbox
+                                    input.m-3.p-1(type='radio' checked=false)
+                    if listArr.length !== 0
+                      table.table.is-fullwidth.is-hoverable.table-fixed
+                        thead
+                          tr 
+                            th.text-center.th-padding= `${currItemCount}/${itemCount}`
+                          tr
+                            th.width-5.text-center No
+                            th.width-10.text-center 請求書番号
+                            th.width-10.text-center 請求書ステータス
+                            th.width-10.text-center 承認ステータス
+                            th.width-10.text-center 通貨
+                            th.width-10.text-center 金額
+                            th.width-10.text-center 送信企業
+                            if isSearch === true
+                              th.width-10.text-center 担当者アドレス<br>（担当者名）
+                            th.width-10.text-center 支払い期限日
+                            th.width-10.text-center 更新日
+                            th.width-10.text-center
+                        tbody.display-row
+                          each item in listArr
+                            tr
+                              th.text-center.td-overflow= item.no
+                              td.text-center.td-overflow= item.invoiceNo
+                              td.text-center.td-overflow
+                                if item.status === 0
+                                  a.a-status-PAID_UNCONFIRMED 入金確認済み
+                                else if item.status === 1
+                                  a.a-status-PAID_CONFIRMED 送金済み
+                                else if item.status === 2
+                                  a.a-status-ACCEPTED 受理済み
+                                else if item.status === 3
+                                  a.a-status-DELIVERED 受信済み
+                              if item.approveStatus === '10'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-WAITING 支払依頼中
+                              else if item.approveStatus === '11'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-APPROVING 一次承認済み
+                              else if item.approveStatus === '12'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-APPROVING 二次承認済み
+                              else if item.approveStatus === '13'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-APPROVING 三次承認済み
+                              else if item.approveStatus === '14'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-APPROVING 四次承認済み
+                              else if item.approveStatus === '15'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-APPROVING 五次承認済み
+                              else if item.approveStatus === '16'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-APPROVING 六次承認済み
+                              else if item.approveStatus === '17'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-APPROVING 七次承認済み
+                              else if item.approveStatus === '18'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-APPROVING 八次承認済み
+                              else if item.approveStatus === '19'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-APPROVING 九次承認済み
+                              else if item.approveStatus === '20'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-APPROVING 十次承認済み
+                              else if item.approveStatus === '00'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-APPROVED 最終承認済み
+                              else if item.approveStatus === '90'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-RETURNED 差し戻し
+                              else
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-UNTREATED 未処理
+                              td.text-center.td-overflow= item.currency
+                              td.text-center.td-overflow= item.ammount
+                              td.text-center.td-overflow= item.sentTo
+                              if isSearch === true
+                                - var managerinfo = item.managerInfo.managerAddress + '<br>' + item.managerInfo.managerName
+                                if (item.managerInfo.managerName === '（ユーザー登録なし）')
+                                  td.text-center.td-overflow.text-color-red!= managerinfo
+                                else 
+                                  td.text-center.td-overflow!= managerinfo
+                              td.text-center.td-overflow= item.expire
+                              td.text-center.td-overflow= item.updated
+                              td.text-center.display-row-td
+                                a.button.is-success.td-overflow.display-row-td-button(href=`/inbox/${item.documentId}`) 仕訳情報設定
+                      nav.pagination.is-centered(role='navigation' aria-label='pagination')
+                        - var page = currPage % 5 === 0 ? currPage - 4 : ~~(currPage / 5) * 5 + 1
+                        - var maxPageNo = ~~(page / 5) * 5 + 5 + 1
+                        if (page - 1 !== 0)
+                          a.pagination-previous(href= `/inboxList/${page - 1}`) 前のページ
+                        else
+                          a.a-previous-none 前のページ
+                        if maxPageNo < numPages
+                          a.pagination-next(href= `/inboxList/${maxPageNo}`) 次のページ
+                        else
+                          a.a-next-none 次のページ
+
+                        ul.pagination-list
+                          while page < (maxPageNo < numPages ? maxPageNo : numPages + 1)
+                            li
+                              if page === currPage
+                                a.pagination-link.is-current(aria-label= `${page}ページへ移動` href= `/inboxList/${page}`)= page++
+                              else
+                                a.pagination-link(aria-label= `${page}ページへ移動` href= `/inboxList/${page}`)= page++
+                    else
+                      p 現在、受領した請求書一覧はありません。
+
+                  .tab-pane#constructTab
+                    table.table.is-fullwidth.is-hoverable.table-fixed
+                      thead
+                        tr
+                          th.width-5.text-center No
+                          th.width-10.text-center 請求書番号
+                          th.width-10.text-center 請求書ステータス
+                          th.width-10.text-center 承認ステータス
+                          th.width-10.text-center 通貨
+                          th.width-10.text-center 金額
+                          th.width-10.text-center 送信企業
+                          if isSearch === true
+                            th.width-10.text-center 担当者アドレス<br>（担当者名）
+                          th.width-10.text-center 支払い期限日
+                          th.width-10.text-center 更新日
+                          th.width-10.text-center
+                      tbody.display-row
+        .mt-1.has-text-left
+          a.button.is-link.is-light(href='/portal') ←Homeへ戻る
+    .modal.modal-fx-fadeInscale#checkStatus-modal
+     .modal-background.cancel-button(data-target="checkStatus-modal")
+     .modal-card
+       header.modal-card-head
+         p.modal-card-title ステータス
+         button.delete(type="button" data-target="checkStatus-modal")
+       section.modal-card-body
+         p.modal-card-result#modal-card-checkStatus
+       footer.modal-card-foot
+         div.button-area
+          a.button.cancel-button(data-target="checkStatus-modal") 確認
+    .modal.modal-fx-fadeInscale#search-progress-modal
+        .modal-background
+        .modal-card
+          header.modal-card-head
+            p.modal-card-title
+          section.modal-card-body
+            center
+              img(src="/image/loading_progress.gif")
+              p.modal-card-result#modal-card-result 処理中
+          footer.modal-card-foot          
+
+  include footer
+
+block append scripts
+  script(src="/js/inboxList-page.js")
+  link(rel='stylesheet', type='text/css', href='/css/inboxList.css')

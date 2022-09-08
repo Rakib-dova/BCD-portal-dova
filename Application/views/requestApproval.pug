@@ -6,11 +6,14 @@ block content
       h4.title-text-journallzing.text-inbox 支払依頼
     .box
       form#form(method='POST' action=`/requestApproval/save/${documentId}`)
+        input(type="hidden" name="_csrf" value=csrfToken)
         include requestApprovalRejectedMessage
         include invoiceHeader
         include requestApprovalInvoiceLines
         include invoiceFooter
         include requestApprovalMessage
+        if (requestApprovals.length !== 0)
+          include requestApprovalBeforeRoute
         include requestApprovalRoute
 
         .field.is-grouped.is-grouped-centered
@@ -221,6 +224,7 @@ block content
         a.delete(data-target='check-approval-modal')
       section.modal-card-body
         form#approval(method='POST', action=`/requestApproval/${documentId}`)
+          input(type="hidden" name="_csrf" value=csrfToken)
           include invoiceHeader
           .box#journal-list
           include invoiceFooter
@@ -246,3 +250,4 @@ block content
 block append scripts
   script(src="/js/requestApproval-page.js")
   link(rel='stylesheet', type='text/css', href='/css/requestApproval.css')
+  link(rel='stylesheet', type='text/css', href='/css/approvalInbox.css')

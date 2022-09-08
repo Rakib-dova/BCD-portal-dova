@@ -2,7 +2,6 @@ const webdriverUtils = require('../utils/webdriver-utils');
 const chai = require('chai');
 const chaiWithReporting = require('../utils/chai-with-reporting').chaiWithReporting;
 const comment = require('../utils/chai-with-reporting').comment;
-const config = require('../autotest-script-config');
 const path = require('path');
 const common = require('./common');
 
@@ -51,23 +50,15 @@ describe('リグレッションテスト', function () {
       }
 
       // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, uploadInvoiceMenuPage, uploadFormatTopPage, uploadFormatSettingPage, uploadFormatConfirmPage, uploadFormatModPage }
+      const { topPage, uploadInvoiceMenuPage, uploadFormatTopPage, uploadFormatSettingPage, uploadFormatConfirmPage, uploadFormatModPage }
         = common.getPageObject(browser, page);
 
-      // 指定したURLに遷移する
-      await page.goto(config.baseUrl);
-
-      // ログインを行う
-      await loginPage.doLogin(account.id, account.password);
-      await tradeShiftTopPage.waitForLoading();
-
-      // デジタルトレードアプリをクリックする
-      await tradeShiftTopPage.clickBcdApp();
-      await topPage.waitForLoading();
+      // デジタルトレードアプリのトップページを表示する
+      await common.gotoTop(page, account);
 
       // 請求書フォーマットをアップロードする
       let formatPath = path.resolve('testdata', 'upload', 'format_header.csv')
-      let itemName = await common.uploadFormat(formatPath, true, 2, 3, 2)
+      let itemName = await common.uploadFormat(formatPath, true, 1, 2, 1)
 
       // 請求書一括作成メニューを表示する
       await topPage.openUploadInvoiceMenu();
@@ -85,7 +76,7 @@ describe('リグレッションテスト', function () {
       // 対応するデータ番号を取得
       selectNumbers = await uploadFormatSettingPage.getNumbers();// 表示文字列ではなくValueであることに注意
       selectNumberTexts = JSON.stringify(selectNumbers);
-      expectedVal = '["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19"]'
+      expectedVal = '["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19"]'
       expect(selectNumberTexts).to.equal(expectedVal, '登録したデータ番号が残っていること');
 
       // 戻るボタンをクリック
@@ -107,8 +98,8 @@ describe('リグレッションテスト', function () {
       expect(await uploadFormatModPage.getUploadedType()).to.equal('請求書データ', '「アップロード種別」が保持されていること');
       expect(await uploadFormatModPage.getUploadedFileName()).to.equal('format_header.csv', '「データファイル」が保持されていること');
       expect(await uploadFormatModPage.isItemNameLineOn()).to.equal(true, '「項目名の行有無」が保持されていること');
-      expect(await uploadFormatModPage.getFormatNumber()).to.equal('2', '「項目名の行番号」が保持されていること');
-      expect(await uploadFormatModPage.getDefaultNumber()).to.equal('3', '「データ開始行番号」が保持されていること');
+      expect(await uploadFormatModPage.getFormatNumber()).to.equal('1', '「項目名の行番号」が保持されていること');
+      expect(await uploadFormatModPage.getDefaultNumber()).to.equal('2', '「データ開始行番号」が保持されていること');
 
       // 明細-税 識別子
       taxValues = await uploadFormatModPage.getTaxs();
@@ -201,19 +192,20 @@ describe('リグレッションテスト', function () {
         paymentDate: '4',
         deliveryDate: '5',
         documentDescription: '6',
-        bankName: '7',
-        financialName: '8',
-        accountType: '9',
-        accountId: '10',
-        accountName: '11',
-        note: '12',
-        sellersItemNum: '13',
-        itemName: '14',
-        quantityValue: '15',
-        quantityUnitCode: '16',
-        priceValue: '17',
-        taxRate: '18',
-        description: '19'
+        mailAddress: '7',
+        bankName: '8',
+        financialName: '9',
+        accountType: '10',
+        accountId: '11',
+        accountName: '12',
+        note: '13',
+        sellersItemNum: '14',
+        itemName: '15',
+        quantityValue: '16',
+        quantityUnitCode: '17',
+        priceValue: '18',
+        taxRate: '19',
+        description: '20'
       }
       await uploadFormatSettingPage.setNumbers(numbersMod);
 
@@ -241,13 +233,13 @@ describe('リグレッションテスト', function () {
       // ユーザフォーマット項目名
       headers = await uploadFormatConfirmPage.getHeaders();
       headerTexts = JSON.stringify(headers);
-      expectedVal = '["列1","列2","列3","列4","列5","列6","列7","列8","列9","列10","列11","列12","列13","列14","列15","列16","列17","列18","列19"]'
+      expectedVal = '["発行日","請求書番号","テナントID","支払期日","納品日","備考","取引先メールアドレス","銀行名","支店名","科目","口座番号","口座名義","その他特記事項","明細-項目ID","明細-内容","明細-数量","明細-単位","明細-単価","明細-税（消費税／軽減税率／不課税／免税／非課税）","明細-備考"]'
       expect(headerTexts).to.equal(expectedVal, '「ユーザフォーマット項目名」の値が保持されていること');
 
       // データ内容
       datas = await uploadFormatConfirmPage.getDatas();
       dataTexts = JSON.stringify(datas);
-      expectedVal = '["","2022/10/8","A0000125","fcde4039-8d4d-4e3e-8b5c-43fca9d6e113","2022/11/8","2022/9/8","備考あああ","銀行名あああ","支店名あああ","当座","1423123","口座名義あああ","その他特記事項あああ","1","明細１","2","個","10000","消費税"]'
+      expectedVal = '["2022/10/8","A0000125","fcde4039-8d4d-4e3e-8b5c-43fca9d6e113","2022/11/8","2022/9/8","備考あああ","aaa@example.com","銀行名あああ","支店名あああ","当座","1423123","口座名義あああ","その他特記事項あああ","1","明細１","2","個","10000","消費税","備考あああ"]'
       expect(dataTexts).to.equal(expectedVal, '「データ内容」の値が保持されていること');
 
       // キャンセルする
@@ -257,7 +249,7 @@ describe('リグレッションテスト', function () {
       // 対応するデータ番号を取得
       selectNumbers = await uploadFormatSettingPage.getNumbers(); // 表示文字列ではなくValueであることに注意
       selectNumberTexts = JSON.stringify(selectNumbers);
-      expectedVal = '["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18"]'
+      expectedVal = '["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19"]'
       expect(selectNumberTexts).to.equal(expectedVal, '選択したデータ番号が残っていること');
 
       // 確認ページに遷移する

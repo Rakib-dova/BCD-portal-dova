@@ -53,7 +53,7 @@ const cbPostSearchApprover = async (req, res, next) => {
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
-  if (req.body.firstName === undefined && req.body.lastName === undefined && req.body.email === undefined) {
+  if (req.body.name === undefined && req.body.email === undefined) {
     return res.status(403).send('403 client forbidden')
   }
 
@@ -64,8 +64,7 @@ const cbPostSearchApprover = async (req, res, next) => {
   }
 
   const keyword = {
-    firstName: req.body.firstName || '',
-    lastName: req.body.lastName || '',
+    name: req.body.name || '',
     email: req.body.email || ''
   }
 

@@ -10,6 +10,7 @@ block content
       .column.is-11
         .container.is-max-widescreen.is-family-noto-sans
             form#form(action="#")
+              input(type='hidden' name='_csrf' value=csrfToken)
               article.panel.is-info
                 h2.panel-heading 契約情報変更
                 .panel-block
@@ -37,15 +38,15 @@ block content
                   .field
                     label(for='contractorName').input-label 契約者名（企業名）
                     p#contractorNameRequired.input-label-required.input-label （必須）
-                    p#contractorNameNoInput.is-invisible.input-label-required(name='errormessage') 未入力です。
-                    p#contractorNameWrongInput.is-invisible.input-label-required(name='errormessage') 入力値が間違いました。
+                    p#contractorNameNoInput.is-invisible.input-label-required(name='errorMessage') 未入力です。
+                    p#contractorNameWrongInput.is-invisible.input-label-required(name='errorMessage') 入力値が間違いました。
                     .control
                       input.input#contractorName(type='text' name='contractorName' value="" pattern=inputPattarnZenkaku maxlength=80 placeholder='全角80文字まで')
                   .field
                     label(for="contractorKanaName").input-label 契約者カナ名（企業名）
                     p#contractorKanaNameRequired.input-label-required.input-label （必須）
-                    p#contractorKanaNameNoInput.is-invisible.input-label-required(name='errormessage') 未入力です。
-                    p#contractorKanaNameWrongInput.is-invisible.input-label-required(name='errormessage') 入力値が間違いました。
+                    p#contractorKanaNameNoInput.is-invisible.input-label-required(name='errorMessage') 未入力です。
+                    p#contractorKanaNameWrongInput.is-invisible.input-label-required(name='errorMessage') 入力値が間違いました。
                     .control
                       input.input#contractorKanaName(type="text" name="contractorKanaName" value="" pattern=inputPattarnZenkakuKatakana maxlength=80 placeholder='全角カタカナ80文字まで')
               
@@ -57,8 +58,8 @@ block content
                     label(for='postalNumber').input-label 郵便番号
                     p#postalNumberRequired.input-label-required.input-label （必須）
                     p.input-label ※数字7桁　
-                    p#postalNumberNoInput.is-invisible.input-label-required(name='errormessage') 未入力です。
-                    p#postalNumberWrongInput.is-invisible.input-label-required(name='errormessage') 入力値が間違いました。
+                    p#postalNumberNoInput.is-invisible.input-label-required(name='errorMessage') 未入力です。
+                    p#postalNumberWrongInput.is-invisible.input-label-required(name='errorMessage') 入力値が間違いました。
                     .control
                       .columns.ml-0.pl-0
                         .column.is-one-third.pl-0
@@ -73,19 +74,19 @@ block content
                   .field
                     label(for="contractAddressVal").input-label 住所
                     p#contractAddressValRequired.input-label-required.input-label （必須）
-                    p#contractAddressValErrormessage.is-invisible.input-label-required(name='errormessage') 未入力です。
+                    p#contractAddressValErrormessage.is-invisible.input-label-required(name='errorMessage') 未入力です。
                     .control
                       input.input#contractAddressVal(type="text" name="contractAddressVal" value readonly)
                   .field
                     label(for="banch1").input-label 番地
                     p#banch1Required.input-label-required.input-label （必須）
-                    p#banch1NoInput.is-invisible.input-label-required(name='errormessage') 未入力です。
-                    p#banch1WrongInput.is-invisible.input-label-required(name='errormessage') 入力値が間違いました。
+                    p#banch1NoInput.is-invisible.input-label-required(name='errorMessage') 未入力です。
+                    p#banch1WrongInput.is-invisible.input-label-required(name='errorMessage') 入力値が間違いました。
                     .control
                       input.input#banch1(type="text" name="banch1" value="" pattern=inputPattarnZenkaku maxlength=20 placeholder='全角20文字まで')
                   .field
                     label(for="tatemono1").input-label 建物等　
-                    p#tatemono1WrongInput.is-invisible.input-label-required(name='errormessage') 入力値が間違いました。
+                    p#tatemono1WrongInput.is-invisible.input-label-required(name='errorMessage') 入力値が間違いました。
                     .control
                       input.input#tatemono1(type="text" name="tatemono1" value="" pattern=inputPattarnZenkaku maxlength=16 placeholder='全角16文字まで')
               
@@ -95,24 +96,24 @@ block content
                   .field
                     label(for="contactPersonName").input-label 連絡先担当者名
                     p#contactPersonNameRequired.input-label-required.input-label （必須）
-                    p#contactPersonNameNoInput.is-invisible.input-label-required(name='errormessage') 未入力です。
-                    p#contactPersonNameWrongInput.is-invisible.input-label-required(name='errormessage') 入力値が間違いました。                    
+                    p#contactPersonNameNoInput.is-invisible.input-label-required(name='errorMessage') 未入力です。
+                    p#contactPersonNameWrongInput.is-invisible.input-label-required(name='errorMessage') 入力値が間違いました。                    
                     .control
                       input.input#contactPersonName(type="text" name="contactPersonName" value="" pattern=inputPattarnZenkaku maxlength=10 placeholder='全角10文字まで')
                   .field
                     label(for="contactPhoneNumber").input-label 連絡先電話番号
                     p#contactPhoneNumberRequired.input-label-required.input-label （必須）
                     p.input-label ※ハイフン含む13桁まで　
-                    p#contactPhoneNumberNoInput.is-invisible.input-label-required(name='errormessage') 未入力です。
-                    p#contactPhoneNumberWorngInput.is-invisible.input-label-required(name='errormessage') 入力値が間違いました。                   
+                    p#contactPhoneNumberNoInput.is-invisible.input-label-required(name='errorMessage') 未入力です。
+                    p#contactPhoneNumberWorngInput.is-invisible.input-label-required(name='errorMessage') 入力値が間違いました。                   
                     .control
                       input.input#contactPhoneNumber(type="text" name="contactPhoneNumber" value="" pattern=inputPattarnTellNumber maxlength=13 placeholder='例：000-0000-0000')
                   .field
                     label(for="contactMail").input-label 連絡先メールアドレス
                     p#contactMailRequired.input-label-required.input-label （必須）
                     p.input-label ※メールアドレス　
-                    p#contactMailNoInput.is-invisible.input-label-required(name='errormessage') 未入力です。
-                    p#contactMailWorongInput.is-invisible.input-label-required(name='errormessage') 入力値が間違いました。
+                    p#contactMailNoInput.is-invisible.input-label-required(name='errorMessage') 未入力です。
+                    p#contactMailWorongInput.is-invisible.input-label-required(name='errorMessage') 入力値が間違いました。
                     .control
                       input.input#contactMail(type="text" name="contactMail" value="" pattern=inputPattarnMailAddress maxlength=82 placeholder='例：bcd@gma.com')
 
@@ -121,7 +122,7 @@ block content
                   .column
                     div.button-area
                       button.button.is-link.mr-6#next-btn.success-button(type="button" data-target="confirmmodify-modal" disabled) 確認
-                      a.button#return-btn.cancel-button(href="portal") 戻る
+                      a.button#return-btn.cancel-button(href="contractDetail") 戻る
                       
               .modal.modal-fx-fadeInscale#confirmmodify-modal
                 .modal-background.cancel-button(data-target="confirmmodify-modal")

@@ -1,13 +1,20 @@
 const { ActionUtils } = require('../utils/action-utils');
+const comment = require('../utils/chai-with-reporting').comment;
 
 // 支払依頼一覧
 class PaymentRequestListPage {
+  title = '支払依頼一覧';
 
   // コンストラクタ
   constructor(browser, page) {
     this.browser = browser;
     this.page = page;
     this.actionUtils = new ActionUtils(browser, page);
+  }
+
+  // コメントする
+  async addComment(message) {
+    await comment('【' + this.title + '】' + message);
   }
 
   // ページが表示されるまで待機する
@@ -19,36 +26,118 @@ class PaymentRequestListPage {
 
   // ホームへ遷移する
   async clickHome() {
+    await this.addComment('「Home」をクリックする');
     await this.actionUtils.click(this.frame, '//*[contains(text(), "Home")]');
+  }
+
+  // 検索条件フォームの表示状態を確認する
+  async isFormShown() {
+    return await this.actionUtils.isDisplayed(this.frame, '#form');
+  }
+
+  // 検索条件を入力する
+  async inputCondition(invoiceNo, minIssueDate, maxIssueDate, sendTo, status, mail, unKnownManager) {
+    await this.addComment('「請求書番号」にて、"' + invoiceNo + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#invoiceNumber', invoiceNo);
+    await this.addComment('「発行日」にて、"' + minIssueDate + '～' + maxIssueDate + '"と入力する');
+    if (minIssueDate) {
+      await this.actionUtils.fill(this.frame, '#minIssuedate', minIssueDate);
+    }
+    if (maxIssueDate) {
+      await this.actionUtils.fill(this.frame, '#maxIssuedate', maxIssueDate);
+    }
+    await this.addComment('「送信企業」にて、"' + sendTo + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#sendTo', sendTo);
+    await this.addComment('「承認ステータス」にて、"' + status + '"を選択する');
+    let value = '';
+    if (status == '未処理') {
+      value = '80';
+    } else if (status == '支払依頼中') {
+      value = '10';
+    } else if (status == '一次承認済み') {
+      value = '11';
+    } else if (status == '二次承認済み') {
+      value = '12';
+    } else if (status == '三次承認済み') {
+      value = '13';
+    } else if (status == '四次承認済み') {
+      value = '14';
+    } else if (status == '五次承認済み') {
+      value = '15';
+    } else if (status == '六次承認済み') {
+      value = '16';
+    } else if (status == '七次承認済み') {
+      value = '17';
+    } else if (status == '八次承認済み') {
+      value = '18';
+    } else if (status == '九次承認済み') {
+      value = '19';
+    } else if (status == '十次承認済み') {
+      value = '20';
+    } else if (status == '最終承認済み') {
+      value = '00';
+    } else if (status == '差し戻し') {
+      value = '90';
+    }
+    await this.actionUtils.check(this.frame, '//input[contains(@name, "status") and @value="' + value + '"]', true);
+    await this.addComment('「担当者アドレス」にて、"' + mail + '"と入力する');
+    await this.actionUtils.fill(this.frame, '#managerAddress', mail);
+    await this.addComment('「担当者不明の請求書」' + (unKnownManager ? 'にチェックを入れる' : 'のチェックを外す'));
+    await this.actionUtils.check(this.frame, '', unKnownManager);
+  }
+
+  // 「検索機能を利用」ボタンの表示状態を確認する
+  async isLightPlanShown() {
+    return await this.actionUtils.isDisplayed(this.frame, '//a[@data-target="information-lightplan"]');
+  }
+
+  // 「検索機能を利用」ボタンをクリックする
+  async clickLightPlan() {
+    await this.addComment('「検索機能を利用」ボタンをクリックする');
+    await this.actionUtils.click(this.frame, '//a[@data-target="information-lightplan"]');
+  }
+
+  // 指定の請求書が見つかるまでページングを行う
+  async paging(invoiceNo) {
+    var pages = await this.actionUtils.getElements(this.frame, '//ul[@class="pagination-list"]/li');
+    var i = 0;
+    for (i = 0; i < pages.length; i++) {
+      if (await this.actionUtils.isExist(this.frame, '//table//td[contains(text(), "' + invoiceNo + '")]')) {
+        return;
+      }
+      await pages[i + 1].click();
+      await this.frame.waitForTimeout(30000);
+    }
   }
 
   // 仕訳情報設定ページへ遷移する
   async clickDetail(invoiceNo) {
+    await this.addComment('請求書番号"' + invoiceNo + '"にて、「仕訳情報設定」をクリックする');
+    await this.paging(invoiceNo);
     await this.actionUtils.click(this.frame, '//table//td[contains(text(), "' + invoiceNo + '")]/..//a[contains(text(), "仕訳情報設定")]');
   }
 
   // 承認ステータスを取得する
   async getApproveStatus(invoiceNo) {
+    await this.paging(invoiceNo);
     return await this.actionUtils.getText(this.frame, '//table//td[contains(text(), "' + invoiceNo + '")]/../td[3]/a');
   }
 
   // 金額を取得する
   async getCost(invoiceNo) {
+    await this.paging(invoiceNo);
     return await this.actionUtils.getText(this.frame, '//table//td[contains(text(), "' + invoiceNo + '")]/../td[5]');
   }
 
   // 差出人を取得する
   async getSender(invoiceNo) {
+    await this.paging(invoiceNo);
     return await this.actionUtils.getText(this.frame, '//table//td[contains(text(), "' + invoiceNo + '")]/../td[6]');
-  }
-
-  // 宛先を取得する
-  async getReceiver(invoiceNo) {
-    return await this.actionUtils.getText(this.frame, '//table//td[contains(text(), "' + invoiceNo + '")]/../td[7]');
   }
 
   // 承認待ちタブを表示する
   async clickConstruct() {
+    await this.addComment('「承認待ち」タブをクリックする');
     await this.actionUtils.click(this.frame, '#constructTab');
     await this.actionUtils.waitForLoading('#constructTab');
   }
@@ -65,6 +154,7 @@ class PaymentRequestListPage {
 
   // 承認待ちリスト内、任意の請求書の支払依頼ページへ遷移する
   async clickConstructDetail(invoiceNo) {
+    await this.addComment('請求書番号"' + invoiceNo + '"にて、「依頼内容確認」をクリックする');
     await this.actionUtils.click(this.frame, '//div[@id="constructTab"]//td[contains(text(), "' + invoiceNo + '")]/..//a[contains(text(), "依頼内容確認")]');
   }
 
@@ -81,6 +171,7 @@ class PaymentRequestListPage {
 
   // ポップアップを閉じる
   async closePopup() {
+    await this.addComment('メッセージを閉じる');
     await this.actionUtils.click(this.frame, '//*[@class="notification is-info animate__animated animate__faster"]/button');
     await this.frame.waitForTimeout(500);
   }

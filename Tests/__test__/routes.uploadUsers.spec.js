@@ -69,11 +69,17 @@ describe('uploadUsersのテスト', () => {
 
   describe('ルーティング', () => {
     test('uploadUsersのルーティングを確認', async () => {
-      expect(uploadUsers.router.get).toBeCalledWith('/', helper.isAuthenticated, uploadUsers.cbGetIndex)
+      expect(uploadUsers.router.get).toBeCalledWith(
+        '/',
+        helper.isAuthenticated,
+        expect.any(Function),
+        uploadUsers.cbGetIndex
+      )
 
       expect(uploadUsers.router.post).toBeCalledWith(
         '/',
         helper.isAuthenticated,
+        expect.any(Function),
         expect.any(Function),
         uploadUsers.cbPostIndex
       )
@@ -93,6 +99,11 @@ describe('uploadUsersのテスト', () => {
       contractControllerFindOneSpy.mockReturnValue(Contracts[0])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await uploadUsers.cbGetIndex(request, response, next)
@@ -123,7 +134,8 @@ describe('uploadUsersのテスト', () => {
           procedureComment3: '3.「ファイル選択」ボタンをクリックし、記入したCSVファイルを選択',
           procedureComment4: '4.「アップロード開始」ボタンをクリック',
           procedureTitle: '(手順)'
-        }
+        },
+        csrfToken: dummyToken
       })
     })
 

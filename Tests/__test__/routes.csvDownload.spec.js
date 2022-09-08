@@ -16,15 +16,17 @@ const userController = require('../../Application/controllers/userController.js'
 const contractController = require('../../Application/controllers/contractController.js')
 const tenantController = require('../../Application/controllers/tenantController')
 const logger = require('../../Application/lib/logger.js')
-const DOMParser = require('dom-parser')
+const DOMParser = require('../../Application/node_modules/dom-parser')
 const notiTitle = '請求書ダウンロード'
 const csvDownloadSysError = 'システムエラーが発生しました。時間を空けてもう一度試してください。'
+const promiseAll = require('../../Application/lib/promiseAll')
 
 let request, response, infoSpy
 let userControllerFindOneSpy,
   contractControllerFindOneSpy,
   tenantControllerFindOneSpy,
-  contractControllerFindContractSpyon
+  contractControllerFindContractSpyon,
+  promiseAllControllerPromiseAllSpyon
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
@@ -73,6 +75,8 @@ describe('csvDownloadのテスト', () => {
     tenantControllerFindOneSpy = jest.spyOn(tenantController, 'findOne')
     contractControllerFindContractSpyon = jest.spyOn(contractController, 'findContract')
     request.flash = jest.fn()
+    request.csrfToken = jest.fn()
+    promiseAllControllerPromiseAllSpyon = jest.spyOn(promiseAll, 'controllerPromiseAll')
   })
   afterEach(() => {
     request.resetMocked()
@@ -83,12 +87,23 @@ describe('csvDownloadのテスト', () => {
     contractControllerFindOneSpy.mockRestore()
     tenantControllerFindOneSpy.mockRestore()
     contractControllerFindContractSpyon.mockRestore()
+    promiseAllControllerPromiseAllSpyon.mockRestore()
   })
 
   describe('ルーティング', () => {
     test('csvDownloadのルーティングを確認', async () => {
-      expect(csvDownload.router.get).toBeCalledWith('/', helper.isAuthenticated, csvDownload.cbGetIndex)
-      expect(csvDownload.router.post).toBeCalledWith('/', helper.isAuthenticated, csvDownload.cbPostIndex)
+      expect(csvDownload.router.get).toBeCalledWith(
+        '/',
+        helper.isAuthenticated,
+        expect.anything(),
+        csvDownload.cbGetIndex
+      )
+      expect(csvDownload.router.post).toBeCalledWith(
+        '/',
+        helper.isAuthenticated,
+        expect.anything(),
+        csvDownload.cbPostIndex
+      )
     })
   })
 
@@ -5032,6 +5047,13 @@ describe('csvDownloadのテスト', () => {
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
+      const result = []
+      const invoice1 = [require('../mockInvoice/invoice1')]
+      const invoice2 = [require('../mockInvoice/invoice2')]
+      result.push(invoice1)
+      result.push(invoice2)
+      promiseAllControllerPromiseAllSpyon.mockReturnValue(result)
+
       // 試験実施
       await csvDownload.cbPostIndex(request, response, next)
 
@@ -5048,8 +5070,15 @@ describe('csvDownloadのテスト', () => {
 
       // responseのcsvファイル
       const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
 
       expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+
+      const checkingData = require('../mockInvoice/invoice1')
+      const checkingData2 = require('../mockInvoice/invoice2')
+      // 複数の請求書番号
+      expect(csvBody).toContain(`${checkingData.ID.value}`)
+      expect(csvBody).toContain(`${checkingData2.ID.value}`)
     })
 
     test('準正常:請求書複数の場合のAPIエラー', async () => {
@@ -5089,7 +5118,7 @@ describe('csvDownloadのテスト', () => {
         '請求書ダウンロード',
         'APIエラーが発生しました。時間を空けてもう一度試してください。'
       ])
-      // ポータルにリダイレクト「される」
+      // 請求情報ダウンロードにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')
     })
@@ -5125,7 +5154,7 @@ describe('csvDownloadのテスト', () => {
         '請求書ダウンロード',
         'APIエラーが発生しました。時間を空けてもう一度試してください。'
       ])
-      // ポータルにリダイレクト「される」
+      // 請求情報ダウンロードにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')
     })
@@ -5163,7 +5192,7 @@ describe('csvDownloadのテスト', () => {
         '請求書ダウンロード',
         'APIエラーが発生しました。時間を空けてもう一度試してください。'
       ])
-      // ポータルにリダイレクト「される」
+      // 請求情報ダウンロードにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')
     })
@@ -5201,7 +5230,7 @@ describe('csvDownloadのテスト', () => {
         '請求書ダウンロード',
         '条件に合致する請求書が見つかりませんでした。'
       ])
-      // ポータルにリダイレクト「される」
+      // 請求情報ダウンロードにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')
     })
@@ -5462,7 +5491,47 @@ describe('csvDownloadのテスト', () => {
         '請求書ダウンロード',
         '条件に合致する請求書が見つかりませんでした。'
       ])
-      // ポータルにリダイレクト「される」
+      // 請求情報ダウンロードにリダイレクト「される」
+      expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
+      expect(response.getHeader('Location')).toEqual('/csvDownload')
+    })
+
+    test('準正常:請求書100件超過した場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: '',
+        status: status,
+        minIssuedate: '1995-10-01',
+        maxIssuedate: '1996-10-01'
+      }
+      request.flash = jest.fn()
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // request.flashが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '請求書ダウンロード',
+        'ダウンロード対象の請求書が100件を超えています。（ダウンロード対象：101件）<br>検索条件を絞り込んでください。'
+      ])
+      // 請求情報ダウンロードにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')
     })
@@ -5920,7 +5989,7 @@ describe('csvDownloadのテスト', () => {
       // 期待結果
       // userContextがLoggedInになっている
       expect(request.session?.userContext).toBe('NotLoggedIn')
-      // ポータルにリダイレクト「される」
+      // 請求情報ダウンロードにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')
     })
@@ -5999,7 +6068,7 @@ describe('csvDownloadのテスト', () => {
       // 期待結果
       // userContextがLoggedInになっている
       expect(request.session?.userContext).toBe('NotLoggedIn')
-      // ポータルにリダイレクト「される」
+      // 請求情報ダウンロードにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')
     })

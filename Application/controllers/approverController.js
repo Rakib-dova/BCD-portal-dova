@@ -40,38 +40,44 @@ const getApprover = async (accTk, refreshTk, tenantId, keyword) => {
   }
 
   const searchUsers = []
-  const keywordName = `${keyword.firstName} ${keyword.lastName}`.trim()
+  const keywordName = keyword.name.replace(/\s+/g, '').trim()
+  const keywordEmail = keyword.email.replace(/[+]/g, '').trim()
   userAccountsArr.forEach((account) => {
-    const name = `${account.FirstName} ${account.LastName}`.trim()
+    const nameMeiSei = `${account.FirstName}${account.LastName}`.trim()
+    const nameSeiMei = `${account.LastName}${account.FirstName}`.trim()
+    const username = account.Username.replace(/[+]/g, '').trim()
     if (keywordName.length > 0 && keyword.email.trim().length > 0) {
-      if (name.search(keywordName) !== -1 && account.Username.search(keyword.email) !== -1) {
+      if (
+        (nameMeiSei.search(keywordName) !== -1 || nameSeiMei.search(keywordName) !== -1) &&
+        username.search(keywordEmail) !== -1
+      ) {
         searchUsers.push({
           id: account.Id,
-          name: `${account.FirstName} ${account.LastName}`,
+          name: `${account.LastName} ${account.FirstName}`,
           email: `${account.Username}`
         })
       }
     } else if (keywordName.length > 0 && keyword.email.trim().length === 0) {
-      if (name.search(keywordName) !== -1) {
+      if (nameMeiSei.search(keywordName) !== -1 || nameSeiMei.search(keywordName) !== -1) {
         searchUsers.push({
           id: account.Id,
-          name: `${account.FirstName} ${account.LastName}`,
+          name: `${account.LastName} ${account.FirstName}`,
           email: `${account.Username}`
         })
       }
     } else if (keywordName.length === 0 && keyword.email.trim().length > 0) {
-      if (account.Username.search(keyword.email) !== -1) {
+      if (username.search(keywordEmail) !== -1) {
         searchUsers.push({
           id: account.Id,
-          name: `${account.FirstName} ${account.LastName}`,
+          name: `${account.LastName} ${account.FirstName}`,
           email: `${account.Username}`
         })
       }
     }
-    if (keyword.firstName.length === 0 && keyword.lastName.length === 0 && keyword.email.length === 0) {
+    if (keyword.name.length === 0 && keyword.email.length === 0) {
       searchUsers.push({
         id: account.Id,
-        name: `${account.FirstName} ${account.LastName}`,
+        name: `${account.LastName} ${account.FirstName}`,
         email: `${account.Username}`
       })
     }
@@ -586,6 +592,7 @@ const requestApproval = async (contractId, approveRouteId, invoiceId, requesterI
     const noneWorkflowStatusCode = await approveStatusDAO.getStautsCode('未処理')
     const rejectWorkflowStatusCode = await approveStatusDAO.getStautsCode('差し戻し')
     const waitingWorkflowStatusCode = await approveStatusDAO.getStautsCode('支払依頼中')
+    let newRequest
 
     // 該当請求書の情報取得
     const requestApprovalFind = await requestApprovalDAO.getRequestApprovalFromInvoice(invoiceId)
@@ -593,7 +600,7 @@ const requestApproval = async (contractId, approveRouteId, invoiceId, requesterI
     // 該当請求書の情報が１つもない場合のみ
     if (!requestApprovalFind) {
       // レコード作成（ステータス：支払依頼中）
-      const newRequest = await requestApprovalDAO.createRequestApproval(
+      newRequest = await requestApprovalDAO.createRequestApproval(
         requester.userId,
         invoiceId,
         approveRouteId,
@@ -610,21 +617,29 @@ const requestApproval = async (contractId, approveRouteId, invoiceId, requesterI
       requestApprovalFind.status === noneWorkflowStatusCode ||
       requestApprovalFind.status === rejectWorkflowStatusCode
     ) {
-      await requestApprovalDAO.updateRequestApproval(
-        requestApprovalFind,
+      // rejectedFlagをtrueに変更
+      await requestApprovalDAO.updateRequestApproval(requestApprovalFind)
+
+      if ((await requestApprovalDAO.saveRequestApproval(requestApprovalFind)) instanceof Request === false) {
+        throw Error('request approval fail')
+      }
+
+      // レコード作成（ステータス：支払依頼中）
+      newRequest = await requestApprovalDAO.createRequestApproval(
         requester.userId,
+        invoiceId,
         approveRouteId,
         waitingWorkflowStatusCode,
-        message
+        message,
+        requestApprovalFind.version + 1
       )
+      if (newRequest instanceof Request === false) return -1
+      await newRequest.save()
     } else {
       return 1
     }
 
-    if ((await requestApprovalDAO.saveRequestApproval(requestApprovalFind)) instanceof Request === false) {
-      throw Error('request approval fail')
-    }
-    return requestApprovalFind
+    return newRequest
   } catch (error) {
     logger.error({ contractId: contractId, stack: error.stack, status: 0 })
     logger.info(constantsDefine.logMessage.INF001 + 'requestApproval')
@@ -875,8 +890,7 @@ const getApprovalFromRejected = async (accessToken, refreshToken, tenant, contra
     if (approval instanceof Approval === false) return false
 
     const users = await getApprover(accessToken, refreshToken, tenant, {
-      firstName: '',
-      lastName: '',
+      name: '',
       email: ''
     })
 

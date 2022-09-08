@@ -118,10 +118,10 @@ $('#next-btn').addEventListener('click', function (event) {
     checkValidations.push($('#contactMailWorongInput'))
   }
 
-  let errormessage = document.querySelectorAll('p[name="errormessage"].input-label-required:not(.is-invisible)')
-  errormessage = Array.prototype.slice.call(errormessage)
+  let errorMessage = document.querySelectorAll('p[name="errorMessage"].input-label-required:not(.is-invisible)')
+  errorMessage = Array.prototype.slice.call(errorMessage)
   const result = []
-  errormessage.map((err) => {
+  errorMessage.map((err) => {
     checkValidations.map((check) => {
       if (check.id === err.id) {
         result.push(check)

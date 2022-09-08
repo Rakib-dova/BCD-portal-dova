@@ -1,7 +1,9 @@
 const { ActionUtils } = require('../utils/action-utils');
+const comment = require('../utils/chai-with-reporting').comment;
 
 // 仕訳情報管理メニュー
 class JournalMenuPage {
+  title = '仕訳情報管理メニュー';
 
   // コンストラクタ
   constructor(browser, page) {
@@ -10,10 +12,16 @@ class JournalMenuPage {
     this.actionUtils = new ActionUtils(browser, page);
   }
 
+  // コメントする
+  async addComment(message) {
+    await comment('【' + this.title + '】' + message);
+  }
+
   // ページが表示されるまで待機する
   async waitForLoading() {
     let frame = await this.actionUtils.waitForLoading('//*[@id="registAccountCode-modal"]//*[contains(text(),"承認ルート一覧")]')
     this.frame = frame;
+    await this.frame.waitForTimeout(1000);
     return frame;
   }
 
@@ -24,6 +32,7 @@ class JournalMenuPage {
 
   // メニュー項目をクリックする
   async clickMenu(menuLabel) {
+    await this.addComment('「' + menuLabel + '」をクリックする');
     await this.actionUtils.click(this.frame, '//*[@id="registAccountCode-modal"]//section//*[contains(text(),"' + menuLabel + '")]');
   }
 

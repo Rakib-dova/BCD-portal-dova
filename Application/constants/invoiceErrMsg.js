@@ -25,6 +25,11 @@ constantsDefine({
   // 備考
   FINANCIALINSTITUTIONERR000: `${invoiceValidDefine.FINANCIALINSTITUTION_KEY}は${invoiceValidDefine.FINANCIALINSTITUTION_VALUE}文字以内で入力してください。`,
 
+  // 取引先メールアドレス
+  MAILADDRESSERR001: `${invoiceValidDefine.MAILADDRESS_KEY}は半角英数字記号を入力してください`,
+  MAILADDRESSERR002: `${invoiceValidDefine.MAILADDRESS_KEY}が未入力です。`,
+  MAILADDRESSERR003: `${invoiceValidDefine.MAILADDRESS_KEY}がフォーマットに含まれておりません。`,
+
   // 明細-項目IDエラーメッセージ
   SELLERSITEMNUMERR000: `${invoiceValidDefine.SELLERSITEMNUM_KEY}は${invoiceValidDefine.SELLERSITEMNUM_VALUE}文字以内で入力してください。`,
   SELLERSITEMNUMERR002: `${invoiceValidDefine.SELLERSITEMNUM_KEY}が未入力です。`,
@@ -98,5 +103,8 @@ constantsDefine({
   APIERROR: 'APIエラーです、時間を空けて再度実行をお願いいたします。',
 
   // システムエラーメッセージ
-  SYSERROR: 'システムエラーです。（後程、接続してください）'
+  SYSERROR: 'システムエラーです。（後程、接続してください）',
+
+  // 合計金額エラーメッセージ
+  TOTALPRICEVALUEERR000: `請求書の合計金額を${invoiceValidDefine.TOTALPRICEVALUE_MESSAGE}円以下で入力してください。`
 })

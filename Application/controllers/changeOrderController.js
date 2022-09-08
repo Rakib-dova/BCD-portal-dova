@@ -7,7 +7,7 @@ let errorStatus = '050'
 module.exports = {
   create: async (_tenantId, contractInformationcancelOrder) => {
     try {
-      const contract = await Contract.findContract({ tenantId: _tenantId, deleteFlag: false }, 'createdAt DESC')
+      const contract = await Contract.findContract({ tenantId: _tenantId, serviceType: '010', deleteFlag: false }, 'createdAt DESC')
 
       if (contract === undefined || contract === null) {
         errorStatus = '051'

@@ -70,7 +70,7 @@ app.use(
   helmet.contentSecurityPolicy({
     directives: {
       ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-      'img-src': ["'self'"],
+      'img-src': ["'self'", 'https: data:'], // eslint-disable-line
       'form-action': ["'self'"], // form-actionは自己ドメインに制限
       // bulma-toast、fontawasom、googlefontsを使うためstyle-srcを一部許可
       // prettier-ignore
@@ -322,18 +322,43 @@ app.use('/deleteApproveRoute', require('./routes/deleteApproveRoute').router)
 // 承認ルート確認
 app.use('/approveRouteEdit', require('./routes/approveRouteEdit').router)
 
-// 設定
-// cancellation
+// ------------設定
+// ご契約内容
+app.use('/contractDetail', require('./routes/contractDetail').router)
+
+// 無料契約者情報の修正
+app.use('/change', require('./routes/change').router)
+
+// 無料契約情報解約
 app.use('/cancellation', require('./routes/cancellation').router)
 
-// 契約者情報の修正
-app.use('/change', require('./routes/change').router)
+// 有料契約情報解約
+app.use('/contractCancellation', require('./routes/contractCancellation').router)
 
 // ユーザー一括登録
 app.use('/uploadUsers', require('./routes/uploadUsers').router)
 
+// 取引先一括登録
+app.use('/uploadSuppliers', require('./routes/uploadSuppliers').router)
+
+// ------------オプションサービス申込
+// 有料サービス利用登録
+app.use('/paidServiceRegister', require('./routes/paidServiceRegister').router)
+
 // 請求書ダウンロード
 app.use('/csvDownload', require('./routes/csvDownload').router)
+
+/* PoC PDF出力機能 */
+app.use('/pdfInvoices', require('./routes/pdfInvoice').router)
+
+/* PoC PDF請求書ドラフト一括作成 */
+app.use('/pdfInvoiceCsvUpload', require('./routes/pdfInvoiceCsvUpload').router)
+
+/* PoC 印影登録 */
+app.use('/imprintUpload', require('./routes/imprintUpload').router)
+
+/* 支払承認フロー */
+app.use('/invoiceFlow', require('./routes/invoiceFlow').router)
 
 /**  会員サイト開発 20220228 */
 // アプリ一覧からの遷移受付けエンドポイント
@@ -343,6 +368,9 @@ app.use('/idLinking', require('./memberSite/routes/idLinkingRouter').router)
 
 // 奉行クラウド連携
 app.use('/bugyo', require('./obc/obc'))
+
+// API専用
+app.use('/api', require('./routes/api').router)
 
 // notice
 const noticeHelper = require('./routes/helpers/notice')

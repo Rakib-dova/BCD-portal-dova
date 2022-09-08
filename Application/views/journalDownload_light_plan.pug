@@ -1,0 +1,142 @@
+﻿extends layout
+
+block content
+  .max-width
+    section.hero.is-small.is-com
+      .hero-body-noImage
+        .title.is-family-noto-sans 仕訳情報ダウンロード
+        .subtitle.is-family-noto-sans JOURNAL DOWNLOAD
+
+    .columns.is-centered
+     .column.is-11
+      .box
+       form#form(method="POST")
+        input(type="hidden" name="_csrf" value=csrfToken)
+        article.panel.is-info
+         h2.panel-heading 条件絞り込み
+         .panel-block.mr-4
+          .container
+           .field.is-invisible#RequiredErrorMesageField
+             p#RequiredErrorMesage.input-label-required
+           .field.is-horizontal.mt-4
+             .field-label.is-normal
+               label.bulmalabel 請求書番号
+             .field-body
+               .field
+                 .control.has-icons-right
+                   input.input#invoiceNumber.itemForSearch(type="text" name="invoiceNumber" maxlength="100" pattern="^.{0,100}$")
+           .field.is-horizontal.my-5
+             .field-label.is-normal
+               label.bulmalabel 発行日
+             .field-body
+               .field.is-grouped.is-grouped-multiline
+                 .control.is-expanded
+                   input.input#minIssuedate.itemForSearch(type="date" name="minIssuedate" value= minissuedate pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$")
+                 .control
+                   div ～
+                 .control.is-expanded
+                   input.input#maxIssuedate.itemForSearch(type="date" name="maxIssuedate" value= maxissuedate pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$")
+
+           .field.is-horizontal.mt-5
+             .field-label.is-normal
+               label.bulmalabel 送信企業
+             .field-body
+               .field.has-addons
+                 p.control.is-expanded
+                   input.input#sendTo(type='text' maxlength="100")
+                 p.control
+                   a.button.is-info#sendToSearchBtn 検索
+
+           .field.is-horizontal
+            .field-label.is-normal
+            .field-body#sendToSelectBtnField
+
+           .field.is-horizontal.is-invisible
+            .field-label.is-normal
+            .field-body.level
+              .container#displaySendToSearchResultField
+
+           .field.is-horizontal.my-3
+             .field-label
+               label.bulmalabel ダウンロード対象
+             .field-body#chkFinalapproval
+               .field.has-addons
+                 label.radio
+                   input#finalapproval(type='radio' name='chkFinalapproval' checked=true value='finalapproval')
+                   label.ml-1(for='finalapproval') 最終承認済みの請求書
+                 label.radio.ml-6
+                   input#noneFinalapproval(type='radio' name='chkFinalapproval' checked=false value='noneFinalapproval')
+                   label.ml-1(for='noneFinalapproval') 仕訳済みの請求書
+           
+           .field.is-horizontal.my-4
+            .field-label
+              label.bulmalabel 出力フォーマット
+            .field-body
+              .select.is-fullwidth
+                select(name='serviceDataFormat')
+                  option(value=0)=serviceDataFormatName[0]
+                  option(value=1)=serviceDataFormatName[1]
+                  option(value=2)=serviceDataFormatName[2]
+                  option(value=3)=serviceDataFormatName[3]
+                  option(value=4)=serviceDataFormatName[4]
+                  option(value=5)=serviceDataFormatName[5]
+        .field.is-grouped.is-grouped-centered
+          .control.mx-4
+            .mt-5.has-text-centered
+              div
+                p.border-journaldownload ※ダウンロードされる請求書数は100件以内となるように設定してください。
+              .column
+                div.button-area
+                  a.button.is-info#submit(type="submit") CSVダウンロード
+            
+    template#templateAllSelectBtn
+        p.control
+          a.button.is-info 全選択
+        p.control
+        p.control
+          a.button.is-info 全解除
+        p.control
+        p.control
+          a.button ▲
+
+    template#templateSearchResultBox
+        .box.searchResultBox
+
+    template#templateSearchResultItem
+      .field.is-horizontal
+        .field-body
+          p.control
+            label.checkbox
+              input.m-3.p-1(type='checkbox' checked=false)
+         
+    .modal.modal-fx-fadeInscale#searchCompany-modal
+     .modal-background.cancel-button(data-target="searchCompany-modal")
+     .modal-card
+       header.modal-card-head
+         p.modal-card-title 企業検索
+         button.delete(type="button" data-target="searchCompany-modal")
+       section.modal-card-body
+         p.modal-card-result#modal-card-result
+       footer.modal-card-foot
+         div.button-area
+          a.button.cancel-button(data-target="searchCompany-modal") 確認
+
+    .modal.modal-fx-fadeInscale#journaldownload-progress-modal
+      .modal-background
+      .modal-card
+        header.modal-card-head
+          p.modal-card-title 仕訳情報ダウンロード
+        section.modal-card-body
+          center
+            img(src="/image/loading_progress.gif")
+            p.modal-card-result#modal-card-result ダウンロードCSVファイル作成中
+        footer.modal-card-foot
+
+    include footer
+
+block append scripts
+  //- 画面のJSファイル
+  script(src="/js/journalDownload-page.js")
+  script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+  script(src="/js/dd.min.js")
+  link(rel='stylesheet', type='text/css', href='/css/journalDownload.css')

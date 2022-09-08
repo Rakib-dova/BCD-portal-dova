@@ -23,6 +23,17 @@ const $ = function (tagObjName) {
 $('#btnCheck').addEventListener('click', function (e) {
   // 英数文字正規式
   const regExpEngNumber = '^[a-zA-Z0-9]*$'
+  // 絵文字正規式
+  const ranges = [
+    '[\ud800-\ud8ff][\ud000-\udfff]', // 基本的な絵文字除去
+    '[\ud000-\udfff]{2,}', // サロゲートペアの二回以上の繰り返しがあった場合
+    '\ud7c9[\udc00-\udfff]', // 特定のシリーズ除去
+    '[0-9|*|#][\uFE0E-\uFE0F]\u20E3', // 数字系絵文字
+    '[0-9|*|#]\u20E3', // 数字系絵文字
+    '[©|®|\u2010-\u3fff][\uFE0E-\uFE0F]', // 環境依存文字や日本語との組み合わせによる絵文字
+    '[\u2010-\u2FFF]', // 指や手、物など、単体で絵文字となるもの
+    '\uA4B3' // 数学記号の環境依存文字の除去
+  ]
   let errorFlag = false
 
   if (this.getAttribute('disabled') !== null) {
@@ -82,6 +93,17 @@ $('#btnCheck').addEventListener('click', function (e) {
   if ($('#setSubAccountCodeNameInputId').value.length > 40) {
     $('#RequiredErrorMesageForName').innerHTML = '補助科目名は40桁まで入力してください。'
     $('#RequiredErrorMesageForName').classList.remove('is-invisible')
+    errorFlag = true
+  }
+
+  // 補助科目名に絵文字が入っている場合
+  if (
+    document.querySelector('#setSubAccountCodeNameInputId').value.match(ranges.join('|')) &&
+    document.querySelector('#setSubAccountCodeNameInputId').value.length > 0 &&
+    document.querySelector('#setSubAccountCodeNameInputId').value.length < 41
+  ) {
+    document.querySelector('#RequiredErrorMesageForName').innerHTML = '補助科目名に絵文字は利用できません。'
+    document.querySelector('#RequiredErrorMesageForName').classList.remove('is-invisible')
     errorFlag = true
   }
 
@@ -189,8 +211,11 @@ $('#btnSearchAccountCode').addEventListener('click', function () {
   $('#setAccountCodeInputId').value = accountCode
   $('#setAccountCodeNameInputId').value = accountCodeName
   const getAccountCode = new XMLHttpRequest()
+  const elements = document.getElementsByName('_csrf')
+  const csrf = elements.item(0).value
   getAccountCode.open('POST', '/registSubAccountCode/getAccountCode')
   getAccountCode.setRequestHeader('Content-Type', 'application/json')
+  getAccountCode.setRequestHeader('CSRF-Token', csrf)
   getAccountCode.onreadystatechange = function () {
     if (getAccountCode.readyState === getAccountCode.DONE) {
       switch (getAccountCode.status) {
