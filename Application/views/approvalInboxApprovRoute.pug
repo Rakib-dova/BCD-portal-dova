@@ -1,44 +1,88 @@
-﻿.box.p-3
-  .column.m-0.p-0
-    .column.p-2#displayRequestApprovaRoute
-      - const approvalNo = ['一次承認', '二次承認', '三次承認', '四次承認', '五次承認', '六次承認', '七次承認', '八次承認', '九次承認', '十次承認', '最終承認']
-        .column-header.text-inbox.text-inbox-subtitle.text-inbox-common
-          | 承認履歴 
-        section#displayDetailApproveRouteTable
-          .columns.m-0.p-0.is-color-table-header.is-border-left-top
-            .column.is-one-fifth.text-left.is-border-right 承認順
-            .column.is-one-third.text-left.is-border-right 担当者名
-            .column.text-left.is-border-right 承認状況
-            .column.is-one-fifth.text-left.is-border-right メッセージ
-          each requestApproval, idx in requestApprovals
-            - const userLen = requestApproval.approveRoute.users.length
-            .columns.m-0.p-0.is-border-left-top
-              if idx > 0
-                .column.is-one-fifth.text-left.is-border-right 支払再依頼
-              else 
-                .column.is-one-fifth.text-left.is-border-right #{requestApproval.requester.no}
-              .column.is-one-third.text-left.is-border-right #{requestApproval.requester.name}
-              .column.text-left.is-border-right #{requestApproval.requester.status} #{requestApproval.requester.requestedAt}
-              .column.is-one-fifth.text-left.is-border-right #{requestApproval.requester.message}
-            each user, idx in requestApproval.approveRoute.users
-              if idx < userLen - 1
-                .columns.m-0.p-0.is-border-left-top
-                  .column.is-one-fifth.text-left.is-border-right #{approvalNo[idx]}
-                  if user.firstName === '未設定'
-                    .column.is-one-third.text-left.is-border-right.input-label-required ユーザー登録なし
-                  else
-                    .column.is-one-third.text-left.is-border-right #{user.lastName} #{user.firstName}
-                  if user.status === '処理中'
-                    .column.is-align-content-center.is-border-right.is-family-noto-sans-bold #{user.status} #{user.approvedAt}
-                  else
-                    .column.is-align-content-center.is-border-right #{user.status} #{user.approvedAt}
-                  .column.is-one-fifth.text-left.is-border-right #{user.message}
-              else
-                .columns.m-0.p-0.is-border-left-top-bottom
-                  .column.is-one-fifth.text-left.is-border-right #{approvalNo.slice(-1)}
-                  .column.is-one-third.text-left.is-border-right  #{user.lastName} #{user.firstName}
-                  if user.status === '処理中'
-                    .column.is-align-content-center.is-border-right.is-family-noto-sans-bold #{user.status} #{user.approvedAt}
-                  else
-                    .column.is-align-content-center.is-border-right #{user.status} #{user.approvedAt}
-                  .column.is-one-fifth.text-left.is-border-right #{user.message}
+﻿
+
+.section.userGuide#invoiceFlow.box 
+    .is-family-noto-sans.contractWidth.mb-5             
+      h3 支払依頼
+        span 依頼日時：2022.07.21 - 13:20:11
+        span 最終更新日：2022.07.23 - 08:00:50
+      #accordion.invoiceFlow
+        ul.include-accordion.scroll-control.include-InvoiceFlow
+          li.include-accordion-wrap.userGuide-feature
+            button.accordionBtn.userGuide-feature-title(type='button').invoiceFlowBox 
+              span ステータス
+              span.btn-status.st-redback
+              span.btn-status.st-yellowfont
+              span.btn-status.st-greenfont
+              span.btn-status.st-greenback
+            ul
+              li.invoiceFlowWrap
+                .is-flex
+                  .is-inline-block.py-4 【依頼者】
+                  .is-inline-block.py-4.mr-4 山田太郎
+                  .is-inline-block.py-4 【メッセージ】
+                  a.py-4.w-1000.td-overflow ○○○と○○○の金額を修正しましたので、再度確お願いします。○○○と○○○の金額が違います。もう一度内容のテストテストテストテストテストテストテストテストテストテスト○○○と○○○の金額が違います。もう一度内容のテストテストテストテストテストテストテストテストテストテスト    
+                table.is-fullwidth.is-hoverable.table-fixed 
+                  tr.tTitle 
+                    td 承認順    
+                    td 日時
+                    td 承認状況
+                    td 担当者名
+                    td メッセージ
+                  tr
+                    td 一次承認
+                    td 2022.07.21 - 15:00:50
+                    td 承認済み
+                    td 鈴木花子
+                    td.has-text-left.td-overflow 
+                      a OKです。
+                  tr 
+                    td 最終承認
+                    td 2022.07.23 - 08:00:50
+                    td.has-text-danger 差し戻し
+                    td 佐藤一郎
+                    td.has-text-left.td-overflow
+                      a ○○○と○○○の金額が違います。もう一度内容のテストテストテストテストテストテストテストテストテストテスト○○○と○○○の金額が違います。もう一度内容のテストテストテストテストテストテストテストテストテストテスト    
+  
+      h3 支払依頼
+        span 依頼日時：2022.07.26 - 09:30:22
+        span 最終更新日：2022.07.26 - 09:30:22
+      .invoiceFlow
+        ul.include-InvoiceFlow
+          li.userGuide-feature
+            button.accordionBtn.userGuide-feature-title(type='button').invoiceFlowBox 
+              span ステータス
+              span.btn-status.st-yellowfont
+            ul  
+              li.invoiceFlowWrap
+                .is-flex
+                  .is-inline-block.py-4 【依頼者】
+                  .is-inline-block.py-4.mr-4 山田太郎
+                  .is-inline-block.py-4 【メッセージ】
+                  a.py-4.w-1000.td-overflow ○○○と○○○の金額を修正しましたので、再度確お願いします。○○○と○○○の金額が違います。もう一度内容のテストテストテストテストテストテストテストテストテストテスト○○○と○○○の金額が違います。もう一度内容のテストテストテストテストテストテストテストテストテストテスト    
+                table 
+                  tr.tTitle 
+                    td 承認順    
+                    td 日時
+                    td 承認状況
+                    td 担当者名
+                    td メッセージ
+                  tr
+                    td 一次承認
+                    td 
+                    td 処理中
+                    td 鈴木花子
+                    td 
+                      a.td-overflow
+                  tr 
+                    td 最終承認
+                    td 
+                    td
+                    td 佐藤一郎
+                    td 
+                      a.td-overflow  
+                  
+
+block append scripts
+  link(rel='stylesheet', type='text/css', href='/css/approvalInboxApprovRoute.css')
+  link(rel='stylesheet', type='text/css', href='/css/accordion.css')
+  script(src="/js/accordion.js")

@@ -14,7 +14,7 @@ block content
         include requestApprovalMessage
         if (requestApprovals.length !== 0)
           include requestApprovalBeforeRoute
-        include approvalInboxApprovRoute
+        include requestApprovalRoute
 
         .field.is-grouped.is-grouped-centered
           .control
@@ -250,3 +250,4 @@ block content
 block append scripts
   script(src="/js/requestApproval-page.js")
   link(rel='stylesheet', type='text/css', href='/css/requestApproval.css')
+  link(rel='stylesheet', type='text/css', href='/css/approvalInbox.css')

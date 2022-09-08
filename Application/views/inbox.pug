@@ -11,6 +11,7 @@ block content
         include invoiceFooter
         include invoiceOptions
         include invoicePaymentMethod
+        include approvalInboxApprovRoute
         input(type='hidden' name='_csrf' value=csrfToken)
         .grouped-button
           a.button.mr-6(href='/inboxList/1')  戻る
