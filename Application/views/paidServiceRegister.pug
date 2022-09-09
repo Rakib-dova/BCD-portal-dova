@@ -184,7 +184,7 @@ block content
                         .field.card
                           .card-content
                             .title.is-4 スタンダードプラン利用開始日
-                            p ご希望の導入支援の内容によっては利用開始日を変更させていただきます。
+                            p ※導入支援サービスをお申し込みいただいた場合は、利用開始日が変更になる可能性があります。
                             br
                             .field
                               label(for="openingDate").input-label 利用開始日
@@ -202,7 +202,7 @@ block content
                             label(for="salesChannelCode").input-label 販売チャネルコード
                             p#salesChannelCodeMessage.input-label-required.input-label
                             .control
-                              input.input#salesChannelCode(type="text" name="salesChannelCode" value="" pattern=inputPatternEngNumKana maxlength=8 placeholder='半角英数カナ8桁まで')
+                              input.input#salesChannelCode(type="text" name="salesChannelCode" value="" pattern=inputPatternEngNumSign maxlength=8 placeholder='半角英数記号8桁まで')
                           .field
                             label(for="salesChannelName").input-label 販売チャネル名
                             p#salesChannelNameMessage.input-label-required.input-label
@@ -246,8 +246,6 @@ block content
                               input.input#salesChannelPhoneNumber(type="text" name="salesChannelPhoneNumber" value="" pattern=inputPattarnTellNumber maxlength=13 placeholder='例：000-0000-0000')
                           .field
                             label(for="salesChannelMailAddress").input-label メールアドレス
-                            p#salesChannelMailAddressRequired.input-label
-                            p.input-label ※メールアドレス　
                             p#salesChannelMailAddressMessage.input-label-required.input-label
                             .control
                               input.input#salesChannelMailAddress(type="text" name="salesChannelMailAddress" value="" pattern=inputPattarnMailAddress maxlength=82 placeholder='例：bcd@gma.com')
