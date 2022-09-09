@@ -12,6 +12,7 @@ Array.prototype.forEach.call(document.querySelectorAll('.moreMessageUser'), (ite
   })
 })
 
+// メッセージモーダル表示
 const showMoreMessageModal = function (target) {
   while (document.getElementById('more-message-modal-body').firstChild) {
     document
@@ -20,11 +21,8 @@ const showMoreMessageModal = function (target) {
   }
 
   const message = target.dataset.info
-  console.log(message.length)
   if (message !== 'null') {
-    console.log('11111')
     document.getElementById('more-message-modal').classList.add('is-active')
-    console.log('22222')
 
     if (message.indexOf('\n') !== -1) {
       const messageLines = message.split('\n')
