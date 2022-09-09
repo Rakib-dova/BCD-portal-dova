@@ -179,6 +179,7 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
   return await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
 }
 
+// 日付フォーマット設定
 const setDate = async (date) => {
   const setDate = `${date.getFullYear()}.${('0' + (date.getMonth() + 1)).slice(-2)}.${('0' + date.getDate()).slice(
     -2

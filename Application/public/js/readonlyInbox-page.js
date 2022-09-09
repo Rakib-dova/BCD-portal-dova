@@ -20,19 +20,24 @@ const showMoreMessageModal = function (target) {
   }
 
   const message = target.dataset.info
-  document.getElementById('more-message-modal').classList.add('is-active')
+  console.log(message.length)
+  if (message !== 'null') {
+    console.log('11111')
+    document.getElementById('more-message-modal').classList.add('is-active')
+    console.log('22222')
 
-  if (message.indexOf('\n') !== -1) {
-    const messageLines = message.split('\n')
-    messageLines.forEach((line, idx) => {
+    if (message.indexOf('\n') !== -1) {
+      const messageLines = message.split('\n')
+      messageLines.forEach((line, idx) => {
+        const newChild = document.createElement('p')
+        newChild.id = idx
+        newChild.textContent = line
+        document.getElementById('more-message-modal-body').appendChild(newChild)
+      })
+    } else {
       const newChild = document.createElement('p')
-      newChild.id = idx
-      newChild.textContent = line
+      newChild.textContent = message
       document.getElementById('more-message-modal-body').appendChild(newChild)
-    })
-  } else {
-    const newChild = document.createElement('p')
-    newChild.textContent = message
-    document.getElementById('more-message-modal-body').appendChild(newChild)
+    }
   }
 }
