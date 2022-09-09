@@ -214,7 +214,7 @@ describe('approvalInboxControllerのテスト', () => {
         }
       ])
 
-      approvalFineOne.mockReturnValue(ApprovalData1[0])
+      approvalFineOne.mockReturnValue(ApprovalData1[7])
       approverControllerGetApprover.mockReturnValue(expectGetApprover)
       requestApprovalFindAll.mockReturnValue(expectRequestApproval)
       approverControllerGetApproveRoute.mockReturnValue(expectGetApproveRoute)

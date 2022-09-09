@@ -9,12 +9,12 @@ block content
       include readonlyApprovalInboxInvoiceLines
       include readonlyApprovalInvoiceFooter
       if (requestApprovals.length !== 0)
-        include readonlyApprovalInboxApprovRoute
+        include approvalInboxApprovRoute
       .grouped-button
         a.button.mr-6(href='/inboxList/1')  戻る
 
   include footer
 
 block append scripts
-  script(src="/js/approvalInbox-page.js")
+  script(src="/js/readonlyInbox-page.js")
   link(rel='stylesheet', type='text/css', href='/css/approvalInbox.css')
