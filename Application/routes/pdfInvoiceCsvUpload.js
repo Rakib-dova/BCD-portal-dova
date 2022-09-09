@@ -211,8 +211,7 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
   const jsonLog = {
     tenantId: req.user.tenantId,
     action: 'csvUploadedPdfInvoice',
-    csvUploadedPdfInvoiceCount: validInvoices.length,
-    invoices: validInvoices
+    csvUploadedPdfInvoiceCount: validInvoices.length
   }
   logger.info(jsonLog)
 

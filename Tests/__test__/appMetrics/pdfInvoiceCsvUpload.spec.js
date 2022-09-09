@@ -172,8 +172,7 @@ describe('アプリ効果測定UT_デジトレ', () => {
       expect(infoSpy).nthCalledWith(2, {
         tenantId: 'dummyTenantId',
         action: 'csvUploadedPdfInvoice',
-        csvUploadedPdfInvoiceCount: 1,
-        invoices: validInvoicesData.success
+        csvUploadedPdfInvoiceCount: 1
       })
     })
 
@@ -202,8 +201,7 @@ describe('アプリ効果測定UT_デジトレ', () => {
       expect(infoSpy).not.nthCalledWith(2, {
         tenantId: 'dummyTenantId',
         action: 'csvUploadedPdfInvoice',
-        csvUploadedPdfInvoiceCount: 1,
-        invoices: validInvoicesData.success
+        csvUploadedPdfInvoiceCount: 1
       })
     })
   })
