@@ -244,6 +244,7 @@ const pdfInvoiceCsvUploadResult = async (req, res, next) => {
       const stamp = `${year}/${month}/${day} ${hour}:${min}:${sec}`
       return stamp
     }
+
     result.forEach((currVal, index) => {
       const invoice = currVal
       const invoiceAll =

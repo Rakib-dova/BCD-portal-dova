@@ -126,17 +126,17 @@ block content
                             .control
                               input.input#billMailingAddressBuilding1(type="text" name="billMailingAddressBuilding1" value="" pattern=inputPattarnZenkaku maxlength=16 placeholder='全角16文字まで')
                           .field
-                            label(for="billMailingKanaName").input-label 請求書送付先宛名（企業名+部課名）
-                            p#billMailingKanaNameRequired.input-label-required.input-label （必須）
-                            p#billMailingKanaNameMessage.input-label-required.input-label
-                            .control
-                              input.input#billMailingKanaName(type="text" name="billMailingKanaName" value="" pattern=inputPattarnZenkaku maxlength=35 required placeholder='全角35文字まで')
-                          .field
-                            label(for="billMailingName").input-label 請求書送付先宛カナ名（企業名+部課名）
+                            label(for="billMailingName").input-label 請求書送付先宛名（企業名+部課名）
                             p#billMailingNameRequired.input-label-required.input-label （必須）
                             p#billMailingNameMessage.input-label-required.input-label
                             .control
-                              input.input#billMailingName(type="text" name="billMailingName" value="" pattern=inputPattarnZenkakuKatakana maxlength=40 required placeholder='全角カタカナ40文字まで')
+                              input.input#billMailingName(type="text" name="billMailingName" value="" pattern=inputPattarnZenkaku maxlength=40 required placeholder='全角40文字まで')
+                          .field
+                            label(for="billMailingKanaName").input-label 請求書送付先カナ宛名（企業名+部課名）
+                            p#billMailingKanaNameRequired.input-label-required.input-label （必須）
+                            p#billMailingKanaNameMessage.input-label-required.input-label
+                            .control
+                              input.input#billMailingKanaName(type="text" name="billMailingKanaName" value="" pattern=inputPattarnZenkakuKatakana maxlength=35 required placeholder='全角カタカナ35文字まで')
 
                       .field.card
                         .card-content
@@ -317,10 +317,10 @@ block content
                         td#rebillMailingAddress.checkData.confirmation-content(colspan="3")
                       tr
                         td(colspan="2") 請求書送付先宛名
-                        td#rebillMailingKanaName.checkData.confirmation-content(colspan="3")
+                        td#rebillMailingName.checkData.confirmation-content(colspan="3")
                       tr
                         td(colspan="2") 請求書送付先宛カナ名
-                        td#rebillMailingName.checkData.confirmation-content(colspan="3")
+                        td#rebillMailingKanaName.checkData.confirmation-content(colspan="3")
 
                   table.table.is-fullwidth.is-bordered
                     tbody
