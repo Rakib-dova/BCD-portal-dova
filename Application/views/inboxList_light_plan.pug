@@ -372,13 +372,13 @@ block content
                         - var page = currPage % 5 === 0 ? currPage - 4 : ~~(currPage / 5) * 5 + 1
                         - var maxPageNo = ~~(page / 5) * 5 + 5 + 1
                         if (page - 1 !== 0)
-                          a.pagination-previous(href= `/inboxList/${page - 1}`) 前のページ
+                          a.pagination-previous(href= `/inboxList/${page - 1}`) <<
                         else
-                          a.a-previous-none 前のページ
+                          a.a-previous-none <<
                         if maxPageNo < numPages
-                          a.pagination-next(href= `/inboxList/${maxPageNo}`) 次のページ
+                          a.pagination-next(href= `/inboxList/${maxPageNo}`) >>
                         else
-                          a.a-next-none 次のページ
+                          a.a-next-none >>
 
                         ul.pagination-list
                           while page < (maxPageNo < numPages ? maxPageNo : numPages + 1)
@@ -627,13 +627,13 @@ block content
                         - var page = currPage % 5 === 0 ? currPage - 4 : ~~(currPage / 5) * 5 + 1
                         - var maxPageNo = ~~(page / 5) * 5 + 5 + 1
                         if (page - 1 !== 0)
-                          a.pagination-previous(href= `/inboxList/${page - 1}`) 前のページ
+                          a.pagination-previous(href= `/inboxList/${page - 1}`) <<
                         else
-                          a.a-previous-none 前のページ
+                          a.a-previous-none <<
                         if maxPageNo < numPages
-                          a.pagination-next(href= `/inboxList/${maxPageNo}`) 次のページ
+                          a.pagination-next(href= `/inboxList/${maxPageNo}`) >>
                         else
-                          a.a-next-none 次のページ
+                          a.a-next-none >>
 
                         ul.pagination-list
                           while page < (maxPageNo < numPages ? maxPageNo : numPages + 1)
