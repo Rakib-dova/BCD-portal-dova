@@ -12,7 +12,7 @@ const requiredProps = [
   'sendAddr1',
   'sendAddr2',
   'sendAddr3',
-  'sendRegistrationNo',
+  // 'sendRegistrationNo',
 
   'invoiceNo',
   'currency',
@@ -49,6 +49,8 @@ const optionProps = [
  * @returns {string} 請求書HTML
  */
 const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
+  // 登録番号は必須でないため、未入力の場合は空とする
+  const sendRegistrationNoData = input.sendRegistrationNo ? input.sendRegistrationNo : ''
   if (!validateInvoiceInput(input)) return console.log('PDF生成バリデーションの失敗')
   padOptionProps(input)
 
@@ -288,7 +290,7 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
         <p class="p width-250px" id="invoice-sendAddr1">${input.sendAddr1}</p>
         <p class="p width-250px" id="invoice-sendAddr2">${input.sendAddr2}</p>
         <p class="p width-250px" id="invoice-sendAddr3">${input.sendAddr3}</p>
-        <p class="p width-250px" id="invoice-sendAddr3">${input.sendRegistrationNo}</p>
+        <p class="p width-250px" id="invoice-sendAddr3">${sendRegistrationNoData}</p>
       </div>
     </div>
     <div class="columns">
