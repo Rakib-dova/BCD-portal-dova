@@ -489,48 +489,52 @@ const testInvoiceData = {
 }
 
 const testLineData = {
-  valid: [{
-    invoiceId: '74b0b766-5aae-49f2-aa2d-d26ed8b9ac09',
-    lineIndex: 0,
-    lineId: '1',
-    lineDescription: 'しな１',
-    unit: 'kg',
-    unitPrice: '3000',
-    quantity: '10',
-    taxType: '消費税',
-    discounts: 3,
-    discountDescription1: 'ワゴンA',
-    discountAmount1: '2',
-    discountUnit1: 'percent',
-    discountDescription2: 'ワゴンB',
-    discountAmount2: '3',
-    discountUnit2: 'percent',
-    discountDescription3: 'ワゴンC',
-    discountAmount3: '100',
-    discountUnit3: 'jpy',
-    invoiceNo: 'I2022070101'
-  }],
-  invalid: [{
-    invoiceId: '74b0b766-5aae-49f2-aa2d-d26ed8b9ac09',
-    lineIndex: 0,
-    lineId: '1',
-    lineDescription: '',
-    unit: 'kg',
-    unitPrice: '3000',
-    quantity: '10',
-    taxType: '消費税',
-    discounts: 3,
-    discountDescription1: 'ワゴンA',
-    discountAmount1: '2',
-    discountUnit1: 'percent',
-    discountDescription2: 'ワゴンB',
-    discountAmount2: '3',
-    discountUnit2: 'percent',
-    discountDescription3: 'ワゴンC',
-    discountAmount3: '100',
-    discountUnit3: 'jpy',
-    invoiceNo: 'I2022070101'
-  }],
+  valid: [
+    {
+      invoiceId: '74b0b766-5aae-49f2-aa2d-d26ed8b9ac09',
+      lineIndex: 0,
+      lineId: '1',
+      lineDescription: 'しな１',
+      unit: 'kg',
+      unitPrice: '3000',
+      quantity: '10',
+      taxType: '消費税',
+      discounts: 3,
+      discountDescription1: 'ワゴンA',
+      discountAmount1: '2',
+      discountUnit1: 'percent',
+      discountDescription2: 'ワゴンB',
+      discountAmount2: '3',
+      discountUnit2: 'percent',
+      discountDescription3: 'ワゴンC',
+      discountAmount3: '100',
+      discountUnit3: 'jpy',
+      invoiceNo: 'I2022070101'
+    }
+  ],
+  invalid: [
+    {
+      invoiceId: '74b0b766-5aae-49f2-aa2d-d26ed8b9ac09',
+      lineIndex: 0,
+      lineId: '1',
+      lineDescription: '',
+      unit: 'kg',
+      unitPrice: '3000',
+      quantity: '10',
+      taxType: '消費税',
+      discounts: 3,
+      discountDescription1: 'ワゴンA',
+      discountAmount1: '2',
+      discountUnit1: 'percent',
+      discountDescription2: 'ワゴンB',
+      discountAmount2: '3',
+      discountUnit2: 'percent',
+      discountDescription3: 'ワゴンC',
+      discountAmount3: '100',
+      discountUnit3: 'jpy',
+      invoiceNo: 'I2022070101'
+    }
+  ],
   succFailSkip: [
     {
       invoiceId: '74b0b766-5aae-49f2-aa2d-d26ed8b9ac01',
@@ -683,7 +687,6 @@ const testLineData = {
       discountUnit3: 'jpy',
       invoiceNo: 'I2022070101'
     }
-
   ],
   failSkip: [
     {
@@ -790,14 +793,55 @@ describe('lib/pdfInvoiceCsvUploadValidation のテスト', () => {
         successCount: 1,
         tenantId: 'dummyTenantId'
       })
-      expect(csvRows).toEqual([{
-        errorData: '',
-        historyDetailId: csvRows[0].historyDetailId,
-        historyId: csvRows[0].historyId,
-        invoiceNo: 'I2022070101',
-        lines: 1,
-        status: 0
-      }])
+      expect(csvRows).toEqual([
+        {
+          errorData: '',
+          historyDetailId: csvRows[0].historyDetailId,
+          historyId: csvRows[0].historyId,
+          invoiceNo: 'I2022070101',
+          lines: 1,
+          status: 0
+        }
+      ])
+    })
+    test('正常: 明細数が20より多いでバリデーション失敗', async () => {
+      findAllInvoicesSpy.mockResolvedValue([])
+
+      const lineOverData = []
+      for (let i = 0; i < 21; i++) {
+        const validData = copyTestData(testLineData.valid)[0]
+        validData.lineIndex = i
+        lineOverData.push(validData)
+      }
+
+      const { validInvoices, validLines, uploadHistory, csvRows } = await pdfInvoiceCsvUploadValidation.validate(
+        copyTestData(testInvoiceData.valid),
+        lineOverData,
+        defaultTenantId,
+        defaultFileName
+      )
+
+      expect(validInvoices).toEqual([])
+      expect(validLines).toEqual([])
+      expect(uploadHistory).toEqual({
+        csvFileName: 'dummyCsvFile',
+        failCount: 21,
+        historyId: uploadHistory.historyId,
+        invoiceCount: 0,
+        skipCount: 0,
+        successCount: 0,
+        tenantId: 'dummyTenantId'
+      })
+      for (let i = 0; i < 21; i++) {
+        expect(csvRows[i]).toEqual({
+          errorData: '一つの請求書で作成できる明細数は20までです。',
+          historyDetailId: csvRows[i].historyDetailId,
+          historyId: csvRows[i].historyId,
+          invoiceNo: 'I2022070101',
+          lines: i + 1,
+          status: 2
+        })
+      }
     })
     test('正常: アップロード済みでバリデーション失敗', async () => {
       findAllInvoicesSpy.mockResolvedValue(testInvoiceData.valid)
@@ -820,14 +864,16 @@ describe('lib/pdfInvoiceCsvUploadValidation のテスト', () => {
         successCount: 0,
         tenantId: 'dummyTenantId'
       })
-      expect(csvRows).toEqual([{
-        errorData: '取込済みのため、処理をスキップしました。',
-        historyDetailId: csvRows[0].historyDetailId,
-        historyId: csvRows[0].historyId,
-        invoiceNo: 'I2022070101',
-        lines: 1,
-        status: 1
-      }])
+      expect(csvRows).toEqual([
+        {
+          errorData: '取込済みのため、処理をスキップしました。',
+          historyDetailId: csvRows[0].historyDetailId,
+          historyId: csvRows[0].historyId,
+          invoiceNo: 'I2022070101',
+          lines: 1,
+          status: 1
+        }
+      ])
     })
     test('正常: 重複でバリデーション失敗', async () => {
       findAllInvoicesSpy.mockResolvedValue([])
@@ -890,14 +936,16 @@ describe('lib/pdfInvoiceCsvUploadValidation のテスト', () => {
         successCount: 0,
         tenantId: 'dummyTenantId'
       })
-      expect(csvRows).toEqual([{
-        errorData: '宛先企業は必須です。' + '\r\n',
-        historyDetailId: csvRows[0].historyDetailId,
-        historyId: csvRows[0].historyId,
-        invoiceNo: 'I2022070101',
-        lines: 1,
-        status: 2
-      }])
+      expect(csvRows).toEqual([
+        {
+          errorData: '宛先企業は必須です。' + '\r\n',
+          historyDetailId: csvRows[0].historyDetailId,
+          historyId: csvRows[0].historyId,
+          invoiceNo: 'I2022070101',
+          lines: 1,
+          status: 2
+        }
+      ])
     })
     test('正常: line がバリデーションに失敗', async () => {
       findAllInvoicesSpy.mockResolvedValue([])
@@ -920,14 +968,16 @@ describe('lib/pdfInvoiceCsvUploadValidation のテスト', () => {
         successCount: 0,
         tenantId: 'dummyTenantId'
       })
-      expect(csvRows).toEqual([{
-        errorData: '明細-内容は必須です。' + '\r\n',
-        historyDetailId: csvRows[0].historyDetailId,
-        historyId: csvRows[0].historyId,
-        invoiceNo: 'I2022070101',
-        lines: 1,
-        status: 2
-      }])
+      expect(csvRows).toEqual([
+        {
+          errorData: '明細-内容は必須です。' + '\r\n',
+          historyDetailId: csvRows[0].historyDetailId,
+          historyId: csvRows[0].historyId,
+          invoiceNo: 'I2022070101',
+          lines: 1,
+          status: 2
+        }
+      ])
     })
     test('正常: invoice がバリデーション失敗 / line がバリデーション失敗', async () => {
       findAllInvoicesSpy.mockResolvedValue([])
@@ -950,14 +1000,16 @@ describe('lib/pdfInvoiceCsvUploadValidation のテスト', () => {
         successCount: 0,
         tenantId: 'dummyTenantId'
       })
-      expect(csvRows).toEqual([{
-        errorData: '宛先企業は必須です。' + '\r\n' + '明細-内容は必須です。' + '\r\n',
-        historyDetailId: csvRows[0].historyDetailId,
-        historyId: csvRows[0].historyId,
-        invoiceNo: 'I2022070101',
-        lines: 1,
-        status: 2
-      }])
+      expect(csvRows).toEqual([
+        {
+          errorData: '宛先企業は必須です。' + '\r\n' + '明細-内容は必須です。' + '\r\n',
+          historyDetailId: csvRows[0].historyDetailId,
+          historyId: csvRows[0].historyId,
+          invoiceNo: 'I2022070101',
+          lines: 1,
+          status: 2
+        }
+      ])
     })
     test('正常: 成功 / 失敗 / スキップ', async () => {
       findAllInvoicesSpy.mockResolvedValue([])
