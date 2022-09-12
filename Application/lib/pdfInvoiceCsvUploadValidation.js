@@ -521,7 +521,7 @@ const validate = async (invoices, lines, tenantId, fileName) => {
       }
 
       // 明細数が20より大きい場合
-      if (!invoiceIsValid) {
+      if (filteredLines.length > 20) {
         csvRow.status = 2
         csvRow.errorData = '一つの請求書で作成できる明細数は20までです。'
         return csvRows.push(csvRow)
