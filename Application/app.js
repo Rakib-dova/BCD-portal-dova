@@ -42,9 +42,11 @@ if (process.env.LOCALLY_HOSTED !== 'true') {
           )
           break
         default:
-          // if it's a custom property that doesn't belong in the
-          // `ContextTagKeys` contract, such as browser information, add
-          // it as a custom property on the `envelope.data.baseData` object
+          /**
+           * if it's a custom property that doesn't belong in the
+           * `ContextTagKeys` contract, such as browser information, add
+           * it as a custom property on the `envelope.data.baseData` object
+           */
           data.properties[key] = value
       }
     }
@@ -52,8 +54,6 @@ if (process.env.LOCALLY_HOSTED !== 'true') {
     return true
   })
 }
-
-// var favicon = require('serve-favicon');
 
 const app = express()
 
@@ -64,19 +64,22 @@ app.use(
     frameguard: false
   })
 )
-// セキュリティ helmet.jsの仕様を確認のこと
-// https://github.com/helmetjs/helmet
+app.use(helmet.frameguard({ action: 'sameorigin' }))
+/**
+ * セキュリティ helmet.jsの仕様を確認のこと
+ * https://github.com/helmetjs/helmet
+ */
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
       ...helmet.contentSecurityPolicy.getDefaultDirectives(),
       'img-src': ["'self'"],
       'form-action': ["'self'"], // form-actionは自己ドメインに制限
-      // bulma-toast、fontawasom、googlefontsを使うためstyle-srcを一部許可
-      // prettier-ignore
-      'style-src': [
-        "'self' https://use.fontawesome.com https://fonts.googleapis.com"
-      ],
+      /**
+       * bulma-toast、fontawasom、googlefontsを使うためstyle-srcを一部許可
+       * prettier-ignore
+       */
+      'style-src': ["'self' https://use.fontawesome.com https://fonts.googleapis.com"],
       'script-src': ["'self'"],
       'object-src': ["'self'"],
       'frame-ancestors': [`'self' https://${process.env.TS_HOST}`]
@@ -86,9 +89,11 @@ app.use(
 
 // cookieはSSL必須のsecure: true, sameSite: noneに設定しているため以下の設定が必要
 app.set('trust proxy', 2)
-// Azure Web App for containerではLBの終端でhttp通信となるため、上記trust proxy設定が必要となる
-// LBとコンテナの入力2ホップをtrust proxyとして設定
-// https://stackoverflow.com/questions/63831794/how-to-pass-samesite-none-from-dockerized-node-app-running-on-azure-appservice
+/**
+ * Azure Web App for containerではLBの終端でhttp通信となるため、上記trust proxy設定が必要となる
+ * LBとコンテナの入力2ホップをtrust proxyとして設定
+ * https://stackoverflow.com/questions/63831794/how-to-pass-samesite-none-from-dockerized-node-app-running-on-azure-appservice
+ */
 
 // session
 const session = require('express-session')
@@ -122,7 +127,7 @@ app.use(
       client: redisClient
     }),
     rolling: true,
-    name: 'bcd.sid',
+    name: '__Host-bcd.sid',
     cookie: {
       httpOnly: true,
       secure: true, // trueの場合、リバースプロキシやローバラがhttp通信では使えなくなる可能性あり？
@@ -150,15 +155,7 @@ app.set('view engine', 'pug')
 // 支払依頼の承認する時の仕訳情報とメッセージのパラメータの最大数：8401個 -> 50000個 (仕訳情報最大値2000個登録のため)
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb', parameterLimit: 50000 }))
 
-// uncomment after placing your favicon in /public
-// app.use(favicon(__dirname + '/public/favicon.ico'));
-
-// app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({ extended: false }));
-// app.use(cookieParser());
-
 /**  会員サイト開発 20220228 */
-// CookieParserのコメントアウトを解除
 const cookieParser = require('cookie-parser')
 app.use(cookieParser())
 /**  会員サイト開発 20220228 */
@@ -186,13 +183,17 @@ if (process.env.LOCALLY_HOSTED !== 'true') {
 // クローラーにページをインデックスしないよう指示
 app.use(function (req, res, next) {
   res.header('X-Robots-Tag', 'noindex')
+  res.header('X-XSS-Protection', '1; mode=block')
+  res.header('Cache-Control', 'no-store')
   next()
 })
 
-// 一時保存機能
-// 支払依頼のユーザーが入力して承認ルート未設定や
-// 未保存ですぐ依頼の時、画面の入力した内容保存する
-// ミドルウェア
+/**
+ * 一時保存機能
+ * 支払依頼のユーザーが入力して承認ルート未設定や
+ * 未保存ですぐ依頼の時、画面の入力した内容保存する
+ * ミドルウェア
+ */
 app.use(function (req, res, next) {
   const url = req.url
 
