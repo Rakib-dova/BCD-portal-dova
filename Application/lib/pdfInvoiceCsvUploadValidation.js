@@ -506,6 +506,7 @@ const validate = async (invoices, lines, tenantId, fileName) => {
 
     // 明細数の判定
     if (filteredLines.length > 20) {
+      // 明細数がオーバーした場合、失敗数に明細数をプラスする
       uploadHistory.failCount += filteredLines.length
       invoiceIsValid = false
     }

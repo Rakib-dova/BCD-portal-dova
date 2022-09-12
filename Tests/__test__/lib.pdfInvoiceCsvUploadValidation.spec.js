@@ -804,6 +804,45 @@ describe('lib/pdfInvoiceCsvUploadValidation のテスト', () => {
         }
       ])
     })
+    test('正常: 明細数が20件でバリデーション成功', async () => {
+      findAllInvoicesSpy.mockResolvedValue([])
+
+      const lineOverData = []
+      for (let i = 0; i < 20; i++) {
+        const validData = copyTestData(testLineData.valid)[0]
+        validData.lineIndex = i
+        lineOverData.push(validData)
+      }
+
+      const { validInvoices, validLines, uploadHistory, csvRows } = await pdfInvoiceCsvUploadValidation.validate(
+        copyTestData(testInvoiceData.valid),
+        lineOverData,
+        defaultTenantId,
+        defaultFileName
+      )
+
+      expect(validInvoices).toEqual(testInvoiceData.valid)
+      expect(validLines).toEqual(lineOverData)
+      expect(uploadHistory).toEqual({
+        csvFileName: 'dummyCsvFile',
+        failCount: 0,
+        historyId: uploadHistory.historyId,
+        invoiceCount: 1,
+        skipCount: 0,
+        successCount: 20,
+        tenantId: 'dummyTenantId'
+      })
+      for (let i = 0; i < 20; i++) {
+        expect(csvRows[i]).toEqual({
+          errorData: '',
+          historyDetailId: csvRows[i].historyDetailId,
+          historyId: csvRows[i].historyId,
+          invoiceNo: 'I2022070101',
+          lines: i + 1,
+          status: 0
+        })
+      }
+    })
     test('正常: 明細数が20より多いでバリデーション失敗', async () => {
       findAllInvoicesSpy.mockResolvedValue([])
 
