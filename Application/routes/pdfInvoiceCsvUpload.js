@@ -167,13 +167,7 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
       })
     )
   }
-  if (pdfInvoiceLines.length > 20) {
-    return res.status(400).send(
-      JSON.stringify({
-        message: '一つの請求書で作成できる明細数は20までです。CSVファイルの内容を確認の上、再度実行をお願いします。'
-      })
-    )
-  }
+
   // バリデーション
   const { validInvoices, validLines, uploadHistory, csvRows } = await validation.validate(
     pdfInvoices,
