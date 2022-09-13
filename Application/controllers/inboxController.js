@@ -18,7 +18,7 @@ const processStatus = {
 }
 
 /**
- *
+ * ドキュメント取得
  * @param {string} accessToken アクセストークン
  * @param {string} refreshToken リフレッシュトークン
  * @param {int} pageId 出力するページ番号
@@ -26,7 +26,6 @@ const processStatus = {
  * @param {string} presentation スタンダードプランの有無確認
  * @returns {document} トレードシフトのドキュメント
  */
-
 const getInbox = async function (accessToken, refreshToken, pageId, tenantId, presentation) {
   const withouttag = ['archived', 'AP_DOCUMENT_Draft', 'PARTNER_DOCUMENT_DRAFT', 'tsgo-document']
   const state = ['DELIVERED', 'ACCEPTED', 'PAID_UNCONFIRMED', 'PAID_CONFIRMED']
@@ -113,6 +112,14 @@ const getInbox = async function (accessToken, refreshToken, pageId, tenantId, pr
   }
 }
 
+/**
+ * 請求書明細取得
+ * @param {string} accessTk アクセストークン
+ * @param {string} refreshTk リフレッシュトークン
+ * @param {uuid} invoiceId 請求書番号
+ * @param {uuid} contractId 契約番号
+ * @returns {InvoiceDetail} 請求書明細
+ */
 const getInvoiceDetail = async function (accessTk, refreshTk, invoiceId, contractId) {
   const InvoiceDetail = require('../lib/invoiceDetail')
   const invoice = await apiManager.accessTradeshift(accessTk, refreshTk, 'get', `/documents/${invoiceId}`)
@@ -139,6 +146,15 @@ const getInvoiceDetail = async function (accessTk, refreshTk, invoiceId, contrac
   return displayInvoice
 }
 
+/**
+ * 勘定科目、補助科目情報取得
+ * @param {uuid} contractId 契約番号
+ * @param {string} accountCode 勘定科目コード
+ * @param {string} accountCodeName 勘定科目名
+ * @param {string} subAccountCode 補助科目コード
+ * @param {string} subAccountCodeName 補助科目名
+ * @returns {object} { accountCode: 勘定科目コード, accountCodeName: 勘定科目名, SubAccountCodes.subjectCode: 補助科目コード, SubAccountCodes.subjectName: 補助科目名 }（正常）、Error（DBエラー、システムエラーなど）
+ */
 const getCode = async (contractId, accountCode, accountCodeName, subAccountCode, subAccountCodeName) => {
   const whereIsAccountCode = { contractId: contractId }
   const whereIsSubAccountCode = {}
@@ -219,7 +235,13 @@ const getCode = async (contractId, accountCode, accountCodeName, subAccountCode,
   }
 }
 
-// 仕訳情報設定（登録、変更、削除）
+/**
+ * 仕訳情報設定（登録、変更、削除）
+ * @param {uuid} contractId 契約番号
+ * @param {uuid} invoiceId 請求書番号
+ * @param {object} data 請求書情報
+ * @returns {object} 仕訳情報（正常）、Error（DBエラー、システムエラーなど）
+ */
 const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => {
   // 明細ID取得
   let lines = []
@@ -596,6 +618,13 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
   }
 }
 
+/**
+ * 部門データ取得
+ * @param {uuid} _contractId 契約番号
+ * @param {string} _departmentCode 部門コード
+ * @param {string} _departmentName 部門名
+ * @returns {object} { status: 0, searchResult: 部門情報 }（正常）、{ status: -1, searchResult: エラー情報 }（DBエラー、システムエラーなど）
+ */
 const getDepartment = async (_contractId, _departmentCode, _departmentName) => {
   logger.info(constantsDefine.logMessage.INF000 + 'getDepartment')
   const contractId = _contractId
@@ -647,8 +676,8 @@ const getDepartment = async (_contractId, _departmentCode, _departmentName) => {
 
 /**
  * 支払依頼の情報（承認タブに表示する情報）を取得する。
- * @param {uuid} contractId コントラクター識別番号
- * @param {uuid} invoiceId 請求書uuid番号
+ * @param {uuid} contractId 契約番号
+ * @param {uuid} invoiceId 請求書番号
  * @returns 支払依頼の場合true、ない場合false
  */
 const getRequestApproval = async (contractId, invoiceId) => {
@@ -677,7 +706,7 @@ const getRequestApproval = async (contractId, invoiceId) => {
 /**
  * 承認待ちのリストを取得
  * @param {uuid} userId ユーザーの識別番号
- * @param {uuid} contractId コントラクター識別番号
+ * @param {uuid} contractId 契約番号
  * @param {object} tradeshiftDTO トレードシフトのdata transfer
  * @param {string} presentation スタンダードプランの有無確認
  * @returns {array<WaitingWorkflow>} 承認待ちのリスト
@@ -694,23 +723,12 @@ const getWorkflow = async (userId, contractId, tradeshiftDTO, presentation) => {
     document.push(result)
   }
 
-  // // 請求書情報取得
-  // let document = []
-  // await Promise.all(
-  //   getWaitingWorkflow.map(async (key) => {
-  //     return tradeshiftDTO.getDocument(key.documentId)
-  //   })
-  // ).then(function (result) {
-  //   document = result
-  // })
-
   // 社内に担当者ユーザーの有無確認
   let contactor = []
   if (presentation === 'inboxList_light_plan') {
     contactor = await getCompanyUserInfo(document, tradeshiftDTO.accessToken, tradeshiftDTO.refreshToken)
   } else {
     // スタンダードプランではない場合
-    // await Promise.all(
     const result = document.map((key) => {
       let managerAddress = ''
       if (!(key instanceof Error)) {
@@ -726,14 +744,12 @@ const getWorkflow = async (userId, contractId, tradeshiftDTO, presentation) => {
 
       return { managerAddress: managerAddress, documentId: key.documentId }
     })
-    // ).then(function (result) {
     contactor = result.filter(
       (element) =>
         element.managerAddress !== '' &&
         element.managerAddress !== undefined &&
         validate.isValidEmail(element.managerAddress)
     )
-    // })
   }
 
   // リストに担当者アドレス、ユーザー情報入力
@@ -762,9 +778,9 @@ const getWorkflow = async (userId, contractId, tradeshiftDTO, presentation) => {
 }
 
 /**
- *
- * @param {object} tradeshiftDTO トレードシフト
- * @param {object} keyword
+ * 請求書検索
+ * @param {object} tradeshiftDTO トレードシフトのdata transfer
+ * @param {object} keyword 検索条件
  * @returns {Array<object>} 検索結果
  */
 const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => {

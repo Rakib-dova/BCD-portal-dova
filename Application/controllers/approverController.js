@@ -15,10 +15,10 @@ const approveStatusDAO = require('../DAO/ApproveStatusDAO')
 const RequestApprovalDAO = require('../DAO/RequestApprovalDAO')
 const approvalInboxController = require('./approvalInboxController')
 /**
- *
+ * 承認ルート取得
  * @param {string} accTk アクセストークン
  * @param {string} refreshTk リフレッシュトークン
- * @param {uuid} tenantId テナント
+ * @param {uuid} tenantId テナントID
  * @param {object} keyword 氏名やメールアドレス
  * @returns {Array} ユーザー情報
  */
@@ -86,6 +86,12 @@ const getApprover = async (accTk, refreshTk, tenantId, keyword) => {
   return searchUsers
 }
 
+/**
+ * 承認ルート登録
+ * @param {object} contract 契約情報
+ * @param {object} values 承認者情報
+ * @returns {int} 0（正常）、-1（DB保存失敗）、Error（DBエラー、システムエラーなど）
+ */
 const insertApprover = async (contract, values) => {
   const functionName = 'approverController.insertApprover'
   // 関数開始表示
@@ -186,6 +192,15 @@ const insertApprover = async (contract, values) => {
   }
 }
 
+/**
+ * 承認ルート変更
+ * @param {string} accTk アクセストークン
+ * @param {string} refreshTk リフレッシュトークン
+ * @param {object} contract 契約情報
+ * @param {object} values 承認者情報
+ * @param {object} prevApproveRouteId 承認ルートの識別番号
+ * @returns {int} 0（正常）、-1（DB保存失敗）、Error（DBエラー、システムエラーなど）
+ */
 const editApprover = async (accTk, refreshTk, contract, values, prevApproveRouteId) => {
   const functionName = 'approverController.editApprover'
   // 関数開始表示
@@ -379,7 +394,7 @@ const getApproveRouteList = async (contractId) => {
  * @param {string} refreshToken トレードシフトのAPIアクセストークン
  * @param {uuid} contract デジトレの利用の契約者の識別番号
  * @param {uuid} approveRouteId 登録した承認ルートの識別番号
- * @returns {object}
+ * @returns {object} 承認ルート情報
  */
 const getApproveRoute = async (accessToken, refreshToken, contract, approveRouteId) => {
   logger.info(constantsDefine.logMessage.INF000 + 'approverController.getApproveRoute')
@@ -523,9 +538,9 @@ const deleteApproveRoute = async (approveRouteId) => {
 
 /**
  * 承認依頼の承認ルート検索関数。
- * @param {uuid} _contractId  // 契約者の識別番号
- * @param {string} _approveRouteName // 承認ルート名
- * @returns {object} // 承認ルート検索結果
+ * @param {uuid} _contractId 契約者の識別番号
+ * @param {string} _approveRouteName 承認ルート名
+ * @returns {object} 承認ルート検索結果
  * No：順番
  * approveRouteName: 承認ルート名
  * approverCount: 承認者の数
@@ -577,13 +592,13 @@ const searchApproveRouteList = async (_contractId, _approveRouteName) => {
 }
 
 /**
- *
- * @param {uuid} contractId
- * @param {uuid} approveRouteId
- * @param {uuid} invoiceId
- * @param {uuid} requesterId
- * @param {string} message
- * @returns
+ * 承認者情報登録/更新
+ * @param {uuid} contractId 契約者の識別番号
+ * @param {uuid} approveRouteId デジトレの利用の契約者の識別番号
+ * @param {uuid} invoiceId 請求書番号
+ * @param {uuid} requesterId 依頼者番号
+ * @param {string} message メッセージ
+ * @returns {object} 支払依頼情報（正常）、-1（DB保存失敗）、Error（DBエラー、システムエラーなど）
  */
 const requestApproval = async (contractId, approveRouteId, invoiceId, requesterId, message) => {
   try {
@@ -648,15 +663,15 @@ const requestApproval = async (contractId, approveRouteId, invoiceId, requesterI
 }
 
 /**
- *
- * @param {uuid} contractId
- * @param {uuid} approveRouteId
- * @param {uuid} requesterId
- * @param {string} message
- * @param {string} accessToken
- * @param {string} refreshToken
- * @param {uuid} request
- * @returns
+ * 承認者情報登録
+ * @param {uuid} contractId 契約者の識別番号
+ * @param {uuid} approveRouteId デジトレの利用の契約者の識別番号
+ * @param {uuid} requesterId 依頼者番号
+ * @param {string} message メッセージ
+ * @param {string} accessToken トレードシフトのAPIアクセストークン
+ * @param {string} refreshToken トレードシフトのAPIアクセストークン
+ * @param {object} request 支払依頼者情報
+ * @returns {int} 0（正常）、Error（DBエラー、システムエラーなど）
  */
 const saveApproval = async (contractId, approveRouteId, requesterId, message, accessToken, refreshToken, request) => {
   try {
@@ -758,6 +773,12 @@ const saveApproval = async (contractId, approveRouteId, requesterId, message, ac
   }
 }
 
+/**
+ * 承認者情報取得
+ * @param {uuid} contractId 契約者の識別番号
+ * @param {uuid} invoiceId 請求書番号
+ * @returns {object} 承認者情報（正常）、Error（DBエラー、システムエラーなど）
+ */
 const readApproval = async (contractId, invoiceId) => {
   try {
     const request = await Request.findOne({
@@ -779,7 +800,7 @@ const readApproval = async (contractId, invoiceId) => {
 
 /**
  * 承認ルート存在確認。
- * @param {uuid} contractId 承認ルートの識別番号
+ * @param {uuid} contractId 契約者の識別番号
  * @param {uuid} approveRouteId 承認ルートの識別番号
  * @returns {Boolean} 承認ルートが存在する場合true、ない場合fasle
  */
@@ -800,6 +821,14 @@ const checkApproveRoute = async (contractId, approveRouteId) => {
   }
 }
 
+/**
+ * 承認者情報更新
+ * @param {uuid} contractId 契約者の識別番号
+ * @param {uuid} requesterId 依頼者番号
+ * @param {string} message メッセージ
+ * @param {uuid} userId ユーザーの識別番号
+ * @returns {boolean} true（正常）、false（異常）、-1（更新しなかった場合）、Error（DBエラー、システムエラーなど）
+ */
 const updateApprove = async (contractId, requestId, message, userId) => {
   try {
     let userNo
@@ -872,7 +901,10 @@ const updateApprove = async (contractId, requestId, message, userId) => {
 
 /**
  * 差し戻しされた承認データ取得。
- * @param {uuid} contractId 承認ルートの識別番号
+ * @param {string} accessToken トレードシフトのAPIアクセストークン
+ * @param {string} refreshToken トレードシフトのAPIアクセストークン
+ * @param {object} tenant テナント情報
+ * @param {uuid} contractId 契約者の識別番号
  * @param {uuid} requestId 支払依頼ID
  * @returns {approval} 差し戻しされた承認データ
  */

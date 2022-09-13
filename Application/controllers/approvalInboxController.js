@@ -6,6 +6,16 @@ const Op = db.Sequelize.Op
 const RequestApproval = db.RequestApproval
 const DbApproval = db.Approval
 
+/**
+ * 承認情報取得
+ * @param {string} accessToken アクセストークン
+ * @param {string} refreshToken リフレッシュトークン
+ * @param {string} contract 契約情報
+ * @param {uuid} invoiceId 請求書番号
+ * @param {object} tenant テナント情報
+ * @param {boolean} isFinalApproval 最終承認フラグ
+ * @returns {object} 承認情報（正常）、なし（DBエラー、システムエラーなど）
+ */
 const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId, tenant, isFinalApproval = false) => {
   try {
     const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(accessToken, refreshToken, tenant)
@@ -124,6 +134,13 @@ const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId
   }
 }
 
+/**
+ * 依頼者が承認ルートの承認者かを確認する。
+ * @param {uuid} contractId 契約番号
+ * @param {string} userId ユーザーの識別番号
+ * @param {object} requestId 支払依頼ID
+ * @returns {boolean} true（依頼者が承認者の場合）、false（依頼者が承認者ではない場合）、-1（DBエラー、システムエラーなど）
+ */
 const hasPowerOfEditing = async (contractId, userId, requestId) => {
   try {
     if (requestId === null) return -1
@@ -170,16 +187,22 @@ const hasPowerOfEditing = async (contractId, userId, requestId) => {
 
 /**
  * 仕訳情報保存
- * @param {uuid} contractId
- * @param {uuid} invoiceId
- * @param {object} data
+ * @param {uuid} contractId 契約番号
+ * @param {uuid} invoiceId 請求書番号
+ * @param {object} data 請求書情報
+ * @returns {object} 仕訳情報（正常）、Error（DBエラー、システムエラーなど）
  */
 const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => {
   const inboxController = require('./inboxController')
   return await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
 }
 
-// 日付フォーマット設定
+/**
+ * 日付フォーマット設定
+ * 画面表示用に「2022.01.01 - 00:00:00」形式に設定
+ * @param {uuid} date 日付
+ * @returns {date} フォーマット設定後の日付
+ */
 const setDate = async (date) => {
   const setDate = `${date.getFullYear()}.${('0' + (date.getMonth() + 1)).slice(-2)}.${('0' + date.getDate()).slice(
     -2

@@ -8,13 +8,19 @@ const { v4: uuidV4 } = require('uuid')
 const utils = require('../lib/utils')
 
 module.exports = {
-  // subAccountCodeテーブル
-  //   subAccountCodeId(PK) - PK
-  //   accountCodeId(FK)=>AccountCode(accountCodeId),
-  //   subjectName - 補助科目コード,
-  //   subjectCode - 補助科目名,
-  //   createdAt - 作成日付,
-  //   updatedAt - 更新日付
+  /**
+   * 補助科目テーブル登録
+   * subAccountCodeテーブル
+   *   subAccountCodeId(PK) - PK
+   *   accountCodeId(FK)=>AccountCode(accountCodeId),
+   *   subjectName - 補助科目コード,
+   *   subjectCode - 補助科目名,
+   *   createdAt - 作成日付,
+   *   updatedAt - 更新日付
+   * @param {object} contract 契約情報
+   * @param {object} values 補助科目情報
+   * @returns {int} 0（正常）、-1（異常）、Error（DBエラー、システムエラーなど）
+   */
   insert: async (contract, values) => {
     const functionName = 'SubAccountCodeController.insert'
     const uploadContractId = contract.contractId
@@ -73,15 +79,19 @@ module.exports = {
       return error
     }
   },
-  // 取得したデータを画面に表示するデータに加工
-  // 加工物
-  // {
-  //    no：               補助科目の順番
-  //    subAccountCodeId： 補助科目のユニークID
-  //    subjectCode：      補助科目コード
-  //    subjectName：      補助科目名
-  //    accountCodeName：  紐づいている勘定科目の名
-  // }
+  /**
+   * 取得したデータを画面に表示するデータに加工
+   * 加工物
+   * {
+   *    no：               補助科目の順番
+   *    subAccountCodeId： 補助科目のユニークID
+   *    subjectCode：      補助科目コード
+   *    subjectName：      補助科目名
+   *    accountCodeName：  紐づいている勘定科目の名
+   * }
+   * @param {object} contract 契約情報
+   * @returns {object} 補助科目情報
+   */
   getSubAccountCodeList: async (contract) => {
     try {
       const accountCodeNameArr = await subAccountCodeModel.getsubAccountCodeList(contract)
@@ -102,6 +112,20 @@ module.exports = {
       return error
     }
   },
+  /**
+   * 補助科目取得
+   * {
+   *   subAccountCodeId：補助科目のユニークID
+   *   accountCodeId：   紐づいている勘定科目のユニークID
+   *   accountCode：     紐づいている勘定科目コード
+   *   accountCodeName： 紐づいている勘定科目名
+   *   subjectName：     補助科目名
+   *   subjectCode：     補助科目コード
+   * }
+   * @param {uuid} contractId 契約番号
+   * @param {uuid} accountCodeId 勘定科目コードキー
+   * @returns {object} 補助科目情報（正常）、Error（DBエラー、システムエラーなど）
+   */
   getSubAccountCode: async (contractId, subAccountCodeId) => {
     logger.info(constantsDefine.logMessage.INF000 + 'subAccountCodeController.getSubAccountCode')
     try {
@@ -141,6 +165,15 @@ module.exports = {
       return error
     }
   },
+  /**
+   * 補助科目更新
+   * @param {uuid} contractId 契約番号
+   * @param {uuid} accountCodeId 勘定科目のユニークID
+   * @param {uuid} subAccountCodeId 補助科目のユニークID
+   * @param {string} subjectCode 補助科目コード
+   * @param {string} subAccountCodeName 補助科目名
+   * @returns {int} 0（正常変更）、1（変更なし）、-1（重複補助科目コードの場合）、Error（DBエラー、システムエラーなど）、-2（補助科目検索失敗）、その他（他のデータエラー）
+   */
   updateSubAccountCode: async function (contractId, accountCodeId, subAccountCodeId, subjectCode, subAccountCodeName) {
     logger.info(constantsDefine.logMessage.INF000 + 'subAccountCodeController.updateSubAccountCode')
     try {
@@ -152,7 +185,7 @@ module.exports = {
         subAccountCodeName
       )
       logger.info(constantsDefine.logMessage.INF001 + 'subAccountCodeController.updateSubAccountCode')
-      // 戻り値：0（正常変更）、1（変更なし）、-1（重複補助科目コードの場合）、Error（DBエラー、システムエラーなど）、-2（補助科目検索失敗）、その他（他のデータエラー）
+
       switch (updateTarget) {
         case 0:
           return 0
@@ -171,14 +204,15 @@ module.exports = {
       return error
     }
   },
-  // 補助科目コードをチェック・変更する。
-  // {
-  //    contractId: 契約番号
-  //    accountCodeId: 勘定科目コードキー
-  //    subAccountCodeId： 補助科目のユニークID
-  //    subjectCode：      補助科目コード
-  //    subjectName：      補助科目名
-  // }
+  /**
+   * 補助科目コードをチェック・変更する。
+   * @param {uuid} contractId 契約番号
+   * @param {uuid} accountCodeId 勘定科目のユニークID
+   * @param {uuid} subAccountCodeId 補助科目のユニークID
+   * @param {string} subjectCode 補助科目コード
+   * @param {string} subjectName 補助科目名
+   * @returns {int} 0（正常変更）、1（変更なし）、-1（重複補助科目コードの場合）、Error（DBエラー、システムエラーなど）、-2（補助科目検索失敗）、その他（他のデータエラー）
+   */
   checkAndLockSubAccountCode: async function (
     contractId,
     accountCodeId,
@@ -265,7 +299,11 @@ module.exports = {
       return error
     }
   },
-  // 補助科目削除
+  /**
+   * 補助科目削除
+   * @param {uuid} subAccountCodeId 補助科目のユニークID
+   * @returns {int} 1（正常変更）、-1（既に削除されていた場合）、0（DBエラー、システムエラーなど）
+   */
   deleteForSubAccountCode: async (subAccountCodeId) => {
     try {
       // 補助科目を検索
@@ -289,6 +327,11 @@ module.exports = {
       return 0
     }
   },
+  /**
+   * 補助科目存在チェック
+   * @param {uuid} subAccountCodeId 補助科目のユニークID
+   * @returns {object} 1（正常）、0（DBエラー、システムエラーなど）、-1（既に削除されていた場合）
+   */
   checkDataForSubAccountCode: async (subAccountCodeId) => {
     try {
       // 補助科目を検索

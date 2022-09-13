@@ -5,16 +5,20 @@ const UploadIdentifier = db.UploadFormatIdentifier
 const constantsDefine = require('../constants')
 
 module.exports = {
-  // パラメータ値
-  // values = {
-  //   uploadFormatId(PK)(FK)=>UploadFormat(uploadFormatId),
-  //   serialNumber(PK),
-  //   extensionType,
-  //   uploadFormatExtension,
-  //   defaultExtension,
-  //   createdAt,
-  //   updatedAt
-  // }
+  /**
+   * アップロードフォーマット識別子テーブル登録
+   * @param {object} values
+   * {
+   *   uploadFormatId(PK)(FK)=>UploadFormat(uploadFormatId),
+   *   serialNumber(PK),
+   *   extensionType,
+   *   uploadFormatExtension,
+   *   defaultExtension,
+   *   createdAt,
+   *   updatedAt
+   *  }
+   * @returns {UploadFormatIdentifier} アップロードフォーマット識別子情報
+   */
   insert: async (values) => {
     const functionName = 'uploadFormatIdentifierController.insert'
     logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
@@ -55,6 +59,11 @@ module.exports = {
     logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
     return resultToInsertUploadFormatIdentifier
   },
+  /**
+   * アップロードフォーマット識別子情報取得
+   * @param {uuid} uploadFormatId アップロードフォーマットID
+   * @returns {UploadFormatIdentifier} アップロードフォーマット識別子情報（正常）、Error（DBエラー、システムエラーなど）
+   */
   findByUploadFormatId: async (uploadFormatId) => {
     try {
       return await UploadIdentifier.findAll({

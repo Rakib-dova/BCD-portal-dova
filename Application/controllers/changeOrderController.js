@@ -5,9 +5,18 @@ const constantsDefine = require('../constants')
 let errorStatus = '050'
 
 module.exports = {
+  /**
+   * オーダー変更
+   * @param {uuid} _tenantId テナントID
+   * @param {object} contractInformationcancelOrder オーダー
+   * @returns {object} {statuscode：200, value：'success'}（正常）、 {statuscode：051/052, value：エラー情報}（DBエラー、システムエラーなど）
+   */
   create: async (_tenantId, contractInformationcancelOrder) => {
     try {
-      const contract = await Contract.findContract({ tenantId: _tenantId, serviceType: '010', deleteFlag: false }, 'createdAt DESC')
+      const contract = await Contract.findContract(
+        { tenantId: _tenantId, serviceType: '010', deleteFlag: false },
+        'createdAt DESC'
+      )
 
       if (contract === undefined || contract === null) {
         errorStatus = '051'

@@ -9,9 +9,19 @@ const { v4: uuidv4 } = require('uuid')
 const constantsDefine = require('../constants')
 
 module.exports = {
+  /**
+   * 解約オーダー登録
+   * @param {uuid} _tenantId テナントID
+   * @param {date} _cancelData 解約日
+   * @param {object} contractInformationcancelOrder 解約オーダー
+   * @returns {object} {statuscode：200, value：'success'}（正常）、Error（DBエラー、システムエラーなど）
+   */
   create: async (_tenantId, _cancelData, contractInformationcancelOrder) => {
     try {
-      const contract = await Contract.findContract({ tenantId: _tenantId, serviceType: '010', deleteFlag: false }, 'createdAt DESC')
+      const contract = await Contract.findContract(
+        { tenantId: _tenantId, serviceType: '010', deleteFlag: false },
+        'createdAt DESC'
+      )
 
       const cancelId = uuidv4()
       const createdDate = new Date()

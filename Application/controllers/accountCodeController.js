@@ -5,13 +5,19 @@ const constantsDefine = require('../constants')
 const { v4: uuidV4 } = require('uuid')
 const Op = db.Sequelize.Op
 module.exports = {
-  // accountCodeテーブル
-  //   accountCodeId(PK) - PK
-  //   contractId(FK)=>Contracts(contractId) - 契約ID,
-  //   accountCode - 勘定科目コード,
-  //   accountCodeName - 勘定科目名,
-  //   createdAt - 作成日付,
-  //   updatedAt - 更新日付,
+  /**
+   * 勘定科目テーブル登録
+   * accountCodeテーブル
+   *  accountCodeId(PK) - PK
+   *  contractId(FK)=>Contracts(contractId) - 契約ID,
+   *  accountCode - 勘定科目コード,
+   *  accountCodeName - 勘定科目名,
+   *  createdAt - 作成日付,
+   *  updatedAt - 更新日付,
+   * @param {object} contract 契約情報
+   * @param {object} values 勘定科目情報
+   * @returns {boolean} true（正常）、false（異常）、Error（DBエラー、システムエラーなど）
+   */
   insert: async (contract, values) => {
     const functionName = 'accountCodeController.insert'
     // 関数開始表示
@@ -62,15 +68,19 @@ module.exports = {
       return error
     }
   },
-  // 取得したデータを画面に表示するデータに加工
-  // 加工物
-  // {
-  //    no：               勘定科目の順番
-  //    accountCodeId：    勘定科目のユニークID
-  //    accountCode：      勘定科目コード
-  //    accountCodeName：  勘定科目名
-  //    updatedAt：        勘定科目の登録時間と更新時間
-  // }
+  /**
+   * 取得したデータを画面に表示するデータに加工
+   * 加工物
+   * {
+   *    no：               勘定科目の順番
+   *    accountCodeId：    勘定科目のユニークID
+   *    accountCode：      勘定科目コード
+   *    accountCodeName：  勘定科目名
+   *    updatedAt：        勘定科目の登録時間と更新時間
+   * }
+   * @param {uuid} contractId 契約番号
+   * @returns {object} 勘定科目情報
+   */
   getAccountCodeList: async (contractId) => {
     try {
       const timestamp = require('../lib/utils').timestampForList
@@ -98,6 +108,12 @@ module.exports = {
       return error
     }
   },
+  /**
+   * 勘定科目情報取得
+   * @param {uuid} contractId 契約番号
+   * @param {uuid} accountCodeId 勘定科目コードキー
+   * @returns {object} { accountCode: 勘定科目コード, accountCodeName: 勘定科目名 }（正常）、Error（DBエラー、システムエラーなど）
+   */
   getAccountCode: async (contractId, accountCodeId) => {
     try {
       // 契約情報と勘定科目キーでDBのデータを検索する。
@@ -114,12 +130,14 @@ module.exports = {
       return error
     }
   },
-  // 勘定科目コードを変更する
-  // contractId: 契約番号
-  // accountCodeId: 勘定科目コードキー
-  // accountCode：勘定科目のコード
-  // accountCodeName: 勘定科目の名
-  // 戻り値：0（正常変更）、1（変更なし）、-1（重複勘定科目コードの場合）、Error（DBエラー、システムエラーなど）、-2（勘定科目検索失敗）
+  /**
+   * 勘定科目コードを変更する
+   * @param {uuid} contractId 契約番号
+   * @param {uuid} accountCodeId 勘定科目コードキー
+   * @param {string} accountCode 勘定科目のコード
+   * @param {string} accountCodeName 勘定科目の名
+   * @returns {int} 0（正常変更）、1（変更なし）、-1（重複勘定科目コードの場合）、Error（DBエラー、システムエラーなど）、-2（勘定科目検索失敗）
+   */
   updatedAccountCode: async function (contractId, accountCodeId, accountCode, accountCodeName) {
     let duplicatedFlag = false
     try {
@@ -178,8 +196,14 @@ module.exports = {
       return error
     }
   },
-  // 勘定科目検索
-  // 使用者から受けた、勘定科目コードや勘定科目名で勘定科目を検索する。
+  /**
+   * 勘定科目検索
+   * 使用者から受けた、勘定科目コードや勘定科目名で勘定科目を検索する。
+   * @param {uuid} contractId 契約番号
+   * @param {string} accountCode 勘定科目のコード
+   * @param {string} accountCodeName 勘定科目の名
+   * @returns {object} 勘定科目情報（正常）、Error（DBエラー、システムエラーなど）
+   */
   searchAccountCode: async (contractId, accountCode, accountCodeName) => {
     try {
       let userCustomizeWhere
@@ -256,8 +280,12 @@ module.exports = {
       return error
     }
   },
-  // 勘定科目削除
-  // 削除対象の勘定科目と紐づいてる補助科目も同時削除
+  /**
+   * 勘定科目削除
+   * 削除対象の勘定科目と紐づいてる補助科目も同時削除
+   * @param {uuid} accountCodeId 勘定科目コードキー
+   * @returns {object} なし（正常）、Error（DBエラー、システムエラーなど）
+   */
   deleteForAccountCode: async (accountCodeId) => {
     try {
       // 勘定科目を検索
@@ -295,6 +323,11 @@ module.exports = {
       return 0
     }
   },
+  /**
+   * 勘定科目存在チェック
+   * @param {uuid} accountCodeId 勘定科目コードキー
+   * @returns {object} 1（正常）、0（DBエラー、システムエラーなど）、-1（既に削除されていた場合）
+   */
   checkDataForAccountCode: async (accountCodeId) => {
     try {
       // 勘定科目を検索

@@ -10,7 +10,16 @@ const PcaService = require('../service/PcaService')
 const OhkenService = require('../service/OhkenService')
 const FreeeService = require('../service/FreeeService')
 
-// 複数の請求書を1つのCSVファイルにまとめる関数
+/**
+ * 複数の請求書を1つのCSVファイルにまとめる関数
+ * @param {string} accessToken アクセストークン
+ * @param {string} refreshToken リフレッシュトークン
+ * @param {object} documents 請求書
+ * @param {uuid} contractId 契約番号
+ * @param {uuid} chkFinalapproval 最終承認済
+ * @param {uuid} userId ユーザーの識別番号
+ * @returns {object[]} 請求書（正常）、Error（DBエラー、システムエラーなど）
+ */
 const createInvoiceDataForDownload = async (
   accessToken,
   refreshToken,
@@ -93,7 +102,12 @@ const createInvoiceDataForDownload = async (
   return invoices
 }
 
-// 自分自身の企業をaccountAPIで取得
+/**
+ * 自身のテナントIDをaccountAPIで取得
+ * @param {string} accessToken アクセストークン
+ * @param {string} refreshToken リフレッシュトークン
+ * @returns {uuid} テナントID
+ */
 const getSentToCompany = async (accessToken, refreshToken) => {
   const result = await apiManager.accessTradeshift(accessToken, refreshToken, 'get', '/account')
 
@@ -101,7 +115,7 @@ const getSentToCompany = async (accessToken, refreshToken) => {
 }
 
 /**
- *
+ * クラウド会計システム用の請求書情報ダウンロード
  * @param {object} passport トレードシフトのAPIアクセス用データ
  * @param {object} contract 契約情報
  * @param {string} businessId 請求書番号
@@ -109,10 +123,9 @@ const getSentToCompany = async (accessToken, refreshToken) => {
  * @param {string} maxIssuedate 発行日（最終日）
  * @param {uuid} sentBy 送信企業
  * @param {string} isCloedApproval 差し戻しメッセージ
- * @param {int} serviceDataFormat 出力フォーマット（0:デフォルト,1:弥生会計,2:勘定奉行, 3:PCA, 4:大蔵大臣）
+ * @param {int} serviceDataFormat 出力フォーマット（0:デフォルト,1:弥生会計,2:勘定奉行, 3:PCA, 4:大蔵大臣, 5:Freee会計）
  * @returns {string} ダウンロードデータ
  */
-
 const dowonloadKaikei = async (
   passport,
   contract,
