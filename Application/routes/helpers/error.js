@@ -5,6 +5,11 @@ const logger = require('../../lib/logger')
 // Require our controllers.
 
 module.exports = {
+  /**
+   * 引数の「status」でエラーの内容を判定する
+   * @param status HTTPリクエストオブジェクト
+   * @returns エラー
+   */
   create: (status) => {
     let e
     switch (status) {
@@ -28,6 +33,14 @@ module.exports = {
     }
     return e
   },
+
+  /**
+   * レンダー処理
+   * @param err エラー
+   * @param req HTTPリクエストオブジェクト
+   * @param res HTTPレスポンスオブジェクト
+   * @param next ネクスト
+   */
   render: (err, req, res, next) => {
     let errorStatus, errorMessage, errorDescription
 

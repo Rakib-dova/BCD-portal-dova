@@ -26,6 +26,13 @@ router.use(
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
+/**
+ * 支払依頼一覧（支払依頼タブ）画面のルーター
+ * @param req HTTPリクエストオブジェクト
+ * @param res HTTPレスポンスオブジェクト
+ * @param next ネクスト
+ * @returns エラー、または各画面表示
+ */
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
   // 認証情報取得処理
@@ -118,6 +125,13 @@ const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
+/**
+ * 仕訳情報設定画面のルーター
+ * @param req HTTPリクエストオブジェクト
+ * @param res HTTPレスポンスオブジェクト
+ * @param next ネクスト
+ * @returns approvalInbox画面表示
+ */
 const cbPostApprove = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostApprove')
 

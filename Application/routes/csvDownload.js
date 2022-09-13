@@ -21,6 +21,13 @@ const notiTitle = '請求書ダウンロード'
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
+/**
+ * 請求情報ダウンロード画面のルーター
+ * @param {object} req リクエスト
+ * @param {object} res レスポンス
+ * @param {function} next 次の処理
+ * @returns エラーもしくは、画面に設定するメッセージ
+ */
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
   // 認証情報取得処理
@@ -64,12 +71,14 @@ const cbGetIndex = async (req, res, next) => {
   const minissuedate = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate()).toISOString().split('T')[0]
   const maxissuedate = today.toISOString().split('T')[0]
 
-  // ステータス項目の選択アイテム
-  // tradeshiftステータス
-  // ・送信済み/受信済み
-  // ・受理済み
-  // ・送金済み
-  // ・入金確認済み
+  /*
+   *ステータス項目の選択アイテム
+   *tradeshiftステータス
+   *・送信済み/受信済み
+   *・受理済み
+   *・送金済み
+   *・入金確認済み
+   */
   const status = ['送信済み/受信済み', '受理済み', '送金済み', '入金確認済み']
   // 販売購入項目の選択アイテム
   const buyAndSell = ['すべて', '販売', '購入']
@@ -86,6 +95,13 @@ const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
+/**
+ * 請求情報ダウンロード画面のルーター
+ * @param {object} req リクエスト
+ * @param {object} res レスポンス
+ * @param {function} next 次の処理
+ * @returns エラーもしくは、画面に設定するメッセージ
+ */
 const cbPostIndex = async (req, res, next) => {
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
   const qs = require('qs')

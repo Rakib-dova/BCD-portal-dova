@@ -71,7 +71,7 @@ const checkContractStatus = async (tenantId, next) => {
  * @param {object} req リクエスト
  * @param {object} res レスポンス
  * @param {function} next 次の処理
- * @returns
+ * @returns 解約画面
  */
 const showContractCancel = async (req, res, next) => {
   logger.info(logMessage.INF000 + 'showContractCancel')
@@ -95,7 +95,7 @@ const showContractCancel = async (req, res, next) => {
  * @param {object} req リクエスト
  * @param {object} res レスポンス
  * @param {function} next 次の処理
- * @returns
+ * @returns DBエラーの場合、エラーオブジェクトを返却、無事処理が完了すれば完了画面へ遷移
  */
 const contractCancel = async (req, res, next) => {
   logger.info(logMessage.INF000 + 'contractCancel')

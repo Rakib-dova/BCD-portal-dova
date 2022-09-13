@@ -11,6 +11,13 @@ const constantsDefine = require('../../constants')
 const serviceTypes = constantsDefine.statusConstants.serviceTypes
 const contractStatuses = constantsDefine.statusConstants.contractStatuses
 
+/**
+ * UIDのチェック
+ * @param {object} req リクエスト
+ * @param {object} res レスポンス
+ * @param {function} next 次の処理
+ * @returns {Object} エラー
+ */
 exports.isAuthenticated = async (req, res, next) => {
   if (req.user?.userId) {
     // セッションにユーザ情報が格納されている
@@ -28,6 +35,13 @@ exports.isAuthenticated = async (req, res, next) => {
   }
 }
 
+/**
+ * UIDとテナントIDのチェック
+ * @param {object} req リクエスト
+ * @param {object} res レスポンス
+ * @param {function} next 次の処理
+ * @returns {Object} エラー
+ */
 exports.isTenantRegistered = async (req, res, next) => {
   // 認証済みかどうか。未認証であれば/authにredirect（後続の処理は行わない）
   if (!req.user?.userId || !req.user?.tenantId) return res.redirect(303, '/auth')
@@ -57,6 +71,14 @@ exports.isTenantRegistered = async (req, res, next) => {
   }
 }
 
+/**
+ * UIDのチェック
+ * バリデーションチェック、DBに登録済みかチェック
+ * @param {object} req リクエスト
+ * @param {object} res レスポンス
+ * @param {function} next 次の処理
+ * @returns {Object} エラー
+ */
 exports.isUserRegistered = async (req, res, next) => {
   if (!req.user?.userId) return res.redirect(303, '/auth')
 
@@ -84,6 +106,13 @@ exports.isUserRegistered = async (req, res, next) => {
   }
 }
 
+/**
+ * contractsステータスチェック
+ * @param {object} req リクエスト
+ * @param {object} res レスポンス
+ * @param {function} next 次の処理
+ * @returns {Object} contractsの結果により返却値変更
+ */
 exports.checkContractStatus = async (tenantId) => {
   const contracts = await contractController.findContract(
     { tenantId: tenantId, serviceType: '010', deleteFlag: false },
@@ -108,6 +137,13 @@ exports.checkContractStatus = async (tenantId) => {
   }
 }
 
+/**
+ * OAuth2認証をパスしたかチェック
+ * @param {object} req リクエスト
+ * @param {object} res レスポンス
+ * @param {function} next 次の処理
+ * @returns {Object} エラー
+ */
 exports.bcdAuthenticate = async (req, res, next) => {
   // ==========================================================================
   // TS OAuth2認証をパスしたか確認
@@ -203,6 +239,7 @@ exports.bcdAuthenticate = async (req, res, next) => {
  * @param {object} req リクエスト
  * @param {object} res レスポンス
  * @param {function} next 次の処理
+ * @returns {Object} エラー
  */
 exports.isOnOrChangeContract = async (req, res, next) => {
   // テナントIDに紐付いている未解約無償契約情報を取得
@@ -289,6 +326,7 @@ exports.getContractPlan = async (req, res, next) => {
  * @param {object} req リクエスト
  * @param {object} res レスポンス
  * @param {function} next 次の処理
+ * @returns {Object} メッセージステータス
  */
 exports.isTenantManager = async (req, res, next) => {
   const user = await userController.findOne(req.user?.userId)
