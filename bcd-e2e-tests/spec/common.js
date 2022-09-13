@@ -9,6 +9,7 @@ const comment = require('../utils/chai-with-reporting').comment;
 
 const { LoginPage } = require('../page-objects/LoginPage.js');
 const { TradeShiftTopPage } = require('../page-objects/TradeShiftTopPage.js');
+const { TradeShiftUserPage } = require('../page-objects/TradeShiftUserPage.js');
 const { TopPage } = require('../page-objects/TopPage.js');
 const { SupportMenuPage } = require('../page-objects/SupportMenuPage');
 const { UploadInvoiceMenuPage } = require('../page-objects/UploadInvoiceMenuPage');
@@ -96,6 +97,7 @@ exports.getPageObject = (browser, page) => {
   pages.loginPage = new LoginPage(browser, page);
   pages.topPage = new TopPage(browser, page);
   pages.tradeShiftTopPage = new TradeShiftTopPage(browser, page);
+  pages.tradeShiftUserPage = new TradeShiftUserPage(browser, page);
   pages.supportMenuPage = new SupportMenuPage(browser, page);
   pages.uploadInvoiceMenuPage = new UploadInvoiceMenuPage(browser, page);
   pages.uploadInvoicePage = new UploadInvoicePage(browser, page);
@@ -360,14 +362,12 @@ exports.gotoTop = async (page, account) => {
     await page.goto(config.baseUrl);
 
     // ログインを行う
-    await comment('ユーザ"' + account.id + '"でログインする');
     await this.pages.loginPage.doLogin(account.id, account.password);
     await this.pages.tradeShiftTopPage.waitForLoading();
 
     // デジタルトレードアプリをクリックする
     let appName = process.env.APP ? process.env.APP : config.appName;
     appName = appName.replace(/\"/g, '');
-    await comment('アイコン「' + appName + '」をクリックする');
     await this.pages.tradeShiftTopPage.clickBcdApp(appName);
     await this.pages.topPage.waitForLoading();
 }

@@ -80,14 +80,10 @@ describe('仕訳情報設定_支払依頼一覧', function () {
     const { topPage, journalMenuPage, paymentRequestListPage, lightPlanMenuPage, paidServiceRegisterPage }
       = common.getPageObject(browser, page);
 
-    // デジタルトレードアプリのトップページへ遷移する
+    // 支払依頼一覧ページへ遷移する
     await common.gotoTop(page, config.company2.user06);
-
-    // 仕訳情報管理メニューを開く
     await topPage.openJournalMenu();
     await journalMenuPage.waitForLoading();
-
-    // 支払依頼一覧ページへ遷移する
     await journalMenuPage.clickPaymentRequest();
     await paymentRequestListPage.waitForLoading();
 
@@ -107,56 +103,6 @@ describe('仕訳情報設定_支払依頼一覧', function () {
     expect(await paidServiceRegisterPage.getTitle()).to.equal(paidServiceRegisterPage.title, '申し込み画面（利用規約）に遷移すること');
     expect(await paidServiceRegisterPage.isStandardChecked()).to.equal(true, '「ご利用希望サービス」の「スタンダードプラン」にチェックが入っていること');
     await page.waitForTimeout(1000);
-  });
-
-  /**
-   * STEP8_ライトプラン_No.180
-   * STEP8_機能改修確認_No.
-   */
-  it("検索機能", async function () {
-    // テストの初期化を実施
-    await initBrowser();
-
-    // 各アカウントごとにテストを実施
-    for (const account of accounts) {
-      const context = await browser.newContext(contextOption);
-      if (page != null) {
-        page.close();
-      }
-      page = await context.newPage();
-
-      global.reporter.setBrowserInfo(browser, page);
-      if (account.type == 'manager') {
-        await comment('---------- 管理者アカウント ----------')
-      } else if (account.type == 'user') {
-        await comment('---------- 一般ユーザー ----------')
-      } else {
-        await comment('---------- その他アカウント ----------')
-        await comment('その他アカウントは対象外です。')
-        continue;
-      }
-
-      // ページオブジェクト
-      const { topPage, journalMenuPage, paymentRequestListPage }
-        = common.getPageObject(browser, page);
-
-      // デジタルトレードアプリのトップページへ遷移する
-      await common.gotoTop(page, account);
-
-      // 仕訳情報管理メニューを開く
-      await comment('「仕訳情報管理」をクリックする');
-      await topPage.openJournalMenu();
-      await journalMenuPage.waitForLoading();
-
-      // 支払依頼一覧ページへ遷移する
-      await comment('「支払依頼一覧」をクリックする');
-      await journalMenuPage.clickPaymentRequest();
-      await paymentRequestListPage.waitForLoading();
-
-      // 請求書を検索する
-      expect(await paymentRequestListPage.isFormShown()).to.equal(true, '検索条件フォームが表示されること');
-      await page.waitForTimeout(1000);
-    }
   });
 
   /**
@@ -190,24 +136,16 @@ describe('仕訳情報設定_支払依頼一覧', function () {
       const { topPage, journalMenuPage, paymentRequestListPage, journalDetailPage }
         = common.getPageObject(browser, page);
 
-      // デジタルトレードアプリのトップページへ遷移する
+      // 支払依頼一覧ページへ遷移する
       await common.gotoTop(page, account);
-
-      // 仕訳情報管理メニューを開く
-      await comment('「仕訳情報管理」をクリックする');
       await topPage.openJournalMenu();
       await journalMenuPage.waitForLoading();
-
-      // 支払依頼一覧ページへ遷移する
       await journalMenuPage.clickPaymentRequest();
       await paymentRequestListPage.waitForLoading();
 
       // 差出人・宛先・価格を取得する
       let cost = await paymentRequestListPage.getCost(invoiceNo);
       let sender = await paymentRequestListPage.getSender(invoiceNo);
-
-      // 請求書を検索する
-      expect(await paymentRequestListPage.isFormShown()).to.equal(true, '検索条件フォームが表示されること');
 
       // 仕訳情報設定ページへ遷移する
       await paymentRequestListPage.clickDetail(invoiceNo);
@@ -220,6 +158,154 @@ describe('仕訳情報設定_支払依頼一覧', function () {
 
       // 「支払依頼へ」ボタンが非活性となっていること
       expect(await journalDetailPage.isPaymentRequestDisabled()).to.equal(false, '「支払依頼へ」ボタンが非活性となっていること');
+      await page.waitForTimeout(1000);
+    }
+  });
+
+  // 担当者アドレス欄を確認する
+  async function confirmMail(nameEmpty, loginPage, tradeShiftTopPage, tradeShiftUserPage, topPage, journalMenuPage, paymentRequestListPage, journalDetailPage) {
+    let sender = config.company2.user03;
+    let receiver = config.company2.user06;
+    let invoiceNo = 'atest220830';
+
+    // ユーザの姓・名を変更する
+    await comment('Tradeshiftログインページへ移動する');
+    await page.goto(config.baseUrl);
+    await loginPage.doLogin(sender.id, sender.password);
+    await tradeShiftTopPage.waitForLoading();
+    await tradeShiftTopPage.editUser();
+    await tradeShiftUserPage.waitForLoading();
+    if (nameEmpty) {
+      await tradeShiftUserPage.editName('', '');
+    } else {
+      await tradeShiftUserPage.editName(sender.first, sender.family);
+    }
+    await tradeShiftTopPage.logout();
+    await loginPage.waitForLoading();
+
+    // 仕訳情報設定ページへ遷移する
+    await common.gotoTop(page, receiver);
+    await topPage.openJournalMenu();
+    await journalMenuPage.waitForLoading();
+    await journalMenuPage.clickPaymentRequest();
+    await paymentRequestListPage.waitForLoading();
+    await paymentRequestListPage.clickDetail(invoiceNo);
+    await journalDetailPage.waitForLoading();
+  
+    // 「担当者アドレス」欄にメールアドレスのみが表示されていること
+    expect(await journalDetailPage.getSenderMail()).to.equal(sender.id, '「担当者アドレス」欄にメールアドレスのみが表示されていること');
+
+    // ログアウトする
+    await tradeShiftTopPage.logout();
+    await loginPage.waitForLoading();
+  }
+
+  /**
+   * STEP8_機能改修確認_No.23,26
+   */
+  /*
+  it("担当者アドレス", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+    const context = await browser.newContext(contextOption);
+    if (page != null) {
+      page.close();
+    }
+    page = await context.newPage();
+    global.reporter.setBrowserInfo(browser, page);
+    
+    // ページオブジェクト
+    const { loginPage, tradeShiftTopPage, tradeShiftUserPage, topPage, journalMenuPage, paymentRequestListPage, journalDetailPage }
+        = common.getPageObject(browser, page);
+
+    // 姓・名を空白にして確認する
+    await confirmMail(true, loginPage, tradeShiftTopPage, tradeShiftUserPage, topPage, journalMenuPage, paymentRequestListPage, journalDetailPage);
+
+    // 姓・名を登録して確認する
+    await confirmMail(false, loginPage, tradeShiftTopPage, tradeShiftUserPage, topPage, journalMenuPage, paymentRequestListPage, journalDetailPage);
+    await page.waitForTimeout(1000);
+  });
+  */
+
+  /**
+   * STEP8_ライトプラン_No.180
+   * STEP8_機能改修確認_No.30,32,35-39,42,43,45,46
+   */
+   it("検索条件フォーム", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+
+    // 各アカウントごとにテストを実施
+    for (const account of accounts) {
+      const context = await browser.newContext(contextOption);
+      if (page != null) {
+        page.close();
+      }
+      page = await context.newPage();
+      global.reporter.setBrowserInfo(browser, page);
+      if (account.type == 'manager') {
+        await comment('---------- 管理者アカウント ----------')
+      } else if (account.type == 'user') {
+        await comment('---------- 一般ユーザー ----------')
+      } else {
+        await comment('---------- その他アカウント ----------')
+        await comment('その他アカウントは対象外です。')
+        continue;
+      }
+
+      // ページオブジェクト
+      const { topPage, journalMenuPage, paymentRequestListPage }
+        = common.getPageObject(browser, page);
+
+      // 支払依頼一覧ページへ遷移する
+      await common.gotoTop(page, account);
+      await topPage.openJournalMenu();
+      await journalMenuPage.waitForLoading();
+      await journalMenuPage.clickPaymentRequest();
+      await paymentRequestListPage.waitForLoading();
+
+      // 検索条件フォームが表示されること
+      expect(await paymentRequestListPage.isFormShown()).to.equal(true, '検索条件フォームが表示されること');
+
+      // 検索条件フォーム未入力のまま検索する
+      let actualMsg = await paymentRequestListPage.clickSearchWithoutConditions();
+      expect(actualMsg).to.equal('検索条件を入力してください。', '検索条件フォーム未入力のメッセージが表示されること');
+
+      // 請求書番号へ100字まで入力できること
+      let invoiceNo = 'テスト1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnop';
+      await paymentRequestListPage.inputSearchInvoiceNo(invoiceNo);
+      expect(await paymentRequestListPage.getSearchInvoiceNo()).to.equal(invoiceNo.substring(0, 100), '請求書番号へ100字まで入力できること');
+
+      // 承認ステータスが複数選択可能であること
+      expect(await paymentRequestListPage.getSearchStatusCheckedCount()).to.equal(0, '承認ステータスが全解除の状態になっていること');
+      let status = ['未処理', '支払依頼中', '一次承認済み', '二次承認済み', '三次承認済み', '四次承認済み', '五次承認済み', '六次承認済み', '七次承認済み', '八次承認済み', '九次承認済み', '十次承認済み', '最終承認済み', '差し戻し'];
+      await paymentRequestListPage.checkSearchStatus(status);
+      expect(await paymentRequestListPage.getSearchStatusCheckedCount()).to.equal(14, '承認ステータスが複数選択可能であること');
+
+      // 発行日（開始日・終了日）へ「yyyy/mm/dd」形式で入力できること
+      let minIssueDate = '2021-07-01';
+      let maxIssueDate = '2022-08-31';
+      await paymentRequestListPage.inputSearchIssueDate(minIssueDate, maxIssueDate);
+      let actualIssueDates = await paymentRequestListPage.getSearchIssueDate();
+      expect(actualIssueDates.min).to.equal(minIssueDate, '発行日（開始日）へ「yyyy/mm/dd」形式で入力できること');
+      expect(actualIssueDates.max).to.equal(maxIssueDate, '発行日（終了日）へ「yyyy/mm/dd」形式で入力できること');
+
+      // 送信企業へ100字まで入力できること
+      let sender = 'テスト1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnop';
+      await paymentRequestListPage.inputSearchSendTo(sender);
+      expect(await paymentRequestListPage.getSearchSendTo()).to.equal(sender.substring(0, 100), '送信企業へ100字まで入力できること');
+
+      // 担当者アドレスへ128字まで入力できること
+      let mail = '1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz12345678@example.coma';
+      await paymentRequestListPage.inputSearchMail(mail);
+      expect(await paymentRequestListPage.getSearchMail()).to.equal(mail.substring(0, 128), '担当者アドレスへ128字まで入力できること');
+      
+      // 請求書番号に一致する請求書データが検索結果に表示されること（完全一致）
+      invoiceNo = 'A0000125';
+      await paymentRequestListPage.clickSearchClear();
+      await paymentRequestListPage.inputSearchInvoiceNo(invoiceNo);
+      await paymentRequestListPage.clickSearch();
+      expect(await paymentRequestListPage.hasRow(invoiceNo)).to.equal(true, '請求書番号に一致する請求書データが検索結果に表示されること（完全一致）');
       await page.waitForTimeout(1000);
     }
   });
@@ -254,21 +340,12 @@ describe('仕訳情報設定_支払依頼一覧', function () {
       const { topPage, journalMenuPage, paymentRequestListPage, journalDetailPage }
         = common.getPageObject(browser, page);
 
-      // デジタルトレードアプリのトップページへ遷移する
+      // 仕訳情報設定ページへ遷移する
       await common.gotoTop(page, account);
-
-      // 仕訳情報管理メニューを開く
-      await comment('「仕訳情報管理」をクリックする');
       await topPage.openJournalMenu();
       await journalMenuPage.waitForLoading();
-
-      // 支払依頼一覧ページへ遷移する
-      await comment('「支払依頼一覧」をクリックする');
       await journalMenuPage.clickPaymentRequest();
       await paymentRequestListPage.waitForLoading();
-
-      // 仕訳情報設定ページへ遷移する
-      await comment('「仕訳情報設定」をクリックする');
       await paymentRequestListPage.clickDetail(invoiceNo);
       await journalDetailPage.waitForLoading();
 
@@ -362,7 +439,6 @@ describe('仕訳情報設定_支払依頼一覧', function () {
         page.close();
       }
       page = await context.newPage();
-
       global.reporter.setBrowserInfo(browser, page);
       if (account.type == 'manager') {
         await comment('---------- 管理者アカウント ----------')
@@ -378,19 +454,12 @@ describe('仕訳情報設定_支払依頼一覧', function () {
       const { topPage, journalMenuPage, paymentRequestListPage, journalDetailPage }
         = common.getPageObject(browser, page);
 
-      // デジタルトレードアプリのトップページへ遷移する
+      // 仕訳情報設定ページへ遷移する
       await common.gotoTop(page, account);
-
-      // 仕訳情報管理メニューを開く
-      await comment('「仕訳情報管理」をクリックする');
       await topPage.openJournalMenu();
       await journalMenuPage.waitForLoading();
-
-      // 支払依頼一覧ページへ遷移する
       await journalMenuPage.clickPaymentRequest();
       await paymentRequestListPage.waitForLoading();
-
-      // 仕訳情報設定ページへ遷移する
       await paymentRequestListPage.clickDetail(invoiceNo);
       await journalDetailPage.waitForLoading();
 
@@ -442,19 +511,12 @@ describe('仕訳情報設定_支払依頼一覧', function () {
       const { topPage, journalMenuPage, paymentRequestListPage, journalDetailPage }
         = common.getPageObject(browser, page);
 
-      // デジタルトレードアプリのトップページへ遷移する
+      // 仕訳情報設定ページへ遷移する
       await common.gotoTop(page, account);
-
-      // 仕訳情報管理メニューを開く
-      await comment('「仕訳情報管理」をクリックする');
       await topPage.openJournalMenu();
       await journalMenuPage.waitForLoading();
-
-      // 支払依頼一覧ページへ遷移する
       await journalMenuPage.clickPaymentRequest();
       await paymentRequestListPage.waitForLoading();
-
-      // 仕訳情報設定ページへ遷移する
       await paymentRequestListPage.clickDetail(invoiceNo);
       await journalDetailPage.waitForLoading();
 
