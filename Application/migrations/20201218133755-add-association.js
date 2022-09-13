@@ -1,5 +1,7 @@
 'use strict'
 // https://qiita.com/shimon_haga/items/e22115c130c6917bd365
+
+// UsersテーブルtenantIdのforeign key指定・解除
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.addConstraint('Users', {

@@ -1,5 +1,6 @@
 'use strict'
 
+// ContractsテーブルserviceTypeカラム追加
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.addColumn('Contracts', 'serviceType', {

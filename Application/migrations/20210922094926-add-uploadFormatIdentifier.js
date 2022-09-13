@@ -1,5 +1,6 @@
 'use strict'
 
+// UploadFormatIdentifierテーブルuploadFormatIdカラムforeign key指定・解除
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.addConstraint('UploadFormatIdentifier', {

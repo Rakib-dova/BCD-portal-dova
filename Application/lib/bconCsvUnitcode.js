@@ -1,5 +1,6 @@
 'use stric'
 
+// CSVアップロード明細-単位 (請求書一括作成)
 module.exports = {
   人月: '3C',
   ボトル: 'BO',

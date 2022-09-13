@@ -1,13 +1,8 @@
 'use strict'
 
+// SubAccountCodeテーブル作成・削除
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    /**
-     * Add altering commands here.
-     *
-     * Example:
-     * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
-     */
     await queryInterface.createTable('SubAccountCode', {
       subAccountCodeId: {
         allowNull: false,
@@ -38,12 +33,6 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    /**
-     * Add reverting commands here.
-     *
-     * Example:
-     * await queryInterface.dropTable('users');
-     */
     await queryInterface.dropTable('SubAccountCode')
   }
 }

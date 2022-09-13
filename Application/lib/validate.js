@@ -66,7 +66,11 @@ const isFunction = function (value) {
   return typeof value === 'function'
 }
 
-// ----
+/**
+ * UUIDバリデーションチェック
+ * @param {uuid} uuid バリデーション対象となるUUID
+ * @returns {boolean} UUIDの場合true,UUIDではない場合false
+ */
 const isUUID = (uuid) => {
   if (!isString(uuid)) return false
   const index = [/^[0-9a-f]{8}-?[0-9a-f]{4}-?[1-5][0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$/i].findIndex((x) =>
@@ -76,6 +80,11 @@ const isUUID = (uuid) => {
   else return true
 }
 
+/**
+ * objectのバリデーションチェック
+ * @param {object} target バリデーション対象となるobject
+ * @returns {boolean} objectがUndefinedの場合true,objectがUndefinedではない場合false
+ */
 const isUndefined = (target) => {
   if (Object.prototype.toString.call(target) === '[object Undefined]') {
     return true
@@ -84,6 +93,11 @@ const isUndefined = (target) => {
   return false
 }
 
+/**
+ * 郵便番号のバリデーションチェック
+ * @param {string} postalNumber バリデーション対象となる郵便番号
+ * @returns {boolean} 郵便番号形式の場合true,郵便番号形式ではない場合false
+ */
 const isPostalNumber = (postalNumber) => {
   const pattern = '^[0-9]{7}$'
   const regex = new RegExp(pattern)
@@ -92,6 +106,11 @@ const isPostalNumber = (postalNumber) => {
   return regex.test(postalNumber)
 }
 
+/**
+ * 数字のバリデーションチェック
+ * @param {string} regNumber バリデーション対象となる数字
+ * @returns {boolean} 数字の場合true,数字ではない場合false
+ */
 const isNumberRegular = (regNumber) => {
   const isNumberPatten = '^[-]?[0-9]*(\\.?[0-9]*)$'
   const regex = new RegExp(isNumberPatten)
@@ -100,6 +119,12 @@ const isNumberRegular = (regNumber) => {
   return regex.test(regNumber)
 }
 
+/**
+ * テナント管理者ユーザーのバリデーションチェック
+ * @param {uuid} userRole バリデーション対象となるユーザーロール
+ * @param {boolean} deleteFlag バリデーション対象企業の解約有無
+ * @returns {boolean} テナント管理者のロールの場合true, その以外の場合false
+ */
 const isTenantManager = function (userRole, deleteFlag) {
   if (userRole !== constantsDefine.userRoleConstants.tenantManager && !deleteFlag) {
     return false
@@ -107,6 +132,12 @@ const isTenantManager = function (userRole, deleteFlag) {
   return true
 }
 
+/**
+ * テナントの契約申請有無バリデーションチェック
+ * @param {string} contractStatus バリデーション対象となるテナントの契約ステータス
+ * @param {boolean} deleteFlag バリデーション対象企業の解約有無
+ * @returns {boolean} テナント契約ステータスが登録申込、登録受付の場合false, その以外の場合true
+ */
 const isStatusForRegister = function (contractStatus, deleteFlag) {
   if (
     (contractStatus === constantsDefine.statusConstants.contractStatusNewContractOrder ||
@@ -118,6 +149,12 @@ const isStatusForRegister = function (contractStatus, deleteFlag) {
   return true
 }
 
+/**
+ * テナントの解約申請有無バリデーションチェック
+ * @param {string} contractStatus バリデーション対象となるテナントの契約ステータス
+ * @param {boolean} deleteFlag バリデーション対象企業の解約有無
+ * @returns {boolean} テナント契約ステータスが解約申込、解約受付の場合false, その以外の場合true
+ */
 const isStatusForCancel = function (contractStatus, deleteFlag) {
   if (
     (contractStatus === constantsDefine.statusConstants.contractStatusCancellationOrder ||
@@ -129,6 +166,12 @@ const isStatusForCancel = function (contractStatus, deleteFlag) {
   return true
 }
 
+/**
+ * テナントの契約情報変更有無バリデーションチェック
+ * @param {string} contractStatus バリデーション対象となるテナントの契約ステータス
+ * @param {boolean} deleteFlag バリデーション対象企業の解約有無
+ * @returns {boolean} テナント契約ステータスが変更申込、変更受付の場合false, その以外の場合true
+ */
 const isStatusForSimpleChange = function (contractStatus, deleteFlag) {
   if (
     (contractStatus === constantsDefine.statusConstants.contractStatusSimpleChangeContractOrder ||
@@ -159,7 +202,11 @@ const isBcdCancelling = (bcdContract) => {
 }
 
 // CSVファイルのバリデーションチェック（現在行～）
-// 請求書番号
+/**
+ * 請求書番号バリデーションチェック
+ * @param {string} invoiceId バリデーション対象対象となる請求書番号
+ * @returns {string} バリデーションチェック結果エラーコード、問題ない場合は''
+ */
 const isInvoiceId = function (invoiceId) {
   // 値の存在有無確認
   if (invoiceId.length < 1) {
@@ -173,7 +220,11 @@ const isInvoiceId = function (invoiceId) {
   return ''
 }
 
-// 銀行名
+/**
+ * 銀行名バリデーションチェック
+ * @param {string} bankName バリデーション対象対象となる銀行名
+ * @returns {string} バリデーションチェック結果エラーコード、問題ない場合は''
+ */
 const isBankName = function (bankName) {
   // 値の存在有無確認
   if (bankName.length < 1) {
@@ -186,7 +237,11 @@ const isBankName = function (bankName) {
   return ''
 }
 
-// 発行日、支払期日、納品日
+/**
+ * 日付関連バリデーションチェック(発行日、支払期日、納品日)
+ * @param {string} isDate バリデーション対象対象となる日付
+ * @returns {int} 1,2:エラー  0:正常
+ */
 const isDate = function (isDate) {
   // 年-月-日の形式のみ許容する
   if (!isDate.match(/^\d{4}-\d{1,2}-\d{1,2}$/)) {
@@ -207,7 +262,11 @@ const isDate = function (isDate) {
   return 0
 }
 
-// 明細-項目ID
+/**
+ * 明細-項目IDバリデーションチェック
+ * @param {string} sellersItemNum バリデーション対象対象となる明細-項目ID
+ * @returns {string} バリデーションチェック結果エラーコード、問題ない場合は''
+ */
 const isSellersItemNum = function (sellersItemNum) {
   // 値の存在有無確認
   if (sellersItemNum.length < 1) {
@@ -220,7 +279,11 @@ const isSellersItemNum = function (sellersItemNum) {
   return ''
 }
 
-// 明細-内容
+/**
+ * 明細-内容バリデーションチェック
+ * @param {string} itemName バリデーション対象対象となる明細-内容
+ * @returns {string} バリデーションチェック結果エラーコード、問題ない場合は''
+ */
 const isItemName = function (itemName) {
   // 値の存在有無確認
   if (itemName.length < 1) {
@@ -233,7 +296,11 @@ const isItemName = function (itemName) {
   return ''
 }
 
-// 明細-数量
+/**
+ * 明細-数量バリデーションチェック
+ * @param {int} quantityValue バリデーション対象対象となる明細-数量
+ * @returns {string} バリデーションチェック結果エラーコード、問題ない場合は''
+ */
 const isQuantityValue = function (quantityValue) {
   // 値の存在有無確認
   if (quantityValue.length < 1) {
@@ -252,7 +319,11 @@ const isQuantityValue = function (quantityValue) {
   return ''
 }
 
-// 明細-単価
+/**
+ * 明細-単価バリデーションチェック
+ * @param {int} priceValue バリデーション対象対象となる明細-単価
+ * @returns {string} バリデーションチェック結果エラーコード、問題ない場合は''
+ */
 const isPriceValue = function (priceValue) {
   // 値の存在有無確認
   if (priceValue.length < 1) {
@@ -272,7 +343,11 @@ const isPriceValue = function (priceValue) {
   return ''
 }
 
-// 明細-税
+/**
+ * 明細-税(種類)バリデーションチェック
+ * @param {string} category バリデーション対象対象となる明細-税(種類)
+ * @returns {string} バリデーションチェック結果エラーコード、問題ない場合はcategoryの税種類
+ */
 const isTaxCategori = function (category) {
   const taxCategory = require('./bconCsvTax')
   // 値の存在有無確認
@@ -287,7 +362,11 @@ const isTaxCategori = function (category) {
   return taxCategory[category]
 }
 
-// 明細-税
+/**
+ * 明細-税(税率)バリデーションチェック
+ * @param {string} category バリデーション対象対象となる明細-税(税率)
+ * @returns {string} バリデーションチェック結果エラーコード、問題ない場合はcategoryの税率
+ */
 const isTaxPercent = function (category) {
   const taxCategory = require('./bconCsvTaxPercent')
   // 値の存在有無確認
@@ -302,7 +381,12 @@ const isTaxPercent = function (category) {
   return taxCategory[category]
 }
 
-// 明細-税(ユーザーフォーマット)
+/**
+ * 明細-税(ユーザーフォーマット)バリデーションチェック
+ * @param {string} category バリデーション対象対象となる明細-税(ユーザーフォーマット)
+ * @param {array} bconCsvTaxUser ユーザーが指定した税種類
+ * @returns {string} バリデーションチェック結果エラーコード、問題ない場合はcategoryの税種類
+ */
 const isUserTaxCategori = function (category, bconCsvTaxUser) {
   // 値の存在有無確認
   if (category.length < 1) {
@@ -316,7 +400,11 @@ const isUserTaxCategori = function (category, bconCsvTaxUser) {
   return bconCsvTaxUser[category]
 }
 
-// 明細-単位
+/**
+ * 明細-単位バリデーションチェック
+ * @param {string} unitCode バリデーション対象対象となる明細-単位
+ * @returns {string} バリデーションチェック結果エラーコード、問題ない場合はunitCodeの単位コード
+ */
 const isUnitcode = function (unitCode) {
   const unitcodeCategory = require('./bconCsvUnitcode')
   // 値の存在有無確認
@@ -331,7 +419,12 @@ const isUnitcode = function (unitCode) {
   return unitcodeCategory[unitCode]
 }
 
-// 明細-単位(ユーザーフォーマット)
+/**
+ * 明細-単位(ユーザーフォーマット)バリデーションチェック
+ * @param {string} unitCode バリデーション対象対象となる明細-単位(ユーザーフォーマット)
+ * @param {array} bconCsvUnitUser ユーザーが指定した明細-単位
+ * @returns {string} バリデーションチェック結果エラーコード、問題ない場合はunitCodeの単位コード
+ */
 const isUserUnitcode = function (unitCode, bconCsvUnitUser) {
   // 値の存在有無確認
   if (unitCode.length < 1) {
@@ -345,6 +438,11 @@ const isUserUnitcode = function (unitCode, bconCsvUnitUser) {
   return bconCsvUnitUser[unitCode]
 }
 
+/**
+ * 備考バリデーションチェック
+ * @param {string} financialInstitution バリデーション対象対象となる備考内容
+ * @returns {string} バリデーションチェック結果エラーコード、問題ない場合は''
+ */
 const isFinancialInstitution = function (financialInstitution) {
   if (financialInstitution.length > constantsDefine.invoiceValidDefine.FINANCIALINSTITUTION_VALUE) {
     return 'FINANCIALINSTITUTIONERR000'
@@ -353,7 +451,11 @@ const isFinancialInstitution = function (financialInstitution) {
   return ''
 }
 
-// 支店名
+/**
+ * 支店名バリデーションチェック
+ * @param {string} financialName バリデーション対象対象となる支店名
+ * @returns {string} バリデーションチェック結果エラーコード、問題ない場合は''
+ */
 const isFinancialName = function (financialName) {
   // 値の存在有無確認
   if (financialName.length < 1) {
@@ -366,7 +468,11 @@ const isFinancialName = function (financialName) {
   return ''
 }
 
-// 科目
+/**
+ * 科目バリデーションチェック
+ * @param {string} accountType バリデーション対象対象となる科目
+ * @returns {*} 1,2:エラー  科目コード:正常
+ */
 const isAccountType = function (accountType) {
   const unitcodeCategory = require('./bconCsvAccountType')
   // 値の存在有無確認
@@ -381,7 +487,11 @@ const isAccountType = function (accountType) {
   return unitcodeCategory[accountType]
 }
 
-// 口座番号
+/**
+ * 口座番号バリデーションチェック
+ * @param {string} accountId バリデーション対象対象となる口座番号
+ * @returns {string} バリデーションチェック結果エラーコード、問題ない場合は''
+ */
 const isAccountId = function (accountId) {
   const isAccountPatten = '^[0-9]+$'
   const regex = new RegExp(isAccountPatten)
@@ -399,7 +509,11 @@ const isAccountId = function (accountId) {
   return ''
 }
 
-// 口座名義
+/**
+ * 口座名義バリデーションチェック
+ * @param {string} accountId バリデーション対象対象となる口座名義
+ * @returns {string} バリデーションチェック結果エラーコード、問題ない場合は''
+ */
 const isAccountName = function (accountName) {
   // 値の存在有無確認
   if (accountName.length < 1) {
@@ -412,7 +526,11 @@ const isAccountName = function (accountName) {
   return ''
 }
 
-// その他特記事項
+/**
+ * その他特記事項バリデーションチェック
+ * @param {string} note バリデーション対象対象となるその他特記事項
+ * @returns {string} バリデーションチェック結果エラーコード、問題ない場合は''
+ */
 const isNote = function (note) {
   if (note.length > constantsDefine.invoiceValidDefine.NOTE_VALUE) {
     return 'NOTEERR000'
@@ -421,7 +539,11 @@ const isNote = function (note) {
   return ''
 }
 
-// 明細-備考
+/**
+ * 明細-備考バリデーションチェック
+ * @param {string} description バリデーション対象対象となる明細-備考
+ * @returns {string} バリデーションチェック結果エラーコード、問題ない場合は''
+ */
 const isDescription = function (description) {
   if (description.length > constantsDefine.invoiceValidDefine.DESCRIPTION_VALUE) {
     return 'DESCRIPTIONERR000'
@@ -429,7 +551,12 @@ const isDescription = function (description) {
   return ''
 }
 
-// ネットワーク接続
+/**
+ * ネットワーク接続バリデーションチェック
+ * @param {array} companyNetworkConnectionList ネットワークに繋がっているテナント企業
+ * @param {uuid} targetConnectionId 請求書を送信する企業のテナントUUID
+ * @returns {string} バリデーションチェック結果エラーコード、問題ない場合は''
+ */
 const checkNetworkConnection = function (companyNetworkConnectionList, targetConnectionId) {
   let connectionFlag = false
   try {
@@ -449,7 +576,12 @@ const checkNetworkConnection = function (companyNetworkConnectionList, targetCon
 }
 
 // 仕訳のバリデーションチェック
-// コード
+/**
+ * 仕訳コードバリデーションチェック
+ * @param {string} code バリデーション対象対象となる仕訳コード
+ * @param {string} prefix 仕訳の種類（勘定科目、補助科目）
+ * @returns {string} バリデーションチェック結果エラーコード、問題ない場合は''
+ */
 const isCode = function (code, prefix) {
   const inputPatternEngNum = '^[a-zA-Z0-9]*$'
   const regex = new RegExp(inputPatternEngNum)
@@ -464,7 +596,12 @@ const isCode = function (code, prefix) {
   }
 }
 
-// 部門コード
+/**
+ * 部門コードバリデーションチェック
+ * @param {string} code バリデーション対象対象となる部門コード
+ * @param {string} prefix 仕訳の種類（部門コード）
+ * @returns {string} バリデーションチェック結果エラーコード、問題ない場合は''
+ */
 const isDepartmentCode = function (code, prefix) {
   const inputPatternEngNum = '^[a-zA-Z0-9ァ-ヶー]*$'
   const regex = new RegExp(inputPatternEngNum)
@@ -479,6 +616,12 @@ const isDepartmentCode = function (code, prefix) {
   }
 }
 
+/**
+ * 仕訳名バリデーションチェック
+ * @param {string} name バリデーション対象対象となる仕訳名
+ * @param {string} prefix 仕訳の種類（勘定科目、補助科目、部門コード）
+ * @returns {string} バリデーションチェック結果エラーコード、問題ない場合は''
+ */
 const isName = function (name, prefix) {
   if (name.length < 1) {
     return `${prefix}NAMEERR000`
@@ -489,6 +632,11 @@ const isName = function (name, prefix) {
   }
 }
 
+/**
+ * 取引担当者メールアドレスバリデーションチェック
+ * @param {string} contactEmail バリデーション対象対象となる取引担当者メールアドレス
+ * @returns {*} -1,-2:エラー  0:正常
+ */
 const isContactEmail = function (contactEmail) {
   const contactEmailType = typeof contactEmail
 
@@ -550,6 +698,11 @@ const isContactEmail = function (contactEmail) {
   return 0
 }
 
+/**
+ * メールアドレスバリデーションチェック
+ * @param {string} emailAddress バリデーション対象対象となるメールアドレス
+ * @returns {boolean} false:エラー  true:正常
+ */
 const isValidEmail = function (emailAddress) {
   const emailType = typeof emailAddress
 
@@ -562,7 +715,7 @@ const isValidEmail = function (emailAddress) {
     return character.charCodeAt()
   }
 
-  // 取引担当者メールアドレスが配列形式で受け取った場合
+  // メールアドレスが配列形式で受け取った場合
   if (emailType !== 'string') return false
 
   if (emailAddress.match(/@/g) === null || emailAddress.match(/@/g).length !== 1) return false
@@ -631,7 +784,11 @@ const isValidEmail = function (emailAddress) {
   return true
 }
 
-// トレードシフトのユーザアカウント用に使用するメールアドレスの形式チェック
+/**
+ * トレードシフトのユーザアカウント用に使用するメールアドレスの形式チェック
+ * @param {string} emailAddress バリデーション対象対象となるメールアドレス
+ * @returns {boolean} false:エラー  true:正常
+ */
 const isValidEmailTsUser = function (emailAddress) {
   const emailType = typeof emailAddress
 
@@ -702,7 +859,12 @@ const isValidEmailTsUser = function (emailAddress) {
   return true
 }
 
-// トレードシフトのユーザアカウント用に使用するメールアドレスの形式チェック
+/**
+ * 請求書の税金額バリデーションチェック
+ * @param {string} documentNo バリデーション対象対象と請求書番号
+ * @param {array} invoiceData バリデーション対象対象となる請求書情報
+ * @returns {boolean} false:エラー  true:正常
+ */
 const isValidTotalPrice = function (documentNo, invoiceData) {
   let totalPrice = 0
   invoiceData.forEach((element) => {

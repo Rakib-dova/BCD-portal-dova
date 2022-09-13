@@ -1,13 +1,8 @@
 'use strict'
 
+// UploadFormatテーブルitemRowNo,dataStartRowNoカラム追加・削除
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    /**
-     * Add altering commands here.
-     *
-     * Example:
-     * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
-     */
     return [
       await queryInterface.addColumn('UploadFormat', 'itemRowNo', {
         allowNull: false,
@@ -23,12 +18,6 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    /**
-     * Add reverting commands here.
-     *
-     * Example:
-     * await queryInterface.dropTable('users');
-     */
     return [
       await queryInterface.removeColumn('UploadFormat', 'itemRowNo'),
       await queryInterface.removeColumn('UploadFormat', 'dataStartRowNo')

@@ -1,5 +1,6 @@
 'use strict'
 
+// ContractsテーブルcontractedAt, canceledAtカラム追加・削除
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.addColumn('Contracts', 'contractedAt', {
