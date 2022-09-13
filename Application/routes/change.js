@@ -19,6 +19,14 @@ const constantsDefine = require('../constants')
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
+/**
+ * 契約情報の取得
+ * ユーザ権限を取得し、ユーザ権限を画面に送る
+ * @param {object} req リクエスト
+ * @param {object} res レスポンス
+ * @param {function} next 次の処理
+ * @returns エラーもしくは、画面に設定するメッセージ
+ */
 const cbGetChangeIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetChangeIndex')
 
@@ -82,6 +90,13 @@ const cbGetChangeIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetChangeIndex')
 }
 
+/**
+ * DBから契約情報取得し、contractorName等のデータをJSONに設定し契約者情報変更の受付を行う
+ * @param {object} req リクエスト
+ * @param {object} res レスポンス
+ * @param {function} next 次の処理
+ * @returns エラーもしくは、画面に設定するメッセージ
+ */
 const cbPostChangeIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostChangeIndex')
 
@@ -176,9 +191,11 @@ const cbPostChangeIndex = async (req, res, next) => {
       constantsDefine.statusConstants.orderTypeSimpleChangeOrder
     contractInformationchangeOrderContractBasicInfo.contractBasicInfo.contractNumber = contract.dataValues?.numberN
 
-    // 「契約者名変更」、「契約者住所変更」、「契約者連絡先変更」
-    // 「契約者名変更、契約者住所変更」「契約者名変更、契約者連絡先変更」「契約者住所変更、契約者連絡先変更」
-    // 「契約者名変更、契約者住所変更、契約者連絡先変更」がチェックされている場合
+    /*
+     *「契約者名変更」、「契約者住所変更」、「契約者連絡先変更」
+     *「契約者名変更、契約者住所変更」「契約者名変更、契約者連絡先変更」「契約者住所変更、契約者連絡先変更」
+     *「契約者名変更、契約者住所変更、契約者連絡先変更」がチェックされている場合
+     */
     if (
       req.body.chkContractorName === 'on' &&
       req.body.chkContractAddress === undefined &&

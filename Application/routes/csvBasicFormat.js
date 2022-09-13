@@ -13,6 +13,15 @@ const constantsDefine = require('../constants')
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
+/**
+ * 基本情報設定画面のルーター
+ * 解約済以外契約情報を取得
+ * 継続利用サービスリスト、初回利用サービスリストを作成する処理
+ * @param {object} req リクエスト
+ * @param {object} res レスポンス
+ * @param {function} next 次の処理
+ * @returns エラーもしくは、ご契約内容を画面に返却
+ */
 const cbGetCsvBasicFormat = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetCsvBasicFormat')
 

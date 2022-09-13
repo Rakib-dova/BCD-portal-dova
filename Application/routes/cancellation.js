@@ -66,6 +66,14 @@ const getAndCheckContracts = async (tenantId, next) => {
   return contract
 }
 
+/**
+ * 契約情報の取得
+ * ユーザ権限を取得し、ユーザ権限を画面に送る
+ * @param {object} req リクエスト
+ * @param {object} res レスポンス
+ * @param {function} next 次の処理
+ * @returns エラーもしくは、画面に設定するメッセージ
+ */
 const cbGetCancellation = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetCancellation')
 
@@ -128,6 +136,13 @@ const cbGetCancellation = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetCancellation')
 }
 
+/**
+ * 解約申込登録を行う
+ * @param {object} req リクエスト
+ * @param {object} res レスポンス
+ * @param {function} next 次の処理
+ * @returns エラーもしくは、画面に設定するメッセージ
+ */
 const cbPostCancellation = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostCancellation')
 

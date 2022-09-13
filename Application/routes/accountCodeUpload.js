@@ -15,6 +15,13 @@ const accountUploadController = require('../controllers/accountUploadController'
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
+/**
+ * 勘定科目一括作成画面のルーター
+ * @param req HTTPリクエストオブジェクト
+ * @param res HTTPレスポンスオブジェクト
+ * @param next ネクスト
+ * @returns エラー、または各画面表示
+ */
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
   // 認証情報取得処理
@@ -84,6 +91,13 @@ const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
+/**
+ * 勘定科目一括作成画面のルーター
+ * @param req HTTPリクエストオブジェクト
+ * @param res HTTPレスポンスオブジェクト
+ * @param next ネクスト
+ * @returns エラー、または各画面表示
+ */
 const cbPostIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'accountCodeUpload.cbPostIndex')
   // 認証情報取得処理

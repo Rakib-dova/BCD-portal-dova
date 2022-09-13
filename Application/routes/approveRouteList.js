@@ -14,6 +14,13 @@ const approverController = require('../controllers/approverController')
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
+/**
+ * 承認ルート一覧画面のルーター
+ * @param req HTTPリクエストオブジェクト
+ * @param res HTTPレスポンスオブジェクト
+ * @param next ネクスト
+ * @returns エラー、または各画面表示
+ */
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
   // 認証情報取得処理
