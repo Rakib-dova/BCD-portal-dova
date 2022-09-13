@@ -71,8 +71,7 @@ class RegistPdfInvoicePage {
     let dates = date.split('/');
     await elm.type(dates[0]);
     await elm.press('Tab');
-    await elm.type(dates[1]);
-    await elm.type(dates[2]);
+    await elm.type(dates[1] + dates[2]);
   }
 
   // 請求日を入力する

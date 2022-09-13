@@ -3,7 +3,7 @@ const comment = require('../utils/chai-with-reporting').comment;
 
 // トレードシフト トップページ
 class TradeShiftTopPage {
-  title = 'トレードシフト';
+  title = 'トレードシフトトップ';
 
   constructor(browser, page) {
     this.browser = browser;
@@ -21,7 +21,7 @@ class TradeShiftTopPage {
     await this.actionUtils.waitForLoading('"文書"');
   }
 
-  // デジタルトレードアプリをクリックする
+  // アプリをクリックする
   async clickBcdApp(appName) {
     this.addComment(`「${appName}」アイコンをクリックする`);
     if(await this.actionUtils.isExist(this.page, `//*[contains(@data-tooltip,"${appName}")]`)) {
@@ -32,6 +32,14 @@ class TradeShiftTopPage {
       await this.actionUtils.waitForLoading(`//span[contains(text(), "${appName}")]`);
       await this.actionUtils.click(this.page, `//span[contains(text(), "${appName}")]`);
     }
+  }
+
+  // ユーザーの姓・名を変更する
+  async editUser() {
+    this.addComment('ユーザー設定を行う');
+    await this.actionUtils.click(this.page, '//div[contains(@class, "userimage-icon")]');
+    await this.page.waitForTimeout(500);
+    await this.actionUtils.click(this.page, '//span[contains(text(), "ユーザー設定")]');
   }
 
   // ログアウトする

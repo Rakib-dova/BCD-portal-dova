@@ -116,7 +116,7 @@ class UploadFormatTopPage {
 
   // 削除ダイアログの「削除」ボタンが存在するか
   async isDialogDeleteBtnDisplayed() {
-    return await this.actionUtils.isDisplayed(this.frame, '#modalDelBtn');
+    return await this.actionUtils.isDisplayed(this.frame, '//div[contains(@class, "is-active")]//a[@id="modalDelBtn"]');
   }
 }
 exports.UploadFormatTopPage = UploadFormatTopPage;

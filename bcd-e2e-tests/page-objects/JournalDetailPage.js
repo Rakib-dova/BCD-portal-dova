@@ -45,6 +45,11 @@ class JournalDetailPage {
     return await this.actionUtils.getText(this.frame, '//p[contains(text(), "差出人")]/../div/div/p');
   }
 
+  // 差出人のメールアドレスを取得する
+  async getSenderMail() {
+    return await this.actionUtils.getText(this.frame, '//div[@id="invoiceSender"]/div[7]/div');
+  }
+
   // 宛先を取得する
   async getReceiver() {
     return await this.actionUtils.getText(this.frame, '//p[contains(text(), "宛先")]/../div/div/p');

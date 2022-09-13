@@ -83,6 +83,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
 
   /**
    * STEP6_No.126,127,143
+   * STEP8_機能改修確認_No.50,62
    */
   it("支払依頼ページ_依頼", async function () {
     // テストの初期化を実施
@@ -106,7 +107,10 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
     await paymentRequestListPage.waitForLoading();
 
     // ステータスが「差し戻し」となっていること
-    expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('差し戻し', 'ステータスが「差し戻し」となっていること');
+    let status = '差し戻し';
+    await paymentRequestListPage.checkSearchStatus([status]);
+    await paymentRequestListPage.clickSearch();
+    expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal(status, 'ステータスが「差し戻し」となっていること');
 
     // 仕訳情報設定ページへ遷移する
     await comment('「仕訳情報設定」をクリックする');
@@ -138,7 +142,10 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
     authorizerNo = 0;
 
     // 再度申請ができること
-    expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('支払依頼中', 'ステータスが「承認依頼中」となっていること');
+    status = '支払依頼中';
+    await paymentRequestListPage.checkSearchStatus([status]);
+    await paymentRequestListPage.clickSearch();
+    expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal(status, 'ステータスが「承認依頼中」となっていること');
 
     // 承認待ちタブを開く
     await comment('「承認待ち」タブを開く');
@@ -189,14 +196,17 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
     expect(await paymentRequestListPage.getPopupMessage()).to.contains('承認を完了しました。', '「承認を完了しました。」のメッセージが表示されていること');
     authorizerNo = no + 1;
 
-    // 請求書一覧画面にて承認ステータスに変更されていること
+    // 請求書一覧画面にて承認ステータスが変更されていること
     await paymentRequestListPage.waitForLoading();
-    expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal(status, '請求書一覧画面にて承認ステータスに変更されていること');
+    await paymentRequestListPage.checkSearchStatus([status]);
+    await paymentRequestListPage.clickSearch();
+    expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal(status, '請求書一覧画面にて承認ステータスが変更されていること');
     await page.waitForTimeout(1000);
   }
 
   /**
    * STEP6_No.94,95,96
+   * STEP8_機能改修確認_No.51
    */
   it("支払依頼ページ_承認（1次承認）", async function () {
     await approve(0, '一次承認済み');
@@ -204,6 +214,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
 
   /**
    * STEP6_No.226
+   * STEP8_機能改修確認_No.52
    */
   it("支払依頼ページ_承認（2次承認）", async function () {
     await approve(1, '二次承認済み');
@@ -211,6 +222,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
 
   /**
    * STEP6_No.228
+   * STEP8_機能改修確認_No.53
    */
   it("支払依頼ページ_承認（3次承認）", async function () {
     await approve(2, '三次承認済み');
@@ -218,6 +230,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
 
   /**
    * STEP6_No.230
+   * STEP8_機能改修確認_No.54
    */
   it("支払依頼ページ_承認（4次承認）", async function () {
     await approve(3, '四次承認済み');
@@ -225,6 +238,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
 
   /**
    * STEP6_No.232
+   * STEP8_機能改修確認_No.55
    */
   it("支払依頼ページ_承認（5次承認）", async function () {
     await approve(4, '五次承認済み');
@@ -232,6 +246,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
 
   /**
    * STEP6_No.234
+   * STEP8_機能改修確認_No.56
    */
   it("支払依頼ページ_承認（6次承認）", async function () {
     await approve(5, '六次承認済み');
@@ -239,6 +254,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
 
   /**
    * STEP6_No.236
+   * STEP8_機能改修確認_No.57
    */
   it("支払依頼ページ_承認（7次承認）", async function () {
     await approve(6, '七次承認済み');
@@ -246,6 +262,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
 
   /**
    * STEP6_No.238
+   * STEP8_機能改修確認_No.58
    */
   it("支払依頼ページ_承認（8次承認）", async function () {
     await approve(7, '八次承認済み');
@@ -253,6 +270,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
 
   /**
    * STEP6_No.240
+   * STEP8_機能改修確認_No.59
    */
   it("支払依頼ページ_承認（9次承認）", async function () {
     await approve(8, '九次承認済み');
@@ -260,6 +278,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
 
   /**
    * STEP6_No.242
+   * STEP8_機能改修確認_No.60
    */
   it("支払依頼ページ_承認（10次承認）", async function () {
     await approve(9, '十次承認済み');

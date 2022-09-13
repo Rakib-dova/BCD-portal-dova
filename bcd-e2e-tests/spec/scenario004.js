@@ -270,7 +270,7 @@ describe('リグレッションテスト', function () {
 
       // 削除ダイアログの「キャンセル」ボタンをクリックする
       await uploadFormatTopPage.clickDialogCancelBtn();
-      expect(await uploadFormatTopPage.isDialogDeleteBtnDisplayed()).to.equal(true, '削除確認ダイアログが閉じられること');
+      expect(await uploadFormatTopPage.isDialogDeleteBtnDisplayed()).to.equal(false, '削除確認ダイアログが閉じられること');
 
       // 「削除」ボタンをクリックする
       await uploadFormatTopPage.clickDeleteBtn(itemName);
