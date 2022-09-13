@@ -1,3 +1,9 @@
+/*
+ページ概要：補助科目登録
+ページ遷移：Home画面→仕訳情報管理→補助科目設定→新規登録する
+*/
+
+// selector「$」宣言
 // document.getElementById、document.getElementsByClassName省略
 const $ = function (tagObjName) {
   const classNamePattern = '\\.+[a-zA-Z0-9]'
@@ -296,6 +302,7 @@ function checkbtnCheck() {
   }
 }
 
+// 選択した勘定科目の削除
 $('#deleteSearchAccountCode').addEventListener('click', function () {
   deleteDisplayAccountCode()
 })

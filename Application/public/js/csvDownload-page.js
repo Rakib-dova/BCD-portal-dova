@@ -1,3 +1,8 @@
+/*
+ページ概要：請求情報ダウンロード
+ページ遷移：Home画面→請求情報ダウンロード
+*/
+
 const modal = document.getElementById('download-progress-modal')
 
 window.onload = function () {
@@ -30,6 +35,7 @@ window.onload = function () {
   })
 }
 
+// ダウンロード条件の入力値チェック
 addEvent(document, 'change', function (e, target) {
   instantValidation(target)
 })

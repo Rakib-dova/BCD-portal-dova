@@ -1,3 +1,9 @@
+/*
+ページ概要：承認ルート一覧
+ページ遷移：Home画面→仕訳情報管理→承認ルート一覧
+*/
+
+// selector「$」宣言
 // document.getElementById、document.getElementsByClassName省略
 const $ = function (tagObjName) {
   const classNamePattern = '\\.+[a-zA-Z0-9]'
@@ -32,6 +38,7 @@ if (ua.indexOf('MSIE ') === -1 && ua.indexOf('Trident') === -1) {
   if (elm) elm.parentNode.removeChild(elm)
 }
 
+// 承認ルート一覧表示
 window.onload = () => {
   document.querySelectorAll('.tabs').forEach((tab) => {
     tab.querySelectorAll('li').forEach((li) => {
