@@ -1,4 +1,6 @@
 'use strict'
+
+// Addressesテーブル作成・削除
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable('Addresses', {

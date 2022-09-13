@@ -8,12 +8,14 @@ const { exit } = require('process')
 const bconCsvTaxDefault = require('./bconCsvTax')
 const bconCsvUnitDefault = require('./bconCsvUnitcode')
 
+// tradeshiftにアップロードするファイル内容を整理するクラス
 class Invoice {
   #DocumentId = null
   constructor() {
     this.#DocumentId = uuidv4()
   }
 
+  // 請求書UUID取得
   getDocumentId() {
     return this.#DocumentId
   }
@@ -39,26 +41,31 @@ class Invoice {
     PaymentMeans: [],
     InvoiceLine: []
   }
+  // 請求書差出人メールアドレス設定
   setMailaddress(_mailaddress) {
     this.#AccountingCustomerParty.Party.Contact.ID.value = _mailaddress
   }
-
+  // 請求書番号設定
   setInvoiceNumber(_invoiceNumber) {
     this.#Document.ID.value = _invoiceNumber
   }
+  // 請求書番号取得
   getInvoiceNumber() {
     return this.#Document.ID
   }
+  // 請求書情報取得
   getDocument() {
     return this.#Document
   }
+  // 請求書明細設定
   appendDocumentInvoice(_invoiceLine) {
     this.#Document.InvoiceLine.push(_invoiceLine)
   }
-
+  // 請求書発行日設定
   setIssueDate(_issuDate) {
     this.#Document.IssueDate.value = _issuDate
   }
+  // 請求書発行日取得
   getIssueDate() {
     return this.#Document.IssueDate.value
   }
@@ -84,11 +91,12 @@ class Invoice {
       }
     }
   }
-
+  // CustomerTennant情報設定
   setCustomerTennant(_tennantId) {
     this.#AccountingCustomerParty.Party.PartyIdentification[0].ID.value = _tennantId
     this.#Document.AccountingCustomerParty = this.#AccountingCustomerParty
   }
+  // CustomerTennant情報取得
   getCustomerTennat() {
     return this.#AccountingCustomerParty.Party.PartyName[0].Name.value
   }
@@ -124,6 +132,7 @@ class Invoice {
       }
     ]
   }
+  // 請求書明細情報設定
   setInvoiceLine(_sellersItemNum, _itemName, _quantityValue, _quantityUnitCode, _priceValue, _taxRate, _description) {
     this.#InvoiceLine.Item.SellersItemIdentification.ID.value = _sellersItemNum
     this.#InvoiceLine.Item.Name.value = _itemName
@@ -149,6 +158,7 @@ class Invoice {
       Name: { value: null }
     }
   }
+  // 請求書支払い情報設定
   setPaymentMeans(_paymentDate, _financialInstitution, _financialName, _accountType, _accountId, _accountName) {
     if (_paymentDate !== '') {
       this.#PaymentMeans.PaymentDueDate.value = _paymentDate
@@ -185,6 +195,7 @@ class Invoice {
     },
     ActualDeliveryDate: { value: null }
   }
+  // 納品日設定
   setDelivery(_deliveryDate) {
     if (_deliveryDate !== '') {
       this.#Delivery.ActualDeliveryDate.value = _deliveryDate
@@ -198,12 +209,14 @@ class Invoice {
     ID: { value: null },
     DocumentTypeCode: { value: 'File ID', listID: 'urn:tradeshift.com:api:1.0:documenttypecode' }
   }
+  // AdditionalDocumentReference設定
   setAdditionalDocumentReference(_documentDescription) {
     this.#AdditionalDocumentReference.ID.value = _documentDescription
     this.#Document.AdditionalDocumentReference.push(JSON.parse(JSON.stringify(this.#AdditionalDocumentReference)))
   }
 
   #Note = { value: null }
+  // その他特記事項設定
   setNote(_value) {
     this.#Note.value = _value
     this.#Document.Note.push(JSON.parse(JSON.stringify(this.#Note)))
@@ -306,6 +319,7 @@ class bconCsv {
     }
   }
 
+  // アップロードファイル取得
   getCSVFile() {
     return this.#csvFile
   }
@@ -327,6 +341,7 @@ class bconCsv {
     this.convertTradeshiftInvoice(uploadFormatDetail, uploadFormatIdentifier)
   }
 
+  // アップロードするデータをアップロードできる形に変更及びバリデーションチェック
   convertTradeshiftInvoice(uploadFormatDetail, uploadFormatIdentifier) {
     // CSVカーラム
     const resultConvert = {
@@ -1002,11 +1017,11 @@ class bconCsv {
       })
     })
   }
-
+  // アップロードする明細情報取得（選択）
   getInvoice(idx) {
     return this.#invoiceDocumentList[idx]
   }
-
+  // アップロードする明細情報取得（全体）
   getInvoiceList() {
     return this.#invoiceDocumentList
   }

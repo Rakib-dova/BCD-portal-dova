@@ -1,5 +1,6 @@
 'use strict'
 
+// AddressesテーブルIdex追加・削除
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.addIndex('Addresses', ['postalCode'], {

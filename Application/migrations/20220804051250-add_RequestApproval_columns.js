@@ -1,5 +1,8 @@
 'use strict'
 
+// RequestApprovalテーブルisSavedカラム削除
+// RequestApprovalテーブルversionカラム追加
+// RequestApprovalテーブルrejectedFlagカラム追加
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.removeColumn('RequestApproval', 'isSaved')

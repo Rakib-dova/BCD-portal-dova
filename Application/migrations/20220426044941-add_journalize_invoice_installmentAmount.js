@@ -1,5 +1,6 @@
 'use strict'
 
+// Journalize_invoiceテーブルinstallmentAmountカラムデータタイプ変更
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.changeColumn('Journalize_invoice', 'installmentAmount', {

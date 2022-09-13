@@ -8,6 +8,7 @@ const tableNameRequestApproval = 'RequestApproval'
 const tableNameApproval = 'Approval'
 const columnName = 'approveRouteId'
 
+// approveRouteIdのforeignkey解除
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const sqlGetFKNameRequestApproval = await queryInterface.sequelize.query(

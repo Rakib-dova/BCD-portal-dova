@@ -1,5 +1,17 @@
 'use strict'
 
+/**
+ * Journalize_invoicesテーブルカラム追加
+ *  accountName
+ *  subAccountName
+ *  departmentName
+ *  creditAccountName
+ *  creditAccountCode
+ *  creditSubAccountName
+ *  creditSubAccountCode
+ *  creditDepartmentName
+ *  creditDepartmentCode
+ */
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     return [
