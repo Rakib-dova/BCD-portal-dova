@@ -1,3 +1,10 @@
+/*
+ページ概要：取込結果一覧
+ページ遷移：Home画面→請求書一括作成→請求書一括作成→取込結果一覧
+*/
+
+// selector「$」宣言
+// document.getElementById、document.getElementsByClassName省略
 const $ = (_selector) => {
   const selectorDelimeter = _selector.substr(0, 1)
   const selector = _selector.substr(1, _selector.length)
@@ -10,6 +17,7 @@ const $ = (_selector) => {
   }
 }
 
+// リストの各取込結果のステータス押下時
 Array.prototype.forEach.call($('.btnDetail'), function (ele) {
   ele.onclick = function () {
     const clickBtn = this

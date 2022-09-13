@@ -1,5 +1,12 @@
+/*
+ページ概要：仕訳情報設定
+ページ遷移：Home画面→仕訳情報管理→支払依頼一覧→承認待ちタブ→依頼内容確認
+*/
+
 const approveProgressModal = document.getElementById('approve-progress-modal')
 const rejectProgressModal = document.getElementById('reject-progress-modal')
+
+// selector「$」宣言
 // document.getElementById、document.getElementsByClassName省略
 const $ = function (tagObjName) {
   const classNamePattern = '\\.+[a-zA-Z0-9]'
@@ -67,7 +74,10 @@ window.onload = function () {
   })
 }
 
-// 明細リスト取得
+/**
+ *  明細リスト取得
+ * @returns 請求書の全明細情報
+ */
 const getInvoiceLineList = function () {
   return Array.prototype.map.call($('.invoiceLine'), (invoiceLine) => {
     const invoiceLineNo = invoiceLine.querySelector('input[name=lineNo]')
@@ -1565,6 +1575,7 @@ const addBulkList = function () {
   })
 }
 
+// 仕訳情報一括登録の際にチェックされている明細リスト
 const getSelectedInvoiceLine = function () {
   const checkBoxLists = []
 
@@ -1596,6 +1607,7 @@ const getBulkList = function () {
   return bulkLines
 }
 
+// 承認ボタン押下時
 $('#checkApproval').addEventListener('click', function () {
   const rejectModalLine = $('#reject-approval-modal').querySelector('#journal-list-reject-modal')
   while (rejectModalLine.firstChild) {
@@ -1714,6 +1726,7 @@ function messageCheck(event) {
   })
 }
 
+// 承認・差し戻しの確認モーダル表示時の全ボタン非表示
 function removeButtonsForModal(cloneInvoice) {
   Array.prototype.forEach.call(cloneInvoice.querySelectorAll('.table-td-upbutton-padding'), (input) => {
     input.parentNode.removeChild(input)

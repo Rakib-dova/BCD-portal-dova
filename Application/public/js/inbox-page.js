@@ -1,3 +1,9 @@
+/*
+ページ概要：仕訳情報設定
+ページ遷移：Home画面→仕訳情報管理→支払依頼一覧→仕訳情報設定
+*/
+
+// selector「$」宣言
 // document.getElementById、document.getElementsByClassName省略
 const $ = function (tagObjName) {
   const classNamePattern = '\\.+[a-zA-Z0-9]'
@@ -1667,6 +1673,7 @@ const addBulkList = function () {
   })
 }
 
+// 仕訳情報一括登録でチェック確認
 const getSelectedInvoiceLine = function () {
   const checkBoxLists = []
 

@@ -1,6 +1,13 @@
+/*
+ページ概要：ユーザー一括登録
+ページ遷移：Home画面→設定→ユーザー一括登録
+*/
+
 let fileReader = null
 let targetFile = null
 
+// selector「$」宣言
+// document.getElementById、document.getElementsByClassName省略
 const $ = (_selector) => {
   const selectorDelimeter = _selector.substr(0, 1)
   const selector = _selector.substr(1, _selector.length)

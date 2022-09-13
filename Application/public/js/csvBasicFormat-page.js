@@ -1,3 +1,8 @@
+/*
+ページ概要：基本情報設定
+ページ遷移：Home画面→請求書一括作成→請求書アップロードフォーマット一覧→新規登録する
+*/
+
 window.onpageshow = function (event) {
   const perEntries = performance.getEntriesByType('navigation')
 
@@ -49,6 +54,7 @@ document.getElementById('checkItemNameLineOff').onclick = function () {
   sessionStorage.setItem('offcheckOn', offcheckOn)
 }
 
+// データファイルのサイズ確認
 document.getElementById('dataFile').addEventListener('change', function (e) {
   targetFile = document.getElementById('dataFile').files.item(0)
   if (targetFile !== null) {
@@ -66,6 +72,7 @@ document.getElementById('dataFile').addEventListener('change', function (e) {
   }
 })
 
+// 次へボタン押下時
 document.getElementById('submit').addEventListener('click', function (e) {
   let noHeaderDatalineFlag = false
   let noDatalineFlag = false
@@ -284,6 +291,7 @@ document.getElementById('submit').addEventListener('click', function (e) {
   }
 })
 
+// 入力値チェック
 addEvent(document, 'change', function (e, target) {
   instantValidation(target)
 })
@@ -325,6 +333,7 @@ function instantValidation(field) {
   }
 }
 
+// 明細-税,明細-単位 重複チェック
 function checkIdentifier(inputArr) {
   let chkFlag = true
   const chkArr = []
