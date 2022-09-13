@@ -8,10 +8,12 @@ const Status = db.ApproveStatus
 const Op = db.Sequelize.Op
 const approvalInboxController = require('./approvalInboxController')
 /**
- *
- * @param {string} invoiceId インヴォイスID
+ * 差し戻し処理
+ * @param {uuid} contractId 契約番号
+ * @param {uuid} invoiceId 請求書番号
  * @param {string} message 差し戻しメッセージ
- * @returns {Boolean} 差し戻し処理結果
+ * @param {uuid} userId ユーザーの識別番号
+ * @returns {Boolean} true（正常）、false（異常）、-1（更新しなかった場合）、Error（DBエラー、システムエラーなど）
  */
 const rejectApprove = async (contractId, invoiceId, message, userId) => {
   try {

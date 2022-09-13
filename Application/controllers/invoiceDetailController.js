@@ -5,17 +5,11 @@ const InvoiceDetail = db.InvoiceDetail
 const constantsDefine = require('../constants')
 
 module.exports = {
-  // パラメータ値
-  // values = {
-  //   invoicesDetailId(PK),
-  //   invoicesId(FK)=>Invoices(invoicesId),
-  //   lines,
-  //   invoiceId(請求書番号),
-  //   status,
-  //   errorData,
-  //   createdAt,
-  //   updatedAt
-  // }
+  /**
+   * 請求書明細アップロード取得
+   * @param {uuid} invoicesId 請求書アップロード番号
+   * @returns {InvoiceDetail} 請求書明細アップロード（正常）、Error（DBエラー、システムエラーなど）
+   */
   findInvoiceDetail: async (invoicesId) => {
     const functionName = 'invoiceDetailController.findInvoiceDetail'
     logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
@@ -33,6 +27,11 @@ module.exports = {
     logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
     return InvoiceResultDetail
   },
+  /**
+   * 請求書明細アップロード登録
+   * @param {object} values 請求書明細アップロード情報
+   * @returns {InvoiceDetail} 請求書明細アップロード（正常）、Error（DBエラー、システムエラーなど）
+   */
   insert: async (values) => {
     const functionName = 'invoiceDetailController.insert'
     logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)

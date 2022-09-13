@@ -8,6 +8,12 @@ const departmentCodeController = require('./departmentCodeController')
 const constants = require('../constants')
 const validate = require('../lib/validate')
 
+/**
+ * 部門データアップロード
+ * @param {string} _file ファイル情報
+ * @param {object} contract 契約情報
+ * @returns {object} 0（正常）、{ idx: 行数, code: 部門コード, name: 部門名, errorData: 詳細 }（異常）、Error（DBエラー、システムエラーなど）
+ */
 const upload = async function (_file, contract) {
   logger.info(constantsDefine.logMessage.INF000 + 'departmentCodeUploadController.upload')
 
@@ -181,7 +187,11 @@ const upload = async function (_file, contract) {
   }
 }
 
-// CSVファイル削除機能
+/**
+ * CSVファイル削除機能
+ * @param {string} deleteFilePath 削除ファイルパス
+ * @returns {boolean} true（正常）、Error（DBエラー、システムエラーなど）
+ */
 const removeFile = async (deleteFilePath) => {
   logger.info(constantsDefine.logMessage.INF000 + 'departmentCodeUploadController.remove')
   const deleteFile = path.join(deleteFilePath)

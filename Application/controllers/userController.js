@@ -13,6 +13,21 @@ const { v4: uuidv4 } = require('uuid')
 const constantsDefine = require('../constants')
 
 module.exports = {
+  /**
+   * ユーザーテーブル登録
+   * userテーブル
+   *  userId(PK) - PK
+   *  tenantId(FK)=>Tenants(tenantId) - テナントID,
+   *  appVersion - アプリバージョン,
+   *  refreshToken - ユーザーのリフレッシュトークン,
+   *  subRefreshToken - ユーザーのサブリフレッシュトークン,
+   *  userStatus - ユーザーステータス,
+   *  lastRefreshedAt - リフレッシュトークンの最後に更新された日付,
+   *  createdAt - 作成日付,
+   *  updatedAt - 更新日付,
+   * @param {object} userId ユーザーId
+   * @returns {object} 取得したユーザーデータ
+   */
   findOne: async (userId) => {
     // データベース接続回りはtry-catch
     try {
@@ -29,6 +44,23 @@ module.exports = {
       return error
     }
   },
+  /**
+   * ユーザーテーブルのリフレッシュトークン更新
+   * userテーブル
+   *  userId(PK) - PK
+   *  tenantId(FK)=>Tenants(tenantId) - テナントID,
+   *  appVersion - アプリバージョン,
+   *  refreshToken - ユーザーのリフレッシュトークン,
+   *  subRefreshToken - ユーザーのサブリフレッシュトークン,
+   *  userStatus - ユーザーステータス,
+   *  lastRefreshedAt - リフレッシュトークンの最後に更新された日付,
+   *  createdAt - 作成日付,
+   *  updatedAt - 更新日付,
+   * @param {object} userId ユーザーId
+   * @param {object} accessToken アクセストークン
+   * @param {object} newRefreshToken 新しいリフレッシュトークン
+   * @returns {object} 更新対象のユーザーデータ
+   */
   findAndUpdate: async (userId, accessToken, newRefreshToken) => {
     // 暗号化回りはtry-catch
     let encryptedRefreshToken
@@ -75,6 +107,23 @@ module.exports = {
       return error
     }
   },
+  /**
+   * ユーザーテーブルのレコード作成
+   * userテーブル
+   *  userId(PK) - PK
+   *  tenantId(FK)=>Tenants(tenantId) - テナントID,
+   *  appVersion - アプリバージョン,
+   *  refreshToken - ユーザーのリフレッシュトークン,
+   *  subRefreshToken - ユーザーのサブリフレッシュトークン,
+   *  userStatus - ユーザーステータス,
+   *  lastRefreshedAt - リフレッシュトークンの最後に更新された日付,
+   *  createdAt - 作成日付,
+   *  updatedAt - 更新日付,
+   * @param {object} accessToken アクセストークン
+   * @param {object} refreshToken リフレッシュトークン
+   * @param {object} contractInformationnewOrder 申込ステータス
+   * @returns {object} 作成したユーザーデータ
+   */
   create: async (accessToken, refreshToken, contractInformationnewOrder) => {
     const userdata = await apiManager.accessTradeshift(accessToken, refreshToken, 'get', '/account/info/user')
     // Tradeshift APIへのアクセスエラーでは、エラーオブジェクトが返る
@@ -198,6 +247,21 @@ module.exports = {
       return error
     }
   },
+  /**
+   * ユーザーテーブルのレコード削除
+   * userテーブル
+   *  userId(PK) - PK
+   *  tenantId(FK)=>Tenants(tenantId) - テナントID,
+   *  appVersion - アプリバージョン,
+   *  refreshToken - ユーザーのリフレッシュトークン,
+   *  subRefreshToken - ユーザーのサブリフレッシュトークン,
+   *  userStatus - ユーザーステータス,
+   *  lastRefreshedAt - リフレッシュトークンの最後に更新された日付,
+   *  createdAt - 作成日付,
+   *  updatedAt - 更新日付,
+   * @param {object} userId 削除対象のユーザーId
+   * @returns {object} 1（正常）、Error（DBエラー、システムエラーなど）
+   */
   delete: async (userId) => {
     // データベース接続回りはtry-catch
     try {

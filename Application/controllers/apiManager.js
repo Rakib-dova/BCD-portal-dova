@@ -1,10 +1,22 @@
 const axios = require('axios')
 const qs = require('qs')
 const logger = require('../lib/logger')
+
+/**
+ * トレードシフトAPI発行
+ * @param {string} accessToken アクセストークン
+ * @param {string} refreshToken リフレッシュトークン
+ * @param {string} method get/その他
+ * @param {string} query クエリ
+ * @param {object} body ボディ
+ * @param {object} config コンフィグ
+ * @returns {object} APIのレスポンスデータ（正常）、Error（DBエラー、システムエラーなど）
+ */
 exports.accessTradeshift = async (accessToken, refreshToken, method, query, body = {}, config = {}) => {
-  // アクセスは2回試す
-  // 1回目は受け取ったアクセストークンで試行
-  // 2回目は1回目でアクセストークンの期限が切れていた場合、リフレッシュして再試行
+  /** アクセスは2回試す
+   * 1回目は受け取ったアクセストークンで試行
+   * 2回目は1回目でアクセストークンの期限が切れていた場合、リフレッシュして再試行
+   * */
   let retryCount = 0
   if (config.headers === undefined) {
     config = {
@@ -35,7 +47,6 @@ exports.accessTradeshift = async (accessToken, refreshToken, method, query, body
         // リフレッシュを試行するフロー
         const appToken = Buffer.from(`${process.env.TS_CLIENT_ID}:${process.env.TS_CLIENT_SECRET}`).toString('base64')
 
-        // console.log('Tradeshift API Access: try token refresh...')
         try {
           const refreshed = await axios.post(
             `https://${process.env.TS_API_HOST}/tradeshift/auth/token`,

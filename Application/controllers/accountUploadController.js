@@ -8,6 +8,12 @@ const accountCodeController = require('./accountCodeController')
 const constants = require('../constants')
 const validate = require('../lib/validate')
 
+/**
+ * 勘定科目アップロード
+ * @param {string} _file ファイル情報
+ * @param {object} contract 契約情報
+ * @returns {object} 0（正常）、{ idx: 行数, code: 勘定科目コード, name: 勘定科目名, errorData: 詳細 }（異常）、Error（DBエラー、システムエラーなど）
+ */
 const upload = async function (_file, contract) {
   logger.info(constantsDefine.logMessage.INF000 + 'accountUploadController.upload')
 
@@ -180,7 +186,11 @@ const upload = async function (_file, contract) {
   }
 }
 
-// CSVファイル削除機能
+/**
+ * CSVファイル削除機能
+ * @param {string} deleteFilePath 削除ファイルパス
+ * @returns {boolean} true（正常）、Error（DBエラー、システムエラーなど）
+ */
 const removeFile = async (deleteFilePath) => {
   logger.info(constantsDefine.logMessage.INF000 + 'accountUploadController.remove')
   const deleteFile = path.join(deleteFilePath)

@@ -6,13 +6,19 @@ const { v4: uuidV4 } = require('uuid')
 const Op = db.Sequelize.Op
 
 module.exports = {
-  // DepartmentCodeテーブル
-  //   departmentCodeId(PK) - PK
-  //   contractId(FK)=>Contracts(contractId) - 契約ID,
-  //   departmentCode - 部門コード,
-  //   departmentCodeName - 部門名,
-  //   createdAt - 作成日付,
-  //   updatedAt - 更新日付,
+  /**
+   * 部門コードテーブル登録
+   * DepartmentCodeテーブル
+   *  departmentCodeId(PK) - PK
+   *  contractId(FK)=>Contracts(contractId) - 契約ID,
+   *  departmentCode - 部門コード,
+   *  departmentCodeName - 部門名,
+   *  createdAt - 作成日付,
+   *  updatedAt - 更新日付,
+   * @param {object} contract 契約情報
+   * @param {object} values 部門情報
+   * @returns {boolean} true（正常）、false（異常）、Error（DBエラー、システムエラーなど）
+   */
   insert: async (contract, values) => {
     const functionName = 'departmentCodeController.insert'
     // 関数開始表示
@@ -63,15 +69,19 @@ module.exports = {
       return error
     }
   },
-  // 取得したデータを画面に表示するデータに加工
-  // 加工物
-  // {
-  //    no：                  部門データの順番
-  //    departmentCodeId：    部門データのユニークID
-  //    departmentCode：      部門コード
-  //    departmentCodeName：  部門名
-  //    updatedAt：           部門データの登録時間と更新時間
-  // }
+  /**
+   * 取得したデータを画面に表示するデータに加工
+   * 加工物
+   * {
+   *    no：                  部門データの順番
+   *    departmentCodeId：    部門データのユニークID
+   *    departmentCode：      部門コード
+   *    departmentCodeName：  部門名
+   *    updatedAt：           部門データの登録時間と更新時間
+   * }
+   * @param {uuid} contractId 契約者の識別番号
+   * @returns {object} 部門情報（正常）、Error（DBエラー、システムエラーなど）
+   */
   getDepartmentCodeList: async (contractId) => {
     try {
       const timestamp = require('../lib/utils').timestampForList
@@ -99,6 +109,12 @@ module.exports = {
       return error
     }
   },
+  /**
+   * 部門データ取得
+   * @param {uuid} contractId 契約者の識別番号
+   * @param {string} departmentCodeId 部門データのユニークID
+   * @returns {object} { departmentCode: 部門コード, departmentCodeName: 部門名 }（正常）、Error（DBエラー、システムエラーなど）
+   */
   getDepartmentCode: async (contractId, departmentCodeId) => {
     try {
       // 契約情報と部門データキーでDBのデータを検索する。
@@ -115,12 +131,14 @@ module.exports = {
       return error
     }
   },
-  // 部門データの変更
-  // contractId:         契約番号
-  // departmentCodeId:   部門データキー
-  // departmentCode：    部門コード
-  // departmentCodeName: 部門名
-  // 戻り値：0（正常変更）、1（変更なし）、-1（重複部門データの場合）、Error（DBエラー、システムエラーなど）、-2（部門データ検索失敗）
+  /**
+   * 部門データの変更
+   * @param {uuid} contractId  契約者の識別番号
+   * @param {string} departmentCodeId 部門データキー
+   * @param {string} departmentCode 部門コード
+   * @param {string} departmentCodeName 部門名
+   * @returns {int} 0（正常変更）、1（変更なし）、-1（重複部門データの場合）、Error（DBエラー、システムエラーなど）、-2（部門データ検索失敗）
+   */
   updatedDepartmentCode: async function (contractId, departmentCodeId, departmentCode, departmentCodeName) {
     let duplicatedFlag = false
     try {
@@ -179,8 +197,14 @@ module.exports = {
       return error
     }
   },
-  // 部門データ検索
-  // 使用者から受けた、部門コードや部門名で部門データを検索する。
+  /**
+   * 部門データ検索
+   * 使用者から受けた、部門コードや部門名で部門データを検索する。
+   * @param {uuid} contractId  契約者の識別番号
+   * @param {string} departmentCode 部門コード
+   * @param {string} departmentCodeName 部門名
+   * @returns {object} { departmentCodeId: 部門データキー, departmentCode: 部門コード, departmentCodeName: 部門名 }（正常）、Error（DBエラー、システムエラーなど）
+   */
   searchDepartmentCode: async (contractId, departmentCode, departmentCodeName) => {
     try {
       let userCustomizeWhere
@@ -257,7 +281,11 @@ module.exports = {
       return error
     }
   },
-  // 部門データ削除
+  /**
+   * 部門データ削除
+   * @param {string} departmentCodeId  部門データキー
+   * @returns {int} 1（正常）、0（DBエラー、システムエラーなど）、-1（既に削除されていた場合）
+   */
   deleteForDepartmentCode: async (departmentCodeId) => {
     try {
       // 部門データを検索
@@ -281,6 +309,11 @@ module.exports = {
       return 0
     }
   },
+  /**
+   * 部門データ存在チェック
+   * @param {string} departmentCodeId  部門データキー
+   * @returns {int} 1（正常）、0（DBエラー、システムエラーなど）、-1（既に削除されていた場合）
+   */
   checkDataForDepartmentCode: async (departmentCodeId) => {
     try {
       // 部門データを検索

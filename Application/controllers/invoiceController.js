@@ -6,17 +6,21 @@ const constantsDefine = require('../constants')
 const { Op } = require('sequelize')
 
 module.exports = {
-  // パラメータ値
-  // values = {
-  //   invoicesId,
-  //   tenantId,
-  //   csvFileName,
-  //   successCount,
-  //   failCount,
-  //   skipCount,
-  //   createdAt,
-  //   updatedAt
-  // }
+  /**
+   * 請求書アップロード登録
+   * @param {object} values
+   * {
+   *   invoicesId,
+   *   tenantId,
+   *   csvFileName,
+   *   successCount,
+   *   failCount,
+   *   skipCount,
+   *   createdAt,
+   *   updatedAt
+   * }
+   * @returns {Invoice} 請求書アップロード（正常）、なし（異常）
+   */
   insert: async (values) => {
     const functionName = 'invoiceController.insert'
     let tenantRow
@@ -55,6 +59,11 @@ module.exports = {
     logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
     return resultToInsertInvoice
   },
+  /**
+   * 請求書アップロード取得（invoicesId）
+   * @param {uuid} invoicesId 請求書アップロード番号
+   * @returns {Invoice} 請求書アップロード
+   */
   findInvoice: async (invoicesId) => {
     const functionName = 'invoiceController.findInvoice'
     logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
@@ -71,6 +80,11 @@ module.exports = {
     logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
     return invoice
   },
+  /**
+   * 請求書アップロード取得（tenantId）
+   * @param {uuid} tenantId テナントID
+   * @returns {Invoice} 請求書アップロード（正常）、Error（DBエラー、システムエラーなど）
+   */
   findforTenant: async (tenantId) => {
     const functionName = 'invoiceController.findforTenant'
     let result
@@ -93,6 +107,15 @@ module.exports = {
     }
     return result
   },
+  /**
+   * 請求書アップロード更新
+   * @param {uuid} invoicesId 請求書アップロード番号
+   * @param {int} successCount 成功件数
+   * @param {int} failCount 失敗件数
+   * @param {int} skipCount スキップ件数
+   * @param {int} invoiceCount 請求書数
+   * @returns {Invoice} 請求書アップロード（正常）、Error（DBエラー、システムエラーなど）
+   */
   updateCount: async ({ invoicesId, successCount, failCount, skipCount, invoiceCount }) => {
     try {
       const invoice = await Invoice.update(
