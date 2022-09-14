@@ -99,6 +99,9 @@ function init() {
     renderTotals()
   }
 
+  // 割引行メッセージの非表示
+  document.getElementById('discount-msg').style.display = 'none'
+
   invoiceJson.textContent = ''
   linesJson.textContent = ''
 }
@@ -450,6 +453,8 @@ function renderInvoicecDiscount() {
       const totaldiscount = clone.querySelector('.invoice-discount-action')
       totaldiscount.addEventListener('click', () => {
         addDiscountLine(invoice)
+        // 割引行メッセージの表示
+        document.getElementById('discount-msg').style.display = ''
       })
       discountsTbody.appendChild(space)
       discountsTbody.appendChild(totaldiscount)
@@ -504,6 +509,11 @@ function renderInvoiceDiscount(clone, num, description, amount, unit) {
     const discountdelBtn = clone.querySelector('.discount-line-del-action')
     discountdelBtn.addEventListener('click', () => {
       delDiscountLine(invoice, num)
+
+      // 割引行が0件の場合割引行メッセージを非表示
+      if (invoice.discounts === 0) {
+        document.getElementById('discount-msg').style.display = 'none'
+      }
     })
   }
 }
