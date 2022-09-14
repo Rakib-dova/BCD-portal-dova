@@ -738,16 +738,6 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
       )
       expect(response.status).toHaveBeenCalledWith(400)
     })
-    test('準正常: 明細数20オーバーエラー', async () => {
-      convertCsvDataArrayToPdfInvoiceModels.mockReturnValue({ pdfInvoices: [], pdfInvoiceLines: Array(21) })
-
-      await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
-
-      expect(response.send).toHaveBeenCalledWith(
-        '{"message":"一つの請求書で作成できる明細数は20までです。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
-      )
-      expect(response.status).toHaveBeenCalledWith(400)
-    })
     test('準正常: バリデーション失敗', async () => {
       convertCsvDataArrayToPdfInvoiceModels.mockReturnValue({ pdfInvoices: [], pdfInvoiceLines: [] })
       validateSpy.mockReturnValue({})

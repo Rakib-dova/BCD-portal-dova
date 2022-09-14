@@ -167,13 +167,7 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
       })
     )
   }
-  if (pdfInvoiceLines.length > 20) {
-    return res.status(400).send(
-      JSON.stringify({
-        message: '一つの請求書で作成できる明細数は20までです。CSVファイルの内容を確認の上、再度実行をお願いします。'
-      })
-    )
-  }
+
   // バリデーション
   const { validInvoices, validLines, uploadHistory, csvRows } = await validation.validate(
     pdfInvoices,
@@ -206,6 +200,14 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
     logger.info(error)
     return res.status(500).send(JSON.stringify({ message: 'システムエラーです。（後程、接続してください）' }))
   }
+
+  // アプリ効果測定
+  const jsonLog = {
+    tenantId: req.user.tenantId,
+    action: 'csvUploadedPdfInvoice',
+    csvUploadedPdfInvoiceCount: validInvoices.length
+  }
+  logger.info(jsonLog)
 
   if (uploadHistory?.failCount > 0 || (uploadHistory?.skipCount > 0 && uploadHistory?.successCount === 0)) {
     return res.status(200).send(
@@ -255,7 +257,7 @@ const pdfInvoiceCsvUploadResult = async (req, res, next) => {
       }
       resultArr.push({
         index: index + 1,
-        date: invoice.dataValues.updatedAt,
+        date: timeStamp(invoice.dataValues.updatedAt),
         filename: invoice.dataValues.csvFileName,
         invoicesAll: invoiceAll,
         invoicesCount: invoice.dataValues.invoiceCount,

@@ -11,8 +11,6 @@ const requiredProps = [
   'sendPost',
   'sendAddr1',
   'sendAddr2',
-  'sendAddr3',
-  'sendRegistrationNo',
 
   'invoiceNo',
   'currency',
@@ -30,6 +28,7 @@ const requiredProps = [
 const optionProps = [
   'recAddr3',
   'sendAddr3',
+  'sendRegistrationNo',
 
   'bankName',
   'branchName',
@@ -360,8 +359,10 @@ const validateInvoiceInput = (input) => {
   if (!input || !(Object.prototype.toString.call(input) === '[object Object]')) return false
 
   for (let i = 0; i < requiredProps.length; i++) {
-    // eslint-disable-next-line no-prototype-builtins
-    if (!input.hasOwnProperty(requiredProps[i])) return false
+    if (input[requiredProps[i]] === undefined || input[requiredProps[i]] === '') {
+      console.log(requiredProps[i])
+      return false
+    }
   }
 
   return true
@@ -369,8 +370,7 @@ const validateInvoiceInput = (input) => {
 
 const padOptionProps = (input) => {
   for (let i = 0; i < optionProps.length; i++) {
-    // eslint-disable-next-line no-prototype-builtins
-    if (!input.hasOwnProperty(optionProps[i]) || !input[optionProps[i]]) {
+    if (input[optionProps[i]] === undefined) {
       input[optionProps[i]] = ''
     }
   }
