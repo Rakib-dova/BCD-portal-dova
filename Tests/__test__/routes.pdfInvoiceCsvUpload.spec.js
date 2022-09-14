@@ -339,7 +339,7 @@ const historyData = [
       skipCount: 3,
       invoiceCount: 6,
       createdAt: '2022-05-01T00:00:00.000Z',
-      updatedAt: '2022-05-01T00:00:00.000Z'
+      updatedAt: new Date('2022', '05', '01', '00', '00', '00')
     }
   },
   {
@@ -352,7 +352,7 @@ const historyData = [
       skipCount: 9,
       invoiceCount: 0,
       createdAt: '2022-12-11T12:59:59.000Z',
-      updatedAt: '2022-12-11T12:59:59.000Z'
+      updatedAt: new Date('2022', '12', '11', '12', '59', '58')
     }
   }
 ]
@@ -738,16 +738,6 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
       )
       expect(response.status).toHaveBeenCalledWith(400)
     })
-    test('準正常: 明細数20オーバーエラー', async () => {
-      convertCsvDataArrayToPdfInvoiceModels.mockReturnValue({ pdfInvoices: [], pdfInvoiceLines: Array(21) })
-
-      await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
-
-      expect(response.send).toHaveBeenCalledWith(
-        '{"message":"一つの請求書で作成できる明細数は20までです。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
-      )
-      expect(response.status).toHaveBeenCalledWith(400)
-    })
     test('準正常: バリデーション失敗', async () => {
       convertCsvDataArrayToPdfInvoiceModels.mockReturnValue({ pdfInvoices: [], pdfInvoiceLines: [] })
       validateSpy.mockReturnValue({})
@@ -784,7 +774,7 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
   describe('コールバック:pdfInvoiceCsvUploadResult', () => {
     test('正常:', async () => {
-      request.params.tenantId = 'dummyId'
+      request.params.invoiceId = 'dummyId'
       pdfInvoiceFindforTenantSpy.mockReturnValue(historyData) // DBからの正常なPDF請求書情報の取得を想定する
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUploadResult(request, response, next)
