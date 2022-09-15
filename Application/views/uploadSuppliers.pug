@@ -28,7 +28,7 @@ block content
                       p.td-overflow.is-family-noto-sans#filename             
 
               .mt-5.has-text-centered
-                a.button.box-large.is-outlined.is-medium.is-family-noto-sans.is-link#upload(disabled='disabled') アップロード開始
+                a.button.box-large.is-outlined.is-medium.is-family-noto-sans.is-link(disabled='disabled', id='supplier-upload-btn') アップロード開始
 
 
               if procedureContents
@@ -44,13 +44,14 @@ block content
                       p.border #{procedureContents.procedureComment3}
                       p.border #{procedureContents.procedureComment4}               
 
-    .modal.modal-fx-fadeInscale#upload-progress-modal
+    .modal.modal-fx-fadeInscale#uploadSuppliers-progress-modal
         .modal-background
         .modal-card
           header.modal-card-head
-            p.modal-card-title
+            p.modal-card-title #{uploadCommonLayoutTitle}
           section.modal-card-body
             center
+              img(src="/image/loading_progress.gif")
               p.modal-card-result#modal-card-result アップロード中
           footer.modal-card-foot
     include footer

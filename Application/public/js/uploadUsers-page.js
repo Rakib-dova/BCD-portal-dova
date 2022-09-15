@@ -1,3 +1,4 @@
+const modal = document.getElementById('uploadUsers-progress-modal')
 let fileReader = null
 let targetFile = null
 
@@ -23,17 +24,18 @@ document.getElementsByName('userNameFileUpload')[0].addEventListener('change', f
       if (fileReader.result.length > 5120000) {
         alert('ファイルサイズが5MB超えています。\nCSVファイルを確認後もう一度アップロードしてください。')
         $('#filename').innerText = ''
-        $('#upload').setAttribute('disabled', 'disabled')
+        $('#user-upload-btn').setAttribute('disabled', 'disabled')
       } else {
         $('#filename').innerText = targetFile.name
-        $('#upload').removeAttribute('disabled')
+        $('#user-upload-btn').removeAttribute('disabled')
       }
     }
   }
 })
 
 // アップロード開始ボタンクリックイベント
-$('#upload').addEventListener('click', function (e) {
+$('#user-upload-btn').addEventListener('click', function (e) {
+  modal.classList.add('is-active')
   // データをDBに保存
   $('#usersUpload').submit()
 })
