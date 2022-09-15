@@ -236,14 +236,14 @@ block content
                                   .column          
                                     .field.is-horizontal
                                       .field-label.is-normal
-                                        label.bulmalabel 担当者アドレス
+                                        label.bulmalabel 担当者アドレス（完全一致）
                                       .field-body
                                         .field.has-addons
                                           p.control.is-expanded
                                             if keyword
-                                              input.input#managerAddress(type='text' name='managerAddress' maxlength=128 pattern=inputPattarnManagerAddress placeholder='例：bcd@gma.com　※省略不可' value=keyword.contactEmail)
+                                              input.input#managerAddress(type='text' name='managerAddress' maxlength=128 pattern=inputPattarnManagerAddress placeholder='例：bcd@gma.com' value=keyword.contactEmail)
                                             else
-                                              input.input#managerAddress(type='text' name='managerAddress' maxlength=128 pattern=inputPattarnManagerAddress placeholder='例：bcd@gma.com　※省略不可')
+                                              input.input#managerAddress(type='text' name='managerAddress' maxlength=128 pattern=inputPattarnManagerAddress placeholder='例：bcd@gma.com')
                                   .column
                                     .field.is-horizontal
                                       .field-label.is-normal
@@ -501,11 +501,11 @@ block content
                                   .column          
                                     .field.is-horizontal
                                       .field-label.is-normal
-                                        label.bulmalabel 担当者アドレス
+                                        label.bulmalabel 担当者アドレス（完全一致）
                                       .field-body
                                         .field.has-addons
                                           p.control.is-expanded
-                                            input.input#managerAddress(type='text' name='managerAddress' maxlength=128 placeholder='例：bcd@gma.com　※省略不可')
+                                            input.input#managerAddress(type='text' name='managerAddress' maxlength=128 placeholder='例：bcd@gma.com')
                                   .column
                                     .field.is-horizontal
                                       .field-label.is-normal

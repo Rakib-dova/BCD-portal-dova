@@ -185,7 +185,7 @@ class TradeshiftDTO {
 
     if (contractEmail.length > 0 && unKnownManager.length > 0) uri = `${uri}&useAndOperatorForTags=true`
 
-    if (contractEmail.length > 0) uri = `${uri}&tag=${contractEmail}`
+    if (contractEmail.length > 0) uri = `${uri}&tag=${encodeURIComponent(contractEmail)}`
 
     if (unKnownManager.length > 0) uri = `${uri}&tag=${encodeURIComponent(unKnownManager)}`
 

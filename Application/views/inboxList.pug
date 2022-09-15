@@ -250,7 +250,7 @@ block content
                         if maxPageNo < numPages
                           a.pagination-next(href= `/inboxList/${maxPageNo}`) >>
                         else
-                          a.a-next-none <<
+                          a.a-next-none >>
 
                         ul.pagination-list
                           while page < (maxPageNo < numPages ? maxPageNo : numPages + 1)
