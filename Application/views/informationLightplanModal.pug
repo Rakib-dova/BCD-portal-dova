@@ -69,11 +69,10 @@
                 | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">その他貴社の業務に沿うようにカスタマイズした機能をご提供</span>                  
       p.px-4.my-5 ※フリープランとスタンダードプランは、下記の導入支援サービスにお申し込み頂くことでセットアップのサポートをいたします。          
       .mb-4.btnWrap.is-block.text-center
-        a.button.mr-1.is-success.show-modal(href='https://www.ntt.com/business/services/application/crm-dm/bconnection.html' target='_blank') オプションサービス詳細   
+        a.button.mr-1.is-success.show-modal(href='https://www.ntt.com/business/services/application/crm-dm/bconnection.html#plan' target='_blank') オプションサービス詳細   
         if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
           if (contractPlan.isLightPlan === true || contractPlan.isLightPlanForEntry === true)
             a.button.ml-1.is-can.show-modal(data-target='' disabled) お申込みフォーム
-            //- a.button.ml-1.is-can.show-modal(data-target='' disabled) お申込み済み
           else
             a.button.ml-1.is-success.show-modal(href='/paidServiceRegister/030') お申込みフォーム
         else
@@ -93,11 +92,10 @@
           | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">スタンダードプランをご利用の方　15万円～</span>  
       img(src='../image/informationLightplanModal.svg' alt='フロー図').flowImg
       .mb-4.btnWrap.is-block.text-center
-        a.button.mr-1.is-success.show-modal(href='https://www.ntt.com/business/services/application/crm-dm/bconnection.html' target='_blank') オプションサービス詳細   
+        a.button.mr-1.is-success.show-modal(href='https://www.ntt.com/business/services/application/crm-dm/bconnection/support_program.html' target='_blank') オプションサービス詳細   
         if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
           if (contractPlan.isIntroductionSupportPlanForEntry === true)
             a.button.ml-1.is-can.show-modal(data-target='' disabled) お申込みフォーム
-            //- a.button.ml-1.is-can.show-modal(data-target='' disabled) お申込み済み
           else
             a.button.ml-1.is-success.show-modal(href='/paidServiceRegister/020') お申込みフォーム
         else
