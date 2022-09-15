@@ -8,6 +8,9 @@ const applyOrderController = require('../../Application/controllers/applyOrderCo
 const contractController = require('../../Application/controllers/contractController')
 const constants = require('../../Application/constants').statusConstants
 const OrderData = require('../../Application/routes/helpers/orderData')
+const TradeshiftDTO = require('../../Application/DTO/TradeshiftDTO')
+const apiManager = require('../../Application/controllers/apiManager.js')
+const logger = require('../../Application/lib/logger')
 
 // 契約ステータス
 const contractStatuses = constants.contractStatuses
@@ -67,7 +70,52 @@ const contractData = {
 
 const dbError = new Error('DB error')
 
-let contractBulkCreateSpy, contractUpdateSpy, orderBulkCreateSpy, orderCreateSpy, findContractSpy
+// ユーザー情報
+const user = {
+  tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+  userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+  accessToken: 'dummyAccessToken',
+  refreshToken: 'dummyRefreshToken'
+}
+
+// ドキュメントリスト
+const getDocumentsResult = {
+  itemsPerPage: 2,
+  itemCount: 4,
+  indexing: false,
+  numPages: 2,
+  pageId: 0,
+  Document: [
+    {
+      DocumentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+      TenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+    },
+    {
+      DocumentId: '0aa6c428-b1d0-5cef-8044-3fe78acb226f',
+      TenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+    },
+    {
+      DocumentId: '5792b9b9-fe31-5b1d-a58f-9798089359fd',
+      TenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+    },
+    {
+      DocumentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537',
+      TenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+    }
+  ]
+}
+
+const apiError = new Error('API ERROR')
+const api404Error = new Error('API 404ERROR')
+let getDocumentErrorCount = 0
+let contractBulkCreateSpy,
+  contractUpdateSpy,
+  orderBulkCreateSpy,
+  orderCreateSpy,
+  findContractSpy,
+  tradeshiftDTOGetDocuments,
+  tradeshiftDTOCreateTags,
+  errorSpy
 
 describe('applyOrderControllerのテスト', () => {
   beforeEach(() => {
@@ -76,6 +124,52 @@ describe('applyOrderControllerのテスト', () => {
     orderBulkCreateSpy = jest.spyOn(Order, 'bulkCreate')
     orderCreateSpy = jest.spyOn(Order, 'create')
     findContractSpy = jest.spyOn(contractController, 'findContract')
+    tradeshiftDTOGetDocuments = jest.spyOn(TradeshiftDTO.prototype, 'getDocuments')
+    tradeshiftDTOCreateTags = jest.spyOn(TradeshiftDTO.prototype, 'createTags')
+    errorSpy = jest.spyOn(logger, 'error')
+    apiManager.accessTradeshift = jest.fn((accToken, refreshToken, method, query, body = {}, config = {}) => {
+      if (query.match(/documents/i)) {
+        if (query.match(/Error/i)) {
+          getDocumentErrorCount += 1
+          if (getDocumentErrorCount === 2) {
+            // 1回失敗後、成功した場合
+            const resultGetDocument = require('../mockInvoice/invoice2')
+            return resultGetDocument
+          } else if (getDocumentErrorCount === 4) {
+            // 2回失敗後、成功した場合
+            const resultGetDocument = require('../mockInvoice/invoice2')
+            return resultGetDocument
+          } else {
+            return apiError
+          }
+        } else {
+          const documentId = query.replace('/documents/', '')
+          if (documentId === '0aa6c428-b1d0-5cef-8044-3fe78acb226f') {
+            // 正しくない担当者メールアドレス
+            const resultGetDocument = require('../mockInvoice/invoice2')
+            return resultGetDocument
+          } else if (documentId === '5792b9b9-fe31-5b1d-a58f-9798089359fd') {
+            // 担当者メールアドレスなし
+            const resultGetDocument = require('../mockInvoice/invoice3')
+            return resultGetDocument
+          } else if (documentId === '76b589ab-1fc2-5aa3-bdb4-151abadd9537') {
+            // ユーザー情報がない担当者メールアドレス
+            const resultGetDocument = require('../mockInvoice/invoice5')
+            return resultGetDocument
+          } else {
+            // 担当者メールアドレスあり
+            const resultGetDocument = require('../mockInvoice/invoice1')
+            return resultGetDocument
+          }
+        }
+      } else if (query.match(/byemail/i)) {
+        if (query.match(/noUserInfo/i)) {
+          return api404Error
+        } else {
+          return ''
+        }
+      }
+    })
 
     db.transaction = jest.fn(async (callback) => {
       const transactionObj = {}
@@ -90,6 +184,9 @@ describe('applyOrderControllerのテスト', () => {
     orderBulkCreateSpy.mockRestore()
     orderCreateSpy.mockRestore()
     findContractSpy.mockRestore()
+    tradeshiftDTOGetDocuments.mockRestore()
+    tradeshiftDTOCreateTags.mockRestore()
+    errorSpy.mockRestore()
   })
 
   describe('applyNewOrders', () => {
@@ -121,7 +218,15 @@ describe('applyOrderControllerのテスト', () => {
       const result = await applyOrderController.applyNewOrders(tenantId, [newStandardOrderData])
 
       // 期待結果
-      expect(result).toBeUndefined()
+      expect(result.length).toBe(1)
+      expect(result[0].contractId).toBeDefined()
+      expect(result[0].tenantId).toEqual(tenantId)
+      expect(result[0].serviceType).toEqual(serviceTypes.lightPlan)
+      expect(result[0].numberN).toEqual('')
+      expect(result[0].contractStatus).toEqual(contractStatuses.newContractOrder)
+      expect(result[0].deleteFlag).toBeFalsy()
+      expect(result[0].createdAt).toBeDefined()
+      expect(result[0].updatedAt).toBeDefined()
     })
 
     test('正常 2件オーダー', async () => {
@@ -171,7 +276,17 @@ describe('applyOrderControllerのテスト', () => {
       ])
 
       // 期待結果
-      expect(result).toBeUndefined()
+      expect(result.length).toBe(2)
+      for (const data of result) {
+        expect(data.contractId).toBeDefined()
+        expect(data.tenantId).toEqual(tenantId)
+        expect(data.numberN).toEqual('')
+        expect(data.deleteFlag).toBeFalsy()
+        expect(data.createdAt).toBeDefined()
+        expect(data.updatedAt).toBeDefined()
+      }
+      expect(result[0].serviceType).toEqual(serviceTypes.lightPlan)
+      expect(result[1].serviceType).toEqual(serviceTypes.introductionSupport)
     })
 
     test('準正常: DBエラー時', async () => {
@@ -237,6 +352,317 @@ describe('applyOrderControllerのテスト', () => {
 
       // 期待結果
       expect(result).toEqual(new Error('Not Founded ContractId'))
+    })
+  })
+
+  describe('tagCreate', () => {
+    test('正常', async () => {
+      // 準備
+      tradeshiftDTOGetDocuments.mockReturnValue(getDocumentsResult)
+      tradeshiftDTOCreateTags.mockReturnValue('')
+
+      // 試験実施
+      const result = await applyOrderController.tagCreate(user, new Date())
+
+      // 期待結果
+      expect(result).toBeUndefined()
+    })
+
+    test('正常系: getDocumentsAPI - 1回失敗後、Retryで成功した場合', async () => {
+      // 準備
+      const apiError = new Error('API ERROR')
+      tradeshiftDTOGetDocuments.mockReturnValueOnce(apiError).mockReturnValue(getDocumentsResult)
+      tradeshiftDTOCreateTags.mockReturnValue('')
+
+      // 試験実施
+      const result = await applyOrderController.tagCreate(user, new Date())
+
+      // 期待結果
+      expect(result).toBeUndefined()
+      expect(errorSpy).not.toHaveBeenCalledWith(
+        { tenant: user.tenantId, stack: apiError.stack, status: 0 },
+        'applyOrderController_tagCreate_getDocuments_retry3_failed'
+      )
+    })
+
+    test('正常系: getDocumentsAPI - 2回失敗後、Retryで成功した場合', async () => {
+      // 準備
+      const apiError = new Error('API ERROR')
+      tradeshiftDTOGetDocuments
+        .mockReturnValueOnce(apiError)
+        .mockReturnValueOnce(apiError)
+        .mockReturnValue(getDocumentsResult)
+      tradeshiftDTOCreateTags.mockReturnValue('')
+
+      // 試験実施
+      const result = await applyOrderController.tagCreate(user, new Date())
+
+      // 期待結果
+      expect(result).toBeUndefined()
+      expect(errorSpy).not.toHaveBeenCalledWith(
+        { tenant: user.tenantId, stack: apiError.stack, status: 0 },
+        'applyOrderController_tagCreate_getDocuments_retry3_failed'
+      )
+    })
+
+    test('異常系: getDocumentsAPI - 3回以上失敗した場合', async () => {
+      // 準備
+      const apiError = new Error('API ERROR')
+      tradeshiftDTOGetDocuments.mockReturnValue(apiError)
+
+      // 試験実施
+      const result = await applyOrderController.tagCreate(user, new Date())
+
+      // 期待結果
+      expect(result).toEqual(apiError)
+      expect(errorSpy).toHaveBeenCalledWith(
+        { tenant: user.tenantId, stack: apiError.stack, status: 0 },
+        'applyOrderController_tagCreate_getDocuments_retry3_failed'
+      )
+    })
+
+    test('正常系: getDocumentAPI - 1回失敗後、Retryで成功した場合', async () => {
+      // 準備
+      const getDocumentsResultWithError = {
+        itemsPerPage: 1,
+        itemCount: 1,
+        indexing: false,
+        numPages: 1,
+        pageId: 0,
+        Document: [
+          {
+            DocumentId: 'Error',
+            TenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+          }
+        ]
+      }
+      tradeshiftDTOGetDocuments.mockReturnValue(getDocumentsResultWithError)
+      tradeshiftDTOCreateTags.mockReturnValue('')
+
+      // 試験実施
+      const result = await applyOrderController.tagCreate(user, new Date())
+
+      // 期待結果
+      expect(result).toBeUndefined()
+      expect(errorSpy).not.toHaveBeenCalledWith(
+        {
+          tenant: user.tenantId,
+          documentid: getDocumentsResultWithError.Document[0].DocumentId,
+          stack: apiError.stack,
+          status: 0
+        },
+        'applyOrderController_tagCreate_tagging_retry3_failed'
+      )
+    })
+
+    test('正常系: getDocumentAPI - 2回失敗後、Retryで成功した場合', async () => {
+      // 準備
+      const getDocumentsResultWithError = {
+        itemsPerPage: 1,
+        itemCount: 1,
+        indexing: false,
+        numPages: 1,
+        pageId: 0,
+        Document: [
+          {
+            DocumentId: 'Error',
+            TenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+          }
+        ]
+      }
+      tradeshiftDTOGetDocuments.mockReturnValue(getDocumentsResultWithError)
+      tradeshiftDTOCreateTags.mockReturnValue('')
+
+      // 試験実施
+      const result = await applyOrderController.tagCreate(user, new Date())
+
+      // 期待結果
+      expect(result).toBeUndefined()
+      expect(errorSpy).not.toHaveBeenCalledWith(
+        {
+          tenant: user.tenantId,
+          documentid: getDocumentsResultWithError.Document[0].DocumentId,
+          stack: apiError.stack,
+          status: 0
+        },
+        'applyOrderController_tagCreate_tagging_retry3_failed'
+      )
+    })
+
+    test('準正常系: getDocumentAPI - 3回以上失敗した場合（1件成功、1件3回失敗、1件成功）', async () => {
+      // 準備
+      const getDocumentsResultWithError = {
+        itemsPerPage: 1,
+        itemCount: 3,
+        indexing: false,
+        numPages: 1,
+        pageId: 0,
+        Document: [
+          {
+            DocumentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+            TenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+          },
+          {
+            DocumentId: 'Error',
+            TenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+          },
+          {
+            DocumentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537',
+            TenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+          }
+        ]
+      }
+      tradeshiftDTOGetDocuments.mockReturnValue(getDocumentsResultWithError)
+      tradeshiftDTOCreateTags.mockReturnValue('')
+
+      // 試験実施
+      const result = await applyOrderController.tagCreate(user, new Date())
+
+      // 期待結果
+      expect(result).toBeUndefined()
+      expect(errorSpy).toHaveBeenCalledWith(
+        {
+          tenant: user.tenantId,
+          documentid: getDocumentsResultWithError.Document[1].DocumentId,
+          stack: apiError.stack,
+          status: 0
+        },
+        'applyOrderController_tagCreate_tagging_retry3_failed'
+      )
+    })
+
+    test('異常系: getDocumentAPI - 3回以上失敗した場合', async () => {
+      // 準備
+      const getDocumentsResultWithError = {
+        itemsPerPage: 1,
+        itemCount: 1,
+        indexing: false,
+        numPages: 1,
+        pageId: 0,
+        Document: [
+          {
+            DocumentId: 'Error',
+            TenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+          }
+        ]
+      }
+      tradeshiftDTOGetDocuments.mockReturnValue(getDocumentsResultWithError)
+      tradeshiftDTOCreateTags.mockReturnValue('')
+
+      // 試験実施
+      const result = await applyOrderController.tagCreate(user, new Date())
+
+      // 期待結果
+      expect(result).toBeUndefined()
+      expect(errorSpy).toHaveBeenCalledWith(
+        {
+          tenant: user.tenantId,
+          documentid: getDocumentsResultWithError.Document[0].DocumentId,
+          stack: apiError.stack,
+          status: 0
+        },
+        'applyOrderController_tagCreate_tagging_retry3_failed'
+      )
+    })
+
+    test('正常系: createTagsAPI - 1回失敗後、Retryで成功した場合', async () => {
+      // 準備
+      const apiError = new Error('API ERROR')
+      tradeshiftDTOGetDocuments.mockReturnValue(getDocumentsResult)
+      tradeshiftDTOCreateTags.mockReturnValueOnce('').mockReturnValueOnce(apiError).mockReturnValue('')
+
+      // 試験実施
+      const result = await applyOrderController.tagCreate(user, new Date())
+
+      // 期待結果
+      expect(result).toBeUndefined()
+      expect(errorSpy).not.toHaveBeenCalledWith(
+        {
+          tenant: user.tenantId,
+          documentid: getDocumentsResult.Document[0].DocumentId,
+          stack: apiError.stack,
+          status: 0
+        },
+        'applyOrderController_tagCreate_tagging_retry3_failed'
+      )
+    })
+
+    test('正常系: createTagsAPI - 2回失敗後、Retryで成功した場合', async () => {
+      // 準備
+      const apiError = new Error('API ERROR')
+      tradeshiftDTOGetDocuments.mockReturnValue(getDocumentsResult)
+      tradeshiftDTOCreateTags
+        .mockReturnValueOnce('')
+        .mockReturnValueOnce(apiError)
+        .mockReturnValueOnce('')
+        .mockReturnValueOnce(apiError)
+        .mockReturnValue('')
+
+      // 試験実施
+      const result = await applyOrderController.tagCreate(user, new Date())
+
+      // 期待結果
+      expect(result).toBeUndefined()
+      expect(errorSpy).not.toHaveBeenCalledWith(
+        {
+          tenant: user.tenantId,
+          documentid: getDocumentsResult.Document[0].DocumentId,
+          stack: apiError.stack,
+          status: 0
+        },
+        'applyOrderController_tagCreate_tagging_retry3_failed'
+      )
+    })
+
+    test('準正常系: createTagsAPI - 3回以上失敗した場合（1件3回失敗、7件成功）', async () => {
+      // 準備
+      const apiError = new Error('API ERROR')
+      tradeshiftDTOGetDocuments.mockReturnValue(getDocumentsResult)
+      tradeshiftDTOCreateTags
+        .mockReturnValueOnce('')
+        .mockReturnValueOnce(apiError)
+        .mockReturnValueOnce(apiError)
+        .mockReturnValueOnce('')
+        .mockReturnValueOnce('')
+        .mockReturnValueOnce(apiError)
+        .mockReturnValue('')
+
+      // 試験実施
+      const result = await applyOrderController.tagCreate(user, new Date())
+
+      // 期待結果
+      expect(result).toBeUndefined()
+      expect(errorSpy).toHaveBeenCalledWith(
+        {
+          tenant: user.tenantId,
+          documentid: getDocumentsResult.Document[0].DocumentId,
+          stack: apiError.stack,
+          status: 0
+        },
+        'applyOrderController_tagCreate_tagging_retry3_failed'
+      )
+    })
+
+    test('異常系: createTagsAPI - 3回以上失敗した場合', async () => {
+      // 準備
+      const apiError = new Error('API ERROR')
+      tradeshiftDTOGetDocuments.mockReturnValue(getDocumentsResult)
+      tradeshiftDTOCreateTags.mockReturnValue(apiError)
+
+      // 試験実施
+      const result = await applyOrderController.tagCreate(user, new Date())
+
+      // 期待結果
+      expect(result).toBeUndefined()
+      expect(errorSpy).toHaveBeenCalledWith(
+        {
+          tenant: user.tenantId,
+          documentid: getDocumentsResult.Document[0].DocumentId,
+          stack: apiError.stack,
+          status: 0
+        },
+        'applyOrderController_tagCreate_tagging_retry3_failed'
+      )
     })
   })
 })
