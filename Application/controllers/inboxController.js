@@ -64,6 +64,9 @@ const getInbox = async function (accessToken, refreshToken, pageId, tenantId, pr
     }
   }
 
+  // documents全件数
+  const itemCount = documents.itemCount
+
   // 文書をリスト化する
   const documentList = documents.Document.map((item, idx) => {
     const ammount = function () {
@@ -104,7 +107,9 @@ const getInbox = async function (accessToken, refreshToken, pageId, tenantId, pr
   return {
     list: updated,
     numPages: numPage,
-    currPage: currPage + 1
+    currPage: currPage + 1,
+    itemCount: itemCount,
+    currItemCount: currPage * 20 + updated.length
   }
 }
 
@@ -770,7 +775,8 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
     const status = keyword.status
     const contactEmail = keyword.contactEmail
     const unKnownManager = keyword.unKnownManager
-    let result = null
+    const pageId = keyword.pageId - 1 // 現在ページ
+    const onePagePerItemCount = 20 // １ページあたり表示する項目の数
 
     // 請求書のタグ付け有無確認
     const checkTagDocumentList = []
@@ -839,66 +845,117 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
       }
     }
 
-    // 送信会社、請求書番号、発行日、取引先担当者(アドレス)で検索
-    if (sentByCompanies.length > 0) {
-      const response = []
-      for (const company of sentByCompanies) {
+    let errorInvoice = ''
+    const apiResult = []
+    let page = 0
+    let documentNumPages = 1
+    let getInvoiceErrorFlag = false
+    if (status.length > 0) {
+      do {
         const result = await tradeshiftDTO.getDocumentSearch(
-          company,
+          sentByCompanies,
           invoiceId,
           issueDate,
           contactEmail,
-          unKnownManager
+          unKnownManager,
+          page,
+          10000
         )
-        response.push(...result)
-      }
-      result = response
+        if (result instanceof Error) {
+          getInvoiceErrorFlag = true
+          errorInvoice = result
+          break
+        }
+        documentNumPages = result.numPages
+        page++
+        apiResult.push(result)
+      } while (page < documentNumPages)
     } else {
-      result = await tradeshiftDTO.getDocumentSearch('', invoiceId, issueDate, contactEmail, unKnownManager)
+      // 送信会社、請求書番号、発行日、取引先担当者(アドレス)で検索
+      const result = await tradeshiftDTO.getDocumentSearch(
+        sentByCompanies,
+        invoiceId,
+        issueDate,
+        contactEmail,
+        unKnownManager,
+        pageId,
+        onePagePerItemCount
+      )
+      if (result instanceof Error) {
+        getInvoiceErrorFlag = true
+        errorInvoice = result
+      }
+      apiResult.push(result)
     }
 
-    if (result instanceof Error) return result
+    if (getInvoiceErrorFlag) return errorInvoice
 
-    // 請求書情報取得
-    const document = []
-    for (let i = 0; i < result.length; i++) {
-      const documentInfo = await tradeshiftDTO.getDocument(result[i].DocumentId, '')
-      document.push(documentInfo)
+    // documents全件数
+    let itemCount = apiResult[0].itemCount
+    // 全ページ数
+    let numPages = apiResult[0].numPages
+    // 現在ページ
+    let currPage = apiResult[0].pageId + 1
+
+    // documentList取得
+    let apiDocumentListResult = []
+    for (const result of apiResult) {
+      for (const document of result.Document) {
+        apiDocumentListResult.push(document)
+      }
     }
-
-    // 社内に担当者ユーザーの有無確認
-    const contactor = await getCompanyUserInfo(document, tradeshiftDTO.accessToken, tradeshiftDTO.refreshToken)
 
     // 請求書の承認依頼検索
-    for (let i = 0; i < result.length; i++) {
+    for (let i = 0; i < apiDocumentListResult.length; i++) {
       const requestApproval = await RequestApproval.findOne({
         where: {
           contractId: contractId,
-          invoiceId: result[i].DocumentId
+          invoiceId: apiDocumentListResult[i].DocumentId
         },
         order: [['create', 'DESC']]
       })
       if (requestApproval !== null) {
-        result[i].approveStatus = requestApproval.status
+        apiDocumentListResult[i].approveStatus = requestApproval.status
       }
     }
 
     // 承認ステータスで検索
     if (status.length > 0) {
       const statusSearchResult = []
-      for (let i = 0; i < result.length; i++) {
+      for (let i = 0; i < apiDocumentListResult.length; i++) {
         for (let j = 0; j < status.length; j++) {
           if (status[j] === '80') {
-            if (!result[i].approveStatus || result[i].approveStatus === status[j]) statusSearchResult.push(result[i])
+            if (!apiDocumentListResult[i].approveStatus || apiDocumentListResult[i].approveStatus === status[j]) {
+              statusSearchResult.push(apiDocumentListResult[i])
+            }
           } else {
-            if (result[i].approveStatus === status[j]) statusSearchResult.push(result[i])
+            if (apiDocumentListResult[i].approveStatus === status[j]) statusSearchResult.push(apiDocumentListResult[i])
           }
         }
       }
-      result = statusSearchResult
+      const statusList = []
+      for (let index = pageId * 20; index < statusSearchResult.length; index++) {
+        statusList.push(statusSearchResult[index])
+        if (statusList.length > 19) break
+      }
+      apiDocumentListResult = statusList
+
+      itemCount = statusSearchResult.length
+      numPages = Math.ceil(statusSearchResult.length / 20)
+      currPage = keyword.pageId
     }
 
-    const documentList = result.map((document, idx) => {
+    // 請求書情報取得
+    const document = []
+    for (let i = 0; i < apiDocumentListResult.length; i++) {
+      const documentInfo = await tradeshiftDTO.getDocument(apiDocumentListResult[i].DocumentId, '')
+      document.push(documentInfo)
+    }
+
+    // 社内に担当者ユーザーの有無確認
+    const contactor = await getCompanyUserInfo(document, tradeshiftDTO.accessToken, tradeshiftDTO.refreshToken)
+
+    const documentList = apiDocumentListResult.map((document, idx) => {
       const ammount = function () {
         if (document.ItemInfos[1] === undefined) return '-'
         return Math.floor(document.ItemInfos[1].value).toLocaleString('ja-JP')
@@ -924,7 +981,7 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
       }
 
       return {
-        no: idx + 1,
+        no: onePagePerItemCount * pageId + idx + 1,
         invoiceNo: document.ID,
         status: processStatus[`${document.UnifiedState}`] ?? '-',
         currency: document.ItemInfos[0].value ?? '-',
@@ -939,7 +996,13 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
       }
     })
 
-    return documentList
+    return {
+      documentList: documentList,
+      numPages: numPages,
+      currPage: currPage,
+      itemCount: itemCount,
+      currItemCount: (currPage - 1) * 20 + documentList.length
+    }
   } catch (error) {
     return error
   }

@@ -309,4 +309,9 @@ const document3 = {
   TenantId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
   Properties: []
 }
-module.exports = [document1, document2, document3]
+module.exports = {
+  numPages: 1,
+  itemCount: 3,
+  pageId: 0,
+  Document: [document1, document2, document3]
+}
