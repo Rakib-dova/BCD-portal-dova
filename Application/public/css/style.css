@@ -93,14 +93,12 @@ img.logo-ncom {
 }
 
 .hero-body {
-  background-image: url('../image/ts-app-digitaltrade-banner.svg');
-  width: 100%;
-  background-color: #044484;
+  background-image: url('../image/ts-app-digitaltrade-banner_02.svg');
+  width: 550px;
+  margin: auto;
+  background-color: transparent;
   background-repeat: no-repeat;
   background-position: center;
-  background-size: 50% 50%;
-  padding-bottom: 11% !important;
-  margin-bottom: 5%;
 }
 
 .hero-body-noImage {
@@ -270,7 +268,7 @@ img.logo-ncom {
 }
 
 .newsDate {
-  width: 150px;
+  width: 100px;
 }
 
 .newsTitle {
@@ -489,7 +487,7 @@ img.logo-ncom {
 }
 
 .tip-img {
-  background-image: url('../image/tip-icon.svg');
+  background-image: url('../image/info-circle.svg');
   width: 24px;
   height: 24px;
   background-repeat: no-repeat;
@@ -499,6 +497,14 @@ img.logo-ncom {
 
 .tip-title {
   margin-left: 10px;
+}
+
+.guide-img img{
+  width: 20px;
+  height: 20px;
+  position: relative;
+  top: .2rem;
+  left: .5rem;
 }
 
 .tooltip {
@@ -739,8 +745,7 @@ img.logo-ncom {
 .is-logo {
   padding-bottom: 0px !important;
   padding-top: 0px !important;
-  height: 113px;
-  background-size: 70% 70% !important;
+  height: 55px;
   margin-bottom: cal(100% - 12px);
 }
 
@@ -1060,3 +1065,38 @@ body > div.hero.is-small {
   .button[disabled]{
     opacity:1 ;
   }
+
+  /* hoverで色薄く */
+  .button-hover:hover{
+  opacity: .8;
+}
+
+/* ヘッダー用ご利用ガイドボタン */
+.userguide-btn{
+  position: absolute;
+  right: 1.5rem;
+  top: 85px;
+  background-color: #fff;
+  border-radius: 4px;
+  color: #044484;
+  padding: .6rem 1rem;
+  font-size:0.87rem;
+}
+
+.userguide-btn .panel-icon{
+  color: #044484;
+  padding-top: .35rem;
+}
+
+/* よくある質問 */
+.external-link {
+  position: relative;
+  padding-right: 1.5em;
+}
+.external-link::after {
+  content: '\f35d';
+  font-family: "Font Awesome 5 Free";
+  font-weight: 700;
+  position: absolute;
+  padding-left: 10px;
+} 

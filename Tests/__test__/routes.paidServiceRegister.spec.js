@@ -771,65 +771,28 @@ describe('paidServiceRegisterのテスト', () => {
         // 準備
         findContractsSpy.mockReturnValue([])
         findOneDept.mockReturnValue(salesChannelDept)
-        applyNewOrdersSpy.mockImplementation(async (tenantId, orderDatas) => {
-          expect(tenantId).toEqual(tenantId)
-          expect(orderDatas).toEqual([
-            {
-              contractBasicInfo: {
-                tradeshiftId: '12345678-bdac-4195-80b9-1ea64b8cb70c',
-                orderId: '',
-                orderType: '010',
-                serviceType: '030',
-                contractChangeName: '',
-                contractChangeAddress: '',
-                contractChangeContact: '',
-                appDate: '',
-                OpeningDate: '20220616',
-                contractNumber: '',
-                salesChannelCode: '000000',
-                salesChannelName: '販売チャネル名',
-                salesChannelDeptName: '部課名',
-                salesChannelEmplyeeCode: '11111111',
-                salesChannelPersonName: '担当者名',
-                salesChannelDeptType: 'Com第一営業本部',
-                salesChannelPhoneNumber: '000-0000-0000',
-                salesChannelMailAddress: 'aaa@aaa.com',
-                kaianPassword: 'Aa11111111',
-                campaignCode: '',
-                salesPersonName: ''
-              },
-              contractAccountInfo: {
-                contractAccountId: '',
-                customerType: '',
-                commonCustomerId: '11111111111',
-                contractorName: '契約者名',
-                contractorKanaName: 'カナ',
-                postalNumber: '1000004',
-                contractAddress: '東京都千代田区大手町一丁目',
-                banch1: '１番',
-                tatemono1: '建物'
-              },
-              contactList: [
-                {
-                  contactType: '',
-                  contactPersonName: '連絡先担当者名',
-                  contactPhoneNumber: '000-0000-0000',
-                  contactMail: 'aaaaaa@aaa.com',
-                  billMailingPostalNumber: '1000004',
-                  billMailingAddress: '東京都千代田区大手町一丁目',
-                  billMailingAddressBanchi1: '請求書送付先番地等',
-                  billMailingAddressBuilding1: '請求書送付先建物等',
-                  billMailingKanaName: '請求書送付先宛名',
-                  billMailingName: 'カナ',
-                  billMailingPersonName: '請求に関する連絡先',
-                  billMailingPhoneNumber: '000-0000-0000',
-                  billMailingMailAddress: 'aaa@aaa.com'
-                }
-              ],
-              prdtList: [{ prdtCode: 'BF3022000000100', idnumber: '', appType: '010' }]
-            }
-          ])
-        })
+        applyNewOrdersSpy.mockReturnValue([
+          {
+            contractId: 'fcb1d4a2-24d5-4647-9725-b471566bb618',
+            tenantId: '12345678-bdac-4195-80b9-1ea64b8cb70c',
+            serviceType: '030',
+            numberN: '',
+            contractStatus: '10',
+            deleteFlag: false,
+            createdAt: '2022-08-25T06:09:34.774Z',
+            updatedAt: '2022-08-25T06:09:34.774Z'
+          },
+          {
+            contractId: '10964378-7015-42d8-9966-b9d1379b5e0f',
+            tenantId: '12345678-bdac-4195-80b9-1ea64b8cb70c',
+            serviceType: '020',
+            numberN: '',
+            contractStatus: '10',
+            deleteFlag: false,
+            createdAt: '2022-08-25T06:09:34.774Z',
+            updatedAt: '2022-08-25T06:09:34.774Z'
+          }
+        ])
         request.session.serviceList = ['030']
         request.body = inputData
 
@@ -850,65 +813,28 @@ describe('paidServiceRegisterのテスト', () => {
         dateNowSpy.mockReturnValue(new Date('2022-07-28'))
         findContractsSpy.mockReturnValue([])
         findOneDept.mockReturnValue(salesChannelDept)
-        applyNewOrdersSpy.mockImplementation(async (tenantId, orderDatas) => {
-          expect(tenantId).toEqual(tenantId)
-          expect(orderDatas).toEqual([
-            {
-              contractBasicInfo: {
-                tradeshiftId: '12345678-bdac-4195-80b9-1ea64b8cb70c',
-                orderId: '',
-                orderType: '010',
-                serviceType: '020',
-                contractChangeName: '',
-                contractChangeAddress: '',
-                contractChangeContact: '',
-                appDate: '',
-                OpeningDate: '20220813',
-                contractNumber: '',
-                salesChannelCode: '000000',
-                salesChannelName: '販売チャネル名',
-                salesChannelDeptName: '部課名',
-                salesChannelEmplyeeCode: '11111111',
-                salesChannelPersonName: '担当者名',
-                salesChannelDeptType: 'Com第一営業本部',
-                salesChannelPhoneNumber: '000-0000-0000',
-                salesChannelMailAddress: 'aaa@aaa.com',
-                kaianPassword: 'Aa11111111',
-                campaignCode: '',
-                salesPersonName: ''
-              },
-              contractAccountInfo: {
-                contractAccountId: '',
-                customerType: '',
-                commonCustomerId: '11111111111',
-                contractorName: '契約者名',
-                contractorKanaName: 'カナ',
-                postalNumber: '1000004',
-                contractAddress: '東京都千代田区大手町一丁目',
-                banch1: '１番',
-                tatemono1: '建物'
-              },
-              contactList: [
-                {
-                  contactType: '',
-                  contactPersonName: '連絡先担当者名',
-                  contactPhoneNumber: '000-0000-0000',
-                  contactMail: 'aaaaaa@aaa.com',
-                  billMailingPostalNumber: '1000004',
-                  billMailingAddress: '東京都千代田区大手町一丁目',
-                  billMailingAddressBanchi1: '請求書送付先番地等',
-                  billMailingAddressBuilding1: '請求書送付先建物等',
-                  billMailingKanaName: '請求書送付先宛名',
-                  billMailingName: 'カナ',
-                  billMailingPersonName: '請求に関する連絡先',
-                  billMailingPhoneNumber: '000-0000-0000',
-                  billMailingMailAddress: 'aaa@aaa.com'
-                }
-              ],
-              prdtList: [{ prdtCode: 'BF4022000000100', idnumber: '', appType: '010' }]
-            }
-          ])
-        })
+        applyNewOrdersSpy.mockReturnValue([
+          {
+            contractId: 'fcb1d4a2-24d5-4647-9725-b471566bb618',
+            tenantId: '12345678-bdac-4195-80b9-1ea64b8cb70c',
+            serviceType: '030',
+            numberN: '',
+            contractStatus: '10',
+            deleteFlag: false,
+            createdAt: '2022-08-25T06:09:34.774Z',
+            updatedAt: '2022-08-25T06:09:34.774Z'
+          },
+          {
+            contractId: '10964378-7015-42d8-9966-b9d1379b5e0f',
+            tenantId: '12345678-bdac-4195-80b9-1ea64b8cb70c',
+            serviceType: '020',
+            numberN: '',
+            contractStatus: '10',
+            deleteFlag: false,
+            createdAt: '2022-08-25T06:09:34.774Z',
+            updatedAt: '2022-08-25T06:09:34.774Z'
+          }
+        ])
         request.session.serviceList = ['020']
         // openingDateなし
         request.body = {
@@ -960,119 +886,28 @@ describe('paidServiceRegisterのテスト', () => {
         // 準備
         findContractsSpy.mockReturnValue([])
         findOneDept.mockReturnValue(salesChannelDept)
-        applyNewOrdersSpy.mockImplementation(async (tenantId, orderDatas) => {
-          expect(tenantId).toEqual(tenantId)
-          expect(orderDatas).toEqual([
-            {
-              contractBasicInfo: {
-                tradeshiftId: '12345678-bdac-4195-80b9-1ea64b8cb70c',
-                orderId: '',
-                orderType: '010',
-                serviceType: '030',
-                contractChangeName: '',
-                contractChangeAddress: '',
-                contractChangeContact: '',
-                appDate: '',
-                OpeningDate: '20220616',
-                contractNumber: '',
-                salesChannelCode: '000000',
-                salesChannelName: '販売チャネル名',
-                salesChannelDeptName: '部課名',
-                salesChannelEmplyeeCode: '11111111',
-                salesChannelPersonName: '担当者名',
-                salesChannelDeptType: 'Com第一営業本部',
-                salesChannelPhoneNumber: '000-0000-0000',
-                salesChannelMailAddress: 'aaa@aaa.com',
-                kaianPassword: 'Aa11111111',
-                campaignCode: '',
-                salesPersonName: ''
-              },
-              contractAccountInfo: {
-                contractAccountId: '',
-                customerType: '',
-                commonCustomerId: '11111111111',
-                contractorName: '契約者名',
-                contractorKanaName: 'カナ',
-                postalNumber: '1000004',
-                contractAddress: '東京都千代田区大手町一丁目',
-                banch1: '１番',
-                tatemono1: '建物'
-              },
-              contactList: [
-                {
-                  contactType: '',
-                  contactPersonName: '連絡先担当者名',
-                  contactPhoneNumber: '000-0000-0000',
-                  contactMail: 'aaaaaa@aaa.com',
-                  billMailingPostalNumber: '1000004',
-                  billMailingAddress: '東京都千代田区大手町一丁目',
-                  billMailingAddressBanchi1: '請求書送付先番地等',
-                  billMailingAddressBuilding1: '請求書送付先建物等',
-                  billMailingKanaName: '請求書送付先宛名',
-                  billMailingName: 'カナ',
-                  billMailingPersonName: '請求に関する連絡先',
-                  billMailingPhoneNumber: '000-0000-0000',
-                  billMailingMailAddress: 'aaa@aaa.com'
-                }
-              ],
-              prdtList: [{ prdtCode: 'BF3022000000100', idnumber: '', appType: '010' }]
-            },
-            {
-              contractBasicInfo: {
-                tradeshiftId: '12345678-bdac-4195-80b9-1ea64b8cb70c',
-                orderId: '',
-                orderType: '010',
-                serviceType: '020',
-                contractChangeName: '',
-                contractChangeAddress: '',
-                contractChangeContact: '',
-                appDate: '',
-                OpeningDate: '20220616',
-                contractNumber: '',
-                salesChannelCode: '000000',
-                salesChannelName: '販売チャネル名',
-                salesChannelDeptName: '部課名',
-                salesChannelEmplyeeCode: '11111111',
-                salesChannelPersonName: '担当者名',
-                salesChannelDeptType: 'Com第一営業本部',
-                salesChannelPhoneNumber: '000-0000-0000',
-                salesChannelMailAddress: 'aaa@aaa.com',
-                kaianPassword: 'Aa11111111',
-                campaignCode: '',
-                salesPersonName: ''
-              },
-              contractAccountInfo: {
-                contractAccountId: '',
-                customerType: '',
-                commonCustomerId: '11111111111',
-                contractorName: '契約者名',
-                contractorKanaName: 'カナ',
-                postalNumber: '1000004',
-                contractAddress: '東京都千代田区大手町一丁目',
-                banch1: '１番',
-                tatemono1: '建物'
-              },
-              contactList: [
-                {
-                  contactType: '',
-                  contactPersonName: '連絡先担当者名',
-                  contactPhoneNumber: '000-0000-0000',
-                  contactMail: 'aaaaaa@aaa.com',
-                  billMailingPostalNumber: '1000004',
-                  billMailingAddress: '東京都千代田区大手町一丁目',
-                  billMailingAddressBanchi1: '請求書送付先番地等',
-                  billMailingAddressBuilding1: '請求書送付先建物等',
-                  billMailingKanaName: '請求書送付先宛名',
-                  billMailingName: 'カナ',
-                  billMailingPersonName: '請求に関する連絡先',
-                  billMailingPhoneNumber: '000-0000-0000',
-                  billMailingMailAddress: 'aaa@aaa.com'
-                }
-              ],
-              prdtList: [{ prdtCode: 'BF4022000000100', idnumber: '', appType: '010' }]
-            }
-          ])
-        })
+        applyNewOrdersSpy.mockReturnValue([
+          {
+            contractId: 'fcb1d4a2-24d5-4647-9725-b471566bb618',
+            tenantId: '12345678-bdac-4195-80b9-1ea64b8cb70c',
+            serviceType: '030',
+            numberN: '',
+            contractStatus: '10',
+            deleteFlag: false,
+            createdAt: '2022-08-25T06:09:34.774Z',
+            updatedAt: '2022-08-25T06:09:34.774Z'
+          },
+          {
+            contractId: '10964378-7015-42d8-9966-b9d1379b5e0f',
+            tenantId: '12345678-bdac-4195-80b9-1ea64b8cb70c',
+            serviceType: '020',
+            numberN: '',
+            contractStatus: '10',
+            deleteFlag: false,
+            createdAt: '2022-08-25T06:09:34.774Z',
+            updatedAt: '2022-08-25T06:09:34.774Z'
+          }
+        ])
         request.session.serviceList = ['030', '020']
         request.body = inputData
 
@@ -1091,65 +926,28 @@ describe('paidServiceRegisterのテスト', () => {
         // 準備
         findContractsSpy.mockReturnValue([])
         findOneDept.mockReturnValue(salesChannelDept)
-        applyNewOrdersSpy.mockImplementation(async (tenantId, orderDatas) => {
-          expect(tenantId).toEqual(tenantId)
-          expect(orderDatas).toEqual([
-            {
-              contractBasicInfo: {
-                tradeshiftId: '12345678-bdac-4195-80b9-1ea64b8cb70c',
-                orderId: '',
-                orderType: '010',
-                serviceType: '030',
-                contractChangeName: '',
-                contractChangeAddress: '',
-                contractChangeContact: '',
-                appDate: '',
-                OpeningDate: '',
-                contractNumber: '',
-                salesChannelCode: '79100100',
-                salesChannelDeptName: '第二ＳＣ部門　第一グループ',
-                salesChannelDeptType: 'アプリケーションサービス部',
-                salesChannelEmplyeeCode: '',
-                salesChannelMailAddress: 'digitaltrade-ap-ops@ntt.com',
-                salesChannelName: 'ＰＳ本部＿ＡＰＳ部＿第二ＳＣ部門一Ｇ四Ｔ',
-                salesChannelPersonName: 'デジトレアプリ担当',
-                salesChannelPhoneNumber: '050-3383-9608',
-                kaianPassword: 'Aa11111111',
-                campaignCode: '',
-                salesPersonName: ''
-              },
-              contractAccountInfo: {
-                contractAccountId: '',
-                customerType: '',
-                commonCustomerId: 'C9999999999',
-                contractorName: '契約者名',
-                contractorKanaName: 'カナ',
-                postalNumber: '1000004',
-                contractAddress: '東京都千代田区大手町一丁目',
-                banch1: '１番',
-                tatemono1: ''
-              },
-              contactList: [
-                {
-                  contactType: '',
-                  contactPersonName: '連絡先担当者名',
-                  contactPhoneNumber: '000-0000-0000',
-                  contactMail: 'aaaaaa@aaa.com',
-                  billMailingPostalNumber: '1000004',
-                  billMailingAddress: '東京都千代田区大手町一丁目',
-                  billMailingAddressBanchi1: '請求書送付先番地等',
-                  billMailingAddressBuilding1: '',
-                  billMailingKanaName: '請求書送付先宛名',
-                  billMailingName: 'カナ',
-                  billMailingPersonName: '請求に関する連絡先',
-                  billMailingPhoneNumber: '000-0000-0000',
-                  billMailingMailAddress: 'aaa@aaa.com'
-                }
-              ],
-              prdtList: [{ prdtCode: 'BF3022000000100', idnumber: '', appType: '010' }]
-            }
-          ])
-        })
+        applyNewOrdersSpy.mockReturnValue([
+          {
+            contractId: 'fcb1d4a2-24d5-4647-9725-b471566bb618',
+            tenantId: '12345678-bdac-4195-80b9-1ea64b8cb70c',
+            serviceType: '030',
+            numberN: '',
+            contractStatus: '10',
+            deleteFlag: false,
+            createdAt: '2022-08-25T06:09:34.774Z',
+            updatedAt: '2022-08-25T06:09:34.774Z'
+          },
+          {
+            contractId: '10964378-7015-42d8-9966-b9d1379b5e0f',
+            tenantId: '12345678-bdac-4195-80b9-1ea64b8cb70c',
+            serviceType: '020',
+            numberN: '',
+            contractStatus: '10',
+            deleteFlag: false,
+            createdAt: '2022-08-25T06:09:34.774Z',
+            updatedAt: '2022-08-25T06:09:34.774Z'
+          }
+        ])
         request.session.serviceList = ['030']
         request.body = onlyRequiredData
 

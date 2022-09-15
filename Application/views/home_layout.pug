@@ -16,26 +16,9 @@ html
       link(rel='stylesheet', type='text/css', href='/css/style.css')
       link(rel='stylesheet', type='text/css', href='/css/animate.min.css')
 
-  body.has-navbar-fixed-top
-    .navbar.is-dark.is-fixed-top
-        .navbar-brand.is-family-noto-sans-bold
-          if title !== 'ポータル'
-            .navbar-item BConnectionデジタルトレード
-            //- a.navbar-brand(href='/') BConnectionデジタルトレード
-            a.navbar-item(href='/') 
-              span.fas.fa-home
-                | Home
-          .navbar-item.right
-            if title && (title === 'PDF請求書編集' || title === 'PDF請求書')
-              img.ncom-logo(src='../../image/ts-app-digitaltrade-ncom-logo.svg')
-            else
-              img.ncom-logo(src='../image/ts-app-digitaltrade-ncom-logo.svg')
-    if (title !== 'ご利用ガイド' && title !=='利用登録')
-      a(href="/userGuide").button-hover.userguide-btn
-        span.panel-icon
-          i.fas.fa-question-circle
-        | ご利用ガイド
-
+  body
+    
+    
     block vars
       - var inputPattarnZenkakuHiragana = '^[^ -~｡-ﾟ\t]+$' // 全角ひらがな
       - var inputPattarnZenkaku = '^[ぁ-んァ-ヶａ-ｚＡ-Ｚー　－‐―−—・，．＆’０-９\u4E00-\u9FFF\u3005-\u3007\u309d\u309e]+$' // 全角文字
@@ -48,7 +31,6 @@ html
       - var inputPattarnHankakuSeisu = '^[1-9][0-9]{0,6}$' //１以上の半角整数
       - var inputPatternEngNum = '^[a-zA-Z0-9]*$' // 英数字のみ
       - var inputPatternEngNumKana = '^[a-zA-Z0-9ァ-ヶー]*$' // 英数字カナのみ
-      - var inputPatternEngNumSign = '^[\x20-\x7E]*$' // 半角英数字記号のみ
       - var inputPattarnManagerAddress = '^[a-zA-Z0-9-._+ <>{}!"$&\'()=~@:*,]+@[a-zA-Z0-9-._+]+$' // 取引先担当者(アドレス)
       - var inputPatternDate = '^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$' // 日付
     block content

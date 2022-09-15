@@ -99,7 +99,10 @@ class TradeshiftDTO {
     if (stag instanceof Array === false) stag = ['sales', 'purchases', 'draft']
 
     const get = 'get'
-    let uri = `/documents?&_onlyIndex=true&${this.getQuery('page', page)}&${this.getQuery('limit', limit)}`
+    let uri = `/documents?&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false&${this.getQuery(
+      'page',
+      page
+    )}&${this.getQuery('limit', limit)}`
 
     if (tag.length > 0) uri = `${uri}&${this.getQuery('tag', tag)}`
 
@@ -154,7 +157,7 @@ class TradeshiftDTO {
     unKnownManager = unKnownManager ?? ''
 
     const get = 'get'
-    let uri = `/documents?sentTo=${this.tenantId}&type=invoice&limit=10000&_onlyIndex=true`
+    let uri = `/documents?sentTo=${this.tenantId}&type=invoice&limit=10000&_onlyIndex=true&includesourcedocuments=false&populatePersonInfo=false`
     const state = ['DELIVERED', 'ACCEPTED', 'PAID_UNCONFIRMED', 'PAID_CONFIRMED']
     const stag = ['purchases']
 
@@ -170,7 +173,7 @@ class TradeshiftDTO {
 
     if (contractEmail.length > 0 && unKnownManager.length > 0) uri = `${uri}&useAndOperatorForTags=true`
 
-    if (contractEmail.length > 0) uri = `${uri}&tag=${contractEmail}`
+    if (contractEmail.length > 0) uri = `${uri}&tag=${encodeURIComponent(contractEmail)}`
 
     if (unKnownManager.length > 0) uri = `${uri}&tag=${encodeURIComponent(unKnownManager)}`
 

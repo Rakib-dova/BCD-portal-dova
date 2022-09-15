@@ -37,6 +37,8 @@ block content
 
           .mt-5.has-text-centered
             label.mr320.is-family-noto-sans-bold ■独自のCSVで請求書一括作成する場合
+              a.guide-img.button-hover(href='userGuide#invoice')
+                img(src="../image/question-circle.svg")
             .columns.is-mobile.is-centered.mt-0.mb-0
               .column-csvupload
                 p.border 社内システムから出力したCSV等、独自のCSVを利用して請求書を作成できます。ご利用には、アップロードフォーマット設定を登録の上、フォーマット種別を指定ください。<br>※ 8/29以前に登録いただいたアップロードフォーマットは利用できませんので修正もしくは再登録をお願いいたします。
@@ -50,9 +52,10 @@ block content
           .modal-background
           .modal-card
             header.modal-card-head
-              p.modal-card-title
+              p.modal-card-title 請求書一括作成
             section.modal-card-body
               center
+                img(src="/image/loading_progress.gif")
                 p.modal-card-result#modal-card-result アップロード中
             footer.modal-card-foot
 
