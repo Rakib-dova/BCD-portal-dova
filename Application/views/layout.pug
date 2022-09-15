@@ -30,7 +30,7 @@ html
               img.ncom-logo(src='../../image/ts-app-digitaltrade-ncom-logo.svg')
             else
               img.ncom-logo(src='../image/ts-app-digitaltrade-ncom-logo.svg')
-    if title !== 'ご利用ガイド'
+    if (title !== 'ご利用ガイド' && title !=='利用登録')
       a(href="/userGuide").button-hover.userguide-btn
         span.panel-icon
           i.fas.fa-question-circle
