@@ -1,3 +1,4 @@
+const modal = document.getElementById('uploadSuppliers-progress-modal')
 let fileReader = null
 let targetFile = null
 
@@ -23,7 +24,7 @@ document.getElementsByName('suppliersFileUpload')[0].addEventListener('change', 
       if (fileReader.result.length > 5120000) {
         alert('ファイルサイズが5MB超えています。\nCSVファイルを確認後もう一度アップロードしてください。')
         $('#filename').innerText = ''
-        $('#upload').setAttribute('disabled', 'disabled')
+        $('#supplier-upload-btn').setAttribute('disabled', 'disabled')
         location.reload()
       } else if (
         targetFile.name.lastIndexOf('.csv') === -1 ||
@@ -31,20 +32,20 @@ document.getElementsByName('suppliersFileUpload')[0].addEventListener('change', 
       ) {
         alert('ファイル形式が異なります。\nCSVファイルを確認後もう一度アップロードしてください。')
         $('#filename').innerText = ''
-        $('#upload').setAttribute('disabled', 'disabled')
+        $('#supplier-upload-btn').setAttribute('disabled', 'disabled')
         location.reload()
       } else {
         $('#filename').innerText = targetFile.name
-        $('#upload').removeAttribute('disabled')
+        $('#supplier-upload-btn').removeAttribute('disabled')
       }
     }
   }
 })
 
 // アップロード開始ボタンクリックイベント
-$('#upload').addEventListener('click', function (e) {
-  if (!$('#upload').getAttribute('disabled')) {
-    document.querySelector('#upload-progress-modal').classList.add('is-active')
+$('#supplier-upload-btn').addEventListener('click', function (e) {
+  if (!$('#supplier-upload-btn').getAttribute('disabled')) {
+    modal.classList.add('is-active')
     $('#suppliersUpload').submit()
   }
 })

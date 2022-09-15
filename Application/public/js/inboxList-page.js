@@ -1,3 +1,4 @@
+const modal = document.getElementById('setjounal-progress-modal')
 const searchProgressModal = document.getElementById('search-progress-modal')
 // UserAgentで判定し
 // IE以外は動的にスクリプトをロード
@@ -157,6 +158,9 @@ function getWorkflow() {
               appendChilds(btn, [btnLink])
               btnLink.setAttribute('href', `/approvalInbox/${item.documentId}`)
               btnLink.innerText = '依頼内容確認'
+              btnLink.addEventListener('click', function (e) {
+                modal.classList.add('is-active')
+              })
 
               appendChilds(row, [
                 no,
@@ -688,4 +692,18 @@ $('#btnInboxSearchClear').addEventListener('click', function () {
 
   // 担当者不明の請求書初期化
   form.unKnownManager.checked = false
+})
+
+// 仕訳情報設定ボタン押下時
+Array.prototype.forEach.call(document.querySelectorAll('.set-journal-button'), (item) => {
+  item.addEventListener('click', function () {
+    modal.classList.add('is-active')
+  })
+})
+
+// 仕訳情報設定ボタン押下時
+Array.prototype.forEach.call(document.querySelectorAll('.info-journal-button'), (item) => {
+  item.addEventListener('click', function () {
+    modal.classList.add('is-active')
+  })
 })
