@@ -289,29 +289,8 @@ function sendToSelectBtnCreate() {
   if (!document.querySelector('#allSelectSentToBtn') ?? false) {
     const allSelectBtnTemplate = document.querySelector('#templateAllSelectBtn')
     const cloneAllSelectBtnTemplate = document.importNode(allSelectBtnTemplate.content, true)
-    cloneAllSelectBtnTemplate.children[0].children[0].id = 'allSelectSentToBtn'
-    cloneAllSelectBtnTemplate.children[2].children[0].id = 'allClearSentToBtn'
-    cloneAllSelectBtnTemplate.children[4].children[0].id = 'invisibleSentToBtn'
+    cloneAllSelectBtnTemplate.children[0].children[0].id = 'invisibleSentToBtn'
     sendToSelectBtnField.appendChild(cloneAllSelectBtnTemplate)
-
-    // 全部選択ボタン機能追加
-    document.querySelector('#allSelectSentToBtn').addEventListener('click', (e) => {
-      const sendToCompanies = document.querySelectorAll('.sendToCompanies')
-      if (sendToCompanies ?? false) {
-        Array.prototype.forEach.call(sendToCompanies, (item) => {
-          item.checked = true
-        })
-      }
-    })
-    // 全部解除ボタン機能追加
-    document.querySelector('#allClearSentToBtn').addEventListener('click', (e) => {
-      const sendToCompanies = document.querySelectorAll('.sendToCompanies')
-      if (sendToCompanies ?? false) {
-        Array.prototype.forEach.call(sendToCompanies, (item) => {
-          item.checked = false
-        })
-      }
-    })
 
     // 送信企業リスト隠すボタン機能追加
     document.querySelector('#invisibleSentToBtn').addEventListener('click', function (e) {
@@ -337,10 +316,7 @@ if (document.querySelector('#sendToSearchBtn')) {
     const sendTo = document.getElementById('sendTo').value
 
     // レイアウト初期化
-    if (
-      (document.querySelector('#allSelectSentToBtn') ?? false) ||
-      (document.querySelector('#allClearSentToBtn') ?? false)
-    ) {
+    if (document.querySelector('#invisibleSentToBtn') ?? false) {
       const sendToSelectBtnFieldChildren = []
       const sendToSelectBtnField = document.querySelector('#sendToSelectBtnField')
       Array.prototype.forEach.call(sendToSelectBtnField.children, (item) => {
@@ -349,8 +325,8 @@ if (document.querySelector('#sendToSearchBtn')) {
       sendToSelectBtnFieldChildren.forEach((item) => item.remove())
     }
 
-    if (document.querySelector('#searchResultBox') ?? false) {
-      document.querySelector('#searchResultBox').remove()
+    if (document.querySelector('.searchResultBox') ?? false) {
+      document.querySelector('.searchResultBox').remove()
       document
         .querySelector('#form > article > div > div > div:nth-child(3) > div:nth-child(3)')
         .classList.add('is-invisible')
@@ -402,7 +378,10 @@ if (document.querySelector('#sendToSearchBtn')) {
                   cloneSearchResultItemTemplate.querySelector('input').id = `sendTo${idx}`
                   cloneSearchResultItemTemplate.querySelector('input').name = 'sentBy[]'
                   cloneSearchResultItemTemplate.querySelector('input').classList.add('sendToCompanies')
-                  cloneSearchResultItemTemplate.querySelector('input').value = item.CompanyAccountId
+                  cloneSearchResultItemTemplate.querySelector('input').value = [
+                    `${item.CompanyName}`,
+                    `${item.CompanyAccountId}`
+                  ]
                   cloneSearchResultBoxTemplate.querySelector('.box').appendChild(cloneSearchResultItemTemplate)
                 })
                 document
@@ -457,6 +436,9 @@ if ($('#BtnInboxSearch')) {
     const invoiceNumber = form.invoiceNumber.value
     const minIssuedate = form.minIssuedate.value
     const maxIssuedate = form.maxIssuedate.value
+    if (form.action.split('/inboxList/')[1] !== 1) {
+      form.action = form.action.split('/inboxList/')[0] + '/inboxList/1'
+    }
     let sentBy = form['sentBy[]']
     if (sentBy !== undefined) {
       if (sentBy.length !== undefined) {
@@ -559,3 +541,151 @@ function managerAddressValidationCheck(managerAddress) {
   }
   return regExpResult
 }
+
+// ページ遷移時のsubmit処理
+function paginationSubmit(form, href) {
+  if (form) {
+    // 検索処理
+    const invoiceNumber = form.invoiceNumber.value
+    const minIssuedate = form.minIssuedate.value
+    const maxIssuedate = form.maxIssuedate.value
+    let sentBy = form['sentBy[]']
+    if (sentBy !== undefined) {
+      if (sentBy.length !== undefined) {
+        sentBy = Array.prototype.slice.call(sentBy)
+        sentBy = sentBy.filter((ele) => ele.checked === true)
+      } else {
+        sentBy = sentBy.checked === true
+      }
+
+      if (!sentBy) {
+        sentBy = []
+      }
+    } else {
+      sentBy = []
+    }
+
+    let status = form['status[]']
+    if (status !== undefined) {
+      status = Array.prototype.slice.call(status)
+      status = status.filter((ele) => ele.checked === true)
+      if (!status) {
+        status = []
+      }
+    } else {
+      status = []
+    }
+
+    let unKnownManager = form.unKnownManager.checked
+    if (unKnownManager === false) {
+      unKnownManager = undefined
+    }
+
+    const managerAddress = form.managerAddress.value
+    const validationCheck = []
+    validationCheck.push(invoiceNumber)
+    validationCheck.push(minIssuedate)
+    validationCheck.push(maxIssuedate)
+    validationCheck.push(managerAddress)
+    validationCheck.push(unKnownManager)
+    validationCheck.push(sentBy)
+    validationCheck.push(status)
+    let checkCount = 0
+    for (let i = 0; i < validationCheck.length; i++) {
+      if (i < 5) {
+        if (validationCheck[i] === '' || validationCheck[i] === undefined) {
+          ++checkCount
+        }
+      } else {
+        if (validationCheck[i].length === 0) {
+          ++checkCount
+        }
+      }
+    }
+    if (checkCount === 7) {
+      searchProgressModal.classList.add('is-active')
+      location.replace(href)
+    } else {
+      form.action = href
+      if (managerAddress.length > 0) {
+        const result = managerAddressValidationCheck(managerAddress)
+        if (!result) {
+          alert('入力したメールアドレスに誤りがあります。')
+        } else {
+          searchProgressModal.classList.add('is-active')
+          form.submit()
+        }
+      } else {
+        searchProgressModal.classList.add('is-active')
+        form.submit()
+      }
+    }
+  } else {
+    searchProgressModal.classList.add('is-active')
+    location.replace(href)
+  }
+}
+
+// ページリンククリック時、機能
+if (document.querySelector('.pagination-list')) {
+  document.querySelector('.pagination-list').addEventListener('click', function (e) {
+    e.preventDefault()
+    paginationSubmit(document.querySelector('#form'), e.target.href)
+  })
+}
+
+// 前のページクリック時、機能
+if (document.querySelector('.pagination-previous')) {
+  document.querySelector('.pagination-previous').addEventListener('click', function (e) {
+    e.preventDefault()
+    paginationSubmit(document.querySelector('#form'), e.target.href)
+  })
+}
+
+// 次のページクリック時、機能
+if (document.querySelector('.pagination-next')) {
+  document.querySelector('.pagination-next').addEventListener('click', function (e) {
+    e.preventDefault()
+    paginationSubmit(document.querySelector('#form'), e.target.href)
+  })
+}
+
+// クリアボタンの機能（支払一覧検索条件クリア）
+$('#btnInboxSearchClear').addEventListener('click', function () {
+  // 請求書番号初期化
+  $('#invoiceNumber').value = ''
+
+  // 発行日初期化
+  $('#minIssuedate').value = ''
+  $('#maxIssuedate').value = ''
+
+  // 送信企業初期化
+  $('#sendTo').value = ''
+  if (document.querySelector('#invisibleSentToBtn') ?? false) {
+    const sendToSelectBtnFieldChildren = []
+    const sendToSelectBtnField = document.querySelector('#sendToSelectBtnField')
+    Array.prototype.forEach.call(sendToSelectBtnField.children, (item) => {
+      sendToSelectBtnFieldChildren.push(item)
+    })
+    sendToSelectBtnFieldChildren.forEach((item) => item.remove())
+  }
+
+  if (document.querySelector('.searchResultBox') ?? false) {
+    document.querySelector('.searchResultBox').remove()
+    document
+      .querySelector('#form > article > div > div > div:nth-child(3) > div:nth-child(3)')
+      .classList.add('is-invisible')
+    document.querySelector('#sendToSearchBtn').classList.remove('is-loading')
+  }
+
+  // 承認ステータス初期化
+  const form = document.querySelector('#form')
+  const status = form['status[]']
+  status.forEach((item) => (item.checked = false))
+
+  // 担当者アドレス初期化
+  $('#managerAddress').value = ''
+
+  // 担当者不明の請求書初期化
+  form.unKnownManager.checked = false
+})

@@ -39,6 +39,8 @@ block content
                       table.table.is-fullwidth.is-hoverable.table-fixed
                         thead
                           tr
+                            th.text-center.th-padding= `${currItemCount}/${itemCount}`
+                          tr
                             th.width-5.text-center No
                             th.width-10.text-center 請求書番号
                             th.width-10.text-center 請求書ステータス
@@ -46,7 +48,6 @@ block content
                             th.width-10.text-center 通貨
                             th.width-10.text-center 金額
                             th.width-10.text-center 送信企業
-                            th.width-10.text-center 担当者アドレス
                             th.width-10.text-center 支払い期限日
                             th.width-10.text-center 更新日
                             th.width-10.text-center
@@ -109,7 +110,6 @@ block content
                               td.text-center.td-overflow= item.currency
                               td.text-center.td-overflow= item.ammount
                               td.text-center.td-overflow= item.sentTo
-                              td.text-center.td-overflow= item.managerInfo.managerAddress
                               td.text-center.td-overflow= item.expire
                               td.text-center.td-overflow= item.updated
                               td.text-center.display-row-td
@@ -118,13 +118,13 @@ block content
                         - var page = currPage % 5 === 0 ? currPage - 4 : ~~(currPage / 5) * 5 + 1
                         - var maxPageNo = ~~(page / 5) * 5 + 5 + 1
                         if (page - 1 !== 0)
-                          a.pagination-previous(href= `/inboxList/${page - 1}`) 前のページ
+                          a.pagination-previous(href= `/inboxList/${page - 1}`) <<
                         else
-                          a.a-previous-none 前のページ
+                          a.a-previous-none <<
                         if maxPageNo < numPages
-                          a.pagination-next(href= `/inboxList/${maxPageNo}`) 次のページ
+                          a.pagination-next(href= `/inboxList/${maxPageNo}`) >>
                         else
-                          a.a-next-none 次のページ
+                          a.a-next-none >>
 
                         ul.pagination-list
                           while page < (maxPageNo < numPages ? maxPageNo : numPages + 1)
@@ -150,7 +150,6 @@ block content
                           th.width-10.text-center 通貨
                           th.width-10.text-center 金額
                           th.width-10.text-center 送信企業
-                          th.width-10.text-center 担当者アドレス
                           th.width-10.text-center 支払い期限日
                           th.width-10.text-center 更新日
                           th.width-10.text-center
@@ -166,6 +165,8 @@ block content
                       table.table.is-fullwidth.is-hoverable.table-fixed
                         thead
                           tr
+                            th.text-center.th-padding= `${currItemCount}/${itemCount}`
+                          tr
                             th.width-5.text-center No
                             th.width-10.text-center 請求書番号
                             th.width-10.text-center 請求書ステータス
@@ -173,7 +174,6 @@ block content
                             th.width-10.text-center 通貨
                             th.width-10.text-center 金額
                             th.width-10.text-center 送信企業
-                            th.width-10.text-center 担当者アドレス
                             th.width-10.text-center 支払い期限日
                             th.width-10.text-center 更新日
                             th.width-10.text-center
@@ -236,7 +236,6 @@ block content
                               td.text-center.td-overflow= item.currency
                               td.text-center.td-overflow= item.ammount
                               td.text-center.td-overflow= item.sentTo
-                              td.text-center.td-overflow= item.managerInfo.managerAddress
                               td.text-center.td-overflow= item.expire
                               td.text-center.td-overflow= item.updated
                               td.text-center.display-row-td
@@ -245,13 +244,13 @@ block content
                         - var page = currPage % 5 === 0 ? currPage - 4 : ~~(currPage / 5) * 5 + 1
                         - var maxPageNo = ~~(page / 5) * 5 + 5 + 1
                         if (page - 1 !== 0)
-                          a.pagination-previous(href= `/inboxList/${page - 1}`) 前のページ
+                          a.pagination-previous(href= `/inboxList/${page - 1}`) <<
                         else
-                          a.a-previous-none 前のページ
+                          a.a-previous-none <<
                         if maxPageNo < numPages
-                          a.pagination-next(href= `/inboxList/${maxPageNo}`) 次のページ
+                          a.pagination-next(href= `/inboxList/${maxPageNo}`) >>
                         else
-                          a.a-next-none 次のページ
+                          a.a-next-none >>
 
                         ul.pagination-list
                           while page < (maxPageNo < numPages ? maxPageNo : numPages + 1)
@@ -274,7 +273,6 @@ block content
                           th.width-10.text-center 通貨
                           th.width-10.text-center 金額
                           th.width-10.text-center 送信企業
-                          th.width-10.text-center 担当者アドレス
                           th.width-10.text-center 支払い期限日
                           th.width-10.text-center 更新日
                           th.width-10.text-center
@@ -300,6 +298,7 @@ block content
             p.modal-card-title
           section.modal-card-body
             center
+              img(src="/image/loading_progress.gif")
               p.modal-card-result#modal-card-result 処理中
           footer.modal-card-foot          
     

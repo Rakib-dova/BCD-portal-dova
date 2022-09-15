@@ -258,3 +258,13 @@ td.text-center {
 .text-color-red {
   color: red;
 }
+
+.th-padding {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  border: none !important;
+}
+
+.ml-2 {
+  margin-left: 3rem !important;
+}

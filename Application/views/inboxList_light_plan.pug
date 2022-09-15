@@ -42,12 +42,15 @@ block content
                                   .column
                                     .field.is-horizontal
                                       .field-label.is-normal
-                                        label.bulmalabel 請求書番号
+                                        label.bulmalabel 請求書番号（完全一致）
                                       .field-body
                                         .field
                                           .control.has-icons-right
                                             p.control.is-expanded
-                                              input.input#invoiceNumber(type='text' name='invoiceNumber' maxlength="100")
+                                              if keyword
+                                                input.input#invoiceNumber(type='text' name='invoiceNumber' maxlength="100" value=keyword.invoiceNumber)
+                                              else
+                                                input.input#invoiceNumber(type='text' name='invoiceNumber' maxlength="100")
                                   .column
                                     .field.is-horizontal
                                       .field-label.is-normal
@@ -55,11 +58,17 @@ block content
                                       .field-body
                                         .field.is-grouped.is-grouped-multiline
                                           .control.is-expanded
-                                            input.input#minIssuedate.itemForSearch(type="date" name="minIssuedate" pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$")
+                                            if keyword
+                                              input.input#minIssuedate.itemForSearch(type="date" name="minIssuedate" pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$" value=keyword.issueDate[0])
+                                            else
+                                              input.input#minIssuedate.itemForSearch(type="date" name="minIssuedate" pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$")
                                           .control
                                             div ～
                                           .control.is-expanded
-                                            input.input#maxIssuedate.itemForSearch(type="date" name="maxIssuedate" pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$")                                                
+                                            if keyword
+                                              input.input#maxIssuedate.itemForSearch(type="date" name="maxIssuedate" pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$" value=keyword.issueDate[1])
+                                            else
+                                              input.input#maxIssuedate.itemForSearch(type="date" name="maxIssuedate" pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$")
                                   .column          
                                     .field.is-horizontal
                                       .field-label.is-normal
@@ -67,17 +76,49 @@ block content
                                       .field-body
                                         .field.has-addons
                                           p.control.is-expanded
-                                            input.input#sendTo(type='text' maxlength="100")
+                                            if keyword
+                                              input.input#sendTo(type='text' name="sendTo" maxlength="100" value=keyword.sent)
+                                            else
+                                              input.input#sendTo(type='text' name="sendTo" maxlength="100")
                                           p.control
                                             a.button.is-info#sendToSearchBtn 検索 
-                                    .field.is-horizontal
-                                      .field-label.is-normal
-                                      .field-body#sendToSelectBtnField
+                                    if keyword
+                                      if (keyword.companyName !== '')
+                                        .field.is-horizontal
+                                          .field-label.is-normal
+                                          .field-body#sendToSelectBtnField
+                                            p.control
+                                              a.button#invisibleSentToBtn ▲
 
-                                    .field.is-horizontal.is-invisible
-                                      .field-label.is-normal
-                                      .field-body.level
-                                        .container#displaySendToSearchResultField                                                                                                                           
+                                        .field.is-horizontal
+                                          .field-label.is-normal
+                                          .field-body.level
+                                            .container#displaySendToSearchResultField
+                                              .box.searchResultBox
+                                                .field.is-horizontal
+                                                  .field-body
+                                                    p.control
+                                                      label.checkbox
+                                                        input.m-3.p-1(type='radio' checked=true value=keyword.companyName)
+                                                        label= keyword.companyName
+                                      else
+                                        .field.is-horizontal
+                                          .field-label.is-normal
+                                          .field-body#sendToSelectBtnField
+
+                                        .field.is-horizontal.is-invisible
+                                          .field-label.is-normal
+                                          .field-body.level
+                                            .container#displaySendToSearchResultField
+                                    else
+                                      .field.is-horizontal
+                                        .field-label.is-normal
+                                        .field-body#sendToSelectBtnField
+
+                                      .field.is-horizontal.is-invisible
+                                        .field-label.is-normal
+                                        .field-body.level
+                                          .container#displaySendToSearchResultField
                                   .column
                                     .field.is-horizontal
                                       .field-label.is-normal
@@ -87,45 +128,122 @@ block content
                                           .box
                                             .control.has-icons-right
                                               .is-fullwidth.is-multiple
-                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '80')
-                                                label.checkbox.margin-right29 未処理
-                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '10')
-                                                label.checkbox.margin-right13 支払依頼中
-                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '11')
-                                                label.checkbo 一次承認済み
-                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '12')
-                                                label.checkbox 二次承認済み
-                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '13')
-                                                label.checkbo 三次承認済み
-                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '14')
-                                                label.checkbox 四次承認済み
-                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '15')
-                                                label.checkbo 五次承認済み 
+                                                if keyword
+                                                  if (keyword.status.includes('80'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '80')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '80')
+                                                  label.checkbox.margin-right29 未処理
+                                                  if (keyword.status.includes('10'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '10')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '10')
+                                                  label.checkbox.margin-right13 支払依頼中
+                                                  if (keyword.status.includes('11'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '11')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '11')
+                                                  label.checkbox 一次承認済み
+                                                  if (keyword.status.includes('12'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '12')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '12')
+                                                  label.checkbox 二次承認済み
+                                                  if (keyword.status.includes('13'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '13')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '13')
+                                                  label.checkbox 三次承認済み
+                                                  if (keyword.status.includes('14'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '14')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '14')
+                                                  label.checkbox 四次承認済み
+                                                  if (keyword.status.includes('15'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '15')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '15')
+                                                  label.checkbox 五次承認済み
+                                                else
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '80')
+                                                  label.checkbox.margin-right29 未処理
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '10')
+                                                  label.checkbox.margin-right13 支払依頼中
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '11')
+                                                  label.checkbox 一次承認済み
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '12')
+                                                  label.checkbox 二次承認済み
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '13')
+                                                  label.checkbox 三次承認済み
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '14')
+                                                  label.checkbox 四次承認済み
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '15')
+                                                  label.checkbox 五次承認済み
                                             .control.has-icons-right
-                                              .is-fullwidth.is-multiple                                                                                                                                       
-                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '16')
-                                                label.checkbox 六次承認済み                                                                                       
-                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '17')
-                                                label.checkbo 七次承認済み                                            
-                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '18')
-                                                label.checkbox 八次承認済み
-                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '19')
-                                                label.checkbo 九次承認済み
-                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '20')
-                                                label.checkbox 十次承認済み
-                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '00')
-                                                label.checkbo 最終承認済み
-                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '90')
-                                                label.checkbox 差し戻し
+                                              .is-fullwidth.is-multiple
+                                                if keyword
+                                                  if (keyword.status.includes('16'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '16')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '16')
+                                                  label.checkbox 六次承認済み
+                                                  if (keyword.status.includes('17'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '17')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '17')
+                                                  label.checkbox 七次承認済み
+                                                  if (keyword.status.includes('18'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '18')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '18')
+                                                  label.checkbox 八次承認済み
+                                                  if (keyword.status.includes('19'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '19')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '19')
+                                                  label.checkbox 九次承認済み
+                                                  if (keyword.status.includes('20'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '20')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '20')
+                                                  label.checkbox 十次承認済み
+                                                  if (keyword.status.includes('00'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '00')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '00')
+                                                  label.checkbox 最終承認済み
+                                                  if (keyword.status.includes('90'))
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=true value= '90')
+                                                  else
+                                                    input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '90')
+                                                  label.checkbox 差し戻し
+                                                else
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '16')
+                                                  label.checkbox 六次承認済み
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '17')
+                                                  label.checkbox 七次承認済み
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '18')
+                                                  label.checkbox 八次承認済み
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '19')
+                                                  label.checkbox 九次承認済み
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '20')
+                                                  label.checkbox 十次承認済み
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '00')
+                                                  label.checkbox 最終承認済み
+                                                  input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '90')
+                                                  label.checkbox 差し戻し
                                                                                                                                                                                                                         
                                   .column          
                                     .field.is-horizontal
                                       .field-label.is-normal
-                                        label.bulmalabel 担当者アドレス
+                                        label.bulmalabel 担当者アドレス（完全一致）
                                       .field-body
                                         .field.has-addons
                                           p.control.is-expanded
-                                            input.input#managerAddress(type='text' name='managerAddress' maxlength=128 pattern=inputPattarnManagerAddress placeholder='例：bcd@gma.com　※省略不可')
+                                            if keyword
+                                              input.input#managerAddress(type='text' name='managerAddress' maxlength=128 pattern=inputPattarnManagerAddress placeholder='例：bcd@gma.com' value=keyword.contactEmail)
+                                            else
+                                              input.input#managerAddress(type='text' name='managerAddress' maxlength=128 pattern=inputPattarnManagerAddress placeholder='例：bcd@gma.com')
                                   .column
                                     .field.is-horizontal
                                       .field-label.is-normal
@@ -134,21 +252,22 @@ block content
                                         .field
                                           .control.has-icons-right
                                             .is-fullwidth.is-multiple
-                                              input.m-3.p-1(type="checkbox" name="unKnownManager" checked=false value= 'unKnownManager')
+                                              if keyword
+                                                if keyword.unKnownManager
+                                                  input.m-3.p-1(type="checkbox" name="unKnownManager" checked=true value= 'unKnownManager')
+                                                else
+                                                  input.m-3.p-1(type="checkbox" name="unKnownManager" checked=false value= 'unKnownManager')
+                                              else
+                                                input.m-3.p-1(type="checkbox" name="unKnownManager" checked=false value= 'unKnownManager')
                                   .column          
                                     .field.is-horizontal                                        
                                       .field-body.m-1.is-4.text-center.width-45percent
                                         .field
-                                          p.control
+                                          div.button-area
                                             a.button.is-link.btn-search-main#BtnInboxSearch(type='submit') 検索
+                                            .button.is-danger.ml-2#btnInboxSearchClear(type="button") クリア
                                                           
                           template#templateAllSelectBtn
-                              p.control
-                                a.button.is-info 全選択
-                              p.control
-                              p.control
-                                a.button.is-info 全解除
-                              p.control
                               p.control
                                 a.button ▲
 
@@ -160,11 +279,13 @@ block content
                               .field-body
                                 p.control
                                   label.checkbox
-                                    input.m-3.p-1(type='checkbox' checked=false) 
+                                    input.m-3.p-1(type='radio' checked=false)
                                  
                     if listArr.length !== 0
                       table.table.is-fullwidth.is-hoverable.table-fixed
                         thead
+                          tr
+                            th.text-center.th-padding= `${currItemCount}/${itemCount}`
                           tr
                             th.width-5.text-center No
                             th.width-10.text-center 請求書番号
@@ -173,7 +294,8 @@ block content
                             th.width-10.text-center 通貨
                             th.width-10.text-center 金額
                             th.width-10.text-center 送信企業
-                            th.width-10.text-center 担当者アドレス<br>（担当者名）
+                            if isSearch === true
+                              th.width-10.text-center 担当者アドレス<br>（担当者名）
                             th.width-10.text-center 支払い期限日
                             th.width-10.text-center 更新日
                             th.width-10.text-center
@@ -236,11 +358,12 @@ block content
                               td.text-center.td-overflow= item.currency
                               td.text-center.td-overflow= item.ammount
                               td.text-center.td-overflow= item.sentTo
-                              - var managerinfo = item.managerInfo.managerAddress + '<br>' + item.managerInfo.managerName
-                              if (item.managerInfo.managerName === '（ユーザー登録なし）')
-                                td.text-center.td-overflow.text-color-red!= managerinfo
-                              else 
-                                td.text-center.td-overflow!= managerinfo
+                              if isSearch === true
+                                - var managerinfo = item.managerInfo.managerAddress + '<br>' + item.managerInfo.managerName
+                                if (item.managerInfo.managerName === '（ユーザー登録なし）')
+                                  td.text-center.td-overflow.text-color-red!= managerinfo
+                                else
+                                  td.text-center.td-overflow!= managerinfo
                               td.text-center.td-overflow= item.expire
                               td.text-center.td-overflow= item.updated
                               td.text-center.display-row-td
@@ -249,13 +372,13 @@ block content
                         - var page = currPage % 5 === 0 ? currPage - 4 : ~~(currPage / 5) * 5 + 1
                         - var maxPageNo = ~~(page / 5) * 5 + 5 + 1
                         if (page - 1 !== 0)
-                          a.pagination-previous(href= `/inboxList/${page - 1}`) 前のページ
+                          a.pagination-previous(href= `/inboxList/${page - 1}`) <<
                         else
-                          a.a-previous-none 前のページ
+                          a.a-previous-none <<
                         if maxPageNo < numPages
-                          a.pagination-next(href= `/inboxList/${maxPageNo}`) 次のページ
+                          a.pagination-next(href= `/inboxList/${maxPageNo}`) >>
                         else
-                          a.a-next-none 次のページ
+                          a.a-next-none >>
 
                         ul.pagination-list
                           while page < (maxPageNo < numPages ? maxPageNo : numPages + 1)
@@ -281,7 +404,8 @@ block content
                           th.width-10.text-center 通貨
                           th.width-10.text-center 金額
                           th.width-10.text-center 送信企業
-                          th.width-10.text-center 担当者アドレス<br>（担当者名）
+                          if isSearch === true
+                            th.width-10.text-center 担当者アドレス<br>（担当者名）
                           th.width-10.text-center 支払い期限日
                           th.width-10.text-center 更新日
                           th.width-10.text-center
@@ -299,7 +423,7 @@ block content
                                   .column
                                     .field.is-horizontal
                                       .field-label.is-normal
-                                        label.bulmalabel 請求書番号
+                                        label.bulmalabel 請求書番号（完全一致）
                                       .field-body
                                         .field
                                           .control.has-icons-right
@@ -334,7 +458,7 @@ block content
                                     .field.is-horizontal.is-invisible
                                       .field-label.is-normal
                                       .field-body.level
-                                        .container#displaySendToSearchResultField                                                                                                                           
+                                        .container#displaySendToSearchResultField
                                   .column
                                     .field.is-horizontal
                                       .field-label.is-normal
@@ -357,7 +481,7 @@ block content
                                                 input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '14')
                                                 label.checkbox 四次承認済み
                                                 input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '15')
-                                                label.checkbo 五次承認済み 
+                                                label.checkbo 五次承認済み
                                             .control.has-icons-right
                                               .is-fullwidth.is-multiple                                                                                                                                       
                                                 input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '16')
@@ -374,15 +498,14 @@ block content
                                                 label.checkbo 最終承認済み
                                                 input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '90')
                                                 label.checkbox 差し戻し
-                                                                                                                                                                                                                        
                                   .column          
                                     .field.is-horizontal
                                       .field-label.is-normal
-                                        label.bulmalabel 担当者アドレス
+                                        label.bulmalabel 担当者アドレス（完全一致）
                                       .field-body
                                         .field.has-addons
                                           p.control.is-expanded
-                                            input.input#managerAddress(type='text' name='managerAddress' maxlength=128 placeholder='例：bcd@gma.com　※省略不可')
+                                            input.input#managerAddress(type='text' name='managerAddress' maxlength=128 placeholder='例：bcd@gma.com')
                                   .column
                                     .field.is-horizontal
                                       .field-label.is-normal
@@ -396,16 +519,11 @@ block content
                                     .field.is-horizontal                                        
                                       .field-body.m-1.is-4.text-center.width-45percent
                                         .field
-                                          p.control
-                                            a.button.is-link.btn-search-main#BtnInboxSearch 検索
+                                          div.button-area
+                                            a.button.is-link.btn-search-main#BtnInboxSearch(type='submit') 検索
+                                            .button.is-danger.ml-2#btnInboxSearchClear(type="button") クリア
                                                           
                           template#templateAllSelectBtn
-                              p.control
-                                a.button.is-info 全選択
-                              p.control
-                              p.control
-                                a.button.is-info 全解除
-                              p.control
                               p.control
                                 a.button ▲
 
@@ -417,10 +535,12 @@ block content
                               .field-body
                                 p.control
                                   label.checkbox
-                                    input.m-3.p-1(type='checkbox' checked=false)
+                                    input.m-3.p-1(type='radio' checked=false)
                     if listArr.length !== 0
                       table.table.is-fullwidth.is-hoverable.table-fixed
                         thead
+                          tr
+                            th.text-center.th-padding= `${currItemCount}/${itemCount}`
                           tr
                             th.width-5.text-center No
                             th.width-10.text-center 請求書番号
@@ -429,7 +549,8 @@ block content
                             th.width-10.text-center 通貨
                             th.width-10.text-center 金額
                             th.width-10.text-center 送信企業
-                            th.width-10.text-center 担当者アドレス<br>（担当者名）
+                            if isSearch === true
+                              th.width-10.text-center 担当者アドレス<br>（担当者名）
                             th.width-10.text-center 支払い期限日
                             th.width-10.text-center 更新日
                             th.width-10.text-center
@@ -492,11 +613,12 @@ block content
                               td.text-center.td-overflow= item.currency
                               td.text-center.td-overflow= item.ammount
                               td.text-center.td-overflow= item.sentTo
-                              - var managerinfo = item.managerInfo.managerAddress + '<br>' + item.managerInfo.managerName
-                              if (item.managerInfo.managerName === '（ユーザー登録なし）')
-                                td.text-center.td-overflow.text-color-red!= managerinfo
-                              else 
-                                td.text-center.td-overflow!= managerinfo
+                              if isSearch === true
+                                - var managerinfo = item.managerInfo.managerAddress + '<br>' + item.managerInfo.managerName
+                                if (item.managerInfo.managerName === '（ユーザー登録なし）')
+                                  td.text-center.td-overflow.text-color-red!= managerinfo
+                                else
+                                  td.text-center.td-overflow!= managerinfo
                               td.text-center.td-overflow= item.expire
                               td.text-center.td-overflow= item.updated
                               td.text-center.display-row-td
@@ -505,13 +627,13 @@ block content
                         - var page = currPage % 5 === 0 ? currPage - 4 : ~~(currPage / 5) * 5 + 1
                         - var maxPageNo = ~~(page / 5) * 5 + 5 + 1
                         if (page - 1 !== 0)
-                          a.pagination-previous(href= `/inboxList/${page - 1}`) 前のページ
+                          a.pagination-previous(href= `/inboxList/${page - 1}`) <<
                         else
-                          a.a-previous-none 前のページ
+                          a.a-previous-none <<
                         if maxPageNo < numPages
-                          a.pagination-next(href= `/inboxList/${maxPageNo}`) 次のページ
+                          a.pagination-next(href= `/inboxList/${maxPageNo}`) >>
                         else
-                          a.a-next-none 次のページ
+                          a.a-next-none >>
 
                         ul.pagination-list
                           while page < (maxPageNo < numPages ? maxPageNo : numPages + 1)
@@ -534,7 +656,8 @@ block content
                           th.width-10.text-center 通貨
                           th.width-10.text-center 金額
                           th.width-10.text-center 送信企業
-                          th.width-10.text-center 担当者アドレス<br>（担当者名）
+                          if isSearch === true
+                            th.width-10.text-center 担当者アドレス<br>（担当者名）
                           th.width-10.text-center 支払い期限日
                           th.width-10.text-center 更新日
                           th.width-10.text-center
@@ -559,6 +682,7 @@ block content
             p.modal-card-title
           section.modal-card-body
             center
+              img(src="/image/loading_progress.gif")
               p.modal-card-result#modal-card-result 処理中
           footer.modal-card-foot          
 
