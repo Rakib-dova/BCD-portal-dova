@@ -75,9 +75,7 @@ describe('PDF請求書', function () {
       await common.gotoTop(page, account);
 
       // PDF出力内容登録ページへ遷移する
-      await topPage.openPdfInvoicing();
-      await pdfInvoicingPage.waitForLoading();
-      await pdfInvoicingPage.clickRegist();
+      await topPage.clickRegisterPdf();
       await registPdfInvoicePage.waitForLoading();
       expect(await registPdfInvoicePage.getTitle()).to.equal('PDF請求書作成', '【PDF請求書作成】PDF出力内容登録画面(宛先情報入力画面) に遷移すること');
       expect(await registPdfInvoicePage.getSender()).to.equal('WRテスト企業_2_山田_田中', '【PDF請求書作成】差出人情報が自動で入力されていること');
@@ -171,9 +169,7 @@ describe('PDF請求書', function () {
       await common.gotoTop(page, account);
 
       // ドラフト一括画面へ遷移すること
-      await topPage.openPdfInvoicing();
-      await pdfInvoicingPage.waitForLoading();
-      await pdfInvoicingPage.clickUpload();
+      await topPage.clickUploadPdf();
       await csvUploadForPdfPage.waitForLoading();
       expect(await csvUploadForPdfPage.getTitle()).to.equal('PDF請求書ドラフト一括作成', '【PDF請求書ドラフト一括作成】ドラフト一括画面へ遷移すること');
 

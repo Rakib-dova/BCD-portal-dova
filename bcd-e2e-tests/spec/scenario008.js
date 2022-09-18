@@ -58,7 +58,7 @@ describe('リグレッションテスト', function () {
       await common.gotoTop(page, account);
 
       // 請求情報ダウンロードページに遷移する
-      await topPage.openDownloadInvoicePage();
+      await topPage.clickDownloadInvoice();
       await downloadInvoicePage.waitForLoading();
 
       expect(await downloadInvoicePage.getTitle()).to.equal('請求情報ダウンロード', '請求情報ダウンロードページに遷移すること');

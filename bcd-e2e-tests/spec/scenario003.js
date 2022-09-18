@@ -50,18 +50,14 @@ describe('リグレッションテスト', function () {
       }
 
       // ページオブジェクト
-      const { topPage, uploadInvoiceMenuPage, uploadFormatTopPage, uploadFormatCreatePage, uploadFormatSettingPage }
+      const { topPage, uploadFormatTopPage, uploadFormatCreatePage, uploadFormatSettingPage }
         = common.getPageObject(browser, page);
 
       // デジタルトレードアプリのトップページを表示する
       await common.gotoTop(page, account);
 
-      // 請求書一括作成メニューを表示する
-      await topPage.openUploadInvoiceMenu();
-      await uploadInvoiceMenuPage.waitForLoading();
-
       // 請求書アップロードフォーマット一覧ページに遷移する
-      await uploadInvoiceMenuPage.clickUploadFormat();
+      await topPage.clickUploadFormat();
       await uploadFormatTopPage.waitForLoading();
 
       // 新規登録ページに遷移する

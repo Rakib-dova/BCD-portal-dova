@@ -90,20 +90,13 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
     await initBrowser();
 
     // ページオブジェクト
-    const { topPage, journalMenuPage, paymentRequestListPage, journalDetailPage, paymentRequestPage }
-      = common.getPageObject(browser, page);
+    const { topPage, paymentRequestListPage, journalDetailPage, paymentRequestPage } = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
     await common.gotoTop(page, requester);
 
-    // 仕訳情報管理メニューを開く
-    await comment('「仕訳情報管理」をクリックする');
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-
     // 支払依頼一覧ページへ遷移する
-    await comment('「支払依頼一覧」をクリックする');
-    await journalMenuPage.clickPaymentRequest();
+    await topPage.clickPaymentRequest();
     await paymentRequestListPage.waitForLoading();
 
     // ステータスが「差し戻し」となっていること
@@ -113,22 +106,18 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal(status, 'ステータスが「差し戻し」となっていること');
 
     // 仕訳情報設定ページへ遷移する
-    await comment('「仕訳情報設定」をクリックする');
     await paymentRequestListPage.clickDetail(invoiceNo);
     await journalDetailPage.waitForLoading();
 
     // 支払い依頼ページへ遷移する
-    await comment('「支払依頼へ」をクリックする');
     await journalDetailPage.clickPaymentRequest();
     await journalDetailPage.acceptPaymentRequest(true);
     await paymentRequestPage.waitForLoading();
 
     // 承認ルート選択ダイアログを表示する
-    await comment('「承認ルート選択」をクリックする');
     await paymentRequestPage.clickRouteSearch();
 
     // 承認ルートを検索する
-    await comment('承認ルート"' + approveRoute.name + '"を検索する');
     await paymentRequestPage.searchRoute(approveRoute.name);
     await paymentRequestPage.selectRoute(approveRoute.name);
 
@@ -148,7 +137,6 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal(status, 'ステータスが「承認依頼中」となっていること');
 
     // 承認待ちタブを開く
-    await comment('「承認待ち」タブを開く');
     await paymentRequestListPage.clickConstruct();
 
     // 再度依頼ができること
@@ -162,32 +150,23 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
     await initBrowser();
 
     // ページオブジェクト
-    const { topPage, journalMenuPage, paymentRequestListPage, paymentRequestPage } = common.getPageObject(browser, page);
+    const { topPage, paymentRequestListPage, paymentRequestPage } = common.getPageObject(browser, page);
   
     // デジタルトレードアプリのトップページへ遷移する
     await common.gotoTop(page, approveRoute.authorizers[no]);
 
-    // 仕訳情報管理メニューを開く
-    await comment('「仕訳情報管理」をクリックする');
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-  
     // 支払依頼一覧ページへ遷移する
-    await comment('「支払依頼一覧」をクリックする');
-    await journalMenuPage.clickPaymentRequest();
+    await topPage.clickPaymentRequest();
     await paymentRequestListPage.waitForLoading();
 
     // 承認待ちタブを開く
-    await comment('「承認待ち」タブを開く');
     await paymentRequestListPage.clickConstruct();
 
     // 支払依頼ページへ遷移する
-    await comment(invoiceNo + 'の「依頼内容確認」をクリックする');
     await paymentRequestListPage.clickConstructDetail(invoiceNo);
     await paymentRequestPage.waitForLoading();
 
     // 承認する
-    await comment('承認する');
     await paymentRequestPage.checkApproval();
     await paymentRequestPage.approve();
     await paymentRequestListPage.waitPopup();
@@ -292,30 +271,22 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
     await initBrowser();
 
     // ページオブジェクト
-    const { topPage, journalMenuPage, paymentRequestListPage, paymentRequestPage } = common.getPageObject(browser, page);
+    const { topPage, paymentRequestListPage, paymentRequestPage } = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
     await common.gotoTop(page, requester);
 
-    // 仕訳情報管理メニューを開く
-    await comment('「仕訳情報管理」をクリックする');
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-
     // 支払依頼一覧ページへ遷移する
-    await comment('「支払依頼一覧」をクリックする');
-    await journalMenuPage.clickPaymentRequest();
+    await topPage.clickPaymentRequest();
     await paymentRequestListPage.waitForLoading();
 
     // ステータスが「十次承認済み」となっていること
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('十次承認済み', 'ステータスが「十次承認済み」となっていること');
     
     // 承認待ちタブを開く
-    await comment('「承認待ち」タブを開く');
     await paymentRequestListPage.clickConstruct();
 
     // 支払依頼ページへ遷移する
-    await comment(invoiceNo + 'の「依頼内容確認」をクリックする');
     await paymentRequestListPage.clickConstructDetail(invoiceNo);
     await paymentRequestPage.waitForLoading();
 
@@ -344,27 +315,19 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
     await initBrowser();
 
     // ページオブジェクト
-    const { topPage, journalMenuPage, paymentRequestListPage, paymentRequestPage } = common.getPageObject(browser, page);
+    const { topPage, paymentRequestListPage, paymentRequestPage } = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
     await common.gotoTop(page, approveRoute.authorizers[authorizerNo]);
 
-    // 仕訳情報管理メニューを開く
-    await comment('「仕訳情報管理」をクリックする');
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-
     // 支払依頼一覧ページへ遷移する
-    await comment('「支払依頼一覧」をクリックする');
-    await journalMenuPage.clickPaymentRequest();
+    await topPage.clickPaymentRequest();
     await paymentRequestListPage.waitForLoading();
 
     // 承認待ちタブを開く
-    await comment('「承認待ち」タブを開く');
     await paymentRequestListPage.clickConstruct();
 
     // 支払依頼ページへ遷移する
-    await comment('「依頼内容確認」をクリックする');
     await paymentRequestListPage.clickConstructDetail(invoiceNo);
     await paymentRequestPage.waitForLoading();
 
@@ -378,7 +341,6 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
     authorizerNo = -1;
 
     // ポップアップを閉じる
-    await comment('ポップアップメッセージを閉じる');
     await paymentRequestListPage.closePopup();
     await paymentRequestListPage.waitForLoading();
 
@@ -386,7 +348,6 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('差し戻し', '差し戻しができること');
 
     // 承認待ちタブを開く
-    await comment('「承認待ち」タブを開く');
     await paymentRequestListPage.clickConstruct();
 
     // 請求書一覧の承認タブに表示されないこと

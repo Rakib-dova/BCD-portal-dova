@@ -60,6 +60,11 @@ class JournalDetailPage {
     return await this.actionUtils.getText(this.frame, '//div[contains(text(), "合計")]/../div[2]');
   }
 
+  // 請求日（発行日）を取得する
+  async getIssueDate() {
+    return await this.actionUtils.getText(this.frame, '//th[contains(text(), "請求日")]/../../../tbody//td');
+  }
+
   // 仕訳情報の「+」をクリックする
   async clickAddBreakdown(lineNo) {
     await this.addComment('「仕訳情報」にて、「＋」をクリックする');

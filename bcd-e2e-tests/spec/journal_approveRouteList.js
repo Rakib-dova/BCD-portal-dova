@@ -41,17 +41,12 @@ describe('仕訳情報設定_承認ルート一覧', function () {
   };
 
   // 承認ルート一覧ページまで遷移する
-  async function gotoApproveRouteList(account, topPage, journalMenuPage, approveRouteListPage) {
+  async function gotoApproveRouteList(account, topPage, approveRouteListPage) {
     // デジタルトレードアプリのトップページを表示する
     await common.gotoTop(page, account);
 
-    // 仕訳情報管理メニューを開く
-    await comment('「仕訳情報管理」をクリックする');
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-
     // 承認ルート一覧ページへ遷移する
-    await journalMenuPage.clickApproveRoute();
+    await topPage.clickApproveRoute();
     await approveRouteListPage.waitForLoading();
   };
 
@@ -82,13 +77,10 @@ describe('仕訳情報設定_承認ルート一覧', function () {
       }
 
       // ページオブジェクト
-      const { topPage, journalMenuPage, approveRouteListPage, registApproveRoutePage }
-        = common.getPageObject(browser, page);
-
-      // 承認ルート一覧ページへ遷移する
-      await gotoApproveRouteList(account, topPage, journalMenuPage, approveRouteListPage);
+      const { topPage, approveRouteListPage, registApproveRoutePage } = common.getPageObject(browser, page);
 
       // 承認ルート登録ページへ遷移する
+      await gotoApproveRouteList(account, topPage, approveRouteListPage);
       await approveRouteListPage.clickRegist();
       await registApproveRoutePage.waitForLoading();
 
@@ -130,7 +122,6 @@ describe('仕訳情報設定_承認ルート一覧', function () {
         page.close();
       }
       page = await context.newPage();
-
       global.reporter.setBrowserInfo(browser, page);
       if (account.type == 'manager') {
         await comment('---------- 管理者アカウント ----------')
@@ -143,13 +134,10 @@ describe('仕訳情報設定_承認ルート一覧', function () {
       }
 
       // ページオブジェクト
-      const { topPage, journalMenuPage, approveRouteListPage, registApproveRoutePage }
-        = common.getPageObject(browser, page);
-
-      // 承認ルート一覧ページへ遷移する
-      await gotoApproveRouteList(account, topPage, journalMenuPage, approveRouteListPage);
+      const { topPage, approveRouteListPage, registApproveRoutePage } = common.getPageObject(browser, page);
 
       // 承認ルート登録ページへ遷移する
+      await gotoApproveRouteList(account, topPage, approveRouteListPage);
       await approveRouteListPage.clickRegist();
       await registApproveRoutePage.waitForLoading();
 
@@ -232,7 +220,6 @@ describe('仕訳情報設定_承認ルート一覧', function () {
         page.close();
       }
       page = await context.newPage();
-
       global.reporter.setBrowserInfo(browser, page);
       if (account.type == 'manager') {
         await comment('---------- 管理者アカウント ----------')
@@ -245,16 +232,10 @@ describe('仕訳情報設定_承認ルート一覧', function () {
       }
 
       // ページオブジェクト
-      const { topPage, journalMenuPage, approveRouteListPage, registApproveRoutePage }
-        = common.getPageObject(browser, page);
-
-      // 承認ルート一覧ページへ遷移する
-      await gotoApproveRouteList(account, topPage, journalMenuPage, approveRouteListPage);
-
-      // 「現在、承認ルートはありません。新規登録するボタンから登録を行ってください。」と表示されていること
-      // expect(await approveRouteListPage.getNodataMessage()).to.equal('現在、承認ルートはありません。', '「現在、承認ルートはありません。新規登録するボタンから登録を行ってください。」と表示されていること');
+      const { topPage, approveRouteListPage, registApproveRoutePage } = common.getPageObject(browser, page);
 
       // 承認ルート登録ページへ遷移する
+      await gotoApproveRouteList(account, topPage, approveRouteListPage);
       await approveRouteListPage.clickRegist();
       await registApproveRoutePage.waitForLoading();
 
@@ -319,16 +300,12 @@ describe('仕訳情報設定_承認ルート一覧', function () {
       // 承認ルート一覧画面に遷移すること
       expect(await approveRouteListPage.getPageTitle()).to.equal('承認ルート一覧', `【${approveRouteListPage.title}】承認ルート一覧画面に遷移すること`);
 
-      // 承認ルートの「削除」をクリックする
-      await approveRouteListPage.deleteRoute(routeName);
-
       // 「削除しますか？」のポップアップが表示されること
+      await approveRouteListPage.deleteRoute(routeName);
       expect(await approveRouteListPage.getDelMessage()).to.equal('削除しますか？', `【${approveRouteListPage.title}】「削除しますか？」のポップアップが表示されること`);
 
-      // 削除確認ポップアップの「削除」をクリックする
-      await approveRouteListPage.deleteOnConfirm();
-
       // 承認ルートが削除されること
+      await approveRouteListPage.deleteOnConfirm();
       expect(await approveRouteListPage.hasRow(routeName)).to.equal(false, `【${approveRouteListPage.title}】承認ルートが削除されること`);
       await page.waitForTimeout(1000);
     }
@@ -361,11 +338,10 @@ describe('仕訳情報設定_承認ルート一覧', function () {
       }
 
       // ページオブジェクト
-      const { topPage, journalMenuPage, approveRouteListPage }
-        = common.getPageObject(browser, page);
+      const { topPage, approveRouteListPage } = common.getPageObject(browser, page);
 
       // 承認ルート一覧ページへ遷移する
-      await gotoApproveRouteList(account, topPage, journalMenuPage, approveRouteListPage);
+      await gotoApproveRouteList(account, topPage, approveRouteListPage);
 
       // 「Homeへ戻る」をクリックする
       await approveRouteListPage.clickHome();

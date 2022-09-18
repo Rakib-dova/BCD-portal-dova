@@ -75,8 +75,7 @@ describe('利用登録', function () {
     global.reporter.setBrowserInfo(browser, page);
 
     // ページオブジェクト
-    const { loginPage, tradeShiftTopPage, registerPage }
-      = common.getPageObject(browser, page);
+    const { loginPage, tradeShiftTopPage, registerPage } = common.getPageObject(browser, page);
 
     // 指定したURLに遷移する
     await comment('Tradeshiftログインページへ移動する');
@@ -154,19 +153,17 @@ describe('利用登録', function () {
     global.reporter.setBrowserInfo(browser, page);
 
     // ページオブジェクト
-    const { topPage, settingMenuPage, contractDetailPage, contractChangePage, contractCancelPage }
+    const { topPage, contractDetailPage, contractChangePage, contractCancelPage }
       = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページを表示する
     await common.gotoTop(page, config.company2.user06);
 
     // ご契約内容画面に遷移すること
-    await topPage.openSettingMenu();
-    await settingMenuPage.waitForLoading();
-    await settingMenuPage.clickContractChange();
+    await topPage.clickContractDetail();
     await contractDetailPage.waitForLoading();
     expect(await contractDetailPage.getTitle()).to.equal('ご契約内容', '【ご契約内容】ご契約内容画面に遷移すること');
-    let planName = 'BConnectionデジタルトレードアプリ フリー';
+    let planName = 'フリー';
     expect(await contractDetailPage.getStatus(planName)).to.equal('契約中', '【ご契約内容】継続利用サービスにフリープランが「契約中」で表示されていること');
     expect(await contractDetailPage.getContractNo(planName)).to.not.equal('ー', '【ご契約内容】フリープランの契約番号が表示されていること');
 
@@ -178,7 +175,7 @@ describe('利用登録', function () {
     // フリープランの契約情報解約画面へ遷移すること
     await contractChangePage.back();
     await contractDetailPage.waitForLoading();
-    await contractDetailPage.clickCancel('フリー');
+    await contractDetailPage.clickCancel(planName);
     await contractCancelPage.waitForLoading();
     expect(await contractCancelPage.getTitle()).to.equal('契約情報解約', '【契約情報解約】契約情報解約画面へ遷移すること');
     await page.waitForTimeout(1000);

@@ -1,9 +1,9 @@
 const { ActionUtils } = require('../utils/action-utils');
 const comment = require('../utils/chai-with-reporting').comment;
 
-// デジタルトレードアプリ Home
+// デジタルトレードアプリ トップページ
 class TopPage {
-  title = 'Home';
+  title = 'トップ';
 
   constructor(browser, page) {
     this.browser = browser;
@@ -36,81 +36,134 @@ class TopPage {
 
   // 「お知らせ」タブを取得する
   async getInformationTab() {
-    return await this.actionUtils.getText(this.frame, '#informationTab');
+    return await this.actionUtils.getText(this.frame, '//div[@id="informationTab"]/../div');
   }
 
   // 「お知らせ」の「もっと見る」をクリックして、リンク先URLを取得する
   async getInformationLinkUrl() {
-    return await this.actionUtils.openNewTabAndGetUrl(this.frame, '//*[@id="informationTab"]//*[contains(text(),"もっと見る")]');
-  }
-
-  // 「工事・故障情報」タブをクリックする
-  async changeConstructTab() {
-    await this.actionUtils.click(this.frame, '#constructTab');
-  }
-
-  // 「工事・故障情報」タブが存在するか
-  async isConstructTabExist() {
-    return await this.actionUtils.isExist(this.frame, '"工事・故障情報"');
-  }
-
-  // 「工事・故障情報」タブが有効か
-  async isConstructTabActive() {
-    return (await this.actionUtils.getAttr(this.frame, '//*[@id="constructTab"]/..', 'class')) == 'is-active';
+    return await this.actionUtils.openNewTabAndGetUrl(this.frame, '//div[@id="informationTab"]/../../div/a[contains(text(),"もっと見る")]');
   }
 
   // 「工事・故障情報」の「もっと見る」をクリックして、リンク先URLを取得する
   async getConstructLinkUrl() {
-    return await this.actionUtils.openNewTabAndGetUrl(this.frame, '//*[@id="constructTab"]//*[contains(text(),"もっと見る")]');
+    return await this.actionUtils.openNewTabAndGetUrl(this.frame, '//div[@id="constructTab"]/../div/a[contains(text(),"もっと見る")]');
   }
 
-  // 「請求書一括作成」メニューを開く
-  async openUploadInvoiceMenu() {
-    await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[contains(text(),"請求書一括作成")]');
+  // メニューをクリックする（共通操作）
+  async clickMenu(category, label) {
+    await this.addComment(`機能一覧にて、「${category}」-「${label}」をクリックする`);
+    await this.actionUtils.click(this.frame, `//p[contains(text(), "${category}")]/../../../a[contains(text(),"${label}")]`);
   }
 
-  // 「請求情報ダウンロード」ページを開く
-  async openDownloadInvoicePage() {
-    await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[contains(text(),"請求情報ダウンロード")]');
+  // メニューをクリックする（共通操作・ポップアップ付）
+  async clickMenuWithPopup(category, label, popupLabel) {
+    await this.clickMenu(category, label);
+    await this.actionUtils.waitForLoading('//div[@class="modal is-active"]');
+    await this.addComment(`ポップアップメニューにて、「${popupLabel}」をクリックする`);
+    await this.actionUtils.click(this.frame, `//div[@class="modal is-active"]//p[contains(text(), "${popupLabel}")]`);
   }
 
-  // 「仕訳情報管理」メニューを開く
-  async openJournalMenu() {
-    await this.addComment('「仕訳情報管理」をクリックする');
-    await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[contains(text(),"仕訳情報管理")]');
+  // メニュー「請求書一括作成」-「請求書一括作成」をクリックする
+  async clickUploadInvoice() {
+    await this.clickMenu('請求書一括作成', '請求書一括作成');
   }
 
-  // 「PDF請求書作成」メニューを開く
-  async openPdfInvoicing() {
-    await this.addComment('「PDF請求書作成」をクリックする');
-    await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[contains(text(),"PDF請求書作成")]');
+  // メニュー「請求書一括作成」-「独自フォーマット登録」をクリックする
+  async clickUploadFormat() {
+    await this.clickMenu('請求書一括作成', '独自フォーマット登録');
   }
 
-  // 「サポート」メニューを開く
-  async openSupportMenu() {
-    await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[text()="サポート"]/../../..')
+  // メニュー「請求書一括作成」-「操作マニュアル」をクリックする
+  async clickInvoiceGuide() {
+    await this.clickMenu('請求書一括作成', '操作マニュアル');
   }
 
-  // 「追加オプション申込」が表示されているか確認する
-  async isSettingMenuShown() {
-    return await this.actionUtils.isDisplayed(this.frame, '//*[contains(@class,"box")]//*[text()="設定"]');
+  // メニュー「請求情報ダウンロード」-「仕訳情報ダウンロード」をクリックする
+  async clickDownloadInvoice() {
+    await this.clickMenu('請求情報ダウンロード', '仕訳情報ダウンロード');
   }
 
-  // 「設定」メニューを開く
-  async openSettingMenu() {
-    await this.addComment('「設定」をクリックする');
-    await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[text()="設定"]')
+  // メニュー「仕訳情報管理」-「各種コード設定」-「勘定科目設定」をクリックする
+  async clickAccountCode() {
+    await this.clickMenuWithPopup('仕訳情報管理', '各種コード設定', '勘定科目設定');
+  }
+
+  // メニュー「仕訳情報管理」-「各種コード設定」-「補助科目設定」をクリックする
+  async clickSubAccountCode() {
+    await this.clickMenuWithPopup('仕訳情報管理', '各種コード設定', '補助科目設定');
+  }
+
+  // メニュー「仕訳情報管理」-「各種コード設定」-「部門データ設定」をクリックする
+  async clickDepartmentCode() {
+    await this.clickMenuWithPopup('仕訳情報管理', '各種コード設定', '部門データ設定');
+  }
+
+  // メニュー「仕訳情報管理」-「支払依頼」をクリックする
+  async clickPaymentRequest() {
+    await this.clickMenu('仕訳情報管理', '支払依頼');
+  }
+
+  // メニュー「仕訳情報管理」-「仕訳情報ダウンロード」をクリックする
+  async clickDownloadJournal() {
+    await this.clickMenu('仕訳情報管理', '仕訳情報ダウンロード');
+  }
+
+  // メニュー「仕訳情報管理」-「承認ルート登録」をクリックする
+  async clickApproveRoute() {
+    await this.clickMenu('仕訳情報管理', '承認ルート登録');
+  }
+
+  // メニュー「PDF請求書作成」-「新規作成」をクリックする
+  async clickRegisterPdf() {
+    await this.clickMenu('PDF請求書作成', '新規作成');
+  }
+
+  // メニュー「PDF請求書作成」-「ドラフト一括作成」をクリックする
+  async clickUploadPdf() {
+    await this.clickMenu('PDF請求書作成', 'ドラフト一括作成');
+  }
+
+  // メニュー「サポート」-「ご利用ガイド」をクリックする
+  async clickUserGuide() {
+    await this.clickMenu('サポート', 'ご利用ガイド');
+  }
+
+  // メニュー「サポート」-「よくある質問」をクリックする
+  async clickFaq() {
+    let category = 'サポート';
+    let label = 'よくある質問';
+    await this.addComment(`機能一覧にて、「${category}」-「${label}」をクリックする`);
+    await this.actionUtils.click(this.frame, `//p[contains(text(), "${category}")]/../../../a/span[contains(text(),"${label}")]`);
+  }
+
+  // メニュー「サポート」-「各種お問い合わせ」をクリックする
+  async clickInquiry() {
+    await this.clickMenu('サポート', '各種お問い合わせ');
+  }
+
+  // メニュー「設定」-「ご契約内容」をクリックする
+  async clickContractDetail() {
+    await this.clickMenu('設定', 'ご契約内容');
+  }
+
+  // メニュー「設定」-「ユーザー一括登録」をクリックする
+  async clickUploadUsers() {
+    await this.clickMenu('設定', 'ユーザー一括登録');
+  }
+
+  // メニュー「追加オプション申込」-「オプション詳細・申込」をクリックする
+  async clickLightPlan() {
+    await this.clickMenu('追加オプション申込', 'オプション詳細・申込');
+  }
+
+  // 「設定」が表示されているか確認する
+  async isSettingShown() {
+    return await this.actionUtils.isDisplayed(this.frame, '//*[contains(@class,"box")]//p[contains(text(), "設定")]');
   }
 
   // 「追加オプション申込」が表示されているか確認する
   async isLightPlanShown() {
-    return await this.actionUtils.isDisplayed(this.frame, '//*[contains(@class,"box")]//*[contains(text(),"追加オプション申込")]');
-  }
-
-  // 「追加オプション申込」メニューを開く
-  async openLightPlan() {
-    await this.addComment('「追加オプション申込」をクリックする');
-    await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[contains(text(),"追加オプション申込")]');
+    return await this.actionUtils.isDisplayed(this.frame, '//*[contains(@class,"box")]//p[contains(text(), "追加オプション申込")]');
   }
 
   // 「銀行振込消印」ダイアログを開く
