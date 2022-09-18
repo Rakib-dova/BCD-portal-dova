@@ -18,7 +18,7 @@ class TradeShiftUserPage {
 
   // ページが表示されるまで待機する
   async waitForLoading() {
-    let frame = await this.actionUtils.waitForLoading('#edit')
+    let frame = await this.actionUtils.waitForLoading('#edit');
     this.frame = frame;
     return frame;
   }

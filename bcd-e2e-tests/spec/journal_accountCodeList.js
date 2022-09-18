@@ -49,14 +49,12 @@ describe('仕訳情報設定_勘定科目一覧', function () {
   };
 
   // 勘定科目一覧ページまで遷移する
-  async function gotoAccountCodeList(account, topPage, journalMenuPage, accountCodeListPage) {
+  async function gotoAccountCodeList(account, topPage, accountCodeListPage) {
     // トップページを表示する
     await common.gotoTop(page, account);
 
     // 勘定科目一覧ページへ遷移する
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-    await journalMenuPage.clickAccount();
+    await topPage.clickAccountCode();
     await accountCodeListPage.waitForLoading();
   };
 
@@ -87,10 +85,10 @@ describe('仕訳情報設定_勘定科目一覧', function () {
       }
 
       // ページオブジェクト
-      const { topPage, journalMenuPage, accountCodeListPage, registAccountCodePage } = common.getPageObject(browser, page);
+      const { topPage, accountCodeListPage, registAccountCodePage } = common.getPageObject(browser, page);
 
       // 勘定科目一覧ページへ遷移する
-      await gotoAccountCodeList(account, topPage, journalMenuPage, accountCodeListPage);
+      await gotoAccountCodeList(account, topPage, accountCodeListPage);
 
       // 勘定科目登録ページへ遷移する
       await accountCodeListPage.clickRegist();
@@ -163,11 +161,10 @@ describe('仕訳情報設定_勘定科目一覧', function () {
       }
 
       // ページオブジェクト
-      const { topPage, journalMenuPage, accountCodeListPage, uploadAccountCodePage }
-        = common.getPageObject(browser, page);
+      const { topPage, accountCodeListPage, uploadAccountCodePage } = common.getPageObject(browser, page);
 
       // 勘定科目一覧ページへ遷移する
-      await gotoAccountCodeList(account, topPage, journalMenuPage, accountCodeListPage);
+      await gotoAccountCodeList(account, topPage, accountCodeListPage);
 
       // 勘定科目一括作成ページへ遷移する
       await accountCodeListPage.clickUpload();

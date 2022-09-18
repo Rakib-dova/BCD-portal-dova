@@ -42,16 +42,11 @@ describe('仕訳情報設定_支払依頼一覧（仕訳情報保存）', functi
   };
 
   // 支払依頼一覧まで遷移する
-  async function gotoPaymentRequestList(account, topPage, journalMenuPage, paymentRequestListPage) {
+  async function gotoPaymentRequestList(account, topPage, paymentRequestListPage) {
     await common.gotoTop(page, account);
 
-    // 仕訳情報管理メニューを開く
-    await comment('「仕訳情報管理」をクリックする');
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-
     // 支払依頼一覧ページへ遷移する
-    await journalMenuPage.clickPaymentRequest();
+    await topPage.clickPaymentRequest();
     await paymentRequestListPage.waitForLoading();
   };
 
@@ -117,11 +112,11 @@ describe('仕訳情報設定_支払依頼一覧（仕訳情報保存）', functi
     global.reporter.setBrowserInfo(browser, page);
 
     // ページオブジェクト
-    const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, paymentRequestListPage, journalDetailPage }
+    const { loginPage, topPage, tradeShiftTopPage, paymentRequestListPage, journalDetailPage }
       = common.getPageObject(browser, page);
 
     // 支払依頼一覧ページへ遷移する
-    await gotoPaymentRequestList(config.company2.user04, topPage, journalMenuPage, paymentRequestListPage);
+    await gotoPaymentRequestList(config.company2.user04, topPage, paymentRequestListPage);
 
     // 仕訳情報設定ページへ遷移する
     await paymentRequestListPage.clickDetail(invoiceNo);
@@ -140,10 +135,8 @@ describe('仕訳情報設定_支払依頼一覧（仕訳情報保存）', functi
     await tradeShiftTopPage.logout();
     await loginPage.waitForLoading();
 
-    // 別のユーザでログインし、支払依頼一覧ページへ遷移する
-    await gotoPaymentRequestList(config.company2.user05, topPage, journalMenuPage, paymentRequestListPage);
-
-    // 仕訳情報設定ページへ遷移する
+    // 別のユーザでログインし、仕訳情報設定ページへ遷移する
+    await gotoPaymentRequestList(config.company2.user05, topPage, paymentRequestListPage);
     await paymentRequestListPage.clickDetail(invoiceNo);
     await journalDetailPage.waitForLoading();
 
@@ -185,13 +178,10 @@ describe('仕訳情報設定_支払依頼一覧（仕訳情報保存）', functi
     global.reporter.setBrowserInfo(browser, page);
 
     // ページオブジェクト
-    const { topPage, journalMenuPage, paymentRequestListPage, journalDetailPage } = common.getPageObject(browser, page);
-
-    // 支払依頼一覧ページへ遷移する
-    await gotoPaymentRequestList(config.company2.user04, topPage, journalMenuPage, paymentRequestListPage);
+    const { topPage, paymentRequestListPage, journalDetailPage } = common.getPageObject(browser, page);
 
     // 仕訳情報設定ページへ遷移する
-    await comment('「仕訳情報設定」をクリックする');
+    await gotoPaymentRequestList(config.company2.user04, topPage, paymentRequestListPage);
     await paymentRequestListPage.clickDetail(invoiceNo);
     await journalDetailPage.waitForLoading();
 

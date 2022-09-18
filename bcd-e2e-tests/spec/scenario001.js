@@ -4,7 +4,6 @@ const chaiWithReporting = require('../utils/chai-with-reporting').chaiWithReport
 const comment = require('../utils/chai-with-reporting').comment;
 const fs = require('fs');
 const common = require('./common');
-const { parse } = require('csv-parse/sync');
 
 const expect = chai.expect;
 chai.use(chaiWithReporting);
@@ -51,84 +50,52 @@ describe('リグレッションテスト', function () {
       }
 
       // ページオブジェクト
-      const { topPage, supportMenuPage, uploadInvoiceMenuPage, uploadInvoicePage, uploadFormatTopPage, settingMenuPage, contractChangePage }
+      const { topPage, userGuidePage, uploadInvoicePage, uploadFormatTopPage, contractDetailPage }
         = common.getPageObject(browser, page);
 
       // デジタルトレードアプリのトップページを表示する
       await common.gotoTop(page, account);
 
       // 「お知らせ」の「もっと見る」をクリックして、リンク先URLをチェックする
-      let url = await topPage.getInformationLinkUrl();
-      expect(url).to.equal('https://support.ntt.com/bconnection/information/search', 'お知らせ一覧に遷移すること');
+      let expected = 'https://support.ntt.com/bconnection/information/search';
+      expect(await topPage.getInformationLinkUrl()).to.equal(expected, 'お知らせ一覧に遷移すること');
       await topPage.waitForLoading();
-
-      // 「工事・故障情報」タブをクリックする
-      await topPage.changeConstructTab();
-      expect(await topPage.isConstructTabActive()).to.equal(true, '表示内容が正しく切り替わること');
 
       // 「工事・故障情報」の「もっと見る」をクリックして、リンク先URLをチェックする
-      url = await topPage.getConstructLinkUrl();
-      expect(url).to.equal('https://support.ntt.com/bconnection/maintenance/search', '工事・故障情報に遷移すること');
+      expected = 'https://support.ntt.com/bconnection/maintenance/search';
+      expect(await topPage.getConstructLinkUrl()).to.equal(expected, '工事・故障情報に遷移すること');
       await topPage.waitForLoading();
 
-      // サポートメニューを表示する
-      await topPage.openSupportMenu();
-      await supportMenuPage.waitForLoading();
+      // ご利用ガイドを表示する
+      await topPage.clickUserGuide();
+      await userGuidePage.waitForLoading();
 
-      // 「設定方法、ご利用方法のお問い合わせ」をクリックする(管理者のみ)
-      if (account.type == 'manager') {
-        await supportMenuPage.clickContact();
-
-        // 「設定方法、ご利用方法のお問い合わせ」画面の表示内容を確認する
-        if (!(await supportMenuPage.isModalShown())) {
-          expect(await supportMenuPage.getNumberN()).to.equal('N999999999', 'N番が表示されていること');
-          expect(await supportMenuPage.isCopyExist()).to.equal(true, 'フォーム右側に「copy」ボタンが表示されていること');
-          expect(await supportMenuPage.isContactLinkExist()).to.equal(true, 'フォーム下部に「お問い合わせページを開く」ボタンが表示されていること');
-  
-          // 「お問い合わせページを開く」をクリックして、リンク先URLをチェックする
-          url = await supportMenuPage.getContactLinkUrl();
-          expect(url).to.equal('https://support.ntt.com/bconnection/inquiry/input/pid2200000saa', 'お問い合わせ画面が表示されること');
-        }
-
-        // 「設定方法、ご利用方法のお問い合わせ」を閉じる
-        await supportMenuPage.closeContact();
+      // 「お問い合わせページを開く」をクリックして、リンク先URLをチェックする
+      if (account.type == 'manager' && await userGuidePage.hasContractNo()) {
+        expected = 'https://support.ntt.com/bconnection/inquiry/input/pid2200000saa';
+        expect(await userGuidePage.getInquiryUrl()).to.equal(expected, 'お問い合わせ画面が表示されること');
       }
 
-      // 「よくある質問（日本語）を参照する」をクリックして、リンク先URLをチェックする
-      url = await supportMenuPage.getFaqLinkUrl();
-      expect(url).to.equal('https://support.ntt.com/bconnection/faq/search', 'よくあるご質問画面が表示されること');
+      // 「よくある質問へ」をクリックして、リンク先URLをチェックする
+      expected = 'https://support.ntt.com/bconnection/faq/search';
+      expect(await userGuidePage.getFaqUrl()).to.equal(expected, 'よくあるご質問画面が表示されること');
 
-      // サポートメニューを閉じる
-      await supportMenuPage.closeMenu();
+      // Homeへ戻る
+      await userGuidePage.clickHome();
       await topPage.waitForLoading();
 
-      // 請求書一括作成メニューを表示する
-      await topPage.openUploadInvoiceMenu();
-      await uploadInvoiceMenuPage.waitForLoading();
-
-      let textList = await uploadInvoiceMenuPage.getMenuTexts();
-      expect(textList).to.include('請求書一括作成', '「請求書一括作成」が表示されていること')
-      expect(textList).to.include('請求書アップロードフォーマット一覧', '「請求書アップロードフォーマット一覧」が表示されていること')
-      expect(textList).to.include('アップロード用請求書フォーマットcsvダウンロード', '「アップロード用請求書フォーマットcsvダウンロード」が表示されていること')
-      expect(textList).to.include('操作マニュアルダウンロード', '「操作マニュアルダウンロード」が表示されていること')
-
-      // アップロード用請求書フォーマットcsvのダウンロード
-      let csvPath = await uploadInvoiceMenuPage.downloadFormatTemplate();
       // 操作マニュアルのダウンロード
-      let pdfPath = await uploadInvoiceMenuPage.downloadManual();
-
-      // ファイルがダウンロードできたかチェックする
-      expect(await fs.existsSync(csvPath)).to.equal(true, 'フォーマットファイルがダウンロードできること');
-      expect(await fs.existsSync(pdfPath)).to.equal(true, '操作マニュアルがダウンロードできること');
-
-      // CSVファイルの中身をチェックする
-      let testDataRow = fs.readFileSync(csvPath)
-      let csvData = JSON.stringify(parse(testDataRow));
-      let expectedVal = '[["\ufeff発行日","請求書番号","テナントID","支払期日","納品日","備考","取引先メールアドレス","銀行名","支店名","科目","口座番号","口座名義","その他特記事項","明細-項目ID","明細-内容","明細-数量","明細-単位","明細-単価","明細-税（消費税／軽減税率／不課税／免税／非課税）","明細-備考"]]'
-      expect(csvData).to.equal(expectedVal, 'フォーマットファイルの中身が正しいこと');
+      await topPage.clickInvoiceGuide();
+      await userGuidePage.waitForLoading();
+      await page.waitForTimeout(1000);
+      let pdfPath = await userGuidePage.downloadInvoiceGuide();
+      // expected = 'https://bcd-portal.tsdev.biz/html/%E3%80%90Bconnection%E3%83%87%E3%82%B8%E3%82%BF%E3%83%AB%E3%83%88%E3%83%AC%E3%83%BC%E3%83%89%E3%82%A2%E3%83%97%E3%83%AA%E3%80%91%E6%93%8D%E4%BD%9C%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB_%E8%AB%8B%E6%B1%82%E6%9B%B8%E4%B8%80%E6%8B%AC%E4%BD%9C%E6%88%90.pdf';
+      expect(await fs.existsSync(pdfPath)).to.equal(true, '請求書一括作成のPDFマニュアルがダウンロードできること');
 
       // 請求書一括作成ページに遷移する
-      await uploadInvoiceMenuPage.clickUploadInvoice();
+      await userGuidePage.clickHome();
+      await topPage.waitForLoading();
+      await topPage.clickUploadInvoice();
       await uploadInvoicePage.waitForLoading();
       expect(await uploadInvoicePage.getTitle()).to.equal('請求書一括作成', '請求書一括作成ページに遷移すること');
 
@@ -136,12 +103,8 @@ describe('リグレッションテスト', function () {
       await uploadInvoicePage.moveTop();
       await topPage.waitForLoading();
 
-      // 請求書一括作成メニューを表示する
-      await topPage.openUploadInvoiceMenu();
-      await uploadInvoiceMenuPage.waitForLoading();
-
       // 請求書アップロードフォーマット一覧ページに遷移する
-      await uploadInvoiceMenuPage.clickUploadFormat();
+      await topPage.clickUploadFormat();
       await uploadFormatTopPage.waitForLoading();
       expect(await uploadFormatTopPage.getTitle()).to.equal('アップロードフォーマット一覧', 'アップロードフォーマット一覧ページに遷移すること');
 
@@ -169,17 +132,13 @@ describe('リグレッションテスト', function () {
       // Homeへ戻るボタンを押下する
       await uploadFormatTopPage.moveTop();
       await topPage.waitForLoading();
-      expect(await topPage.isConstructTabExist()).to.equal(true, 'Home画面に遷移すること');
+      expect(await topPage.getInformationTab()).to.equal('お知らせ', 'Home画面に遷移すること');
 
-      // 設定メニューを表示する(管理者のみ)
+      // 契約内容を表示する(管理者のみ)
       if (account.type == 'manager') {
-        await topPage.openSettingMenu();
-        await settingMenuPage.waitForLoading();
-
-        // 契約情報変更画面に遷移する
-        await settingMenuPage.clickContractChange();
-        await contractChangePage.waitForLoading();
-        expect(await contractChangePage.getTitle()).to.equal('ご契約内容', 'ご契約内容画面に遷移すること');
+        await topPage.clickContractDetail();
+        await contractDetailPage.waitForLoading();
+        expect(await contractDetailPage.getTitle()).to.equal('ご契約内容', 'ご契約内容画面に遷移すること');
       }
       await page.waitForTimeout(1000);
     }

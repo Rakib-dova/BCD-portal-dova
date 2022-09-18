@@ -45,6 +45,7 @@ parameters:
     type: string
     default: デジタルトレードアプリ（モック）
     values:
+      - デジタルトレードアプリ（Dev）
       - デジタルトレードアプリ（モック）
       - デジタルトレード (prodstg)
   - name: account

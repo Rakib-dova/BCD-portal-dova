@@ -14,7 +14,7 @@ class PaymentRequestListPage {
 
   // コメントする
   async addComment(message) {
-    await comment('【' + this.title + '】' + message);
+    await comment(`【${this.title}】${message}`);
   }
 
   // ページが表示されるまで待機する
@@ -37,7 +37,7 @@ class PaymentRequestListPage {
 
   // 検索条件フォーム：請求書番号を入力する
   async inputSearchInvoiceNo(invoiceNo) {
-    await this.addComment('「請求書番号」にて、"' + invoiceNo + '"と入力する');
+    await this.addComment(`「請求書番号」にて、"${invoiceNo}"と入力する`);
     await this.actionUtils.fill(this.frame, '#invoiceNumber', invoiceNo);
   }
 
@@ -48,7 +48,7 @@ class PaymentRequestListPage {
 
   // 日付を入力する
   async inputDate(itemName, selector, date) {
-    await this.addComment('「' + itemName + '」にて、"' + date + '"と入力する');
+    await this.addComment(`「${itemName}」にて、"${date}"と入力する`);
     let elm = await this.actionUtils.getElement(this.frame, selector);
     let dates = date.split('-');
     await elm.type(dates[0]);
@@ -76,8 +76,17 @@ class PaymentRequestListPage {
 
   // 検索条件フォーム：送信企業を入力する
   async inputSearchSendTo(sender) {
-    await this.addComment('「送信企業」にて、"' + sender + '"と入力する');
+    await this.addComment(`「送信企業」にて、"${sender}"と入力する`);
     await this.actionUtils.fill(this.frame, '#sendTo', sender);
+    await this.addComment('「送信企業」にて、「検索」をクリックする');
+    await this.actionUtils.click(this.frame, '#sendToSearchBtn');
+    await this.actionUtils.waitForLoading('//div[@id="displaySendToSearchResultField"]/div');
+  }
+
+  // 送信企業を選択する
+  async selectSearchSendTo(sender) {
+    await this.addComment(`「送信企業」の検索結果から、"${sender}"を選択する`);
+    await this.actionUtils.click(this.frame, `//div[@id="displaySendToSearchResultField"]//label[contains(text(), "${sender}")]`);
   }
 
   // 検索条件フォーム：送信企業を取得する
@@ -103,10 +112,10 @@ class PaymentRequestListPage {
       '最終承認済み' : '00',
       '差し戻し' : '90',
     }
-    await this.addComment('「承認ステータス」にて、"' + status + '"にチェックを入れる');
+    await this.addComment(`「承認ステータス」にて、"${status}"にチェックを入れる`);
     let i = 0;
     for (i = 0; i < status.length; i++) {
-      await this.actionUtils.check(this.frame, '//input[contains(@name, "status") and @value="' + statusValues[status[i]] + '"]', true);
+      await this.actionUtils.check(this.frame, `//input[contains(@name, "status") and @value="${statusValues[status[i]]}"]`, true);
     }
   }
 
@@ -208,22 +217,34 @@ class PaymentRequestListPage {
     }
   }
 
-  // 支払依頼リストに、任意の請求書が表示されているか確認する
+  // 支払依頼リストに、指定した番号の請求書が表示されているか確認する
   async hasRow(invoiceNo) {
     return await this.actionUtils.isExist(this.frame, '//div[@id="informationTab"]//td[contains(text(), "' + invoiceNo + '")]');
   }
 
-  // 仕訳情報設定ページへ遷移する
-  async clickDetail(invoiceNo) {
-    await this.addComment('請求書番号"' + invoiceNo + '"にて、「仕訳情報設定」をクリックする');
-    await this.paging(invoiceNo);
-    await this.actionUtils.click(this.frame, '//table//td[contains(text(), "' + invoiceNo + '")]/..//a[contains(text(), "仕訳情報設定")]');
+  // 支払依頼リスト内、全ての行の送信企業を取得する
+  async getAllSenders() {
+    let trPath = '//div[@id="informationTab"]/table/tbody/tr';
+    let rowCount = (await this.actionUtils.getElements(this.frame, '//div[@id="informationTab"]/table/tbody/tr')).length;
+    let i = 0;
+    let result = [];
+    for (i = 0; i < rowCount; i++) {
+      let sender = await this.actionUtils.getText(this.frame, `${trPath}/td[6]`);
+      if (!result.includes(sender)) {
+        result.push(sender);
+      }
+    }
+    return result;
   }
 
   // 承認ステータスを取得する
   async getApproveStatus(invoiceNo) {
     await this.paging(invoiceNo);
     return await this.actionUtils.getText(this.frame, '//table//td[contains(text(), "' + invoiceNo + '")]/../td[3]/a');
+  }
+
+  async getAllStatus() {
+
   }
 
   // 金額を取得する
@@ -236,6 +257,19 @@ class PaymentRequestListPage {
   async getSender(invoiceNo) {
     await this.paging(invoiceNo);
     return await this.actionUtils.getText(this.frame, '//table//td[contains(text(), "' + invoiceNo + '")]/../td[6]');
+  }
+
+  // 仕訳情報設定ページへ遷移する
+  async clickDetail(invoiceNo) {
+    await this.addComment('請求書番号"' + invoiceNo + '"にて、「仕訳情報設定」をクリックする');
+    await this.paging(invoiceNo);
+    await this.actionUtils.click(this.frame, '//table//td[contains(text(), "' + invoiceNo + '")]/..//a[contains(text(), "仕訳情報設定")]');
+  }
+
+  // 仕訳情報設定ページへ遷移する
+  async clickFirstDetail() {
+    await this.addComment('先頭行の「仕訳情報設定」をクリックする');
+    await this.actionUtils.click(this.frame, '//table//a[contains(text(), "仕訳情報設定")]');
   }
 
   // 承認待ちタブを表示する

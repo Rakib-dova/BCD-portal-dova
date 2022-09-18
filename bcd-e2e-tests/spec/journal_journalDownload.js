@@ -57,10 +57,8 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
   });
 
   // 支払依頼一覧から、仕訳情報の詳細を取得する
-  async function getDetail(topPage, journalMenuPage, paymentRequestListPage, journalDetailPage, invoiceNo, lineNo) {
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-    await journalMenuPage.clickPaymentRequest();
+  async function getDetail(topPage, paymentRequestListPage, journalDetailPage, invoiceNo, lineNo) {
+    await topPage.clickPaymentRequest();
     await paymentRequestListPage.waitForLoading();
     await paymentRequestListPage.clickDetail(invoiceNo);
     await journalDetailPage.waitForLoading();
@@ -68,13 +66,11 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
   }
 
   // 仕訳情報をダウンロードする
-  async function download(topPage, journalMenuPage, journalDownloadPage,
+  async function download(topPage, journalDownloadPage,
       invoiceNo, startDate, endDate, sender, approved, dataFormat, hasData) {
 
     // 仕訳情報ダウンロードページへ遷移する
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-    await journalMenuPage.clickJournalDownload();
+    await topPage.clickDownloadJournal();
     await journalDownloadPage.waitForLoading();
 
     // ダウンロード対象の選択肢が追加されていること
@@ -113,16 +109,12 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
     global.reporter.setBrowserInfo(browser, page);
 
     // ページオブジェクト
-    const { topPage, journalMenuPage, journalDownloadPage, lightPlanMenuPage, paidServiceRegisterPage }
+    const { topPage, journalDownloadPage, lightPlanMenuPage, paidServiceRegisterPage }
       = common.getPageObject(browser, page);
 
-    // デジタルトレードアプリのトップページへ遷移する
-    await common.gotoTop(page, config.company2.user06);
-
     // 仕訳情報ダウンロードページへ遷移する
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-    await journalMenuPage.clickJournalDownload();
+    await common.gotoTop(page, config.company2.user06);
+    await topPage.clickDownloadJournal();
     await journalDownloadPage.waitForLoading();
 
     // 出力フォーマットが「規定フォーマット」のみであること
@@ -153,22 +145,21 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
     await initBrowser();
 
     // ページオブジェクト
-    const { topPage, journalMenuPage, paymentRequestListPage, journalDetailPage, journalDownloadPage }
-      = common.getPageObject(browser, page);
+    const { topPage, paymentRequestListPage, journalDetailPage, journalDownloadPage } = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
     await common.gotoTop(page, config.company1.mng);
 
     // 支払依頼一覧から、仕訳情報の詳細を取得する
     let invoiceNo = 'fcde40392';
-    let expected = await getDetail(topPage, journalMenuPage, paymentRequestListPage, journalDetailPage, invoiceNo, 1);
+    let expected = await getDetail(topPage, paymentRequestListPage, journalDetailPage, invoiceNo, 1);
 
     // デジタルトレードアプリのホームへ遷移する
     await journalDetailPage.clickHome();
     await topPage.waitForLoading();
 
     // ダウンロードする
-    let csvPath = await download(topPage, journalMenuPage, journalDownloadPage, invoiceNo, '2021-08-21', '2021-08-25', null, false, null, true);
+    let csvPath = await download(topPage, journalDownloadPage, invoiceNo, '2021-08-21', '2021-08-25', null, false, null, true);
 
     // CSVデータがダウンロードされ、GQ列～ID列に設定した仕訳情報が入力されていること
     let actual = await getCsvData(csvPath, false, true);
@@ -192,14 +183,14 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
     await initBrowser();
 
     // ページオブジェクト
-    const { topPage, journalMenuPage, journalDownloadPage } = common.getPageObject(browser, page);
+    const { topPage, journalDownloadPage } = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
     await common.gotoTop(page, config.company2.user04);
 
     // ダウンロードする
     let invoiceNo = 'atestApproved';
-    let csvPath = await download(topPage, journalMenuPage, journalDownloadPage, invoiceNo, '2021-04-01', '2023-03-31', null, true, null, true);
+    let csvPath = await download(topPage, journalDownloadPage, invoiceNo, '2021-04-01', '2023-03-31', null, true, null, true);
 
     // 仕訳情報ダウンロード画面で絞り込みをしたデータと同一の内容になっていること
     let actual = await getCsvData(csvPath, false, true);
@@ -221,13 +212,13 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
     await initBrowser();
 
     // ページオブジェクト
-    const { topPage, journalMenuPage, journalDownloadPage } = common.getPageObject(browser, page);
+    const { topPage, journalDownloadPage } = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
     await common.gotoTop(page, account);
 
     // ダウンロードする
-    await download(topPage, journalMenuPage, journalDownloadPage, invoiceNo, startDate, endDate, null, approved, null, false);
+    await download(topPage, journalDownloadPage, invoiceNo, startDate, endDate, null, approved, null, false);
     await page.waitForTimeout(1000);
   }
 
@@ -250,13 +241,13 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
     await initBrowser();
 
     // ページオブジェクト
-    const { topPage, journalMenuPage, journalDownloadPage } = common.getPageObject(browser, page);
+    const { topPage, journalDownloadPage } = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
     await common.gotoTop(page, config.company2.user04);
 
     // ダウンロードする
-    let csvPath = await download(topPage, journalMenuPage, journalDownloadPage, invoiceNo, startDate, endDate, null, false, null, true);
+    let csvPath = await download(topPage, journalDownloadPage, invoiceNo, startDate, endDate, null, false, null, true);
     
     // 仕訳情報ダウンロード画面で絞り込みをしたデータと同一の内容になっていること
     let actual = await getCsvData(csvPath, false, true);
@@ -347,22 +338,21 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
     await initBrowser();
 
     // ページオブジェクト
-    const { topPage, journalMenuPage, journalDownloadPage, paymentRequestListPage, journalDetailPage }
-      = common.getPageObject(browser, page);
+    const { topPage, journalDownloadPage, paymentRequestListPage, journalDetailPage } = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
     await common.gotoTop(page, config.company1.mng);
 
     // 支払依頼一覧から、仕訳情報の詳細を取得する
     let invoiceNo = 'fcde40393';
-    let expected = await getDetail(topPage, journalMenuPage, paymentRequestListPage, journalDetailPage, invoiceNo, 1);
+    let expected = await getDetail(topPage, paymentRequestListPage, journalDetailPage, invoiceNo, 1);
 
     // デジタルトレードアプリのホームへ遷移する
     await journalDetailPage.clickHome();
     await topPage.waitForLoading();
 
     // ダウンロードする
-    let csvPath = await download(topPage, journalMenuPage, journalDownloadPage, invoiceNo, '2021-08-21', '2021-08-25', null, false, '弥生会計', true);
+    let csvPath = await download(topPage, journalDownloadPage, invoiceNo, '2021-08-21', '2021-08-25', null, false, '弥生会計', true);
 
     // 仕訳情報ダウンロード画面で絞り込みをしたデータと同一の内容になっていること
     await validateYayoi(csvPath, expected);
@@ -378,22 +368,21 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
     await initBrowser();
 
     // ページオブジェクト
-    const { topPage, journalMenuPage, journalDownloadPage, paymentRequestListPage, journalDetailPage }
-      = common.getPageObject(browser, page);
+    const { topPage, journalDownloadPage, paymentRequestListPage, journalDetailPage } = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
     await common.gotoTop(page, config.company1.mng);
 
     // 支払依頼一覧から、仕訳情報の詳細を取得する
     let invoiceNo = 'fcde40392';
-    let expected = await getDetail(topPage, journalMenuPage, paymentRequestListPage, journalDetailPage, invoiceNo, 1);
+    let expected = await getDetail(topPage, paymentRequestListPage, journalDetailPage, invoiceNo, 1);
 
     // デジタルトレードアプリのホームへ遷移する
     await journalDetailPage.clickHome();
     await topPage.waitForLoading();
 
     // ダウンロードする
-    let csvPath = await download(topPage, journalMenuPage, journalDownloadPage, invoiceNo, '2021-08-21', '2021-08-25', null, false, '弥生会計', true);
+    let csvPath = await download(topPage, journalDownloadPage, invoiceNo, '2021-08-21', '2021-08-25', null, false, '弥生会計', true);
 
     // 仕訳情報ダウンロード画面で絞り込みをしたデータと同一の内容になっていること
     await validateYayoi(csvPath, expected);
@@ -409,22 +398,21 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
     await initBrowser();
 
     // ページオブジェクト
-    const { topPage, journalMenuPage, journalDownloadPage, paymentRequestListPage, journalDetailPage }
-      = common.getPageObject(browser, page);
+    const { topPage, journalDownloadPage, paymentRequestListPage, journalDetailPage } = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
     await common.gotoTop(page, config.company1.mng);
 
     // 支払依頼一覧から、仕訳情報の詳細を取得する
     let invoiceNo = 'fcde40393';
-    let expected = await getDetail(topPage, journalMenuPage, paymentRequestListPage, journalDetailPage, invoiceNo, 1);
+    let expected = await getDetail(topPage, paymentRequestListPage, journalDetailPage, invoiceNo, 1);
 
     // デジタルトレードアプリのホームへ遷移する
     await journalDetailPage.clickHome();
     await topPage.waitForLoading();
 
     // ダウンロードする
-    let csvPath = await download(topPage, journalMenuPage, journalDownloadPage, invoiceNo, '2021-08-21', '2021-08-25', null, false, '勘定奉行クラウド', true);
+    let csvPath = await download(topPage, journalDownloadPage, invoiceNo, '2021-08-21', '2021-08-25', null, false, '勘定奉行クラウド', true);
 
     // 仕訳情報ダウンロード画面で絞り込みをしたデータと同一の内容になっていること
     let actual = await getCsvData(csvPath, false, true);
@@ -450,22 +438,21 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
     await initBrowser();
 
     // ページオブジェクト
-    const { topPage, journalMenuPage, journalDownloadPage, paymentRequestListPage, journalDetailPage }
-      = common.getPageObject(browser, page);
+    const { topPage, journalDownloadPage, paymentRequestListPage, journalDetailPage } = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
     await common.gotoTop(page, config.company1.mng);
 
     // 支払依頼一覧から、仕訳情報の詳細を取得する
     let invoiceNo = 'fcde40393';
-    let expected = await getDetail(topPage, journalMenuPage, paymentRequestListPage, journalDetailPage, invoiceNo, 1);
+    let expected = await getDetail(topPage, paymentRequestListPage, journalDetailPage, invoiceNo, 1);
 
     // デジタルトレードアプリのホームへ遷移する
     await journalDetailPage.clickHome();
     await topPage.waitForLoading();
 
     // ダウンロードする
-    let csvPath = await download(topPage, journalMenuPage, journalDownloadPage, invoiceNo, '2021-08-21', '2021-08-25', null, false, 'PCA hyper', true);
+    let csvPath = await download(topPage, journalDownloadPage, invoiceNo, '2021-08-21', '2021-08-25', null, false, 'PCA hyper', true);
 
     // 仕訳情報ダウンロード画面で絞り込みをしたデータと同一の内容になっていること
     let actual = await getCsvData(csvPath, true, true);
@@ -491,22 +478,21 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
     await initBrowser();
 
     // ページオブジェクト
-    const { topPage, journalMenuPage, journalDownloadPage, paymentRequestListPage, journalDetailPage }
-      = common.getPageObject(browser, page);
+    const { topPage, journalDownloadPage, paymentRequestListPage, journalDetailPage } = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
     await common.gotoTop(page, config.company1.mng);
 
     // 支払依頼一覧から、仕訳情報の詳細を取得する
     let invoiceNo = 'fcde40393';
-    let expected = await getDetail(topPage, journalMenuPage, paymentRequestListPage, journalDetailPage, invoiceNo, 1);
+    let expected = await getDetail(topPage, paymentRequestListPage, journalDetailPage, invoiceNo, 1);
 
     // デジタルトレードアプリのホームへ遷移する
     await journalDetailPage.clickHome();
     await topPage.waitForLoading();
 
     // ダウンロードする
-    let csvPath = await download(topPage, journalMenuPage, journalDownloadPage, invoiceNo, '2021-08-21', '2021-08-25', null, false, '大蔵大臣NX', true);
+    let csvPath = await download(topPage, journalDownloadPage, invoiceNo, '2021-08-21', '2021-08-25', null, false, '大蔵大臣NX', true);
 
     // 仕訳情報ダウンロード画面で絞り込みをしたデータと同一の内容になっていること
     let actual = await getCsvData(csvPath, true, false);
