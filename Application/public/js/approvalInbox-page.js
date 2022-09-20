@@ -1,5 +1,4 @@
 const approvalInboxProgressModal = document.getElementById('approval-inbox-progress-modal')
-// const rejectProgressModal = document.getElementById('reject-progress-modal')
 // document.getElementById、document.getElementsByClassName省略
 const $ = function (tagObjName) {
   const classNamePattern = '\\.+[a-zA-Z0-9]'
