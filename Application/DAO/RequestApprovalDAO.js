@@ -16,7 +16,8 @@ class RequestApprovalDAO extends DAO {
       where: {
         contractId: this.contractId,
         invoiceId: invoiceId,
-        status: statusCode
+        status: statusCode,
+        rejectedFlag: false
       },
       order: [['create', 'DESC']]
     })
@@ -28,7 +29,8 @@ class RequestApprovalDAO extends DAO {
     const requestApproval = await this.DTO.findOne({
       where: {
         contractId: this.contractId,
-        invoiceId: invoiceId
+        invoiceId: invoiceId,
+        rejectedFlag: false
       },
       order: [['create', 'DESC']]
     })
@@ -55,6 +57,7 @@ class RequestApprovalDAO extends DAO {
       invoiceId,
       approveRouteId,
       status: status,
+      create: new Date(),
       message,
       version: version,
       rejectedFlag: false
