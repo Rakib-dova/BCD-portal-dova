@@ -57,10 +57,9 @@ class RequestApprovalDAO extends DAO {
       invoiceId,
       approveRouteId,
       status: status,
-      create: new Date(),
       message,
-      version: version,
       create: new Date(),
+      version: version,
       rejectedFlag: false
     })
     return createRequestApproval
