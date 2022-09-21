@@ -26,6 +26,13 @@ router.use(
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
+/**
+ * 支払依頼画面のルーター
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 支払依頼画面表示、またはエラー
+ */
 const cbGetRequestApproval = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetRequestApproval')
 
@@ -227,6 +234,13 @@ const cbGetRequestApproval = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetRequestApproval')
 }
 
+/**
+ * 承認ルート情報取得
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 呼び出し元画面表示、またはエラー
+ */
 const cbPostGetDetailApproveRoute = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetRequestApproval')
 
@@ -277,6 +291,13 @@ const cbPostGetDetailApproveRoute = async (req, res, next) => {
   })
 }
 
+/**
+ * 承認ルート一覧取得
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 呼び出し元画面表示、またはエラー
+ */
 const cbPostGetApproveRoute = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostGetApproveRoute')
 
@@ -328,6 +349,13 @@ const cbPostGetApproveRoute = async (req, res, next) => {
   }
 }
 
+/**
+ * 支払依頼登録
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 支払依頼一覧画面表示、またはエラー
+ */
 const cbPostApproval = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostApproval')
 

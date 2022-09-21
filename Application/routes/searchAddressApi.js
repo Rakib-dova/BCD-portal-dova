@@ -15,6 +15,12 @@ router.use(
   })
 )
 
+/**
+ * 住所検索
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @returns {object} 呼び出し元画面表示、またはエラー
+ */
 const cbSearchAddress = async (req, res) => {
   let resultAddress = { addressList: [] }
   let resultStatusCode

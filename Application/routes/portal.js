@@ -23,6 +23,13 @@ const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 /* 会員サイト開発により追加 */
 
+/**
+ * ポータル画面のルーター
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} ポータル画面表示、またはエラー
+ */
 const cbGetIndex = async (req, res, next) => {
   if (!req.session || !req.user?.userId) {
     return next(errorHelper.create(500))
@@ -67,7 +74,7 @@ const cbGetIndex = async (req, res, next) => {
       browser
     }
     logger.info(jsonLog)
-  // 2つ目以降のブラウザ検知
+    // 2つ目以降のブラウザ検知
   } else if (req.session.browserInfo && !req.session.browserInfo.browsers.includes(browser)) {
     req.session.browserInfo.browsers.push(browser)
     jsonLog = {

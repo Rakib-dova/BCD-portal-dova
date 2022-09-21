@@ -22,6 +22,13 @@ const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 let uploadData
 
+/**
+ * 請求書アップロードフォーマット登録
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 請求書アップロードフォーマット設定画面表示、またはエラー
+ */
 const cbPostIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostIndex')
 
@@ -399,6 +406,13 @@ const cbPostIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
 }
 
+/**
+ * 請求書アップロードフォーマット登録
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} アップロードフォーマット一覧画面表示、またはエラー
+ */
 const cbPostConfirmIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostConfirmIndex')
 
@@ -577,7 +591,12 @@ const cbPostConfirmIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostConfirmIndex')
 }
 
-// CSVファイル削除機能
+/**
+ * CSVファイル削除機能
+ * @param {string} _deleteDataPath 削除ファイルパス
+ * @param {string} _filename ファイル名
+ * @returns true（正常）、false（異常）
+ */
 const cbRemoveCsv = (_deleteDataPath, _filename) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbRemoveCsv')
   const deleteFile = path.join(_deleteDataPath, '/' + _filename)
@@ -594,6 +613,13 @@ const cbRemoveCsv = (_deleteDataPath, _filename) => {
   }
 }
 
+/**
+ * 請求書アップロードフォーマット削除
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 請求書アップロードフォーマット設定画面表示、またはエラー
+ */
 const cbDeleteFormat = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbDeleteFormat')
 
@@ -669,6 +695,13 @@ const cbDeleteFormat = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbDeleteFormat')
 }
 
+/**
+ * 請求書アップロードフォーマット存在チェック
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 請求書アップロードフォーマット設定画面表示、またはエラー
+ */
 const cbGetCheckFormat = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetCheckFormat')
 

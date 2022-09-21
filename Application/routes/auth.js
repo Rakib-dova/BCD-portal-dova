@@ -13,10 +13,10 @@ const userController = require('../controllers/userController.js')
 
 /**
  * ユーザ登録/テナント登録を判定し、ポータル画面にリダイレクトする
- * @param req HTTPリクエストオブジェクト
- * @param res HTTPレスポンスオブジェクト
- * @param next ネクスト
- * @returns エラー、またはポータル画面表示
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} ポータル画面表示またはエラー
  */
 const cbGetCallback = async (req, res, next) => {
   if (!req.user?.tenantId || !req.user?.userId || !req.user?.refreshToken || !req.user?.accessToken) {
@@ -38,10 +38,10 @@ const cbGetCallback = async (req, res, next) => {
 
 /**
  * 取得失敗処理
- * @param req HTTPリクエストオブジェクト
- * @param res HTTPレスポンスオブジェクト
- * @param next ネクスト
- * @returns エラー
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} エラー
  */
 const cbGetFailure = (req, res, next) => {
   next(errorHelper.create(500)) // エラーはnextに渡す

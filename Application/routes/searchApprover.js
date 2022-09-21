@@ -20,6 +20,13 @@ router.use(
   })
 )
 
+/**
+ * 承認者検索
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 呼び出し元画面表示、またはエラー
+ */
 const cbPostSearchApprover = async (req, res, next) => {
   const functionName = 'cbPostSearchApprover'
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)

@@ -13,10 +13,10 @@ const contractStatuses = constantsDefine.statusConstants.contractStatuses
 
 /**
  * UIDのチェック
- * @param {object} req リクエスト
- * @param {object} res レスポンス
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
  * @param {function} next 次の処理
- * @returns {Object} エラー
+ * @returns {object} エラー画面表示
  */
 exports.isAuthenticated = async (req, res, next) => {
   if (req.user?.userId) {
@@ -37,10 +37,10 @@ exports.isAuthenticated = async (req, res, next) => {
 
 /**
  * UIDとテナントIDのチェック
- * @param {object} req リクエスト
- * @param {object} res レスポンス
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
  * @param {function} next 次の処理
- * @returns {Object} エラー
+ * @returns {object} エラー画面表示
  */
 exports.isTenantRegistered = async (req, res, next) => {
   // 認証済みかどうか。未認証であれば/authにredirect（後続の処理は行わない）
@@ -74,10 +74,10 @@ exports.isTenantRegistered = async (req, res, next) => {
 /**
  * UIDのチェック
  * バリデーションチェック、DBに登録済みかチェック
- * @param {object} req リクエスト
- * @param {object} res レスポンス
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
  * @param {function} next 次の処理
- * @returns {Object} エラー
+ * @returns {object} エラー画面表示
  */
 exports.isUserRegistered = async (req, res, next) => {
   if (!req.user?.userId) return res.redirect(303, '/auth')
@@ -108,9 +108,7 @@ exports.isUserRegistered = async (req, res, next) => {
 
 /**
  * contractsステータスチェック
- * @param {object} req リクエスト
- * @param {object} res レスポンス
- * @param {function} next 次の処理
+ * @param {uuid} tenantId テナントID
  * @returns {Object} contractsの結果により返却値変更
  */
 exports.checkContractStatus = async (tenantId) => {
@@ -139,10 +137,10 @@ exports.checkContractStatus = async (tenantId) => {
 
 /**
  * OAuth2認証をパスしたかチェック
- * @param {object} req リクエスト
- * @param {object} res レスポンス
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
  * @param {function} next 次の処理
- * @returns {Object} エラー
+ * @returns {Object} エラー画面表示
  */
 exports.bcdAuthenticate = async (req, res, next) => {
   // ==========================================================================
@@ -236,10 +234,10 @@ exports.bcdAuthenticate = async (req, res, next) => {
 
 /**
  * 無償契約が契約中、または、簡易変更中ことのチェック
- * @param {object} req リクエスト
- * @param {object} res レスポンス
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
  * @param {function} next 次の処理
- * @returns {Object} エラー
+ * @returns {Object} エラー画面表示
  */
 exports.isOnOrChangeContract = async (req, res, next) => {
   // テナントIDに紐付いている未解約無償契約情報を取得
@@ -270,8 +268,8 @@ exports.isOnOrChangeContract = async (req, res, next) => {
 
 /**
  * 契約プランのチェック結果を取得
- * @param {object} req リクエスト
- * @param {object} res レスポンス
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
  * @param {function} next 次の処理
  */
 exports.getContractPlan = async (req, res, next) => {
@@ -323,8 +321,8 @@ exports.getContractPlan = async (req, res, next) => {
 
 /**
  * 管理者権限のチェック
- * @param {object} req リクエスト
- * @param {object} res レスポンス
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
  * @param {function} next 次の処理
  * @returns {Object} メッセージステータス
  */
