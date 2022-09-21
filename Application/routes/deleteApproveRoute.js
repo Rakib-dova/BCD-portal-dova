@@ -15,6 +15,12 @@ const noticeHelper = require('./helpers/notice')
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
+/**
+ * 承認ルート一覧画面のルーター
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ */
 const cbDeleteApproveRoute = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbDeleteApproveRoute')
 
@@ -76,11 +82,13 @@ const cbDeleteApproveRoute = async (req, res, next) => {
     })
   }
 
-  // 削除処理
-  // resultOfDeletedApproveRoute : 削除処理結果
-  //              -1 : 削除対象のがない場合
-  //               1 : 正常_削除成功
-  //               0 : エラー
+  /*
+   * 削除処理
+   * resultOfDeletedApproveRoute : 削除処理結果
+   *              -1 : 削除対象のがない場合
+   *               1 : 正常_削除成功
+   *               0 : エラー
+   */
   const resultOfDeletedApproveRoute = await approverController.deleteApproveRoute(approveRouteId)
 
   // 結果確認（正常）
@@ -95,6 +103,12 @@ const cbDeleteApproveRoute = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbDeleteApproveRoute')
 }
 
+/**
+ * 承認ルート一覧画面のルーター
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ */
 const cbGetCheckApproveRoute = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetCheckApproveRoute')
 

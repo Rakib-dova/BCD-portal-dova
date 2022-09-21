@@ -24,6 +24,13 @@ router.use(
   })
 )
 
+/**
+ * 仕訳情報設定画面の表示
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 画面に設定するメッセージもしくはエラー
+ */
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
   // 認証情報取得処理
@@ -210,6 +217,13 @@ const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
+/**
+ * 仕訳情報設定画面の表示
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 画面に設定するメッセージもしくはエラー
+ */
 const cbPostGetCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostGetCode')
 
@@ -279,6 +293,13 @@ const cbPostGetCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostGetAccountCode')
 }
 
+/**
+ * 仕訳情報設定画面の表示
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 画面に設定するメッセージもしくはエラー
+ */
 const cbPostIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostIndex')
   // 認証情報取得処理
@@ -333,10 +354,11 @@ const cbPostIndex = async (req, res, next) => {
 
   if (error instanceof Error) return next(errorHelper.create(500))
 
-  // 結果：0（正常変更）、-1（未登録勘定科目）、-2（未登録補助科目）
   switch (status) {
+    // 結果：0（正常変更）
     case 0:
       break
+    // -1（未登録勘定科目）
     case -1:
       req.flash('noti', [
         '仕訳情報設定',
@@ -344,6 +366,7 @@ const cbPostIndex = async (req, res, next) => {
         'SYSERR'
       ])
       return res.redirect('/inboxList/1')
+    // -2（未登録補助科目）
     case -2:
       req.flash('noti', [
         '仕訳情報設定',
@@ -351,6 +374,7 @@ const cbPostIndex = async (req, res, next) => {
         'SYSERR'
       ])
       return res.redirect('/inboxList/1')
+    // -3（未登録補助科目）
     case -3:
       req.flash('noti', [
         '仕訳情報設定',
@@ -376,6 +400,13 @@ const cbPostIndex = async (req, res, next) => {
   res.redirect(`/inbox/${invoiceId}`)
 }
 
+/**
+ * 仕訳情報設定画面の表示
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 画面に設定するメッセージもしくはエラー
+ */
 const cbPostDepartment = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostDepartment')
 

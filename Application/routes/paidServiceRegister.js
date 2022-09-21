@@ -29,7 +29,7 @@ const logMessage = constantsDefine.logMessage
  * @param {string} tenantId テナントID
  * @param {string[]} serviceList 有料サービスリスト
  * @param {function} next 次の処理
- * @returns 解約済以外契約情報
+ * @returns {object} 解約済以外契約情報
  */
 const getAndCheckContracts = async (tenantId, serviceList, next) => {
   logger.info(logMessage.INF000 + 'getAndCheckContracts')
@@ -97,10 +97,10 @@ const getAndCheckContracts = async (tenantId, serviceList, next) => {
 
 /**
  * 有料サービス利用登録利用規約画面の表示
- * @param {object} req リクエスト
- * @param {object} res レスポンス
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
  * @param {function} next 次の処理
- * @returns
+ * @returns {object} 有料サービス利用登録利用規約画面
  */
 const showPaidServiceRegisterTerms = async (req, res, next) => {
   logger.info(logMessage.INF000 + 'showPaidServiceRegisterTerms')
@@ -156,10 +156,10 @@ const showPaidServiceRegisterTerms = async (req, res, next) => {
 
 /**
  * 有料サービス利用登録画面の表示
- * @param {object} req リクエスト
- * @param {object} res レスポンス
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
  * @param {function} next 次の処理
- * @returns
+ * @returns {object} 有料サービス利用登録入力フォーム画面
  */
 const showPaidServiceRegister = async (req, res, next) => {
   logger.info(logMessage.INF000 + 'showPaidServiceRegister')
@@ -191,10 +191,10 @@ const showPaidServiceRegister = async (req, res, next) => {
 
 /**
  * 有料サービスの申込
- * @param {object} req リクエスト
- * @param {object} res レスポンス
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
  * @param {function} next 次の処理
- * @returns
+ * @returns {object} 有料サービス利用登録完了画面表示
  */
 const applyPaidServiceRegister = async (req, res, next) => {
   logger.info(logMessage.INF000 + 'applyPaidServiceRegister')

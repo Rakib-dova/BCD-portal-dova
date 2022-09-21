@@ -14,6 +14,13 @@ const departmentCodeController = require('../controllers/departmentCodeControlle
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
+/**
+ * 部門データ確認・変更画面のルーター
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 各画面表示またはエラー
+ */
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
   // 認証情報取得処理
@@ -85,6 +92,13 @@ const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
+/**
+ * 部門データ確認・変更画面のルーター
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 各画面表示またはエラー
+ */
 const cbPostIndex = async function (req, res, next) {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostIndex')
   // 認証情報取得処理

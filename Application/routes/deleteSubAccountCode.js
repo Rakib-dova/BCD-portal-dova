@@ -15,6 +15,12 @@ const noticeHelper = require('./helpers/notice')
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
+/**
+ * 補助科目一覧画面のルーター
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ */
 const cbDeleteSubAccountCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbDeleteSubAccountCode')
 
@@ -75,11 +81,12 @@ const cbDeleteSubAccountCode = async (req, res, next) => {
     })
   }
 
-  // 削除処理
-  // resultOfDeletedSubAccountCode : 削除処理結果
-  //              -1 : 削除対象の補助科目がない場合。
-  //               1 : 正常（補助科目の削除成功）
-  //               0 : エラー
+  /* 削除処理
+   * resultOfDeletedSubAccountCode : 削除処理結果
+   *            -1 : 削除対象の補助科目がない場合。
+   *             1 : 正常（補助科目の削除成功）
+   *             0 : エラー
+   */
   const resultOfDeletedSubAccountCode = await subAccountCodeController.deleteForSubAccountCode(subAccountCodeId)
 
   // 結果確認（正常）
@@ -94,6 +101,12 @@ const cbDeleteSubAccountCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbDeleteSubAccountCode')
 }
 
+/**
+ * 補助科目一覧画面のルーター
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ */
 const cbGetCheckSubAccountCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetCheckSubAccountCode')
 
