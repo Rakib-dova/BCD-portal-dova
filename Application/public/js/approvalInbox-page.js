@@ -1,5 +1,4 @@
-const approveProgressModal = document.getElementById('approve-progress-modal')
-const rejectProgressModal = document.getElementById('reject-progress-modal')
+const approvalInboxProgressModal = document.getElementById('approval-inbox-progress-modal')
 // document.getElementById、document.getElementsByClassName省略
 const $ = function (tagObjName) {
   const classNamePattern = '\\.+[a-zA-Z0-9]'
@@ -1641,7 +1640,7 @@ $('#checkApproval').addEventListener('click', function () {
 
 $('#btn-approve').addEventListener('click', function (e) {
   e.preventDefault()
-  approveProgressModal.classList.add('is-active')
+  approvalInboxProgressModal.classList.add('is-active')
   $('#approval').submit()
 })
 
@@ -1681,7 +1680,7 @@ $('#rejectApproval').addEventListener('click', function () {
 
 $('#btn-reject').addEventListener('click', function (e) {
   e.preventDefault()
-  rejectProgressModal.classList.add('is-active')
+  approvalInboxProgressModal.classList.add('is-active')
   $('#reject').submit()
 })
 
