@@ -136,8 +136,8 @@ const invoiceRules = [
         if (!value) {
           this.message = `${this.colName}は必須です。`
           return false
-        } else if (!(value > 0 && value <= 999999999999.999)) {
-          this.message = `${this.colName}は整数or少数 0 ～ 999999999999.999 の範囲で入力してください。`
+        } else if (!(Number.isInteger(Number(value)) && value > 0 && value <= 999999999999)) {
+          this.message = `${this.colName}は整数 0 ～ 999999999999 の範囲で入力してください。`
           return false
         } else return true
       }
@@ -187,8 +187,8 @@ const invoiceRules = [
         if (!value) {
           this.message = `${this.colName}は必須です。`
           return false
-        } else if (!(value > 0 && value <= 999999999999.999)) {
-          this.message = `${this.colName}は整数or少数 0 ～ 999999999999.999 の範囲で入力してください。`
+        } else if (!(Number.isInteger(Number(value)) && value > 0 && value <= 999999999999)) {
+          this.message = `${this.colName}は整数 0 ～ 999999999999 の範囲で入力してください。`
           return false
         } else return true
       }
@@ -238,8 +238,8 @@ const invoiceRules = [
         if (!value) {
           this.message = `${this.colName}は必須です。`
           return false
-        } else if (!(value > 0 && value <= 999999999999.999)) {
-          this.message = `${this.colName}は整数or少数 0 ～ 999999999999.999 の範囲で入力してください。`
+        } else if (!(Number.isInteger(Number(value)) && value > 0 && value <= 999999999999)) {
+          this.message = `${this.colName}は整数 0 ～ 999999999999 の範囲で入力してください。`
           return false
         } else return true
       }
@@ -336,8 +336,8 @@ const lineRules = [
         if (!value) {
           this.message = `${this.colName}は必須です。`
           return false
-        } else if (!(value > 0 && value <= 999999999999.999)) {
-          this.message = `${this.colName}は整数or少数 0 ～ 999999999999.999 の範囲で入力してください。`
+        } else if (!(Number.isInteger(Number(value)) && value > 0 && value <= 999999999999)) {
+          this.message = `${this.colName}は整数 0 ～ 999999999999 の範囲で入力してください。`
           return false
         } else return true
       }
@@ -387,8 +387,8 @@ const lineRules = [
         if (!value) {
           this.message = `${this.colName}は必須です。`
           return false
-        } else if (!(value > 0 && value <= 999999999999.999)) {
-          this.message = `${this.colName}は整数or少数 0 ～ 999999999999.999 の範囲で入力してください。`
+        } else if (!(Number.isInteger(Number(value)) && value > 0 && value <= 999999999999)) {
+          this.message = `${this.colName}は整数 0 ～ 999999999999 の範囲で入力してください。`
           return false
         } else return true
       }
@@ -438,8 +438,8 @@ const lineRules = [
         if (!value) {
           this.message = `${this.colName}は必須です。`
           return false
-        } else if (!(value > 0 && value <= 999999999999.999)) {
-          this.message = `${this.colName}は整数or少数 0 ～ 999999999999.999 の範囲で入力してください。`
+        } else if (!(Number.isInteger(Number(value)) && value > 0 && value <= 999999999999)) {
+          this.message = `${this.colName}は整数 0 ～ 999999999999 の範囲で入力してください。`
           return false
         } else return true
       }
