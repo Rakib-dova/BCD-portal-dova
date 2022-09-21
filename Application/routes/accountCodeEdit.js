@@ -16,10 +16,10 @@ const csrfProtection = csrf({ cookie: false })
 
 /**
  * 勘定科目登録、勘定科目確認・変更画面のルーター
- * @param req HTTPリクエストオブジェクト
- * @param res HTTPレスポンスオブジェクト
- * @param next ネクスト
- * @returns エラー、または各画面表示
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 各画面表示またはエラー
  */
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -89,10 +89,10 @@ const cbGetIndex = async (req, res, next) => {
 
 /**
  * 勘定科目登録、勘定科目確認・変更画面のルーター
- * @param req HTTPリクエストオブジェクト
- * @param res HTTPレスポンスオブジェクト
- * @param next ネクスト
- * @returns エラー、または各画面表示
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 各画面表示またはエラー
  */
 const cbPostIndex = async function (req, res, next) {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostIndex')

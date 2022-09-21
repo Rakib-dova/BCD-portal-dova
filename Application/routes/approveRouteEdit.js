@@ -16,10 +16,10 @@ const csrfProtection = csrf({ cookie: false })
 
 /**
  * 承認ルート登録、承認ルート確認・変更画面のルーター
- * @param req HTTPリクエストオブジェクト
- * @param res HTTPレスポンスオブジェクト
- * @param next ネクスト
- * @returns エラー、または各画面表示
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 各画面表示またはエラー
  */
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -112,10 +112,10 @@ const cbGetIndex = async (req, res, next) => {
 
 /**
  * 承認ルート確認・変更画面のルーター
- * @param req HTTPリクエストオブジェクト
- * @param res HTTPレスポンスオブジェクト
- * @param next ネクスト
- * @returns エラー、または各画面表示
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 各画面表示またはエラー
  */
 const cbPostEditApproveRoute = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostEditApproveRoute')

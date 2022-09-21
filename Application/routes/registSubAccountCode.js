@@ -22,6 +22,13 @@ router.use(
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
+/**
+ * 補助科目登録画面のルーター
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 補助科目登録画面表示、またはエラー
+ */
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
 
@@ -90,6 +97,13 @@ const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
+/**
+ * 補助科目取得
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 呼び出し元画面表示、またはエラー
+ */
 const cbPostGetAccountCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostGetAccountCode')
 
@@ -140,6 +154,13 @@ const cbPostGetAccountCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostGetAccountCode')
 }
 
+/**
+ * 補助科目登録
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 補助科目一覧画面表示、またはエラー
+ */
 const cbPostIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostIndex')
 

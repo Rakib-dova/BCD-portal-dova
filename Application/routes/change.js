@@ -22,10 +22,10 @@ const csrfProtection = csrf({ cookie: false })
 /**
  * 契約情報の取得
  * ユーザ権限を取得し、ユーザ権限を画面に送る
- * @param {object} req リクエスト
- * @param {object} res レスポンス
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
  * @param {function} next 次の処理
- * @returns エラーもしくは、画面に設定するメッセージ
+ * @returns {object} 画面に設定するメッセージもしくはエラー
  */
 const cbGetChangeIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetChangeIndex')
@@ -92,10 +92,10 @@ const cbGetChangeIndex = async (req, res, next) => {
 
 /**
  * DBから契約情報取得し、contractorName等のデータをJSONに設定し契約者情報変更の受付を行う
- * @param {object} req リクエスト
- * @param {object} res レスポンス
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
  * @param {function} next 次の処理
- * @returns エラーもしくは、画面に設定するメッセージ
+ * @returns {object} 画面に設定するメッセージもしくはエラー
  */
 const cbPostChangeIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostChangeIndex')

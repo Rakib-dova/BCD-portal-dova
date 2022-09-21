@@ -7,8 +7,8 @@ const logger = require('../../lib/logger')
 module.exports = {
   /**
    * 引数の「status」でエラーの内容を判定する
-   * @param status HTTPリクエストオブジェクト
-   * @returns エラー
+   * @param {int} status HTTPステータス
+   * @returns {object} エラー
    */
   create: (status) => {
     let e
@@ -36,10 +36,11 @@ module.exports = {
 
   /**
    * レンダー処理
-   * @param err エラー
-   * @param req HTTPリクエストオブジェクト
-   * @param res HTTPレスポンスオブジェクト
-   * @param next ネクスト
+   * @param {object} err エラー情報
+   * @param {object} req HTTPリクエストオブジェクト
+   * @param {object} res HTTPレスポンスオブジェクト
+   * @param {function} next 次の処理
+   * @returns {object} エラー画面表示
    */
   render: (err, req, res, next) => {
     let errorStatus, errorMessage, errorDescription

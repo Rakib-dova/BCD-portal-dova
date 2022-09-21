@@ -14,6 +14,13 @@ const accountCodeController = require('../controllers/accountCodeController')
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
+/**
+ * 勘定科目登録画面のルーター
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 勘定科目登録画面表示、またはエラー
+ */
 const cbGetRegistAccountCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetRegistAccountCode')
 
@@ -64,6 +71,13 @@ const cbGetRegistAccountCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetRegistAccountCode')
 }
 
+/**
+ * 勘定科目登録
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 勘定科目一覧画面表示、またはエラー
+ */
 const cbPostRegistAccountCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostRegistAccountCode')
 

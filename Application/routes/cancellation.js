@@ -25,7 +25,7 @@ const serviceTypes = constantsDefine.statusConstants.serviceTypes
  * 契約情報の取得とチェック
  * @param {string} tenantId テナントID
  * @param {function} next 次の処理
- * @returns 無料契約情報
+ * @returns {object} 無料契約情報
  */
 const getAndCheckContracts = async (tenantId, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'getAndCheckContracts')
@@ -69,10 +69,10 @@ const getAndCheckContracts = async (tenantId, next) => {
 /**
  * 契約情報の取得
  * ユーザ権限を取得し、ユーザ権限を画面に送る
- * @param {object} req リクエスト
- * @param {object} res レスポンス
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
  * @param {function} next 次の処理
- * @returns エラーもしくは、画面に設定するメッセージ
+ * @returns {object} 画面に設定するメッセージもしくはエラー
  */
 const cbGetCancellation = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetCancellation')
@@ -138,10 +138,10 @@ const cbGetCancellation = async (req, res, next) => {
 
 /**
  * 解約申込登録を行う
- * @param {object} req リクエスト
- * @param {object} res レスポンス
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
  * @param {function} next 次の処理
- * @returns エラーもしくは、画面に設定するメッセージ
+ * @returns {object} 画面に設定するメッセージもしくはエラー
  */
 const cbPostCancellation = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostCancellation')

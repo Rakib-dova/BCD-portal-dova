@@ -15,6 +15,13 @@ const tenantController = require('../controllers/tenantController')
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
+/**
+ * ユーザー利用登録画面のルーター
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} ユーザー利用登録画面表示、またはエラー
+ */
 const cbGetRegister = async (req, res, next) => {
   if (req.session?.userContext !== 'NotUserRegistered') {
     return next(errorHelper.create(400))
@@ -23,6 +30,13 @@ const cbGetRegister = async (req, res, next) => {
   res.render('user-register', { title: '利用登録', csrfToken: req.csrfToken() })
 }
 
+/**
+ * ユーザー利用登録
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} ポータル画面表示、またはエラー
+ */
 const cbPostRegister = async (req, res, next) => {
   if (req.session?.userContext !== 'NotUserRegistered') {
     return next(errorHelper.create(400))
@@ -69,6 +83,14 @@ const cbPostRegister = async (req, res, next) => {
     return next(errorHelper.create(500))
   }
 }
+
+/**
+ * ユーザ削除。開発環境のみ動作。
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 呼び出し元画面表示
+ */
 const cbGetDelete = async (req, res, next) => {
   // ユーザを削除するための動作確認用。開発環境のみ動作。
   if (process.env.NODE_ENV !== 'development') {

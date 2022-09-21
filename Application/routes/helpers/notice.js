@@ -4,8 +4,8 @@ const errorHelper = require('./error')
 module.exports = {
   /**
    * 引数の「status」をmessageStatusに設定する
-   * @param status HTTPリクエストオブジェクト
-   * @returns メッセージステータス
+   * @param {int} status HTTPステータス
+   * @returns {int} メッセージステータス
    */
   create: (status) => {
     const messageStatus = status
@@ -14,11 +14,11 @@ module.exports = {
 
   /**
    * 引数の「status」で設定するメッセージの内容を判定する
-   * @param messageStatus HTTPリクエストオブジェクト
-   * @param req HTTPリクエストオブジェクト
-   * @param res HTTPレスポンスオブジェクト
-   * @param next ネクストオブジェクト
-   * @returns エラーもしくは、設定するメッセージ
+   * @param {object} messageStatus メッセージステータス
+   * @param {object} req HTTPリクエストオブジェクト
+   * @param {object} res HTTPレスポンスオブジェクト
+   * @param {function} next 次の処理
+   * @returns {object} エラーもしくは、設定するメッセージ
    */
   render: (messageStatus, req, res, next) => {
     let message, description1, description2

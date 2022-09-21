@@ -5,6 +5,13 @@ const contractController = require('../../controllers/contractController')
 const db = require('../../models')
 const requestApproval = db.RequestApproval
 
+/**
+ * 支払依頼件数、差し戻し件数取得
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 呼び出し元画面表示、またはエラー
+ */
 module.exports = async (req, res, next) => {
   let resultStatusCode
   if (!req.session || !req.user?.userId || !req.user?.tenantId) {
