@@ -29,6 +29,13 @@ const serviceDataFormatName = [
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
+/**
+ * 仕訳情報ダウンロード画面のルーター
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 画面に設定するメッセージもしくはエラー
+ */
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
   // 認証情報取得処理
@@ -45,27 +52,10 @@ const cbGetIndex = async (req, res, next) => {
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
   if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
 
-  // // DBから契約情報取得
-  // const contract = await contractController.findOne(req.user.tenantId)
-  // // データベースエラーは、エラーオブジェクトが返る
-  // // 契約情報未登録の場合もエラーを上げる
-  // if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
-
   req.session.userContext = 'LoggedIn'
 
   // ユーザ権限を取得
   req.session.userRole = user.dataValues?.userRole
-  // const deleteFlag = contract.dataValues.deleteFlag
-  // const contractStatus = contract.dataValues.contractStatus
-  // const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
-
-  // if (checkContractStatus === null || checkContractStatus === 999) {
-  //   return next(errorHelper.create(500))
-  // }
-
-  // if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
-  //   return next(noticeHelper.create('cancelprocedure'))
-  // }
 
   // テナントIDに紐付いている全ての契約情報を取得
   const contracts = await contractController.findContractsBytenantId(req.user.tenantId)
@@ -102,6 +92,13 @@ const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
+/**
+ * 仕訳情報ダウンロード画面のルーター
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 画面に設定するメッセージもしくはエラー
+ */
 const cbPostIndex = async (req, res, next) => {
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
   const qs = require('qs')
@@ -491,7 +488,7 @@ const cbPostIndex = async (req, res, next) => {
         jsonLog = {
           tenantId: req.user.tenantId,
           action: 'downloadedJournalInfo',
-          downloadedJournalCount: (invoiceArray.length - 2) > 0 ? (invoiceArray.length - 2) : undefined,
+          downloadedJournalCount: invoiceArray.length - 2 > 0 ? invoiceArray.length - 2 : undefined,
           dataFormat: getServiceNameForDataFormat(req.body.serviceDataFormat),
           finalApproved: chkFinalapproval
         }
@@ -507,6 +504,13 @@ const cbPostIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
 }
 
+/**
+ * エラーハンドラー
+ * @param {object} documentsResult ドキュメント結果
+ * @param {object} _res HTTPレスポンスオブジェクト
+ * @param {object} _req HTTPレスポンスオブジェクト
+ * @returns {object} 画面に設定するメッセージもしくはエラー
+ */
 const errorHandle = (documentsResult, _res, _req) => {
   if (String(documentsResult.response?.status).slice(0, 1) === '4') {
     // 400番エラーの場合
@@ -537,6 +541,12 @@ const errorHandle = (documentsResult, _res, _req) => {
   }
 }
 
+/**
+ * 引数のjournalDataをJson形式に変換する処理
+ * @param {object} invoiceData 請求書データ
+ * @param {object} journalData ジャーナルデータ
+ * @returns {object} 画面に設定するメッセージもしくはエラー
+ */
 const dataToJson = (invoiceData, journalData) => {
   const jsonData = []
   const InvoiceObject = {

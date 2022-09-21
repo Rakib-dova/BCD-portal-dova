@@ -23,10 +23,10 @@ const csrfProtection = csrf({ cookie: false })
 
 /**
  * 請求情報ダウンロード画面のルーター
- * @param {object} req リクエスト
- * @param {object} res レスポンス
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
  * @param {function} next 次の処理
- * @returns エラーもしくは、画面に設定するメッセージ
+ * @returns {object} 画面に設定するメッセージもしくはエラー
  */
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -97,10 +97,10 @@ const cbGetIndex = async (req, res, next) => {
 
 /**
  * 請求情報ダウンロード画面のルーター
- * @param {object} req リクエスト
- * @param {object} res レスポンス
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
  * @param {function} next 次の処理
- * @returns エラーもしくは、画面に設定するメッセージ
+ * @returns {object} 画面に設定するメッセージもしくはエラー
  */
 const cbPostIndex = async (req, res, next) => {
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
@@ -486,6 +486,13 @@ const cbPostIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
 }
 
+/**
+ * エラーハンドラーファンクション
+ * @param {object} documentsResult ドキュメントの結果
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @returns {object} エラーの場合のcsvダウンロード
+ */
 const errorHandle = (documentsResult, _res, _req) => {
   if (String(documentsResult.response?.status).slice(0, 1) === '4') {
     // 400番エラーの場合
@@ -516,6 +523,11 @@ const errorHandle = (documentsResult, _res, _req) => {
   }
 }
 
+/**
+ * 引数の「data」をJson形式に変換するファンクション
+ * @param {object} data ドキュメントの結果
+ * @returns {object} 作成したJsonデータ
+ */
 const dataToJson = (data) => {
   const jsonData = []
   const InvoiceObject = {
@@ -2052,6 +2064,11 @@ const dataToJson = (data) => {
   return jsonData
 }
 
+/**
+ * 引数の「jsonData」をCsv形式に変換するファンクション
+ * @param {object} jsonData Jsonデータ
+ * @returns {object} 作成したcsvデータ
+ */
 const jsonToCsv = (jsonData) => {
   const jsonArray = jsonData
 
@@ -2065,6 +2082,12 @@ const jsonToCsv = (jsonData) => {
   return csvString
 }
 
+/**
+ * 支払方法-予備に支払方法を入れるファンクション
+ * @param {object} paymentExtra 支払方法-予備の配列
+ * @param {object} data データ
+ * @returns {object} 作成したc支払方法-予備の配列
+ */
 const paymentExtraPush = async (paymentExtra, data) => {
   if (paymentExtra.length !== 0) {
     paymentExtra.push(` {${data}}`)

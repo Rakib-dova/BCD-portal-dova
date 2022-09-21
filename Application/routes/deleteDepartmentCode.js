@@ -15,6 +15,12 @@ const noticeHelper = require('./helpers/notice')
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
+/**
+ * 部門データ一覧画面のルーター
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ */
 const cbDeleteDepartmentCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbDeleteDepartmentCode')
 
@@ -75,11 +81,12 @@ const cbDeleteDepartmentCode = async (req, res, next) => {
     })
   }
 
-  // 削除処理
-  // resultOfDeletedDepartmentCode : 削除処理結果
-  //              -1 : 削除対象の部門データがない場合。
-  //               1 : 正常（部門データの削除成功）
-  //               0 : エラー
+  /* 削除処理
+   * resultOfDeletedDepartmentCode : 削除処理結果
+   *              -1 : 削除対象の部門データがない場合。
+   *               1 : 正常（部門データの削除成功）
+   *               0 : エラー
+   */
   const resultOfDeletedDepartmentCode = await departmentCodeController.deleteForDepartmentCode(departmentCodeId)
 
   // 結果確認（正常）
@@ -94,6 +101,12 @@ const cbDeleteDepartmentCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbDeleteDepartmentCode')
 }
 
+/**
+ * 部門データ一覧画面のルーター
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ */
 const cbGetCheckDepartmentCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetCheckDepartmentCode')
 
