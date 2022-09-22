@@ -50,7 +50,8 @@ describe('リグレッションテスト', function () {
       }
 
       // ページオブジェクト
-      const { topPage, uploadInvoicePage, uploadListPage } = common.getPageObject(browser, page);
+      const { topPage, tradeShiftTopPage, tradeShiftDocListPage, tradeShiftDocDetailPage, uploadInvoicePage, uploadListPage }
+          = common.getPageObject(browser, page);
 
       // デジタルトレードアプリのトップページを表示する
       await common.gotoTop(page, account);
@@ -134,6 +135,17 @@ describe('リグレッションテスト', function () {
         await page.waitForTimeout(3000);
       }
 
+      /*
+      // 文書を削除する
+      await tradeShiftTopPage.clickDocMng();
+      await tradeShiftDocListPage.waitForLoading();
+      while(await tradeShiftDocListPage.hasDocId('2022')) {
+        await tradeShiftDocListPage.clickDocId('2022');
+        await tradeShiftDocDetailPage.waitForLoading();
+        await tradeShiftDocDetailPage.delete();
+        await tradeShiftDocListPage.waitForLoading();
+      }
+      */
       await page.waitForTimeout(1000);
     }
   });

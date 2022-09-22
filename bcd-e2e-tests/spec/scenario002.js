@@ -285,6 +285,10 @@ describe('リグレッションテスト', function () {
       expect(await uploadFormatTopPage.getPopupMsg()).to.equal('フォーマットの登録が完了しました。', '登録完了のポップアップが表示されること');
       expect(await uploadFormatTopPage.getFormatName(1)).to.equal(itemName, '登録したフォーマットデータが一番上に表示されていること。');
 
+      // 削除する
+      await uploadFormatTopPage.clickDeleteBtn(itemName);
+      await uploadFormatTopPage.clickDialogDeleteBtn();
+      await uploadFormatTopPage.getPopupMsg();
       await page.waitForTimeout(1000);
     }
   });
