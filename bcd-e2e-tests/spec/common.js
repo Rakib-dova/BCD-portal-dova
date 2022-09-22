@@ -10,6 +10,8 @@ const comment = require('../utils/chai-with-reporting').comment;
 const { LoginPage } = require('../page-objects/LoginPage.js');
 const { TradeShiftTopPage } = require('../page-objects/TradeShiftTopPage.js');
 const { TradeShiftUserPage } = require('../page-objects/TradeShiftUserPage.js');
+const { TradeShiftDocListPage } = require('../page-objects/TradeShiftDocListPage.js');
+const { TradeShiftDocDetailPage } = require('../page-objects/TradeShiftDocDetailPage.js');
 const { TopPage } = require('../page-objects/TopPage.js');
 const { UploadInvoicePage } = require('../page-objects/UploadInvoicePage');
 const { UploadFormatTopPage } = require('../page-objects/UploadFormatTopPage');
@@ -95,6 +97,8 @@ exports.getPageObject = (browser, page) => {
   pages.topPage = new TopPage(browser, page);
   pages.tradeShiftTopPage = new TradeShiftTopPage(browser, page);
   pages.tradeShiftUserPage = new TradeShiftUserPage(browser, page);
+  pages.tradeShiftDocListPage = new TradeShiftDocListPage(browser, page);
+  pages.tradeShiftDocDetailPage = new TradeShiftDocDetailPage(browser, page);
   pages.uploadInvoicePage = new UploadInvoicePage(browser, page);
   pages.uploadFormatTopPage = new UploadFormatTopPage(browser, page);
   pages.uploadFormatCreatePage = new UploadFormatCreatePage(browser, page);

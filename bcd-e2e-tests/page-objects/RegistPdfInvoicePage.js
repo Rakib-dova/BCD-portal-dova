@@ -67,11 +67,7 @@ class RegistPdfInvoicePage {
   // 日付を入力する
   async inputDate(itemName, selector, date) {
     await this.addComment('「' + itemName + '」にて、"' + date + '"と入力する');
-    let elm = await this.actionUtils.getElement(this.frame, selector);
-    let dates = date.split('/');
-    await elm.type(dates[0]);
-    await elm.press('Tab');
-    await elm.type(dates[1] + dates[2]);
+    await this.actionUtils.fill(this.frame, selector, date);
   }
 
   // 請求日を入力する

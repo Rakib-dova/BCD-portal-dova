@@ -50,7 +50,7 @@ describe('リグレッションテスト', function () {
       }
 
       // ページオブジェクト
-      const { topPage, uploadInvoicePage, uploadListPage, uploadListDetailPage }
+      const { topPage, tradeShiftTopPage, tradeShiftDocListPage, tradeShiftDocDetailPage, uploadInvoicePage, uploadListPage, uploadListDetailPage }
         = common.getPageObject(browser, page);
 
       // デジタルトレードアプリのトップページを表示する
@@ -137,6 +137,16 @@ describe('リグレッションテスト', function () {
       await uploadListPage.waitForLoading();
       expect(await uploadListPage.getTitle()).to.equal('取込結果一覧', '取込結果一覧ページに遷移すること');
 
+      /*
+      // 文書を削除する
+      await tradeShiftTopPage.clickDocMng();
+      await tradeShiftDocListPage.waitForLoading();
+      while(await tradeShiftDocListPage.hasDocId('2022')) {
+        await tradeShiftDocListPage.clickDocId('2022');
+        await tradeShiftDocDetailPage.waitForLoading();
+        await tradeShiftDocDetailPage.delete();
+        await tradeShiftDocListPage.waitForLoading();
+      }*/
       await page.waitForTimeout(1000);
     }
   });

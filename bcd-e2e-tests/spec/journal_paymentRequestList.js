@@ -64,7 +64,8 @@ describe('仕訳情報設定_支払依頼一覧', function () {
   });
 
   /**
-   * STEP8_No.21,22,25
+   * STEP8_ライトプラン_No.21,22,25
+   * STEP8_機能改修確認_No.20-22
    */
   it("スタンダードプラン未加入時の検索機能利用制限", async function () {
     // テストの初期化を実施
@@ -83,6 +84,12 @@ describe('仕訳情報設定_支払依頼一覧', function () {
     await common.gotoTop(page, config.company2.user06);
     await topPage.clickPaymentRequest();
     await paymentRequestListPage.waitForLoading();
+
+    // 一覧に「担当者アドレス」「支払い期限日」「更新日」が表示されること
+    let headers = await paymentRequestListPage.getResultHeaders();
+    //expect(headers[headers.length - 4]).to.equal('担当者アドレス', '「担当者アドレス」欄が右から3つ目に表示されていること');
+    expect(headers[headers.length - 3]).to.equal('支払い期限日', '「支払期限日」欄が右から2つ目に表示されていること');
+    expect(headers[headers.length - 2]).to.equal('更新日', '「更新日」欄が右から1つ目に表示されていること');
 
     // 「支払依頼検索」機能が利用できないこと
     expect(await paymentRequestListPage.isFormShown()).to.equal(false, '「支払依頼検索」機能が利用できないこと');
@@ -104,7 +111,7 @@ describe('仕訳情報設定_支払依頼一覧', function () {
 
   /**
    * STEP5_No.109
-   * STEP8_機能改修確認_No.118
+   * STEP8_機能改修確認_No.109-111,118
    */
    it("支払依頼情報確認（仕訳情報未設定）", async function () {
     // テストの初期化を実施
@@ -135,6 +142,18 @@ describe('仕訳情報設定_支払依頼一覧', function () {
       await common.gotoTop(page, account);
       await topPage.clickPaymentRequest();
       await paymentRequestListPage.waitForLoading();
+
+      // 一覧に「担当者アドレス」「支払い期限日」「更新日」が表示されること
+      let headers = await paymentRequestListPage.getResultHeaders();
+      //expect(headers[headers.length - 4]).to.equal('担当者アドレス', '「担当者アドレス」欄が右から3つ目に表示されていること');
+      expect(headers[headers.length - 3]).to.equal('支払い期限日', '「支払期限日」欄が右から2つ目に表示されていること');
+      expect(headers[headers.length - 2]).to.equal('更新日', '「更新日」欄が右から1つ目に表示されていること');
+
+      // 20件以下の場合、全て表示されること
+      let resultCount = await paymentRequestListPage.getResultCount();
+      if (resultCount < 21) {
+        expect(await paymentRequestListPage.getRowCount()).to.equal(resultCount, '請求書がページング無しで全件表示されていること');
+      }
 
       // 差出人・宛先・価格を取得する
       let cost = await paymentRequestListPage.getCost(invoiceNo);
@@ -220,7 +239,7 @@ describe('仕訳情報設定_支払依頼一覧', function () {
 
   /**
    * STEP8_ライトプラン_No.180
-   * STEP8_機能改修確認_No.30,32,35-39,42,43,45
+   * STEP8_機能改修確認_No.30,32,35-39,42,43,45,99
    */
    it("検索条件フォーム（入力）", async function () {
     // テストの初期化を実施
@@ -287,12 +306,57 @@ describe('仕訳情報設定_支払依頼一覧', function () {
       let mail = '1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz12345678@example.coma';
       await paymentRequestListPage.inputSearchMail(mail);
       expect(await paymentRequestListPage.getSearchMail()).to.equal(mail.substring(0, 128), '担当者アドレスへ128字まで入力できること');
+
+      // 「担当者不明の請求書」のチェックボックスが表示されていること
+      expect(await paymentRequestListPage.isUnknownMngShown()).to.equal(true, '「担当者不明の請求書」のチェックボックスが表示されていること');
       await page.waitForTimeout(1000);
     }
   });
 
+  // 支払依頼の検索と検索結果確認を行う
+  async function confirmSearch(paymentRequestListPage, journalDetailPage,
+      invoiceNo, minIssueDate, maxIssueDate, senderPart, sender, status, mail, unKnownManager) {
+    // 検索する
+    //await paymentRequestListPage.search(invoiceNo, minIssueDate, maxIssueDate, senderPart, sender, status, mail, unKnownManager);
+    await paymentRequestListPage.search(invoiceNo, minIssueDate, maxIssueDate, senderPart, sender, status, null, unKnownManager);
+
+    // 検索結果一覧を確認する
+    let resultCount = await paymentRequestListPage.getResultCount();
+    if (resultCount < 21) {
+      expect(await paymentRequestListPage.getRowCount()).to.equal(resultCount, '請求書がページング無しで全件表示されていること');
+    }
+    let actual;
+    if (invoiceNo) {
+      actual = await paymentRequestListPage.hasRow(invoiceNo);
+      expect(actual).to.equal(true, '請求書番号に一致する請求書データが検索結果に表示されること（完全一致）');
+    }
+    if (senderPart && sender) {
+      actual = await paymentRequestListPage.getAllSenders();
+      expect(actual.length == 1 && actual[0] == sender).to.equal(true, '入力した送信企業に一致する請求書データが検索結果に表示されること');
+    }
+
+    // 先頭の請求書に対して、支払依頼内容を確認する
+    await paymentRequestListPage.clickFirstDetail();
+    await journalDetailPage.waitForLoading();
+    actual = new Date(await journalDetailPage.getIssueDate());
+    if (minIssueDate) {
+      expect(actual).to.greaterThanOrEqual(new Date(minIssueDate), `請求日が"${minIssueDate}"以降であること`);
+    }
+    if (maxIssueDate) {
+      expect(actual).to.lessThanOrEqual(new Date(maxIssueDate), `請求日が"${maxIssueDate}"以前であること`);
+    }
+    /*
+    if (mail) {
+      actual = await journalDetailPage.getSenderMail();
+      expect(actual).to.equal(mail, '入力した担当者アドレスに一致する請求書データが検索結果に表示されること');
+    }
+    */
+    await journalDetailPage.back();
+    await paymentRequestListPage.waitForLoading();
+  }
+
   /**
-   * STEP8_機能改修確認_No.46,72,75,
+   * STEP8_機能改修確認_No.46,72,75,83,87
    */
    it("検索条件フォーム（検索）", async function () {
     // テストの初期化を実施
@@ -325,60 +389,47 @@ describe('仕訳情報設定_支払依頼一覧', function () {
       await paymentRequestListPage.waitForLoading();
 
       // 請求書番号に一致する請求書データが検索結果に表示されること（完全一致）
-      let invoiceNo = 'A0000125';
-      await paymentRequestListPage.clickSearchClear();
-      await paymentRequestListPage.inputSearchInvoiceNo(invoiceNo);
-      await paymentRequestListPage.clickSearch();
-      expect(await paymentRequestListPage.hasRow(invoiceNo)).to.equal(true, '請求書番号に一致する請求書データが検索結果に表示されること（完全一致）');
+      let invoiceNo = 'fcde40391';
+      await confirmSearch(paymentRequestListPage, journalDetailPage, invoiceNo, null, null, null, null, null, null, false);
 
       // 選択した承認ステータスの請求書データが検索結果に表示されること
-      await paymentRequestListPage.clickSearchClear();
       let status = ['支払依頼中', '一次承認済み', '二次承認済み', '三次承認済み', '四次承認済み', '五次承認済み', '六次承認済み', '七次承認済み', '八次承認済み', '九次承認済み', '十次承認済み', '最終承認済み'];
-      await paymentRequestListPage.checkSearchStatus(status);
-      await paymentRequestListPage.clickSearch();
-      
+      await confirmSearch(paymentRequestListPage, journalDetailPage, null, null, null, null, null, status, null, false);
+
       // 入力した発行日の請求書データが検索結果に表示されること
-      let dates = [
-        { min: '2021-08-22', max: null },
-        { min: null, max: '2021-08-21' },
-        { min: '2021-08-01', max: '2021-08-31'}
-      ];
-      for (i = 0; i < dates.length; i++) {
-        await paymentRequestListPage.clickSearchClear();
-        await paymentRequestListPage.inputSearchIssueDate(dates[i].min, dates[i].max);
-        await paymentRequestListPage.clickSearch();
-        await paymentRequestListPage.clickFirstDetail();
-        await journalDetailPage.waitForLoading();
-        let actual = await journalDetailPage.getIssueDate();
-        if (dates[i].min) {
-          expect(new Date(actual)).to.greaterThanOrEqual(new Date(dates[i].min), `請求日が"${dates[i].min}"以降であること`);
-        }
-        if (dates[i].max) {
-          expect(new Date(actual)).to.lessThanOrEqual(new Date(dates[i].max), `請求日が"${dates[i].max}"以前であること`);
-        }
-        await journalDetailPage.back();
-        await paymentRequestListPage.waitForLoading();
-      }
-      
+      await confirmSearch(paymentRequestListPage, journalDetailPage, null, '2021-08-22', null, null, null, null, null, false);
+      await confirmSearch(paymentRequestListPage, journalDetailPage, null, null, '2021-08-21', null, null, null, null, false);
+      await confirmSearch(paymentRequestListPage, journalDetailPage, null, '2021-08-01', '2021-08-31', null, null, null, null, false);
+
       // 入力した送信企業に一致する請求書データが検索結果に表示されること（完全一致）
-      await paymentRequestListPage.clickSearchClear();
-      let sender = 'テスト企業田中';
-      await paymentRequestListPage.inputSearchSendTo(sender);
-      await paymentRequestListPage.selectSearchSendTo(sender);
-      await paymentRequestListPage.clickSearch();
-      actual = await paymentRequestListPage.getAllSenders();
-      expect(actual.length == 1 && actual[0] == sender).to.equal(true, '入力した送信企業に一致する請求書データが検索結果に表示されること');
-      
+      let sender = 'テスト企業山田';
+      await confirmSearch(paymentRequestListPage, journalDetailPage, null, null, null, sender, sender, null, null, false);
+
       // 入力した送信企業に一致する請求書データが検索結果に表示されること（部分一致）
-      await paymentRequestListPage.clickSearchClear();
-      sender = '山田';
-      await paymentRequestListPage.inputSearchSendTo(sender);
-      sender = 'テスト企業山田';
-      await paymentRequestListPage.selectSearchSendTo(sender);
-      await paymentRequestListPage.clickSearch();
-      actual = await paymentRequestListPage.getAllSenders();
-      expect(actual.length == 1 && actual[0] == sender).to.equal(true, '入力した送信企業に一致する請求書データが検索結果に表示されること');
-      
+      let senderPart = '山田';
+      await confirmSearch(paymentRequestListPage, journalDetailPage, null, null, null, senderPart, sender, null, null, false);
+
+      // 入力した担当者アドレスに一致する請求書データが検索結果に表示されること（完全一致）
+      let mail = 'pyopobe@neko2.net';
+      //await confirmSearch(paymentRequestListPage, journalDetailPage, null, null, null, null, null, null, mail, false);
+
+      // ANDパターン検索（送信企業・発行日）
+      await confirmSearch(paymentRequestListPage, journalDetailPage, null, '2021-08-01', '2021-08-31', senderPart, sender, null, null, false);
+
+      // ANDパターン検索（送信企業・発行日・承認ステータス）
+      status = [ '差し戻し', '未処理' ];
+      await confirmSearch(paymentRequestListPage, journalDetailPage, null, '2021-08-01', '2021-08-31', senderPart, sender, status, null, false);
+
+      // ANDパターン検索（送信企業・発行日・承認ステータス・担当者アドレス）
+      await confirmSearch(paymentRequestListPage, journalDetailPage, null, '2021-08-01', '2021-08-31', senderPart, sender, status, mail, false);
+
+      // ANDパターン検索（送信企業・発行日・承認ステータス・請求書番号）
+      await confirmSearch(paymentRequestListPage, journalDetailPage, invoiceNo, '2021-08-01', '2021-08-31', senderPart, sender, status, mail, false);
+
+      // 担当者不明のチェックあり
+      await confirmSearch(paymentRequestListPage, journalDetailPage, null, null, null, senderPart, sender, status, null, true);
+
+      // 担当者不明のチェックあり + 
       await page.waitForTimeout(1000);
     }
   });

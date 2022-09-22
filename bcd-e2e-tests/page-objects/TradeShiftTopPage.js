@@ -34,6 +34,11 @@ class TradeShiftTopPage {
     }
   }
 
+  // 文書管理をクリックする
+  async clickDocMng() {
+    await this.clickBcdApp('文書管理');
+  }
+
   // ユーザーの姓・名を変更する
   async editUser() {
     this.addComment('ユーザー設定を行う');
