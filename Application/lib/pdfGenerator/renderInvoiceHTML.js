@@ -359,7 +359,7 @@ const validateInvoiceInput = (input) => {
   if (!input || !(Object.prototype.toString.call(input) === '[object Object]')) return false
 
   for (let i = 0; i < requiredProps.length; i++) {
-    if (input[requiredProps[i]] === undefined || input[requiredProps[i]] === '') {
+    if (input[requiredProps[i]] === undefined || input[requiredProps[i]] === null || input[requiredProps[i]] === '') {
       console.log(requiredProps[i])
       return false
     }
@@ -370,7 +370,7 @@ const validateInvoiceInput = (input) => {
 
 const padOptionProps = (input) => {
   for (let i = 0; i < optionProps.length; i++) {
-    if (input[optionProps[i]] === undefined) {
+    if (input[optionProps[i]] === undefined || input[optionProps[i]] === null) {
       input[optionProps[i]] = ''
     }
   }
