@@ -1,6 +1,7 @@
 * {
   padding: 4px;
-  font-family: sans-serif;}
+  font-family: sans-serif;
+}
 h2 {
   margin: 10px 10px 15px 10px;
   font-weight: bold;
@@ -34,4 +35,23 @@ span.inum {
   margin: 5px 10px 5px -4px;
   font-weight: bold;
 }
-
+table,
+td,
+th {
+  border: 1px solid #363636;
+  border-collapse: collapse;
+}
+th {
+  font-weight: normal;
+}
+.topLeft {
+  text-align: left;
+  vertical-align: top;
+}
+.center {
+  text-align: center;
+}
+.title_h3_table {
+  margin: 0px 10px 5px 10px;
+  color: #5e6ec1;
+}
