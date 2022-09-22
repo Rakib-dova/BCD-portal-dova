@@ -84,6 +84,7 @@ block content
                   img(src='../image/ts-app-issueonly_status.svg')
               p 指定ファイルをアップロードすることで、複数のドラフト状態の請求書を一括で作成できます。 
               a(href='/csvupload')  請求書一括作成
+              a(download href='../html/請求書一括作成フォーマット_v1.1.csv')  請求書一括作成フォーマットCSV <br> ダウンロード
               a(href='/uploadFormatList') 独自フォーマット登録
               a(href='/userGuide#invoice') 操作マニュアル
           .column
@@ -95,7 +96,7 @@ block content
                   p.title.is-5 請求情報ダウンロード
                   img(src='../image/ts-app-digitaltrade-func-icon-siwake-type3_status.svg')
               p 送受信した請求情報をCSV形式でダウンロードできます。 
-              a(href='/csvDownload')  仕訳情報ダウンロード
+              a(href='/csvDownload')  請求情報ダウンロード
           .column
             .box.iconBox.textOverflow
               .media.appdesc.is-align-items-flex-end.mb-4.ml-4
