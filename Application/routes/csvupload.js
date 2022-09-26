@@ -11,6 +11,8 @@ const contractController = require('../controllers/contractController.js')
 const uploadFormatController = require('../controllers/uploadFormatController.js')
 const uploadFormatDetailController = require('../controllers/uploadFormatDetailController.js')
 const uploadFormatIdentifierController = require('../controllers/uploadFormatIdentifierController.js')
+const invoiceController = require('../controllers/invoiceController')
+const invoiceDetailController = require('../controllers/invoiceDetailController')
 const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const apiManager = require('../controllers/apiManager')
@@ -266,8 +268,7 @@ const cbRemoveCsv = (_deleteDataPath, _filename) => {
 
 const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, _res) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbExtractInvoice')
-  const invoiceController = require('../controllers/invoiceController')
-  const invoiceDetailController = require('../controllers/invoiceDetailController')
+
   let extractFullpathFile
   try {
     extractFullpathFile = path.join(_extractDir, '/') + _filename
@@ -351,13 +352,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
 
   const invoiceList = csvObj.getInvoiceList()
   const invoiceCnt = invoiceList.length
-  const setHeaders = {}
-  setHeaders.Accepts = 'application/json'
-  setHeaders.Authorization = `Bearer ${_user.accessToken}`
-  setHeaders['Content-Type'] = 'application/json'
 
-  // 明細表示区分
-  let meisaiNumber = 0
   // 結果表示区分
   let resultNumber = 0
   if (validate.isUndefined(_invoices)) {
@@ -414,14 +409,133 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
     return 101
   }
 
-  let idx = 0
   let successCount = 0
   let failCount = 0
   let skipCount = 0
   let uploadInvoiceCnt = 0
   let headerErrorFlag = 0
 
-  const invoices = []
+  let invoices = []
+
+  // アップロード処理関数呼び出し
+  ;({ failCount, skipCount, successCount, resultNumber, uploadInvoiceCnt, headerErrorFlag, invoices } =
+    await convertDataForRegist(
+      invoiceList,
+      resultNumber,
+      _invoices,
+      documentIds,
+      _user,
+      failCount,
+      skipCount,
+      successCount,
+      uploadInvoiceCnt,
+      _req,
+      extractFullpathFile,
+      itemRowNumber,
+      dataRowNumber,
+      headerErrorFlag,
+      formatFlag,
+      invoices
+    ))
+
+  if (headerErrorFlag === 1) {
+    await invoiceController.updateCount({
+      invoicesId: _invoices.invoicesId,
+      successCount: '-',
+      failCount: '-',
+      skipCount: '-',
+      invoiceCount: '0'
+    })
+  } else {
+    await invoiceController.updateCount({
+      invoicesId: _invoices.invoicesId,
+      successCount: successCount,
+      failCount: failCount,
+      skipCount: skipCount,
+      invoiceCount: uploadInvoiceCnt
+    })
+  }
+
+  // アプリ効果測定
+  if (headerErrorFlag === 0) {
+    const jsonLog = {
+      tenantId: _req.user.tenantId,
+      action: 'uploadedInvoiceInfo',
+      uploadedInvoiceCount: invoices.length,
+      invoices: invoices
+    }
+    logger.info(jsonLog)
+  }
+
+  logger.info(constantsDefine.logMessage.INF001 + 'cbExtractInvoice')
+
+  switch (resultNumber) {
+    case 1:
+      return 102
+    case 2:
+      return 103
+    case 3:
+      return 104
+    case 4:
+      return 104
+    default:
+      return 0
+  }
+}
+
+/**
+ * 請求書アップロード処理・結果
+ * @param {object} invoiceList CSVファイルの請求書オブジェクトリスト
+ * @param {object} resultNumber 結果表示区分
+ * @param {object} _invoices 請求書データ
+ * @param {object} documentIds トレードシフトから取得した請求書のドキュメントIDリスト
+ * @param {object} _user ユーザー情報
+ * @param {object} failCount アップロード失敗件数
+ * @param {object} skipCount アップロードスキップ件数
+ * @param {object} successCount アップロード成功件数
+ * @param {object} uploadInvoiceCnt アップロード処理を行った請求書件数
+ * @param {object} _req HTTPリクエストオブジェクト
+ * @param {object} extractFullpathFile CSVファイルのパス
+ * @param {object} itemRowNumber ヘッダ行
+ * @param {object} dataRowNumber データ行
+ * @param {object} headerErrorFlag ヘッダエラー有無
+ * @param {object} formatFlag フォーマット一致/不一致
+ * @param {object} invoices アップロード成功の請求書リスト
+ * @returns {object} アップロード結果
+ *  failCount
+ *  skipCount
+ *  successCount
+ *  resultNumber
+ *  uploadInvoiceCnt
+ *  headerErrorFlag
+ *  invoices
+ */
+async function convertDataForRegist(
+  invoiceList,
+  resultNumber,
+  _invoices,
+  documentIds,
+  _user,
+  failCount,
+  skipCount,
+  successCount,
+  uploadInvoiceCnt,
+  _req,
+  extractFullpathFile,
+  itemRowNumber,
+  dataRowNumber,
+  headerErrorFlag,
+  formatFlag,
+  invoices
+) {
+  let idx = 0
+  // 明細表示区分
+  let meisaiNumber = 0
+
+  const setHeaders = {}
+  setHeaders.Accepts = 'application/json'
+  setHeaders.Authorization = `Bearer ${_user.accessToken}`
+  setHeaders['Content-Type'] = 'application/json'
 
   while (invoiceList[idx]) {
     // 明細check
@@ -543,7 +657,6 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
       }
 
       // == TS にアップロード済み ========================================
-
       const invoiceLines = invoiceList[idx].INVOICE.getDocument().InvoiceLine
       const invoiceId = invoiceList[idx].invoiceId
       const status = invoiceList[idx].status
@@ -645,48 +758,14 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
 
     idx++
   }
-  if (headerErrorFlag === 1) {
-    await invoiceController.updateCount({
-      invoicesId: _invoices.invoicesId,
-      successCount: '-',
-      failCount: '-',
-      skipCount: '-',
-      invoiceCount: '0'
-    })
-  } else {
-    await invoiceController.updateCount({
-      invoicesId: _invoices.invoicesId,
-      successCount: successCount,
-      failCount: failCount,
-      skipCount: skipCount,
-      invoiceCount: uploadInvoiceCnt
-    })
-  }
-
-  // アプリ効果測定
-  if (headerErrorFlag === 0) {
-    const jsonLog = {
-      tenantId: _req.user.tenantId,
-      action: 'uploadedInvoiceInfo',
-      uploadedInvoiceCount: invoices.length,
-      invoices: invoices
-    }
-    logger.info(jsonLog)
-  }
-
-  logger.info(constantsDefine.logMessage.INF001 + 'cbExtractInvoice')
-
-  switch (resultNumber) {
-    case 1:
-      return 102
-    case 2:
-      return 103
-    case 3:
-      return 104
-    case 4:
-      return 104
-    default:
-      return 0
+  return {
+    failCount,
+    skipCount,
+    successCount,
+    resultNumber,
+    uploadInvoiceCnt,
+    headerErrorFlag,
+    invoices
   }
 }
 
