@@ -334,6 +334,18 @@ describe('仕訳情報設定_支払依頼一覧', function () {
       actual = await paymentRequestListPage.getAllSenders();
       expect(actual.length == 1 && actual[0] == sender).to.equal(true, '入力した送信企業に一致する請求書データが検索結果に表示されること');
     }
+    if (unKnownManager) {
+      actual = await paymentRequestListPage.getAllMails();
+      let contains = false;
+      let i = 0;
+      for (i = 0; i < actual.length; i++) {
+        if (actual[i].includes('ユーザー登録なし')) {
+          contains = true;
+          break;
+        }
+      }
+      expect(contains).to.equal(true, '担当者不明の請求書が表示されること');
+    }
 
     // 先頭の請求書に対して、支払依頼内容を確認する
     await paymentRequestListPage.clickFirstDetail();
@@ -429,7 +441,21 @@ describe('仕訳情報設定_支払依頼一覧', function () {
       // 担当者不明のチェックあり
       await confirmSearch(paymentRequestListPage, journalDetailPage, null, null, null, senderPart, sender, status, null, true);
 
-      // 担当者不明のチェックあり + 
+      // ANDパターン検索（担当者不明のチェックあり + 担当者アドレス）
+      //await confirmSearch(paymentRequestListPage, journalDetailPage, null, null, null, null, null, null, mail, true);
+
+      // ANDパターン検索（担当者不明のチェックあり + 発行日）
+      await confirmSearch(paymentRequestListPage, journalDetailPage, null, '2021-08-01', '2021-08-31', null, null, null, null, true);
+
+      // ANDパターン検索（担当者不明のチェックあり + 送信企業）
+      await confirmSearch(paymentRequestListPage, journalDetailPage, null, null, null, senderPart, sender, null, null, true);
+
+      // ANDパターン検索（担当者不明のチェックあり + 発行日 + 送信企業）
+      await confirmSearch(paymentRequestListPage, journalDetailPage, null, '2021-08-01', '2021-08-31', senderPart, sender, null, null, true);
+
+      // ANDパターン検索（担当者不明のチェックあり + 発行日 + 送信企業 + 担当者アドレス）
+      //await confirmSearch(paymentRequestListPage, journalDetailPage, null, '2021-08-01', '2021-08-31', senderPart, sender, null, mail, true);
+
       await page.waitForTimeout(1000);
     }
   });
