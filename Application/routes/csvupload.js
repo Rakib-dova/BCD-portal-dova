@@ -207,7 +207,12 @@ const cbPostUpload = async (req, res, next) => {
 // csvアップロード
 const cbUploadCsv = (_filePath, _filename, _uploadCsvData) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostUploadCsv')
-  const uploadPath = path.join(_filePath, '/')
+  let uploadPath
+  try {
+    uploadPath = path.join(_filePath, '/')
+  } catch (error) {
+    return false
+  }
   const filename = _filename
   const uploadData = _uploadCsvData
   const writeFile = () => {
@@ -235,7 +240,13 @@ const cbUploadCsv = (_filePath, _filename, _uploadCsvData) => {
 // CSVファイル削除機能
 const cbRemoveCsv = (_deleteDataPath, _filename) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbRemoveCsv')
-  const deleteFile = path.join(_deleteDataPath, '/' + _filename)
+  let deleteFile
+  try {
+    deleteFile = path.join(_deleteDataPath, '/' + _filename)
+  } catch (error) {
+    logger.error(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')
+    return false
+  }
 
   if (fs.existsSync(deleteFile)) {
     try {
@@ -257,7 +268,13 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
   logger.info(constantsDefine.logMessage.INF000 + 'cbExtractInvoice')
   const invoiceController = require('../controllers/invoiceController')
   const invoiceDetailController = require('../controllers/invoiceDetailController')
-  const extractFullpathFile = path.join(_extractDir, '/') + _filename
+  let extractFullpathFile
+  try {
+    extractFullpathFile = path.join(_extractDir, '/') + _filename
+  } catch (error) {
+    setErrorLog(_req, 500)
+    return _res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+  }
   const uploadFormatId = _req.body.uploadFormatId
   let formatFlag = false
   let itemRowNumber = 1
