@@ -258,19 +258,29 @@ class PaymentRequestListPage {
     return await this.actionUtils.isExist(this.frame, '//div[@id="informationTab"]//td[contains(text(), "' + invoiceNo + '")]');
   }
 
-  // 支払依頼リスト内、全ての行の送信企業を取得する
-  async getAllSenders() {
+  // 支払依頼リスト内、全ての行分の、同一カラムのテキストを取得する
+  async getAllRows(columnNo) {
     let trPath = '//div[@id="informationTab"]/table/tbody/tr';
     let rowCount = (await this.actionUtils.getElements(this.frame, '//div[@id="informationTab"]/table/tbody/tr')).length;
     let i = 0;
     let result = [];
     for (i = 0; i < rowCount; i++) {
-      let sender = await this.actionUtils.getText(this.frame, `${trPath}/td[6]`);
-      if (!result.includes(sender)) {
-        result.push(sender);
+      let column = await this.actionUtils.getText(this.frame, `${trPath}/td[${columnNo}]`);
+      if (!result.includes(column)) {
+        result.push(column);
       }
     }
     return result;
+  }
+
+  // 支払依頼リスト内、全ての行の送信企業を取得する
+  async getAllSenders() {
+    return await this.getAllRows(6);
+  }
+
+  // 支払依頼リスト内、全ての行の担当者アドレスを取得する
+  async getAllMails() {
+    return await this.getAllRows(7);
   }
 
   // 承認ステータスを取得する
