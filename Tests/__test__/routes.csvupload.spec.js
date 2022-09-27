@@ -24,6 +24,7 @@ jest.mock('../../Application/node_modules/express', () => {
 
 const csvupload = require('../../Application/routes/csvupload')
 const bconCsv = require('../../Application/lib/bconCsv')
+const removeFile = require('../../Application/lib/removeFile')
 const Request = require('jest-express').Request
 const Response = require('jest-express').Response
 const next = require('jest-express').Next
@@ -3573,7 +3574,8 @@ describe('csvuploadのテスト', () => {
       const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBeTruthy()
 
-      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -3609,7 +3611,8 @@ describe('csvuploadのテスト', () => {
       const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBeTruthy()
 
-      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -3660,7 +3663,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -3690,7 +3694,8 @@ describe('csvuploadのテスト', () => {
       const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBeTruthy()
 
-      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -3721,7 +3726,8 @@ describe('csvuploadのテスト', () => {
       const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBeTruthy()
 
-      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -3767,7 +3773,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBeTruthy()
 
-      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -3822,7 +3829,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBeTruthy()
 
-      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -3864,7 +3872,10 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+      path.resolve.mockRestore()
+
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -3936,7 +3947,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -4014,7 +4026,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -4092,7 +4105,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -4170,7 +4184,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -4248,7 +4263,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -4326,7 +4342,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -4404,7 +4421,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -4482,7 +4500,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -4562,7 +4581,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -4640,7 +4660,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -4718,7 +4739,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -4796,7 +4818,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -4874,7 +4897,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -4955,7 +4979,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -5038,7 +5063,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBeTruthy()
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -5116,7 +5142,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -5194,7 +5221,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -5272,7 +5300,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -5350,7 +5379,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -5428,7 +5458,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -5506,7 +5537,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -5584,7 +5616,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -5662,7 +5695,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -5742,7 +5776,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -5820,7 +5855,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -5900,7 +5936,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -5978,7 +6015,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -6056,7 +6094,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -6134,7 +6173,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -6212,7 +6252,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -6290,7 +6331,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -6372,7 +6414,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -6450,7 +6493,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -6532,7 +6576,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -6610,7 +6655,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -6688,7 +6734,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -6759,7 +6806,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -6831,7 +6879,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -6908,7 +6957,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -6982,7 +7032,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -7226,7 +7277,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -7306,7 +7358,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -7387,7 +7440,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -7561,7 +7615,8 @@ describe('csvuploadのテスト', () => {
       // 期待結果
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       apiManager.accessTradeshift = tmpApiManager
@@ -7659,7 +7714,8 @@ describe('csvuploadのテスト', () => {
       // 期待結果
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       apiManager.accessTradeshift = tmpApiManager
@@ -7757,7 +7813,8 @@ describe('csvuploadのテスト', () => {
       // 期待結果
       expect(resultExt).toBe(104)
 
-      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       apiManager.accessTradeshift = tmpApiManager
@@ -7935,7 +7992,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBeTruthy()
 
-      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -7981,7 +8039,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBeTruthy()
 
-      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -8026,7 +8085,8 @@ describe('csvuploadのテスト', () => {
       )
       expect(resultExt).toBeTruthy()
 
-      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -8072,7 +8132,8 @@ describe('csvuploadのテスト', () => {
       )
       const invoiceList = csvObj.getInvoiceList()
 
-      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -8118,7 +8179,8 @@ describe('csvuploadのテスト', () => {
 
       const invoiceList = csvObj.getInvoiceList()
 
-      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
 
       expect(resultRem).toBeTruthy()
 
@@ -8178,7 +8240,8 @@ describe('csvuploadのテスト', () => {
 
       const invoiceList = csvObj.getInvoiceList()
 
-      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -8222,7 +8285,8 @@ describe('csvuploadのテスト', () => {
 
       const invoiceList = csvObj.getInvoiceList()
 
-      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -8264,7 +8328,8 @@ describe('csvuploadのテスト', () => {
       )
       const invoiceList = csvObj.getInvoiceList()
 
-      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -8306,7 +8371,8 @@ describe('csvuploadのテスト', () => {
       )
       const invoiceList = csvObj.getInvoiceList()
 
-      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -8348,7 +8414,8 @@ describe('csvuploadのテスト', () => {
       )
       const invoiceList = csvObj.getInvoiceList()
 
-      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+      const removeFilePath = path.resolve(filePath, filename)
+      const resultRem = await removeFile.removeFile(removeFilePath)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -8463,71 +8530,6 @@ describe('csvuploadのテスト', () => {
       // 500エラーがエラーハンドリング「される」
       expect(response.status).toHaveBeenCalledWith(500)
       expect(response.send).toHaveBeenCalledWith(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
-    })
-  })
-
-  // cbRemoveCsvの確認
-  describe('cbRemoveCsv', () => {
-    test('正常', async () => {
-      // 準備
-      request.user = user
-      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
-
-      const uploadCsvData = Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-
-      // 試験実施
-      csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
-
-      // 試験実施
-      const result = csvupload.cbRemoveCsv(filePath, filename)
-
-      // returnがtrueであること
-      expect(result).toBeTruthy()
-
-      // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-    })
-
-    test('ファイルが存在しない場合', async () => {
-      // 準備
-      request.user = user
-
-      // 試験実施(returnがtrueであること)
-      const result = csvupload.cbRemoveCsv(filePath, '')
-
-      // 期待結果
-      // returnがfalseであること
-      expect(result).toBeFalsy()
-    })
-
-    test('Failed to Delete CSVFile.(error)', async () => {
-      // 準備
-      request.user = user
-      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
-      const filePath = '///'
-
-      // 試験実施(returnがtrueであること)
-      const result = csvupload.cbRemoveCsv(filePath, filename)
-
-      // 期待結果
-      // returnがfalseであること
-      expect(result).toBeFalsy()
-    })
-
-    test('File Path is Nothing.', async () => {
-      // 準備
-      request.user = user
-      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
-      const filePath = null
-
-      // 試験実施(returnがtrueであること)
-      const result = csvupload.cbRemoveCsv(filePath, filename)
-
-      // 期待結果
-      // returnがfalseであること
-      expect(result).toBeFalsy()
     })
   })
 
