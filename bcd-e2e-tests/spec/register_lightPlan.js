@@ -1,7 +1,6 @@
 const webdriverUtils = require('../utils/webdriver-utils');
 const chai = require('chai');
 const chaiWithReporting = require('../utils/chai-with-reporting').chaiWithReporting;
-const comment = require('../utils/chai-with-reporting').comment;
 const config = require('../autotest-script-config');
 const common = require('./common');
 
@@ -95,8 +94,7 @@ describe('追加オプション申込', function () {
     global.reporter.setBrowserInfo(browser, page);
 
     // ページオブジェクト
-    const { topPage, journalMenuPage, paymentRequestListPage, journalDownloadPage, lightPlanMenuPage }
-      = common.getPageObject(browser, page);
+    const { topPage, paymentRequestListPage, journalDownloadPage, lightPlanMenuPage } = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページを表示する
     await common.gotoTop(page, config.company2.user07);
@@ -105,9 +103,7 @@ describe('追加オプション申込', function () {
     expect(await topPage.isLightPlanShown()).to.equal(false, '【トップ】「追加オプション申込」が表示されないこと');
 
     // 【支払依頼一覧】申込フォームボタン（スタンダード、導入支援）の両方が非活性となっていること
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-    await journalMenuPage.clickPaymentRequest();
+    await topPage.clickPaymentRequest();
     await paymentRequestListPage.waitForLoading();
     await paymentRequestListPage.clickLightPlan();
     await lightPlanMenuPage.waitForLoading();
@@ -119,9 +115,7 @@ describe('追加オプション申込', function () {
     await lightPlanMenuPage.close();
     await paymentRequestListPage.clickHome();
     await topPage.waitForLoading();
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-    await journalMenuPage.clickJournalDownload();
+    await topPage.clickDownloadJournal();
     await journalDownloadPage.waitForLoading();
     await journalDownloadPage.clickLightPlan();
     await lightPlanMenuPage.waitForLoading();
@@ -155,7 +149,7 @@ describe('追加オプション申込', function () {
     expect(await topPage.isLightPlanShown()).to.equal(true, '【トップ】「追加オプション申込」が表示されること');
 
     // オプションサービス申込モーダルを開く
-    await topPage.openLightPlan();
+    await topPage.clickLightPlan();
     await lightPlanMenuPage.waitForLoading();
 
     // オプションサービス申込モーダルが表示されること
@@ -163,6 +157,7 @@ describe('追加オプション申込', function () {
     expect(await lightPlanMenuPage.getApplyEnabled()).to.equal(true, '【オプションサービス申込】スタンダードプランの「お申し込みフォーム」ボタンが活性状態であること');
 
     // 「サービス紹介LP」へ遷移すること
+    await lightPlanMenuPage.clickStandardPlan();
     expect(await lightPlanMenuPage.getDetailUrl()).to.equal('https://www.ntt.com/business/services/application/crm-dm/bconnection.html', '【トップ】「サービス紹介LP」へ遷移すること');
 
     // 申し込み画面（利用規約）に遷移すること
@@ -249,8 +244,7 @@ describe('追加オプション申込', function () {
     global.reporter.setBrowserInfo(browser, page);
 
     // ページオブジェクト
-    const { topPage, settingMenuPage, lightPlanMenuPage, contractDetailPage, contractCancelPage }
-      = common.getPageObject(browser, page);
+    const { topPage, lightPlanMenuPage, contractDetailPage, contractCancelPage } = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページを表示する
     await common.gotoTop(page, config.company1.mng);
@@ -258,16 +252,14 @@ describe('追加オプション申込', function () {
     expect(await topPage.isLightPlanShown()).to.equal(true, '【トップ】「オプションサービス申込」のアイコンが表示されていること');
 
     // オプションサービス申込モーダルが表示されること 
-    await topPage.openLightPlan();
+    await topPage.clickLightPlan();
     await lightPlanMenuPage.waitForLoading();
     expect(await lightPlanMenuPage.getTitle()).to.equal('オプションサービス申込', '【オプションサービス申込】オプションサービス申込モーダルが表示されること');
     expect(await lightPlanMenuPage.getApplyEnabled()).to.equal(false, '【オプションサービス申込】スタンダードプランの「お申込みフォーム」が非活性になっていること');
 
     // 継続利用サービスにスタンダードプランが「契約中」で表示されていること
     await lightPlanMenuPage.close();
-    await topPage.openSettingMenu();
-    await settingMenuPage.waitForLoading();
-    await settingMenuPage.clickContractChange();
+    await topPage.clickContractDetail();
     await contractDetailPage.waitForLoading();
     expect(await contractDetailPage.getStatus('スタンダード')).to.equal('契約中', '【ご契約内容】スタンダードプランが「契約中」で表示されていること');
     expect(await contractDetailPage.getContractNo('スタンダード')).to.not.equal('ー', '【ご契約内容】スタンダードプランの契約番号が表示されていること');
@@ -307,7 +299,7 @@ describe('追加オプション申込', function () {
     await common.gotoTop(page, config.company2.user03);
 
     // オプションサービス申込モーダルを開く
-    await topPage.openLightPlan();
+    await topPage.clickLightPlan();
     await lightPlanMenuPage.waitForLoading();
 
     // 「導入支援サービス」欄の下部にある「お申し込みフォーム」ボタンが活性になっていること
@@ -396,8 +388,7 @@ describe('追加オプション申込', function () {
     global.reporter.setBrowserInfo(browser, page);
 
     // ページオブジェクト
-    const { topPage, lightPlanMenuPage, settingMenuPage, contractDetailPage }
-      = common.getPageObject(browser, page);
+    const { topPage, lightPlanMenuPage, contractDetailPage } = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページを表示する
     await common.gotoTop(page, config.company1.mng);
@@ -406,9 +397,7 @@ describe('追加オプション申込', function () {
     expect(await topPage.isLightPlanShown()).to.equal(true, '【トップ】「追加オプション申込」が表示されること');
 
     // 初回利用サービスに導入支援サービスが「申込処理中」で表示されていること
-    await topPage.openSettingMenu();
-    await settingMenuPage.waitForLoading();
-    await settingMenuPage.clickContractChange();
+    await topPage.clickContractDetail();
     await contractDetailPage.waitForLoading();
     expect(await contractDetailPage.getStatus('導入支援サービス')).to.equal('申込処理中', '【ご契約内容】導入支援サービスが「申込処理中」で表示されていること');
 
@@ -427,14 +416,13 @@ describe('追加オプション申込', function () {
 
     // 追加オプション申込アイコンからオプションサービス申込ダイアログを開く
     await lightPlanMenuPage.close();
-    await topPage.openLightPlan();
+    await topPage.clickLightPlan();
     await lightPlanMenuPage.waitForLoading();
 
     // 「導入支援サービス」欄の下部にある「お申し込みフォーム」ボタンが非活性になっていること
     expect(await lightPlanMenuPage.getTitle()).to.equal('オプションサービス申込', '【オプションサービス申込】「オプションサービス申込」モーダルが表示されること');
     await lightPlanMenuPage.clickIntroSupport();
     expect(await lightPlanMenuPage.getApplyIntroSupportEnabled()).to.equal(false, '【オプションサービス申込】導入支援サービスの「お申し込みフォーム」ボタンが非活性状態であること');
-
     await page.waitForTimeout(1000);
   });
 });

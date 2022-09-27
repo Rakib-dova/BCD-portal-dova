@@ -3,8 +3,7 @@
 ページ遷移：Home画面→仕訳情報管理→支払依頼一覧→承認待ちタブ→依頼内容確認
 */
 
-const approveProgressModal = document.getElementById('approve-progress-modal')
-const rejectProgressModal = document.getElementById('reject-progress-modal')
+const approvalInboxProgressModal = document.getElementById('approval-inbox-progress-modal')
 
 // selector「$」宣言
 // document.getElementById、document.getElementsByClassName省略
@@ -1653,7 +1652,7 @@ $('#checkApproval').addEventListener('click', function () {
 
 $('#btn-approve').addEventListener('click', function (e) {
   e.preventDefault()
-  approveProgressModal.classList.add('is-active')
+  approvalInboxProgressModal.classList.add('is-active')
   $('#approval').submit()
 })
 
@@ -1693,7 +1692,7 @@ $('#rejectApproval').addEventListener('click', function () {
 
 $('#btn-reject').addEventListener('click', function (e) {
   e.preventDefault()
-  rejectProgressModal.classList.add('is-active')
+  approvalInboxProgressModal.classList.add('is-active')
   $('#reject').submit()
 })
 

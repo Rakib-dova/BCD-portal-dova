@@ -50,7 +50,7 @@ describe('リグレッションテスト', function () {
       }
 
       // ページオブジェクト
-      const { topPage, uploadInvoiceMenuPage, uploadFormatTopPage, uploadFormatSettingPage, uploadFormatConfirmPage, uploadFormatModPage }
+      const { topPage, uploadFormatTopPage, uploadFormatSettingPage, uploadFormatConfirmPage, uploadFormatModPage }
         = common.getPageObject(browser, page);
 
       // デジタルトレードアプリのトップページを表示する
@@ -60,12 +60,8 @@ describe('リグレッションテスト', function () {
       let formatPath = path.resolve('testdata', 'upload', 'format_header.csv')
       let itemName = await common.uploadFormat(formatPath, true, 1, 2, 1)
 
-      // 請求書一括作成メニューを表示する
-      await topPage.openUploadInvoiceMenu();
-      await uploadInvoiceMenuPage.waitForLoading();
-
       // 請求書アップロードフォーマット一覧ページに遷移する
-      await uploadInvoiceMenuPage.clickUploadFormat();
+      await topPage.clickUploadFormat();
       await uploadFormatTopPage.waitForLoading();
 
       // 「確認・変更する」ボタンをクリックする
@@ -270,7 +266,7 @@ describe('リグレッションテスト', function () {
 
       // 削除ダイアログの「キャンセル」ボタンをクリックする
       await uploadFormatTopPage.clickDialogCancelBtn();
-      expect(await uploadFormatTopPage.isDialogDeleteBtnDisplayed()).to.equal(true, '削除確認ダイアログが閉じられること');
+      expect(await uploadFormatTopPage.isDialogDeleteBtnDisplayed()).to.equal(false, '削除確認ダイアログが閉じられること');
 
       // 「削除」ボタンをクリックする
       await uploadFormatTopPage.clickDeleteBtn(itemName);

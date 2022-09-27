@@ -3,6 +3,8 @@
 ページ遷移：Home画面→仕訳情報管理→支払依頼一覧→仕訳情報設定
 */
 
+const modal = document.getElementById('requestApproval-progress-modal')
+
 // selector「$」宣言
 // document.getElementById、document.getElementsByClassName省略
 const $ = function (tagObjName) {
@@ -1704,3 +1706,10 @@ const getBulkList = function () {
   } while (journalIdx < $('.lineAccountcodeForBulk').length)
   return bulkLines
 }
+
+// 仕訳情報設定ボタン押下時
+Array.prototype.forEach.call(document.querySelectorAll('.request-approval-button'), (item) => {
+  item.addEventListener('click', function () {
+    modal.classList.add('is-active')
+  })
+})

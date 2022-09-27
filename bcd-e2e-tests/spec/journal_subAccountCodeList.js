@@ -76,7 +76,6 @@ describe('仕訳情報設定_補助科目一覧', function () {
         page.close();
       }
       page = await context.newPage();
-  
       global.reporter.setBrowserInfo(browser, page);
       if (account.type == 'manager') {
         await comment('---------- 管理者アカウント ----------')
@@ -91,19 +90,13 @@ describe('仕訳情報設定_補助科目一覧', function () {
       }
   
       // ページオブジェクト
-      const { topPage, journalMenuPage, accountCodeListPage, uploadAccountCodePage } = common.getPageObject(browser, page);
+      const { topPage, accountCodeListPage, uploadAccountCodePage } = common.getPageObject(browser, page);
   
       // デジタルトレードアプリのトップページへ遷移する
       await common.gotoTop(page, account);
 
-      // 仕訳情報管理メニューを開く
-      await comment('「仕訳情報管理」をクリックする');
-      await topPage.openJournalMenu();
-      await journalMenuPage.waitForLoading();
-  
       // 勘定科目一覧ページへ遷移する
-      await comment('「勘定科目設定」をクリックする');
-      await journalMenuPage.clickAccount();
+      await topPage.clickAccountCode();
       await accountCodeListPage.waitForLoading();
   
       let files = [
@@ -152,7 +145,6 @@ describe('仕訳情報設定_補助科目一覧', function () {
         page.close();
       }
       page = await context.newPage();
-  
       global.reporter.setBrowserInfo(browser, page);
       if (account.type == 'manager') {
         await comment('---------- 管理者アカウント ----------')
@@ -165,20 +157,11 @@ describe('仕訳情報設定_補助科目一覧', function () {
       }
   
       // ページオブジェクト
-      const { topPage, journalMenuPage, subAccountCodeListPage, registSubAccountCodePage }
-        = common.getPageObject(browser, page);
+      const { topPage, subAccountCodeListPage, registSubAccountCodePage } = common.getPageObject(browser, page);
 
-      // デジタルトレードアプリのトップページへ遷移する
-      await common.gotoTop(page, account);
-
-      // 仕訳情報管理メニューを開く
-      await comment('「仕訳情報管理」をクリックする');
-      await topPage.openJournalMenu();
-      await journalMenuPage.waitForLoading();
-  
       // 補助科目一覧ページへ遷移する
-      await comment('「補助科目設定」をクリックする');
-      await journalMenuPage.clickSubAccount();
+      await common.gotoTop(page, account);
+      await topPage.clickSubAccountCode();
       await subAccountCodeListPage.waitForLoading();
 
       // 新規登録ページへ遷移する
@@ -211,7 +194,6 @@ describe('仕訳情報設定_補助科目一覧', function () {
       expect(await subAccountCodeListPage.hasRowWithAccount(subAccountSets[0].subCode, subAccountSets[0].subName, subAccountSets[0].name)).to.equal(true, '登録した勘定科目名、補助科目コード、補助科目名、最新更新日が正しいこと');
 
       // 補助科目確認・変更ページへ遷移する
-      await comment('勘定科目コード"' + subAccountSets[0].code + '"、補助科目コード"' + subAccountSets[0].subCode + '"の「確認・変更する」をクリックする');
       await subAccountCodeListPage.clickEdit(subAccountSets[0].subCode, subAccountSets[0].name);
       await registSubAccountCodePage.waitForLoading();
 
@@ -275,23 +257,12 @@ describe('仕訳情報設定_補助科目一覧', function () {
       }
   
       // ページオブジェクト
-      const { topPage, journalMenuPage, subAccountCodeListPage, uploadSubAccountCodePage }
-        = common.getPageObject(browser, page);
-
-      // デジタルトレードアプリのトップページへ遷移する
-      await common.gotoTop(page, account);
-
-      // 仕訳情報管理メニューを開く
-      await comment('「仕訳情報管理」をクリックする');
-      await topPage.openJournalMenu();
-      await journalMenuPage.waitForLoading();
-  
-      // 補助科目一覧ページへ遷移する
-      await comment('「補助科目設定」をクリックする');
-      await journalMenuPage.clickSubAccount();
-      await subAccountCodeListPage.waitForLoading();
+      const { topPage, subAccountCodeListPage, uploadSubAccountCodePage } = common.getPageObject(browser, page);
 
       // 補助科目一括作成ページへ遷移する
+      await common.gotoTop(page, account);
+      await topPage.clickSubAccountCode();
+      await subAccountCodeListPage.waitForLoading();
       await subAccountCodeListPage.clickUpload();
       await uploadSubAccountCodePage.waitForLoading();
 
@@ -349,21 +320,18 @@ describe('仕訳情報設定_補助科目一覧', function () {
     global.reporter.setBrowserInfo(browser, page);
 
     // ページオブジェクト
-    const { topPage, journalMenuPage, accountCodeListPage } = common.getPageObject(browser, page);
+    const { topPage, accountCodeListPage } = common.getPageObject(browser, page);
 
-    // デジタルトレードアプリのトップページへ遷移する
+    // 勘定科目一覧ページへ遷移する
     await common.gotoTop(page, config.company1.mng);
+    await topPage.clickAccountCode();
+    await accountCodeListPage.waitForLoading();
 
     // 勘定科目をすべて削除する
-    await comment('「仕訳情報管理」をクリックする');
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-    await journalMenuPage.clickAccount();
-    await accountCodeListPage.waitForLoading();
     await accountCodeListPage.deleteAll();
     await page.waitForTimeout(1000);
   });
-  
+
   /**
    * STEP5 No.3
    */
@@ -391,23 +359,12 @@ describe('仕訳情報設定_補助科目一覧', function () {
       }
   
       // ページオブジェクト
-      const { topPage, journalMenuPage, subAccountCodeListPage, registSubAccountCodePage }
-        = common.getPageObject(browser, page);
-
-      // デジタルトレードアプリのトップページへ遷移する
-      await common.gotoTop(page, account);
-
-      // 仕訳情報管理メニューを開く
-      await comment('「仕訳情報管理」をクリックする');
-      await topPage.openJournalMenu();
-      await journalMenuPage.waitForLoading();
-  
-      // 補助科目一覧ページへ遷移する
-      await comment('「補助科目設定」をクリックする');
-      await journalMenuPage.clickSubAccount();
-      await subAccountCodeListPage.waitForLoading();
+      const { topPage, subAccountCodeListPage, registSubAccountCodePage } = common.getPageObject(browser, page);
 
       // 新規登録ページへ遷移する
+      await common.gotoTop(page, account);
+      await topPage.clickSubAccountCode();
+      await subAccountCodeListPage.waitForLoading();
       await subAccountCodeListPage.clickRegist();
       await registSubAccountCodePage.waitForLoading();
   

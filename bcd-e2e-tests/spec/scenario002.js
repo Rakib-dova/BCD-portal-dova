@@ -50,18 +50,14 @@ describe('リグレッションテスト', function () {
       }
 
       // ページオブジェクト
-      const { topPage, uploadInvoiceMenuPage, uploadFormatTopPage, uploadFormatCreatePage, uploadFormatSettingPage, uploadFormatConfirmPage }
+      const { topPage, uploadFormatTopPage, uploadFormatCreatePage, uploadFormatSettingPage, uploadFormatConfirmPage }
         = common.getPageObject(browser, page);
 
       // デジタルトレードアプリのトップページを表示する
       await common.gotoTop(page, account);
 
-      // 請求書一括作成メニューを表示する
-      await topPage.openUploadInvoiceMenu();
-      await uploadInvoiceMenuPage.waitForLoading();
-
       // 請求書アップロードフォーマット一覧ページに遷移する
-      await uploadInvoiceMenuPage.clickUploadFormat();
+      await topPage.clickUploadFormat();
       await uploadFormatTopPage.waitForLoading();
 
       // 新規登録ページに遷移する
@@ -289,6 +285,10 @@ describe('リグレッションテスト', function () {
       expect(await uploadFormatTopPage.getPopupMsg()).to.equal('フォーマットの登録が完了しました。', '登録完了のポップアップが表示されること');
       expect(await uploadFormatTopPage.getFormatName(1)).to.equal(itemName, '登録したフォーマットデータが一番上に表示されていること。');
 
+      // 削除する
+      await uploadFormatTopPage.clickDeleteBtn(itemName);
+      await uploadFormatTopPage.clickDialogDeleteBtn();
+      await uploadFormatTopPage.getPopupMsg();
       await page.waitForTimeout(1000);
     }
   });

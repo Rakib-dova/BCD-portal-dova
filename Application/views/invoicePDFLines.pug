@@ -64,7 +64,7 @@ div.margin-top-40p
               p(class='line-discountDescription' + x)
           td.text-center
             if editing
-              input.input(data-prop='discountAmount' + x class='line-discountAmount' + x type='text' placeholder='0～999999999999')
+              input.input(data-prop='discountAmount' + x class='line-discountAmount' + x type='text' placeholder='1～999999999999')
             eles
               p(class='line-discountAmount' + x)
           td.text-center
@@ -95,6 +95,8 @@ div.margin-top-40p
         td.text-center.align-middle
           a#btn-plus-invoice-detail.mr-auto
             i.fas.fa-plus-circle
+
+  p#discount-msg 　　　※税込金額から割引する金額を入力して下さい。
 
     .modal#taxType-modal
         .modal-background.cancel-button(data-target='taxType-modal')
@@ -173,7 +175,7 @@ div.margin-top-40p
               p(class='invoice-discountDescription' + x)
           td.text-center
             if editing
-              input.input(data-prop='discountAmount' + x id='invoice-discountAmount' + x class='invoice-discountAmount' + x type='text' placeholder='0～999999999999')
+              input.input(data-prop='discountAmount' + x id='invoice-discountAmount' + x class='invoice-discountAmount' + x type='text' placeholder='1～999999999999')
             eles
               p(class='invoice-discountAmount' + x)
           td.text-center

@@ -9,16 +9,16 @@ const comment = require('../utils/chai-with-reporting').comment;
 
 const { LoginPage } = require('../page-objects/LoginPage.js');
 const { TradeShiftTopPage } = require('../page-objects/TradeShiftTopPage.js');
+const { TradeShiftUserPage } = require('../page-objects/TradeShiftUserPage.js');
+const { TradeShiftDocListPage } = require('../page-objects/TradeShiftDocListPage.js');
+const { TradeShiftDocDetailPage } = require('../page-objects/TradeShiftDocDetailPage.js');
 const { TopPage } = require('../page-objects/TopPage.js');
-const { SupportMenuPage } = require('../page-objects/SupportMenuPage');
-const { UploadInvoiceMenuPage } = require('../page-objects/UploadInvoiceMenuPage');
 const { UploadInvoicePage } = require('../page-objects/UploadInvoicePage');
 const { UploadFormatTopPage } = require('../page-objects/UploadFormatTopPage');
 const { UploadFormatCreatePage } = require('../page-objects/UploadFormatCreatePage');
 const { UploadFormatSettingPage } = require('../page-objects/UploadFormatSettingPage');
 const { UploadFormatConfirmPage } = require('../page-objects/UploadFormatConfirmPage');
 const { UploadFormatModPage } = require('../page-objects/UploadFormatModPage');
-const { SettingMenuPage } = require('../page-objects/SettingMenuPage');
 const { ContractCancelPage } = require('../page-objects/ContractCancelPage');
 const { ContractChangePage } = require('../page-objects/ContractChangePage');
 const { ContractDetailPage } = require('../page-objects/ContractDetailPage');
@@ -27,7 +27,6 @@ const { UploadListDetailPage } = require('../page-objects/UploadListDetailPage')
 const { SettlementPage } = require('../page-objects/SettlementPage');
 const { RakkoToolsPage } = require('../page-objects/RakkoToolsPage');
 const { DownloadInvoicePage } = require('../page-objects/DownloadInvoicePage');
-const { JournalMenuPage } = require('../page-objects/JournalMenuPage');
 const { AccountCodeListPage } = require('../page-objects/AccountCodeListPage');
 const { RegistAccountCodePage } = require('../page-objects/RegistAccountCodePage');
 const { ApproveRouteListPage } = require('../page-objects/ApproveRouteListPage');
@@ -51,6 +50,7 @@ const { PaidServiceRegisterPage } = require('../page-objects/PaidServiceRegister
 const { PaidServiceRegisterInputPage } = require('../page-objects/PaidServiceRegisterInputPage');
 const { CsvUploadForPdfPage } = require('../page-objects/CsvUploadForPdfPage');
 const { BulkUploadUsersPage } = require('../page-objects/BulkUploadUsersPage');
+const { UserGuidePage } = require('../page-objects/UserGuidePage');
 
 // テストの準備を行う
 exports.initTest = async () => {
@@ -96,15 +96,15 @@ exports.getPageObject = (browser, page) => {
   pages.loginPage = new LoginPage(browser, page);
   pages.topPage = new TopPage(browser, page);
   pages.tradeShiftTopPage = new TradeShiftTopPage(browser, page);
-  pages.supportMenuPage = new SupportMenuPage(browser, page);
-  pages.uploadInvoiceMenuPage = new UploadInvoiceMenuPage(browser, page);
+  pages.tradeShiftUserPage = new TradeShiftUserPage(browser, page);
+  pages.tradeShiftDocListPage = new TradeShiftDocListPage(browser, page);
+  pages.tradeShiftDocDetailPage = new TradeShiftDocDetailPage(browser, page);
   pages.uploadInvoicePage = new UploadInvoicePage(browser, page);
   pages.uploadFormatTopPage = new UploadFormatTopPage(browser, page);
   pages.uploadFormatCreatePage = new UploadFormatCreatePage(browser, page);
   pages.uploadFormatSettingPage = new UploadFormatSettingPage(browser, page);
   pages.uploadFormatConfirmPage = new UploadFormatConfirmPage(browser, page);
   pages.uploadFormatModPage = new UploadFormatModPage(browser, page);
-  pages.settingMenuPage = new SettingMenuPage(browser, page);
   pages.contractCancelPage = new ContractCancelPage(browser, page);
   pages.contractChangePage = new ContractChangePage(browser, page);
   pages.contractDetailPage = new ContractDetailPage(browser, page);
@@ -113,7 +113,6 @@ exports.getPageObject = (browser, page) => {
   pages.settlementPage = new SettlementPage(browser, page);
   pages.rakkoToolsPage = new RakkoToolsPage(browser, page);
   pages.downloadInvoicePage = new DownloadInvoicePage(browser, page);
-  pages.journalMenuPage = new JournalMenuPage(browser, page);
   pages.accountCodeListPage = new AccountCodeListPage(browser, page);
   pages.registAccountCodePage = new RegistAccountCodePage(browser, page);
   pages.approveRouteListPage = new ApproveRouteListPage(browser, page);
@@ -137,6 +136,7 @@ exports.getPageObject = (browser, page) => {
   pages.paidServiceRegisterInputPage = new PaidServiceRegisterInputPage(browser, page);
   pages.csvUploadForPdfPage = new CsvUploadForPdfPage(browser, page);
   pages.bulkUploadUsersPage = new BulkUploadUsersPage(browser, page);
+  pages.userGuidePage = new UserGuidePage(browser, page);
   this.pages = pages;
   return pages;
 }
@@ -231,12 +231,8 @@ exports.updateInvoiceItemNameForCustom = (baseFilePath, tmpFilePath, startRow, c
 // 請求書フォーマットファイルをアップロードする(BCDアプリトップページから開始)
 exports.uploadFormat = async (formatPath, hasHeader, headerRow, dataRow, startColumn) => {
 
-  // 請求書一括作成メニューを表示する
-  await this.pages.topPage.openUploadInvoiceMenu();
-  await this.pages.uploadInvoiceMenuPage.waitForLoading();
-
   // 請求書アップロードフォーマット一覧ページに遷移する
-  await this.pages.uploadInvoiceMenuPage.clickUploadFormat();
+  await this.pages.topPage.clickUploadFormat();
   await this.pages.uploadFormatTopPage.waitForLoading();
 
   // 新規登録ページに遷移する
@@ -360,14 +356,12 @@ exports.gotoTop = async (page, account) => {
     await page.goto(config.baseUrl);
 
     // ログインを行う
-    await comment('ユーザ"' + account.id + '"でログインする');
     await this.pages.loginPage.doLogin(account.id, account.password);
     await this.pages.tradeShiftTopPage.waitForLoading();
 
     // デジタルトレードアプリをクリックする
     let appName = process.env.APP ? process.env.APP : config.appName;
     appName = appName.replace(/\"/g, '');
-    await comment('アイコン「' + appName + '」をクリックする');
     await this.pages.tradeShiftTopPage.clickBcdApp(appName);
     await this.pages.topPage.waitForLoading();
 }
@@ -379,10 +373,7 @@ exports.registJournalData = async (page, account, journalData, approveRoute) => 
   await this.gotoTop(page, account);
 
   // 勘定科目を登録する
-  await comment('「仕訳情報管理」をクリックする');
-  await this.pages.topPage.openJournalMenu();
-  await this.pages.journalMenuPage.waitForLoading();
-  await this.pages.journalMenuPage.clickAccount();
+  await this.pages.topPage.clickAccountCode();
   await this.pages.accountCodeListPage.waitForLoading();
   for (let acSet of journalData.accountCodes) {
     if (await this.pages.accountCodeListPage.hasRow(acSet.code, acSet.name)) {
@@ -400,10 +391,7 @@ exports.registJournalData = async (page, account, journalData, approveRoute) => 
   // 補助科目を登録する
   await this.pages.accountCodeListPage.clickHome();
   await this.pages.topPage.waitForLoading();
-  await comment('「仕訳情報管理」をクリックする');
-  await this.pages.topPage.openJournalMenu();
-  await this.pages.journalMenuPage.waitForLoading();
-  await this.pages.journalMenuPage.clickSubAccount();
+  await this.pages.topPage.clickSubAccountCode();
   await this.pages.subAccountCodeListPage.waitForLoading();
   for (let acSet of journalData.accountCodes) {
     if (await this.pages.subAccountCodeListPage.hasRow(acSet.subCode, acSet.subName)) {
@@ -427,10 +415,7 @@ exports.registJournalData = async (page, account, journalData, approveRoute) => 
   await comment('「Home」をクリックする');
   await this.pages.subAccountCodeListPage.clickHome();
   await this.pages.topPage.waitForLoading();
-  await comment('「仕訳情報管理」をクリックする');
-  await this.pages.topPage.openJournalMenu();
-  await this.pages.journalMenuPage.waitForLoading();
-  await this.pages.journalMenuPage.clickDepartment();
+  await this.pages.topPage.clickDepartmentCode();
   await this.pages.departmentListPage.waitForLoading();
   for(let department of journalData.departments) {
     if (await this.pages.departmentListPage.hasRow(department.code, department.name)) {
@@ -452,11 +437,7 @@ exports.registJournalData = async (page, account, journalData, approveRoute) => 
   }
   await this.pages.departmentListPage.clickHome();
   await this.pages.topPage.waitForLoading();
-  await comment('「仕訳情報管理」をクリックする');
-  await this.pages.topPage.openJournalMenu();
-  await this.pages.journalMenuPage.waitForLoading();
-  await comment('「承認ルート一覧」をクリックする');
-  await this.pages.journalMenuPage.clickApproveRoute();
+  await this.pages.topPage.clickApproveRoute();
   await this.pages.approveRouteListPage.waitForLoading();
   if (!await this.pages.approveRouteListPage.hasRow(approveRoute.name)) {
     await comment('「新規登録する」をクリックする');
@@ -491,20 +472,14 @@ exports.deleteJournalData = async (page, account, approveRouteName) => {
   await this.gotoTop(page, account);
 
   // 勘定科目をすべて削除する
-  await comment('「仕訳情報管理」をクリックする');
-  await this.pages.topPage.openJournalMenu();
-  await this.pages.journalMenuPage.waitForLoading();
-  await this.pages.journalMenuPage.clickAccount();
+  await this.pages.topPage.clickAccountCode();
   await this.pages.accountCodeListPage.waitForLoading();
   await this.pages.accountCodeListPage.deleteAll();
 
   // 部門データをすべて削除する
   await this.pages.accountCodeListPage.clickHome();
   await this.pages.topPage.waitForLoading();
-  await comment('「仕訳情報管理」をクリックする');
-  await this.pages.topPage.openJournalMenu();
-  await this.pages.journalMenuPage.waitForLoading();
-  await this.pages.journalMenuPage.clickDepartment();
+  await this.pages.topPage.clickDepartmentCode();
   await this.pages.departmentListPage.waitForLoading();
   await this.pages.departmentListPage.deleteAll();
 
@@ -515,10 +490,7 @@ exports.deleteJournalData = async (page, account, approveRouteName) => {
   }
   await this.pages.departmentListPage.clickHome();
   await this.pages.topPage.waitForLoading();
-  await comment('「仕訳情報管理」をクリックする');
-  await this.pages.topPage.openJournalMenu();
-  await this.pages.journalMenuPage.waitForLoading();
-  await this.pages.journalMenuPage.clickApproveRoute();
+  await this.pages.topPage.clickApproveRoute();
   await this.pages.approveRouteListPage.waitForLoading();
   await this.pages.approveRouteListPage.deleteRoute(approveRouteName);
   await this.pages.approveRouteListPage.deleteOnConfirm();

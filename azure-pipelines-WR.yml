@@ -39,11 +39,13 @@ parameters:
       - PDF請求書
       - 利用登録_フリープラン
       - 利用登録_ライトプラン
+      - 設定_ユーザー一括登録
   - name: app
     displayName: "実行したいアプリを選択してください"
     type: string
     default: デジタルトレードアプリ（モック）
     values:
+      - デジタルトレードアプリ（Dev）
       - デジタルトレードアプリ（モック）
       - デジタルトレード (prodstg)
   - name: account
@@ -217,6 +219,11 @@ stages:
                 workingDirectory: $(DIR)
                 displayName: test
                 condition: eq( '${{ parameters.scenario }}', '利用登録_ライトプラン' )
+
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && (SET APP="${{ parameters.app }}") && npm run ${{BROWSER_NAME}} -- spec\setting_users.js
+                workingDirectory: $(DIR)
+                displayName: test
+                condition: eq( '${{ parameters.scenario }}', '設定_ユーザー一括登録' )
 
               - script: npm run e2e-report
                 workingDirectory: $(DIR)

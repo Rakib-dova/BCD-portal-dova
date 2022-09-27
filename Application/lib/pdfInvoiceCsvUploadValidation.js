@@ -136,8 +136,8 @@ const invoiceRules = [
         if (!value) {
           this.message = `${this.colName}は必須です。`
           return false
-        } else if (!(value > 0 && value <= 999999999999.999)) {
-          this.message = `${this.colName}は整数or少数 0 ～ 999999999999.999 の範囲で入力してください。`
+        } else if (!(Number.isInteger(Number(value)) && value > 0 && value <= 999999999999)) {
+          this.message = `${this.colName}は整数 1 ～ 999999999999 の範囲で入力してください。`
           return false
         } else return true
       }
@@ -187,8 +187,8 @@ const invoiceRules = [
         if (!value) {
           this.message = `${this.colName}は必須です。`
           return false
-        } else if (!(value > 0 && value <= 999999999999.999)) {
-          this.message = `${this.colName}は整数or少数 0 ～ 999999999999.999 の範囲で入力してください。`
+        } else if (!(Number.isInteger(Number(value)) && value > 0 && value <= 999999999999)) {
+          this.message = `${this.colName}は整数 1 ～ 999999999999 の範囲で入力してください。`
           return false
         } else return true
       }
@@ -238,8 +238,8 @@ const invoiceRules = [
         if (!value) {
           this.message = `${this.colName}は必須です。`
           return false
-        } else if (!(value > 0 && value <= 999999999999.999)) {
-          this.message = `${this.colName}は整数or少数 0 ～ 999999999999.999 の範囲で入力してください。`
+        } else if (!(Number.isInteger(Number(value)) && value > 0 && value <= 999999999999)) {
+          this.message = `${this.colName}は整数 1 ～ 999999999999 の範囲で入力してください。`
           return false
         } else return true
       }
@@ -336,8 +336,8 @@ const lineRules = [
         if (!value) {
           this.message = `${this.colName}は必須です。`
           return false
-        } else if (!(value > 0 && value <= 999999999999.999)) {
-          this.message = `${this.colName}は整数or少数 0 ～ 999999999999.999 の範囲で入力してください。`
+        } else if (!(Number.isInteger(Number(value)) && value > 0 && value <= 999999999999)) {
+          this.message = `${this.colName}は整数 1 ～ 999999999999 の範囲で入力してください。`
           return false
         } else return true
       }
@@ -387,8 +387,8 @@ const lineRules = [
         if (!value) {
           this.message = `${this.colName}は必須です。`
           return false
-        } else if (!(value > 0 && value <= 999999999999.999)) {
-          this.message = `${this.colName}は整数or少数 0 ～ 999999999999.999 の範囲で入力してください。`
+        } else if (!(Number.isInteger(Number(value)) && value > 0 && value <= 999999999999)) {
+          this.message = `${this.colName}は整数 1 ～ 999999999999 の範囲で入力してください。`
           return false
         } else return true
       }
@@ -438,8 +438,8 @@ const lineRules = [
         if (!value) {
           this.message = `${this.colName}は必須です。`
           return false
-        } else if (!(value > 0 && value <= 999999999999.999)) {
-          this.message = `${this.colName}は整数or少数 0 ～ 999999999999.999 の範囲で入力してください。`
+        } else if (!(Number.isInteger(Number(value)) && value > 0 && value <= 999999999999)) {
+          this.message = `${this.colName}は整数 1 ～ 999999999999 の範囲で入力してください。`
           return false
         } else return true
       }
@@ -539,6 +539,13 @@ const validate = async (invoices, lines, tenantId, fileName) => {
     let invoiceIsValid = true // 請求書がバリデーションをパスできたかフラグ
 
     const filteredLines = lines.filter((line) => line.invoiceId === invoice.invoiceId)
+
+    // 明細数の判定
+    if (filteredLines.length > 20) {
+      // 明細数がオーバーした場合、失敗数に明細数をプラスする
+      uploadHistory.failCount += filteredLines.length
+      invoiceIsValid = false
+    }
     filteredLines.forEach((line, index) => {
       const csvRow = {
         historyDetailId: uuidv4(),
@@ -547,6 +554,13 @@ const validate = async (invoices, lines, tenantId, fileName) => {
         invoiceNo: line.invoiceNo,
         status: 0,
         errorData: ''
+      }
+
+      // 明細数が20より大きい場合
+      if (filteredLines.length > 20) {
+        csvRow.status = 2
+        csvRow.errorData = '一つの請求書で作成できる明細数は20までです。'
+        return csvRows.push(csvRow)
       }
 
       // 重複 & アップロード済み のバリデーション

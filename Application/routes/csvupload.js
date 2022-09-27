@@ -11,6 +11,8 @@ const contractController = require('../controllers/contractController.js')
 const uploadFormatController = require('../controllers/uploadFormatController.js')
 const uploadFormatDetailController = require('../controllers/uploadFormatDetailController.js')
 const uploadFormatIdentifierController = require('../controllers/uploadFormatIdentifierController.js')
+const invoiceController = require('../controllers/invoiceController')
+const invoiceDetailController = require('../controllers/invoiceDetailController')
 const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const apiManager = require('../controllers/apiManager')
@@ -51,7 +53,7 @@ const cbGetIndex = async (req, res, next) => {
   // user未登録の場合もエラーを上げる
   if (user instanceof Error || user === null) return next(errorHelper.create(500))
 
-  // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
+  // TX依頼後に改修、ユーザステータスが0以外の場合、「404」エラーとする not 403
   if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
 
   // DBから契約情報取得
@@ -79,7 +81,7 @@ const cbGetIndex = async (req, res, next) => {
   // フォーマット種別配列
   const formatkindsArr = await uploadFormatController.findByContractId(contract.dataValues.contractId)
 
-  // ユーザ権限も画面に送る
+  // ユーザ権限を画面に送る
   res.render('csvupload', {
     formatkindsArr: formatkindsArr,
     csrfToken: req.csrfToken()
@@ -143,7 +145,7 @@ const cbPostUpload = async (req, res, next) => {
   const jsonLog = { tenantId: req.user.tenantId, action: 'invoiceUploadRequest' }
   logger.info(jsonLog)
 
-  // CSVfile 読み込む
+  // 「テナントid + Eメールアドレス + タイムスタンプ.csv」の形式で作成したCSVfileを読み込む
   const filename = req.user.tenantId + '_' + req.user.email + '_' + getTimeStamp() + '.csv'
   const uploadCsvData = Buffer.from(decodeURIComponent(req.body.fileData), 'base64').toString('utf8')
   const userToken = {
@@ -228,7 +230,12 @@ const cbPostUpload = async (req, res, next) => {
  */
 const cbUploadCsv = (_filePath, _filename, _uploadCsvData) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostUploadCsv')
-  const uploadPath = path.join(_filePath, '/')
+  let uploadPath
+  try {
+    uploadPath = path.join(_filePath, '/')
+  } catch (error) {
+    return false
+  }
   const filename = _filename
   const uploadData = _uploadCsvData
   const writeFile = () => {
@@ -262,7 +269,13 @@ const cbUploadCsv = (_filePath, _filename, _uploadCsvData) => {
  */
 const cbRemoveCsv = (_deleteDataPath, _filename) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbRemoveCsv')
-  const deleteFile = path.join(_deleteDataPath, '/' + _filename)
+  let deleteFile
+  try {
+    deleteFile = path.join(_deleteDataPath, '/' + _filename)
+  } catch (error) {
+    logger.error(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')
+    return false
+  }
 
   if (fs.existsSync(deleteFile)) {
     try {
@@ -295,9 +308,14 @@ const cbRemoveCsv = (_deleteDataPath, _filename) => {
  */
 const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, _res) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbExtractInvoice')
-  const invoiceController = require('../controllers/invoiceController')
-  const invoiceDetailController = require('../controllers/invoiceDetailController')
-  const extractFullpathFile = path.join(_extractDir, '/') + _filename
+
+  let extractFullpathFile
+  try {
+    extractFullpathFile = path.join(_extractDir, '/') + _filename
+  } catch (error) {
+    setErrorLog(_req, 500)
+    return _res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+  }
   const uploadFormatId = _req.body.uploadFormatId
   let formatFlag = false
   let itemRowNumber = 1
@@ -374,15 +392,9 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
 
   const invoiceList = csvObj.getInvoiceList()
   const invoiceCnt = invoiceList.length
-  const setHeaders = {}
-  setHeaders.Accepts = 'application/json'
-  setHeaders.Authorization = `Bearer ${_user.accessToken}`
-  setHeaders['Content-Type'] = 'application/json'
 
-  // 明細表示フラグ
-  let meisaiFlag = 0
-  // 結果表示フラグ
-  let resultFlag = 0
+  // 結果表示区分
+  let resultNumber = 0
   if (validate.isUndefined(_invoices)) {
     return 101
   }
@@ -437,28 +449,147 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
     return 101
   }
 
-  let idx = 0
   let successCount = 0
   let failCount = 0
   let skipCount = 0
   let uploadInvoiceCnt = 0
   let headerErrorFlag = 0
 
-  const invoices = []
+  let invoices = []
+
+  // アップロード処理関数呼び出し
+  ;({ failCount, skipCount, successCount, resultNumber, uploadInvoiceCnt, headerErrorFlag, invoices } =
+    await convertDataForRegist(
+      invoiceList,
+      resultNumber,
+      _invoices,
+      documentIds,
+      _user,
+      failCount,
+      skipCount,
+      successCount,
+      uploadInvoiceCnt,
+      _req,
+      extractFullpathFile,
+      itemRowNumber,
+      dataRowNumber,
+      headerErrorFlag,
+      formatFlag,
+      invoices
+    ))
+
+  if (headerErrorFlag === 1) {
+    await invoiceController.updateCount({
+      invoicesId: _invoices.invoicesId,
+      successCount: '-',
+      failCount: '-',
+      skipCount: '-',
+      invoiceCount: '0'
+    })
+  } else {
+    await invoiceController.updateCount({
+      invoicesId: _invoices.invoicesId,
+      successCount: successCount,
+      failCount: failCount,
+      skipCount: skipCount,
+      invoiceCount: uploadInvoiceCnt
+    })
+  }
+
+  // アプリ効果測定
+  if (headerErrorFlag === 0) {
+    const jsonLog = {
+      tenantId: _req.user.tenantId,
+      action: 'uploadedInvoiceInfo',
+      uploadedInvoiceCount: invoices.length,
+      invoices: invoices
+    }
+    logger.info(jsonLog)
+  }
+
+  logger.info(constantsDefine.logMessage.INF001 + 'cbExtractInvoice')
+
+  switch (resultNumber) {
+    case 1:
+      return 102
+    case 2:
+      return 103
+    case 3:
+      return 104
+    case 4:
+      return 104
+    default:
+      return 0
+  }
+}
+
+/**
+ * 請求書アップロード処理・結果
+ * @param {object} invoiceList CSVファイルの請求書オブジェクトリスト
+ * @param {object} resultNumber 結果表示区分
+ * @param {object} _invoices 請求書データ
+ * @param {object} documentIds トレードシフトから取得した請求書のドキュメントIDリスト
+ * @param {object} _user ユーザー情報
+ * @param {object} failCount アップロード失敗件数
+ * @param {object} skipCount アップロードスキップ件数
+ * @param {object} successCount アップロード成功件数
+ * @param {object} uploadInvoiceCnt アップロード処理を行った請求書件数
+ * @param {object} _req HTTPリクエストオブジェクト
+ * @param {object} extractFullpathFile CSVファイルのパス
+ * @param {object} itemRowNumber ヘッダ行
+ * @param {object} dataRowNumber データ行
+ * @param {object} headerErrorFlag ヘッダエラー有無
+ * @param {object} formatFlag フォーマット一致/不一致
+ * @param {object} invoices アップロード成功の請求書リスト
+ * @returns {object} アップロード結果
+ *  failCount
+ *  skipCount
+ *  successCount
+ *  resultNumber
+ *  uploadInvoiceCnt
+ *  headerErrorFlag
+ *  invoices
+ */
+async function convertDataForRegist(
+  invoiceList,
+  resultNumber,
+  _invoices,
+  documentIds,
+  _user,
+  failCount,
+  skipCount,
+  successCount,
+  uploadInvoiceCnt,
+  _req,
+  extractFullpathFile,
+  itemRowNumber,
+  dataRowNumber,
+  headerErrorFlag,
+  formatFlag,
+  invoices
+) {
+  let idx = 0
+  // 明細表示区分
+  let meisaiNumber = 0
+
+  const setHeaders = {}
+  setHeaders.Accepts = 'application/json'
+  setHeaders.Authorization = `Bearer ${_user.accessToken}`
+  setHeaders['Content-Type'] = 'application/json'
 
   while (invoiceList[idx]) {
     // 明細check
     const meisaiLength = invoiceList[idx].INVOICE.getDocument().InvoiceLine.length
 
-    meisaiFlag = 0
+    meisaiNumber = 0
 
     if (meisaiLength > 200) {
       logger.error(
         constantsDefine.logMessage.ERR001 + invoiceList[idx].INVOICE.getDocument().ID.value + ' - specificToomuch Error'
       )
       failCount += meisaiLength
-      meisaiFlag = 1
-      resultFlag = 1
+      meisaiNumber = 1
+      resultNumber = 1
       const invoiceLines = invoiceList[idx].INVOICE.getDocument().InvoiceLine
       const invoiceId = invoiceList[idx].invoiceId
       const status = -1
@@ -476,7 +607,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
         return ''
       })
     } else {
-      // アップロードするドキュメントが重複のチェック
+      // アップロードするドキュメントが重複しているかチェック
       const docNo = invoiceList[idx].INVOICE.getDocument().ID.value
       documentIds.forEach((id) => {
         if (docNo === id && invoiceList[idx].status !== -1) {
@@ -506,8 +637,8 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
             // totalDetailCount += meisaiLength
           } else {
             // apiエラーの場合、すべて失敗にカウントする
-            meisaiFlag = 4
-            resultFlag = 4
+            meisaiNumber = 4
+            resultNumber = 4
             failCount += invoiceList[idx].successCount
             invoiceList[idx].status = -1
             if (String(apiResult.response?.status).slice(0, 1) === '4') {
@@ -544,26 +675,28 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
           break
         // 請求書の重複
         case 1:
-          meisaiFlag = 2
-          resultFlag = 2
+          meisaiNumber = 2
+          resultNumber = 2
           invoiceList[idx].errorData = constantsDefine.invoiceErrMsg.SKIP
           skipCount += invoiceList[idx].skipCount
           break
         // アップロードの重複
         case 2:
-          meisaiFlag = 2
-          resultFlag = 2
+          meisaiNumber = 2
+          resultNumber = 2
           invoiceList[idx].errorData = constantsDefine.invoiceErrMsg.SKIP
           skipCount += meisaiLength
           invoiceList[idx].status = 1
           break
+        // 明細上限数オーバー
         case -1:
-          meisaiFlag = 3
-          resultFlag = 3
+          meisaiNumber = 3
+          resultNumber = 3
           failCount += invoiceList[idx].failCount
           break
       }
 
+      // == TS にアップロード済み ========================================
       const invoiceLines = invoiceList[idx].INVOICE.getDocument().InvoiceLine
       const invoiceId = invoiceList[idx].invoiceId
       const status = invoiceList[idx].status
@@ -588,7 +721,8 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
         }
       }
 
-      if (meisaiFlag === 2) {
+      // アップロードするドキュメントが重複している場合
+      if (meisaiNumber === 2) {
         const errorDataSkip = invoiceList[idx].errorData
         invoiceLines.map((ele, idx) => {
           invoiceDetailController.insert({
@@ -601,7 +735,8 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
           })
           return ''
         })
-      } else if (meisaiFlag === 4) {
+        // apiエラーが発生した場合
+      } else if (meisaiNumber === 4) {
         const errorDataErr = invoiceList[idx].errorData
         invoiceLines.map((ele, idx) => {
           invoiceDetailController.insert({
@@ -663,48 +798,14 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
 
     idx++
   }
-  if (headerErrorFlag === 1) {
-    await invoiceController.updateCount({
-      invoicesId: _invoices.invoicesId,
-      successCount: '-',
-      failCount: '-',
-      skipCount: '-',
-      invoiceCount: '0'
-    })
-  } else {
-    await invoiceController.updateCount({
-      invoicesId: _invoices.invoicesId,
-      successCount: successCount,
-      failCount: failCount,
-      skipCount: skipCount,
-      invoiceCount: uploadInvoiceCnt
-    })
-  }
-
-  // アプリ効果測定
-  if (headerErrorFlag === 0) {
-    const jsonLog = {
-      tenantId: _req.user.tenantId,
-      action: 'uploadedInvoiceInfo',
-      uploadedInvoiceCount: invoices.length,
-      invoices: invoices
-    }
-    logger.info(jsonLog)
-  }
-
-  logger.info(constantsDefine.logMessage.INF001 + 'cbExtractInvoice')
-
-  switch (resultFlag) {
-    case 1:
-      return 102
-    case 2:
-      return 103
-    case 3:
-      return 104
-    case 4:
-      return 104
-    default:
-      return 0
+  return {
+    failCount,
+    skipCount,
+    successCount,
+    resultNumber,
+    uploadInvoiceCnt,
+    headerErrorFlag,
+    invoices
   }
 }
 

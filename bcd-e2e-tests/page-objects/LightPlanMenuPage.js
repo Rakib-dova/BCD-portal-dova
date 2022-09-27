@@ -34,6 +34,12 @@ class LightPlanMenuPage {
     await this.frame.waitForTimeout(500);
   }
 
+  // 「スタンダードプラン」をクリックする
+  async clickStandardPlan() {
+    await this.addComment('「スタンダードプラン」をクリックする');
+    await this.actionUtils.click(this.frame, '//a[contains(text(), "スタンダードプラン")]');
+  }
+
   // 「導入支援サービス」をクリックする
   async clickIntroSupport() {
     this.addComment('「導入支援サービス」をクリックする');

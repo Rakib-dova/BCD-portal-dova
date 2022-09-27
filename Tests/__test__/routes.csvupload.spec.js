@@ -3531,6 +3531,22 @@ describe('csvuploadのテスト', () => {
       // ユーザディレクトリが存在しない場合、trueが返却される
       expect(result).toBeTruthy()
     })
+
+    test('File Path is Nothing.', async () => {
+      // 準備
+      request.user = user
+
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+      const uploadCsvData = Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      const filePath = null
+
+      // 試験実施
+      const result = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+
+      // 期待結果
+      // returnがfalseであること
+      expect(result).toBeFalsy()
+    })
   })
 
   // cbExtractInvoiceの確認
@@ -8423,6 +8439,31 @@ describe('csvuploadのテスト', () => {
       expect(response.statusCode).toBe(500)
       expect(response.body).toBe(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
     })
+
+    test('500エラー:filePathがnullの場合', async () => {
+      // 準備
+      request.user = user
+      const userToken = {
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      const filePath = null
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+
+      // 試験実施
+      // request uplodadFormatId 空
+      request.body = {
+        uploadFormatId: ''
+      }
+      csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // 500エラーがエラーハンドリング「される」
+      expect(response.status).toHaveBeenCalledWith(500)
+      expect(response.send).toHaveBeenCalledWith(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+    })
   })
 
   // cbRemoveCsvの確認
@@ -8466,6 +8507,20 @@ describe('csvuploadのテスト', () => {
       request.user = user
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
       const filePath = '///'
+
+      // 試験実施(returnがtrueであること)
+      const result = csvupload.cbRemoveCsv(filePath, filename)
+
+      // 期待結果
+      // returnがfalseであること
+      expect(result).toBeFalsy()
+    })
+
+    test('File Path is Nothing.', async () => {
+      // 準備
+      request.user = user
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+      const filePath = null
 
       // 試験実施(returnがtrueであること)
       const result = csvupload.cbRemoveCsv(filePath, filename)

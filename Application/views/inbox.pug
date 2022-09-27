@@ -753,8 +753,17 @@ block content
         footer.modal-card-foot
           div.button-area
             a.button.mr-6.cancel-button(data-target='check-journalize-modal') キャンセル
-            a.button.is-link(href=`/requestApproval/${documentId}`) OK
-        
+            a.button.is-link.request-approval-button(href=`/requestApproval/${documentId}`) OK
+  .modal.modal-fx-fadeInscale#requestApproval-progress-modal
+      .modal-background
+      .modal-card
+        header.modal-card-head
+          p.modal-card-title 支払依頼一覧
+        section.modal-card-body
+          center
+            img(src="/image/loading_progress.gif")
+            p.modal-card-result#modal-card-result 処理中
+        footer.modal-card-foot   
 
 
   include footer

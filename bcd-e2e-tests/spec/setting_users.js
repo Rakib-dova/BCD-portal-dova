@@ -61,7 +61,7 @@ describe('設定_ユーザー一括登録', function () {
     await common.gotoTop(page, config.company1.user);
 
     // 設定アイコンが表示されていないこと
-    expect(await topPage.isSettingMenuShown()).to.equal(false, '【トップ】設定アイコンが表示されていないこと');
+    expect(await topPage.isSettingShown()).to.equal(false, '【トップ】機能一覧にて、「設定」が表示されていないこと');
 
     // ユーザー一括登録の機能が利用できないこと
     await page.goto('https://bcd-portal.tsdev.biz/uploadUsers');
@@ -83,13 +83,11 @@ describe('設定_ユーザー一括登録', function () {
     global.reporter.setBrowserInfo(browser, page);
 
     // ページオブジェクト
-    const { topPage, settingMenuPage, bulkUploadUsersPage } = common.getPageObject(browser, page);
+    const { topPage, bulkUploadUsersPage } = common.getPageObject(browser, page);
 
     // ユーザー一括登録ページを表示する
     await common.gotoTop(page, config.company1.mng);
-    await topPage.openSettingMenu();
-    await settingMenuPage.waitForLoading();
-    await settingMenuPage.clickBulkUploadUsers();
+    await topPage.clickUploadUsers();
     await bulkUploadUsersPage.waitForLoading();
 
     // 「ユーザー一括登録」画面に遷移すること

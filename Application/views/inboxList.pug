@@ -113,7 +113,7 @@ block content
                               td.text-center.td-overflow= item.expire
                               td.text-center.td-overflow= item.updated
                               td.text-center.display-row-td
-                                a.button.is-success.td-overflow.display-row-td-button(href=`/inbox/${item.documentId}`) 仕訳情報設定
+                                a.button.is-success.td-overflow.display-row-td-button.set-journal-button(href=`/inbox/${item.documentId}`) 仕訳情報設定
                       nav.pagination.is-centered(role='navigation' aria-label='pagination')
                         - var page = currPage % 5 === 0 ? currPage - 4 : ~~(currPage / 5) * 5 + 1
                         - var maxPageNo = ~~(page / 5) * 5 + 5 + 1
@@ -239,7 +239,7 @@ block content
                               td.text-center.td-overflow= item.expire
                               td.text-center.td-overflow= item.updated
                               td.text-center.display-row-td
-                                a.button.is-success.td-overflow.display-row-td-button(href=`/inbox/${item.documentId}`) 仕訳情報設定
+                                a.button.is-success.td-overflow.display-row-td-button.set-journal-button(href=`/inbox/${item.documentId}`) 仕訳情報設定
                       nav.pagination.is-centered(role='navigation' aria-label='pagination')
                         - var page = currPage % 5 === 0 ? currPage - 4 : ~~(currPage / 5) * 5 + 1
                         - var maxPageNo = ~~(page / 5) * 5 + 5 + 1
@@ -250,7 +250,7 @@ block content
                         if maxPageNo < numPages
                           a.pagination-next(href= `/inboxList/${maxPageNo}`) >>
                         else
-                          a.a-next-none <<
+                          a.a-next-none >>
 
                         ul.pagination-list
                           while page < (maxPageNo < numPages ? maxPageNo : numPages + 1)
@@ -300,7 +300,17 @@ block content
             center
               img(src="/image/loading_progress.gif")
               p.modal-card-result#modal-card-result 処理中
-          footer.modal-card-foot          
+          footer.modal-card-foot    
+    .modal.modal-fx-fadeInscale#setjounal-progress-modal
+        .modal-background
+        .modal-card
+          header.modal-card-head
+            p.modal-card-title 支払依頼一覧
+          section.modal-card-body
+            center
+              img(src="/image/loading_progress.gif")
+              p.modal-card-result#modal-card-result 処理中
+          footer.modal-card-foot      
     
     include informationLightplanModal
 

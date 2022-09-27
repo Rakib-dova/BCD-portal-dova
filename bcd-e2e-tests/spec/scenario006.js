@@ -50,7 +50,8 @@ describe('リグレッションテスト', function () {
       }
 
       // ページオブジェクト
-      const { topPage, uploadInvoiceMenuPage, uploadInvoicePage, uploadListPage } = common.getPageObject(browser, page);
+      const { topPage, tradeShiftTopPage, tradeShiftDocListPage, tradeShiftDocDetailPage, uploadInvoicePage, uploadListPage }
+          = common.getPageObject(browser, page);
 
       // デジタルトレードアプリのトップページを表示する
       await common.gotoTop(page, account);
@@ -74,12 +75,8 @@ describe('リグレッションテスト', function () {
           itemName = await common.uploadFormat(formatPath, false, null, 1, 1)
         }
 
-        // 請求書一括作成メニューを表示する
-        await topPage.openUploadInvoiceMenu();
-        await uploadInvoiceMenuPage.waitForLoading();
-
         // 請求書一括作成ページに遷移する
-        await uploadInvoiceMenuPage.clickUploadInvoice();
+        await topPage.clickUploadInvoice();
         await uploadInvoicePage.waitForLoading();
 
         // 請求書ファイルの請求書番号を一意な値に書き換える
@@ -138,6 +135,17 @@ describe('リグレッションテスト', function () {
         await page.waitForTimeout(3000);
       }
 
+      /*
+      // 文書を削除する
+      await tradeShiftTopPage.clickDocMng();
+      await tradeShiftDocListPage.waitForLoading();
+      while(await tradeShiftDocListPage.hasDocId('2022')) {
+        await tradeShiftDocListPage.clickDocId('2022');
+        await tradeShiftDocDetailPage.waitForLoading();
+        await tradeShiftDocDetailPage.delete();
+        await tradeShiftDocListPage.waitForLoading();
+      }
+      */
       await page.waitForTimeout(1000);
     }
   });

@@ -27,7 +27,7 @@ class LoginPage {
     if (await this.actionUtils.isExist(this.page, '#cookie-consent-accept-all')) {
       await this.actionUtils.click(this.page, '#cookie-consent-accept-all');
     }
-    await this.addComment(`ID"${id}"でログインする`);
+    await this.addComment(`ユーザー"${id}"でログインする`);
     await this.actionUtils.fill(this.page, '#j_username', id);
     await this.actionUtils.fill(this.page, '#j_password', password);
     await this.actionUtils.click(this.page, '#proceed');

@@ -52,17 +52,12 @@ describe('仕訳情報設定_部門データ一覧', function () {
   };
 
   // 部門データ一覧ページまで遷移する
-  async function gotoDepartmentList(account, topPage, journalMenuPage, departmentListPage) {
+  async function gotoDepartmentList(account, topPage, departmentListPage) {
     // デジタルトレードアプリのトップページを表示する
     await common.gotoTop(page, account);
 
-    // 仕訳情報管理メニューを開く
-    await comment('「仕訳情報管理」をクリックする');
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-
     // 部門データ一覧ページへ遷移する
-    await journalMenuPage.clickDepartment();
+    await topPage.clickDepartmentCode();
     await departmentListPage.waitForLoading();
   };
 
@@ -95,10 +90,10 @@ describe('仕訳情報設定_部門データ一覧', function () {
       }
 
       // ページオブジェクト
-      const { topPage, journalMenuPage, departmentListPage, registDepartmentPage } = common.getPageObject(browser, page);
+      const { topPage, departmentListPage, registDepartmentPage } = common.getPageObject(browser, page);
 
       // 部門データ一覧ページへ遷移する
-      await gotoDepartmentList(account, topPage, journalMenuPage, departmentListPage)
+      await gotoDepartmentList(account, topPage, departmentListPage)
 
       // 新規登録ページへ遷移する
       await departmentListPage.clickRegist();
@@ -164,10 +159,10 @@ describe('仕訳情報設定_部門データ一覧', function () {
       }
   
       // ページオブジェクト
-      const { topPage, journalMenuPage, departmentListPage, uploadDepartmentPage } = common.getPageObject(browser, page);
+      const { topPage, departmentListPage, uploadDepartmentPage } = common.getPageObject(browser, page);
   
       // 部門データ一覧ページへ遷移する
-      await gotoDepartmentList(account, topPage, journalMenuPage, departmentListPage)
+      await gotoDepartmentList(account, topPage, departmentListPage)
 
       let files = [
         'testdata/upload/TESTCSV41.csv',
