@@ -3,6 +3,7 @@ module.exports = {
   // 共通
   // コード
   CODE_LENGTH: 10,
+  DEPARTMENTCODE_LENGTH: 6,
 
   // 勘定科目
   ACCOUNTCODE_KEY: '勘定科目コード',

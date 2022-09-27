@@ -389,7 +389,7 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       page.click('#accountCodeUpload > div > label > input')
     ])
 
-    await fileChooser.accept(['./testData/departmentCodeUpload_test11.csv'])
+    await fileChooser.accept(['./testData/departmentCodeUpload_test10.csv'])
 
     await page.click('#upload')
   })

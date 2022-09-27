@@ -252,7 +252,7 @@ describe('uploadUsersControllerのテスト', () => {
       getUserInformationByEmailSpy.mockReturnValueOnce(returnGetUserInformationByEmailValue)
       addNetworkConnectionSpy.mockReturnValueOnce(returnAddNetworkConnectionValue)
       fsExistsSyncSpy.mockReturnValueOnce(false)
-      const deleteError = new Error('削除対象を見つかれませんでした。')
+      const deleteError = new Error('ファイル削除エラー')
 
       // 試験実施
       const [status, resultSuppliersCompany] = await uploadSuppliersController.upload(passport, contract, testNominal)

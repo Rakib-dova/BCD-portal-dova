@@ -7,6 +7,7 @@ const constantsDefine = require('../constants')
 const tradeshiftAPI = require('../lib/tradeshiftAPI')
 const { v4: uuidv4 } = require('uuid')
 const validate = require('../lib/validate')
+const removeFile = require('../lib/removeFile')
 
 /**
  * 取引先一括アップロード
@@ -240,10 +241,9 @@ const upload = async (passport, contract, nominalList) => {
   }
 
   // 読み込んだファイル削除
-  const deleteResult = await removeFile(pwdFile)
-
-  if (deleteResult instanceof Error) {
-    const error = deleteResult
+  try {
+    await removeFile.removeFile(pwdFile)
+  } catch (error) {
     logger.error({ contractId: contract.contractId, stack: error.stack, status: 0 })
     logger.info(constantsDefine.logMessage.INF001 + 'uploadSuppliersController.upload')
     return [error, null]
@@ -325,34 +325,9 @@ const getReadCsvData = (fullPath) => {
   }
 }
 
-/**
- * アップロードされたCSVファイル削除
- * @param {string} fullPath アップロードされたCSVファイルパス
- * @returns {boolean} true（正常）、false（異常）、Error（DBエラー、システムエラーなど）
- */
-const removeFile = async (fullPath) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'uploadSuppliersController.remove')
-  if (fs.existsSync(fullPath)) {
-    try {
-      fs.unlinkSync(fullPath)
-      logger.info(constantsDefine.logMessage.INF001 + 'uploadSuppliersController.remove')
-      return true
-    } catch (error) {
-      logger.info(constantsDefine.logMessage.INF001 + 'uploadSuppliersController.remove')
-      return error
-    }
-  } else {
-    // 削除対象がない場合、サーバーエラー画面表示
-    logger.info(constantsDefine.logMessage.INF001 + 'uploadSuppliersController.remove')
-    const deleteError = new Error('削除対象を見つかれませんでした。')
-    return deleteError
-  }
-}
-
 module.exports = {
   upload: upload,
   setErrorResponse: setErrorResponse,
   readNominalList: readNominalList,
-  getReadCsvData: getReadCsvData,
-  removeFile: removeFile
+  getReadCsvData: getReadCsvData
 }

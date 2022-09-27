@@ -143,15 +143,7 @@ describe('departmentCodeUploadControllerのテスト', () => {
 
   // 異常系9
   const departmentCodeFileData10 = Buffer.from(
-    fs.readFileSync('./testData/departmentCodeUpload_test10.csv', {
-      encoding: 'utf-8',
-      flag: 'r'
-    })
-  ).toString('base64')
-
-  // 異常系10
-  const departmentCodeFileData12 = Buffer.from(
-    fs.readFileSync('./testData/departmentCodeUpload_test12.csv', {
+    fs.readFileSync('./testData/departmentCodeUpload_test11.csv', {
       encoding: 'utf-8',
       flag: 'r'
     })
@@ -323,14 +315,14 @@ describe('departmentCodeUploadControllerのテスト', () => {
         { header: ['行数', '部門コード', '部門名', '詳細'] },
         {
           code: 'TEST333322222222222222',
-          errorData: '部門コードは10文字以内で入力してください。,部門名は40文字以内で入力してください。',
+          errorData: '部門コードは6文字以内で入力してください。,部門名は40文字以内で入力してください。',
           idx: 1,
           name: '結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12'
         }
       ])
     })
 
-    test('異常：10桁数チェック', async () => {
+    test('異常：6桁数チェック', async () => {
       // 準備
       findAllSpy.mockReturnValue(dbDepartmentCodeTable)
       createSpy.mockReturnValue(codeDepartmentDataResult)
@@ -356,7 +348,7 @@ describe('departmentCodeUploadControllerのテスト', () => {
       // 想定したデータがReturnされていること
       expect(result).toEqual([
         { header: ['行数', '部門コード', '部門名', '詳細'] },
-        { code: '11111111111', errorData: '部門コードは10文字以内で入力してください。', idx: 1, name: '現金' }
+        { code: '11111111111', errorData: '部門コードは6文字以内で入力してください。', idx: 1, name: '現金' }
       ])
     })
 
@@ -369,7 +361,7 @@ describe('departmentCodeUploadControllerのテスト', () => {
       const uploadFilePath = path.resolve('/home/upload/testBUG3763.csv')
       fs.writeFileSync(
         uploadFilePath,
-        Buffer.from(decodeURIComponent(departmentCodeFileData12), 'base64').toString('utf8')
+        Buffer.from(decodeURIComponent(departmentCodeFileData10), 'base64').toString('utf8')
       )
       pathSpy.mockReturnValue('/home/upload/testBUG3763.csv')
       const file = {
@@ -386,94 +378,94 @@ describe('departmentCodeUploadControllerのテスト', () => {
       // 想定したデータがReturnされていること
       expect(result).toEqual([
         { header: ['行数', '部門コード', '部門名', '詳細'] },
-        { code: 'ブモンtest1!', errorData: '部門コードは英数字カナで入力してください。', idx: 1, name: 'test1' },
-        { code: 'ブモンtest1"', errorData: '部門コードは英数字カナで入力してください。', idx: 2, name: 'test1' },
-        { code: 'ブモンtest1#', errorData: '部門コードは英数字カナで入力してください。', idx: 3, name: 'test1' },
-        { code: 'ブモンtest1$', errorData: '部門コードは英数字カナで入力してください。', idx: 4, name: 'test1' },
-        { code: 'ブモンtest1%', errorData: '部門コードは英数字カナで入力してください。', idx: 5, name: 'test1' },
-        { code: 'ブモンtest1&', errorData: '部門コードは英数字カナで入力してください。', idx: 6, name: 'test1' },
-        { code: "ブモンtest1'", errorData: '部門コードは英数字カナで入力してください。', idx: 7, name: 'test1' },
-        { code: 'ブモンtest1(', errorData: '部門コードは英数字カナで入力してください。', idx: 8, name: 'test1' },
-        { code: 'ブモンtest1)', errorData: '部門コードは英数字カナで入力してください。', idx: 9, name: 'test1' },
-        { code: 'ブモンtest1-', errorData: '部門コードは英数字カナで入力してください。', idx: 10, name: 'test1' },
-        { code: 'ブモンtest1=', errorData: '部門コードは英数字カナで入力してください。', idx: 11, name: 'test1' },
-        { code: 'ブモンtest1~', errorData: '部門コードは英数字カナで入力してください。', idx: 12, name: 'test1' },
-        { code: 'ブモンtest1^', errorData: '部門コードは英数字カナで入力してください。', idx: 13, name: 'test1' },
-        { code: 'ブモンtest1\\', errorData: '部門コードは英数字カナで入力してください。', idx: 14, name: 'test1' },
-        { code: 'ブモンtest1|', errorData: '部門コードは英数字カナで入力してください。', idx: 15, name: 'test1' },
-        { code: 'ブモンtest1@', errorData: '部門コードは英数字カナで入力してください。', idx: 16, name: 'test1' },
-        { code: 'ブモンtest1`', errorData: '部門コードは英数字カナで入力してください。', idx: 17, name: 'test1' },
-        { code: 'ブモンtest1[', errorData: '部門コードは英数字カナで入力してください。', idx: 18, name: 'test1' },
-        { code: 'ブモンtest1{', errorData: '部門コードは英数字カナで入力してください。', idx: 19, name: 'test1' },
-        { code: 'ブモンtest1]', errorData: '部門コードは英数字カナで入力してください。', idx: 20, name: 'test1' },
-        { code: 'ブモンtest1}', errorData: '部門コードは英数字カナで入力してください。', idx: 21, name: 'test1' },
-        { code: 'ブモンtest1+', errorData: '部門コードは英数字カナで入力してください。', idx: 22, name: 'test1' },
-        { code: 'ブモンtest1;', errorData: '部門コードは英数字カナで入力してください。', idx: 23, name: 'test1' },
-        { code: 'ブモンtest1*', errorData: '部門コードは英数字カナで入力してください。', idx: 24, name: 'test1' },
-        { code: 'ブモンtest1:', errorData: '部門コードは英数字カナで入力してください。', idx: 25, name: 'test1' },
-        { code: 'ブモンtest1<', errorData: '部門コードは英数字カナで入力してください。', idx: 26, name: 'test1' },
-        { code: 'ブモンtest1>', errorData: '部門コードは英数字カナで入力してください。', idx: 27, name: 'test1' },
-        { code: 'ブモンtest1.', errorData: '部門コードは英数字カナで入力してください。', idx: 28, name: 'test1' },
-        { code: 'ブモンtest1/', errorData: '部門コードは英数字カナで入力してください。', idx: 29, name: 'test1' },
-        { code: 'ブモンtest1?', errorData: '部門コードは英数字カナで入力してください。', idx: 30, name: 'test1' },
-        { code: 'ブモンtest1\\', errorData: '部門コードは英数字カナで入力してください。', idx: 31, name: 'test1' },
-        { code: 'ブモンtest1_', errorData: '部門コードは英数字カナで入力してください。', idx: 32, name: 'test1' },
-        { code: 'ブモンあtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 33, name: 'test1' },
-        { code: 'ブモンいtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 34, name: 'test1' },
-        { code: 'ブモンうtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 35, name: 'test1' },
-        { code: 'ブモンえtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 36, name: 'test1' },
-        { code: 'ブモンおtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 37, name: 'test1' },
-        { code: 'ブモンかtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 38, name: 'test1' },
-        { code: 'ブモンきtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 39, name: 'test1' },
-        { code: 'ブモンくtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 40, name: 'test1' },
-        { code: 'ブモンけtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 41, name: 'test1' },
-        { code: 'ブモンこtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 42, name: 'test1' },
-        { code: 'ブモンさtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 43, name: 'test1' },
-        { code: 'ブモンしtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 44, name: 'test1' },
-        { code: 'ブモンすtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 45, name: 'test1' },
-        { code: 'ブモンせtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 46, name: 'test1' },
-        { code: 'ブモンそtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 47, name: 'test1' },
-        { code: 'ブモンたtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 48, name: 'test1' },
-        { code: 'ブモンちtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 49, name: 'test1' },
-        { code: 'ブモンつtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 50, name: 'test1' },
-        { code: 'ブモンてtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 51, name: 'test1' },
-        { code: 'ブモンとtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 52, name: 'test1' },
-        { code: 'ブモンなtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 53, name: 'test1' },
-        { code: 'ブモンにtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 54, name: 'test1' },
-        { code: 'ブモンぬtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 55, name: 'test1' },
-        { code: 'ブモンねtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 56, name: 'test1' },
-        { code: 'ブモンのtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 57, name: 'test1' },
-        { code: 'ブモンはtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 58, name: 'test1' },
-        { code: 'ブモンひtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 59, name: 'test1' },
-        { code: 'ブモンふtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 60, name: 'test1' },
-        { code: 'ブモンへtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 61, name: 'test1' },
-        { code: 'ブモンほtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 62, name: 'test1' },
-        { code: 'ブモンばtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 63, name: 'test1' },
-        { code: 'ブモンびtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 64, name: 'test1' },
-        { code: 'ブモンぶtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 65, name: 'test1' },
-        { code: 'ブモンべtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 66, name: 'test1' },
-        { code: 'ブモンぼtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 67, name: 'test1' },
-        { code: 'ブモンぱtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 68, name: 'test1' },
-        { code: 'ブモンぴtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 69, name: 'test1' },
-        { code: 'ブモンぷtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 70, name: 'test1' },
-        { code: 'ブモンぺtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 71, name: 'test1' },
-        { code: 'ブモンぽtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 72, name: 'test1' },
-        { code: 'ブモンまtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 73, name: 'test1' },
-        { code: 'ブモンみtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 74, name: 'test1' },
-        { code: 'ブモンむtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 75, name: 'test1' },
-        { code: 'ブモンめtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 76, name: 'test1' },
-        { code: 'ブモンもtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 77, name: 'test1' },
-        { code: 'ブモンやtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 78, name: 'test1' },
-        { code: 'ブモンゆtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 79, name: 'test1' },
-        { code: 'ブモンよtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 80, name: 'test1' },
-        { code: 'ブモンらtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 81, name: 'test1' },
-        { code: 'ブモンりtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 82, name: 'test1' },
-        { code: 'ブモンるtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 83, name: 'test1' },
-        { code: 'ブモンれtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 84, name: 'test1' },
-        { code: 'ブモンろtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 85, name: 'test1' },
-        { code: 'ブモンわtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 86, name: 'test1' },
-        { code: 'ブモンをtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 87, name: 'test1' },
-        { code: 'ブモンんtest1', errorData: '部門コードは英数字カナで入力してください。', idx: 88, name: 'test1' }
+        { code: 'ブt1!', errorData: '部門コードは英数字カナで入力してください。', idx: 1, name: 'test1' },
+        { code: 'ブt1"', errorData: '部門コードは英数字カナで入力してください。', idx: 2, name: 'test1' },
+        { code: 'ブt1#', errorData: '部門コードは英数字カナで入力してください。', idx: 3, name: 'test1' },
+        { code: 'ブt1$', errorData: '部門コードは英数字カナで入力してください。', idx: 4, name: 'test1' },
+        { code: 'ブt1%', errorData: '部門コードは英数字カナで入力してください。', idx: 5, name: 'test1' },
+        { code: 'ブt1&', errorData: '部門コードは英数字カナで入力してください。', idx: 6, name: 'test1' },
+        { code: "ブt1'", errorData: '部門コードは英数字カナで入力してください。', idx: 7, name: 'test1' },
+        { code: 'ブt1(', errorData: '部門コードは英数字カナで入力してください。', idx: 8, name: 'test1' },
+        { code: 'ブt1)', errorData: '部門コードは英数字カナで入力してください。', idx: 9, name: 'test1' },
+        { code: 'ブt1-', errorData: '部門コードは英数字カナで入力してください。', idx: 10, name: 'test1' },
+        { code: 'ブt1=', errorData: '部門コードは英数字カナで入力してください。', idx: 11, name: 'test1' },
+        { code: 'ブt1~', errorData: '部門コードは英数字カナで入力してください。', idx: 12, name: 'test1' },
+        { code: 'ブt1^', errorData: '部門コードは英数字カナで入力してください。', idx: 13, name: 'test1' },
+        { code: 'ブt1\\', errorData: '部門コードは英数字カナで入力してください。', idx: 14, name: 'test1' },
+        { code: 'ブt1|', errorData: '部門コードは英数字カナで入力してください。', idx: 15, name: 'test1' },
+        { code: 'ブt1@', errorData: '部門コードは英数字カナで入力してください。', idx: 16, name: 'test1' },
+        { code: 'ブt1`', errorData: '部門コードは英数字カナで入力してください。', idx: 17, name: 'test1' },
+        { code: 'ブt1[', errorData: '部門コードは英数字カナで入力してください。', idx: 18, name: 'test1' },
+        { code: 'ブt1{', errorData: '部門コードは英数字カナで入力してください。', idx: 19, name: 'test1' },
+        { code: 'ブt1]', errorData: '部門コードは英数字カナで入力してください。', idx: 20, name: 'test1' },
+        { code: 'ブt1}', errorData: '部門コードは英数字カナで入力してください。', idx: 21, name: 'test1' },
+        { code: 'ブt1+', errorData: '部門コードは英数字カナで入力してください。', idx: 22, name: 'test1' },
+        { code: 'ブt1;', errorData: '部門コードは英数字カナで入力してください。', idx: 23, name: 'test1' },
+        { code: 'ブt1*', errorData: '部門コードは英数字カナで入力してください。', idx: 24, name: 'test1' },
+        { code: 'ブt1:', errorData: '部門コードは英数字カナで入力してください。', idx: 25, name: 'test1' },
+        { code: 'ブt1<', errorData: '部門コードは英数字カナで入力してください。', idx: 26, name: 'test1' },
+        { code: 'ブt1>', errorData: '部門コードは英数字カナで入力してください。', idx: 27, name: 'test1' },
+        { code: 'ブt1.', errorData: '部門コードは英数字カナで入力してください。', idx: 28, name: 'test1' },
+        { code: 'ブt1/', errorData: '部門コードは英数字カナで入力してください。', idx: 29, name: 'test1' },
+        { code: 'ブt1?', errorData: '部門コードは英数字カナで入力してください。', idx: 30, name: 'test1' },
+        { code: 'ブt1\\', errorData: '部門コードは英数字カナで入力してください。', idx: 31, name: 'test1' },
+        { code: 'ブt1_', errorData: '部門コードは英数字カナで入力してください。', idx: 32, name: 'test1' },
+        { code: 'ブあt1', errorData: '部門コードは英数字カナで入力してください。', idx: 33, name: 'test1' },
+        { code: 'ブいt1', errorData: '部門コードは英数字カナで入力してください。', idx: 34, name: 'test1' },
+        { code: 'ブうt1', errorData: '部門コードは英数字カナで入力してください。', idx: 35, name: 'test1' },
+        { code: 'ブえt1', errorData: '部門コードは英数字カナで入力してください。', idx: 36, name: 'test1' },
+        { code: 'ブおt1', errorData: '部門コードは英数字カナで入力してください。', idx: 37, name: 'test1' },
+        { code: 'ブかt1', errorData: '部門コードは英数字カナで入力してください。', idx: 38, name: 'test1' },
+        { code: 'ブきt1', errorData: '部門コードは英数字カナで入力してください。', idx: 39, name: 'test1' },
+        { code: 'ブくt1', errorData: '部門コードは英数字カナで入力してください。', idx: 40, name: 'test1' },
+        { code: 'ブけt1', errorData: '部門コードは英数字カナで入力してください。', idx: 41, name: 'test1' },
+        { code: 'ブこt1', errorData: '部門コードは英数字カナで入力してください。', idx: 42, name: 'test1' },
+        { code: 'ブさt1', errorData: '部門コードは英数字カナで入力してください。', idx: 43, name: 'test1' },
+        { code: 'ブしt1', errorData: '部門コードは英数字カナで入力してください。', idx: 44, name: 'test1' },
+        { code: 'ブすt1', errorData: '部門コードは英数字カナで入力してください。', idx: 45, name: 'test1' },
+        { code: 'ブせt1', errorData: '部門コードは英数字カナで入力してください。', idx: 46, name: 'test1' },
+        { code: 'ブそt1', errorData: '部門コードは英数字カナで入力してください。', idx: 47, name: 'test1' },
+        { code: 'ブたt1', errorData: '部門コードは英数字カナで入力してください。', idx: 48, name: 'test1' },
+        { code: 'ブちt1', errorData: '部門コードは英数字カナで入力してください。', idx: 49, name: 'test1' },
+        { code: 'ブつt1', errorData: '部門コードは英数字カナで入力してください。', idx: 50, name: 'test1' },
+        { code: 'ブてt1', errorData: '部門コードは英数字カナで入力してください。', idx: 51, name: 'test1' },
+        { code: 'ブとt1', errorData: '部門コードは英数字カナで入力してください。', idx: 52, name: 'test1' },
+        { code: 'ブなt1', errorData: '部門コードは英数字カナで入力してください。', idx: 53, name: 'test1' },
+        { code: 'ブにt1', errorData: '部門コードは英数字カナで入力してください。', idx: 54, name: 'test1' },
+        { code: 'ブぬt1', errorData: '部門コードは英数字カナで入力してください。', idx: 55, name: 'test1' },
+        { code: 'ブねt1', errorData: '部門コードは英数字カナで入力してください。', idx: 56, name: 'test1' },
+        { code: 'ブのt1', errorData: '部門コードは英数字カナで入力してください。', idx: 57, name: 'test1' },
+        { code: 'ブはt1', errorData: '部門コードは英数字カナで入力してください。', idx: 58, name: 'test1' },
+        { code: 'ブひt1', errorData: '部門コードは英数字カナで入力してください。', idx: 59, name: 'test1' },
+        { code: 'ブふt1', errorData: '部門コードは英数字カナで入力してください。', idx: 60, name: 'test1' },
+        { code: 'ブへt1', errorData: '部門コードは英数字カナで入力してください。', idx: 61, name: 'test1' },
+        { code: 'ブほt1', errorData: '部門コードは英数字カナで入力してください。', idx: 62, name: 'test1' },
+        { code: 'ブばt1', errorData: '部門コードは英数字カナで入力してください。', idx: 63, name: 'test1' },
+        { code: 'ブびt1', errorData: '部門コードは英数字カナで入力してください。', idx: 64, name: 'test1' },
+        { code: 'ブぶt1', errorData: '部門コードは英数字カナで入力してください。', idx: 65, name: 'test1' },
+        { code: 'ブべt1', errorData: '部門コードは英数字カナで入力してください。', idx: 66, name: 'test1' },
+        { code: 'ブぼt1', errorData: '部門コードは英数字カナで入力してください。', idx: 67, name: 'test1' },
+        { code: 'ブぱt1', errorData: '部門コードは英数字カナで入力してください。', idx: 68, name: 'test1' },
+        { code: 'ブぴt1', errorData: '部門コードは英数字カナで入力してください。', idx: 69, name: 'test1' },
+        { code: 'ブぷt1', errorData: '部門コードは英数字カナで入力してください。', idx: 70, name: 'test1' },
+        { code: 'ブぺt1', errorData: '部門コードは英数字カナで入力してください。', idx: 71, name: 'test1' },
+        { code: 'ブぽt1', errorData: '部門コードは英数字カナで入力してください。', idx: 72, name: 'test1' },
+        { code: 'ブまt1', errorData: '部門コードは英数字カナで入力してください。', idx: 73, name: 'test1' },
+        { code: 'ブみt1', errorData: '部門コードは英数字カナで入力してください。', idx: 74, name: 'test1' },
+        { code: 'ブむt1', errorData: '部門コードは英数字カナで入力してください。', idx: 75, name: 'test1' },
+        { code: 'ブめt1', errorData: '部門コードは英数字カナで入力してください。', idx: 76, name: 'test1' },
+        { code: 'ブもt1', errorData: '部門コードは英数字カナで入力してください。', idx: 77, name: 'test1' },
+        { code: 'ブやt1', errorData: '部門コードは英数字カナで入力してください。', idx: 78, name: 'test1' },
+        { code: 'ブゆt1', errorData: '部門コードは英数字カナで入力してください。', idx: 79, name: 'test1' },
+        { code: 'ブよt1', errorData: '部門コードは英数字カナで入力してください。', idx: 80, name: 'test1' },
+        { code: 'ブらt1', errorData: '部門コードは英数字カナで入力してください。', idx: 81, name: 'test1' },
+        { code: 'ブりt1', errorData: '部門コードは英数字カナで入力してください。', idx: 82, name: 'test1' },
+        { code: 'ブるt1', errorData: '部門コードは英数字カナで入力してください。', idx: 83, name: 'test1' },
+        { code: 'ブれt1', errorData: '部門コードは英数字カナで入力してください。', idx: 84, name: 'test1' },
+        { code: 'ブろt1', errorData: '部門コードは英数字カナで入力してください。', idx: 85, name: 'test1' },
+        { code: 'ブわt1', errorData: '部門コードは英数字カナで入力してください。', idx: 86, name: 'test1' },
+        { code: 'ブをt1', errorData: '部門コードは英数字カナで入力してください。', idx: 87, name: 'test1' },
+        { code: 'ブんt1', errorData: '部門コードは英数字カナで入力してください。', idx: 88, name: 'test1' }
       ])
     })
 
@@ -528,7 +520,7 @@ describe('departmentCodeUploadControllerのテスト', () => {
       const uploadFilePath = path.resolve('/home/upload/test11.csv')
       fs.writeFileSync(
         uploadFilePath,
-        Buffer.from(decodeURIComponent(departmentCodeFileData10), 'base64').toString('utf8')
+        Buffer.from(decodeURIComponent(departmentCodeFileData9), 'base64').toString('utf8')
       )
       pathSpy.mockReturnValue('/home/upload/test11.csv')
       departmentCodeControllerInsertSpy.mockClear()
@@ -542,7 +534,7 @@ describe('departmentCodeUploadControllerのテスト', () => {
       expect(result).toEqual([
         { header: ['行数', '部門コード', '部門名', '詳細'] },
         {
-          code: 'TEST302',
+          code: 'TEST32',
           errorData: '入力した部門コードは既に登録されています。',
           idx: 1,
           name: '結合テスト12'
@@ -600,7 +592,7 @@ describe('departmentCodeUploadControllerのテスト', () => {
       )
       pathSpy.mockReturnValue('/home/upload/test1.csv')
       departmentCodeControllerInsertSpy.mockImplementation(() => {
-        throw new Error('CSVファイル削除エラー')
+        throw new Error('ファイル削除エラー')
       })
 
       // 試験実施
@@ -610,91 +602,7 @@ describe('departmentCodeUploadControllerのテスト', () => {
       // 想定したデータがReturnされていること
       expect(() => {
         throw result
-      }).toThrowError('CSVファイル削除エラー')
-    })
-  })
-
-  describe('removeFile', () => {
-    test('正常:データ削除', async () => {
-      // 準備
-      findAllSpy.mockReturnValue(dbDepartmentCodeTable)
-      createSpy.mockReturnValue(codeDepartmentDataResult)
-      // 部門データ一括作成
-      const fs = require('fs')
-      const uploadFilePath = path.resolve('/home/upload/test9.csv')
-      fs.writeFileSync(
-        uploadFilePath,
-        Buffer.from(decodeURIComponent(departmentCodeFileData9), 'base64').toString('utf8')
-      )
-      pathSpy.mockReturnValue('/home/upload/test9.csv')
-
-      departmentCodeControllerInsertSpy.mockReturnValue(true)
-
-      // 試験実施
-      const result = await departmentCodeUploadController.remove(uploadFilePath)
-
-      // 期待結果
-      expect(result).toEqual(true)
-    })
-
-    test('異常:削除エラー(存在しないデータを削除する場合)', async () => {
-      // 準備
-      findAllSpy.mockReturnValue(dbDepartmentCodeTable)
-      createSpy.mockReturnValue(codeDepartmentDataResult)
-      // 部門データ一括作成
-      const fs = require('fs')
-      const uploadFilePath = path.resolve('/home/upload/test9.csv')
-      fs.writeFileSync(
-        uploadFilePath,
-        Buffer.from(decodeURIComponent(departmentCodeFileData9), 'base64').toString('utf8')
-      )
-      pathSpy.mockReturnValue('/home/upload/test9.csv')
-
-      departmentCodeControllerInsertSpy.mockReturnValue(true)
-
-      // 試験実施
-      const noUploadFilePath = '/home/upload???/test9.csv'
-      let result
-      try {
-        result = await departmentCodeUploadController.remove(noUploadFilePath)
-      } catch (err) {
-        result = err
-      }
-      // 期待結果
-      // 削除エラーが返されること
-      expect(() => {
-        throw result
-      }).toThrowError('CSVファイル削除エラー')
-    })
-
-    test('異常:削除エラー', async () => {
-      // 準備
-      const fs = require('fs')
-      let noUploadFilePath = null
-      if (fs.existsSync('/etc/resolv.conf')) {
-        noUploadFilePath = '/etc/resolv.conf'
-      } else {
-        noUploadFilePath = '/Windows/System32/drivers/etc/hosts'
-      }
-
-      // 試験実施
-      let result
-      try {
-        result = await departmentCodeUploadController.remove(noUploadFilePath)
-      } catch (err) {
-        result = err
-      }
-      // 期待結果
-      // 削除エラー（権限エラー）が返されること
-      if (process.platform === 'win32') {
-        expect(() => {
-          throw result
-        }).toThrowError('operation not permitted')
-      } else {
-        expect(() => {
-          throw result
-        }).toThrowError('permission denied')
-      }
+      }).toThrowError('ファイル削除エラー')
     })
   })
 })
