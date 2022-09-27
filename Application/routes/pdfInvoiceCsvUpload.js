@@ -207,6 +207,14 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
     return res.status(500).send(JSON.stringify({ message: 'システムエラーです。（後程、接続してください）' }))
   }
 
+  // アプリ効果測定
+  const jsonLog = {
+    tenantId: req.user.tenantId,
+    action: 'csvUploadedPdfInvoice',
+    csvUploadedPdfInvoiceCount: validInvoices.length
+  }
+  logger.info(jsonLog)
+
   if (uploadHistory?.failCount > 0 || (uploadHistory?.skipCount > 0 && uploadHistory?.successCount === 0)) {
     return res.status(200).send(
       JSON.stringify({
@@ -255,7 +263,7 @@ const pdfInvoiceCsvUploadResult = async (req, res, next) => {
       }
       resultArr.push({
         index: index + 1,
-        date: invoice.dataValues.updatedAt,
+        date: timeStamp(invoice.dataValues.updatedAt),
         filename: invoice.dataValues.csvFileName,
         invoicesAll: invoiceAll,
         invoicesCount: invoice.dataValues.invoiceCount,

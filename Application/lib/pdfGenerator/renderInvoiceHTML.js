@@ -11,8 +11,6 @@ const requiredProps = [
   'sendPost',
   'sendAddr1',
   'sendAddr2',
-  'sendAddr3',
-  'sendRegistrationNo',
 
   'invoiceNo',
   'currency',
@@ -30,6 +28,7 @@ const requiredProps = [
 const optionProps = [
   'recAddr3',
   'sendAddr3',
+  'sendRegistrationNo',
 
   'bankName',
   'branchName',

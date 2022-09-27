@@ -790,14 +790,94 @@ describe('lib/pdfInvoiceCsvUploadValidation のテスト', () => {
         successCount: 1,
         tenantId: 'dummyTenantId'
       })
-      expect(csvRows).toEqual([{
-        errorData: '',
-        historyDetailId: csvRows[0].historyDetailId,
-        historyId: csvRows[0].historyId,
-        invoiceNo: 'I2022070101',
-        lines: 1,
-        status: 0
-      }])
+      expect(csvRows).toEqual([
+        {
+          errorData: '',
+          historyDetailId: csvRows[0].historyDetailId,
+          historyId: csvRows[0].historyId,
+          invoiceNo: 'I2022070101',
+          lines: 1,
+          status: 0
+        }
+      ])
+    })
+    test('正常: 明細数が20件でバリデーション成功', async () => {
+      findAllInvoicesSpy.mockResolvedValue([])
+
+      const lineOverData = []
+      for (let i = 0; i < 20; i++) {
+        const validData = copyTestData(testLineData.valid)[0]
+        validData.lineIndex = i
+        lineOverData.push(validData)
+      }
+
+      const { validInvoices, validLines, uploadHistory, csvRows } = await pdfInvoiceCsvUploadValidation.validate(
+        copyTestData(testInvoiceData.valid),
+        lineOverData,
+        defaultTenantId,
+        defaultFileName
+      )
+
+      expect(validInvoices).toEqual(testInvoiceData.valid)
+      expect(validLines).toEqual(lineOverData)
+      expect(uploadHistory).toEqual({
+        csvFileName: 'dummyCsvFile',
+        failCount: 0,
+        historyId: uploadHistory.historyId,
+        invoiceCount: 1,
+        skipCount: 0,
+        successCount: 20,
+        tenantId: 'dummyTenantId'
+      })
+      for (let i = 0; i < 20; i++) {
+        expect(csvRows[i]).toEqual({
+          errorData: '',
+          historyDetailId: csvRows[i].historyDetailId,
+          historyId: csvRows[i].historyId,
+          invoiceNo: 'I2022070101',
+          lines: i + 1,
+          status: 0
+        })
+      }
+    })
+    test('正常: 明細数が20より多いでバリデーション失敗', async () => {
+      findAllInvoicesSpy.mockResolvedValue([])
+
+      const lineOverData = []
+      for (let i = 0; i < 21; i++) {
+        const validData = copyTestData(testLineData.valid)[0]
+        validData.lineIndex = i
+        lineOverData.push(validData)
+      }
+
+      const { validInvoices, validLines, uploadHistory, csvRows } = await pdfInvoiceCsvUploadValidation.validate(
+        copyTestData(testInvoiceData.valid),
+        lineOverData,
+        defaultTenantId,
+        defaultFileName
+      )
+
+      expect(validInvoices).toEqual([])
+      expect(validLines).toEqual([])
+      expect(uploadHistory).toEqual({
+        csvFileName: 'dummyCsvFile',
+        failCount: 21,
+        historyId: uploadHistory.historyId,
+        invoiceCount: 0,
+        skipCount: 0,
+        successCount: 0,
+        tenantId: 'dummyTenantId'
+      })
+      for (let i = 0; i < 21; i++) {
+        expect(csvRows[i]).toEqual({
+          errorData: '一つの請求書で作成できる明細数は20までです。',
+          historyDetailId: csvRows[i].historyDetailId,
+          historyId: csvRows[i].historyId,
+          invoiceNo: 'I2022070101',
+          lines: i + 1,
+          status: 2
+        })
+      }
     })
     test('正常: アップロード済みでバリデーション失敗', async () => {
       findAllInvoicesSpy.mockResolvedValue(testInvoiceData.valid)
