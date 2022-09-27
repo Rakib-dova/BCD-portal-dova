@@ -3,26 +3,11 @@
 ページ遷移：Home画面→設定→ご契約内容→解約変更
 */
 
-// selector「$」宣言
-// document.getElementById、document.getElementsByClassName省略
-const $ = function (tagObjName) {
-  const classNamePattern = '\\.+[a-zA-Z0-9]'
-  const idNamePatten = '\\#+[a-zA-Z0-9]'
-  const classNameReg = new RegExp(classNamePattern)
-  const idNameReg = new RegExp(idNamePatten)
-  let selectors
+/* global
 
-  if (classNameReg.test(tagObjName)) {
-    selectors = document.querySelectorAll(tagObjName)
-  } else if (idNameReg.test(tagObjName)) {
-    selectors = document.querySelectorAll(tagObjName)[0]
-  } else {
-    return null
-  }
-  return Object.assign(selectors, Array.prototype, (type, event) => {
-    document.addEventListener(type, event)
-  })
-}
+ $
+
+*/
 
 // 確認ボタン押下するとmodalに契約者名・契約者住所が表示処理
 $('#next-btn').addEventListener('click', function (event) {

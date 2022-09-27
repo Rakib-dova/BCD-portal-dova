@@ -3,6 +3,12 @@
 ページ遷移：Home画面
 */
 
+/* global
+
+ $
+
+*/
+
 import BconAxios from './lib/BconAxios.js'
 // UserAgentで判定し
 // IE以外は動的にスクリプトをロード
@@ -16,28 +22,6 @@ if (ua.indexOf('MSIE ') === -1 && ua.indexOf('Trident') === -1) {
   // IEはクリップボードコピーが機能しないのでコピーボタンを削除
   const elm = document.getElementById('copy-btn')
   if (elm) elm.parentNode.removeChild(elm)
-}
-
-// selector「$」宣言
-// document.getElementById、document.getElementsByClassName省略
-const $ = function (tagObjName) {
-  const classNamePattern = '\\.+[a-zA-Z0-9]'
-  const idNamePatten = '\\#+[a-zA-Z0-9]'
-  const classNameReg = new RegExp(classNamePattern)
-  const idNameReg = new RegExp(idNamePatten)
-  let selectors
-
-  if (classNameReg.test(tagObjName)) {
-    selectors = document.querySelectorAll(tagObjName)
-  } else if (idNameReg.test(tagObjName)) {
-    selectors = document.querySelectorAll(tagObjName)[0]
-    if (selectors === undefined) return null
-  } else {
-    return null
-  }
-  return Object.assign(selectors, Array.prototype, (type, event) => {
-    document.addEventListener(type, event)
-  })
 }
 
 const loadingProgress = document.getElementById('loading-progress-modal')

@@ -2,6 +2,12 @@
 ページ概要：利用登録
 */
 
+/* global
+
+ $
+
+*/
+
 // ----利用規約を最後までスクロールしないとチェックボックスが有効化しない
 const iframe = document.getElementById('terms-of-service')
 // iframeの高さ
@@ -314,27 +320,6 @@ function instantValidation(field) {
 // ---- 登録ボタン押下時のフロント側での二重送信防止
 document.getElementById('form').onsubmit = function () {
   document.getElementById('submit').setAttribute('disabled', 'disabled')
-}
-
-// selector「$」宣言
-// document.getElementById、document.getElementsByClassName省略
-const $ = function (tagObjName) {
-  const classNamePattern = '\\.+[a-zA-Z0-9]'
-  const idNamePatten = '\\#+[a-zA-Z0-9]'
-  const classNameReg = new RegExp(classNamePattern)
-  const idNameReg = new RegExp(idNamePatten)
-  let selectors
-
-  if (classNameReg.test(tagObjName)) {
-    selectors = document.querySelectorAll(tagObjName)
-  } else if (idNameReg.test(tagObjName)) {
-    selectors = document.querySelectorAll(tagObjName)[0]
-  } else {
-    return null
-  }
-  return Object.assign(selectors, Array.prototype, (type, event) => {
-    document.addEventListener(type, event)
-  })
 }
 
 // 郵便番号入力
