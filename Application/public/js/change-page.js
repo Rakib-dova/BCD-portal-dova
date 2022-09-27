@@ -1,3 +1,9 @@
+/*
+ページ概要：契約情報変更
+ページ遷移：Home画面→設定→ご契約内容→解約変更
+*/
+
+// selector「$」宣言
 // document.getElementById、document.getElementsByClassName省略
 const $ = function (tagObjName) {
   const classNamePattern = '\\.+[a-zA-Z0-9]'
@@ -266,6 +272,7 @@ $('#chkContractContact').addEventListener('change', function () {
   }
 })
 
+// 郵便番号入力チェック
 $('#postalNumber').addEventListener('input', function () {
   const postalNumberPatten = '^[0-9]{7}$'
   const postalNumberReg = new RegExp(postalNumberPatten)
@@ -350,6 +357,7 @@ $('#postalSearchBtn').addEventListener('click', function () {
   requestAddressApi.send(JSON.stringify(sendData))
 })
 
+// 入力値チェックイベント
 addEvent(document, 'change', function (e, target) {
   instantValidation(target)
 })

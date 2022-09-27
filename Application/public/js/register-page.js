@@ -1,3 +1,7 @@
+/*
+ページ概要：利用登録
+*/
+
 // ----利用規約を最後までスクロールしないとチェックボックスが有効化しない
 const iframe = document.getElementById('terms-of-service')
 // iframeの高さ
@@ -20,8 +24,6 @@ function scrollEvent() {
 }
 
 // iframeのonloadはchromeしか動かないためsetIntervalで監視する
-// iframe.onload = scrollEvent
-
 const timer = setInterval(function () {
   const iframeDoc = iframe.contentDocument
   // Check if loading is complete
@@ -265,7 +267,6 @@ document.getElementById('next-btn').addEventListener('click', function (e) {
     }
   }
   // return falseで返すとバリデーションの結果が画面表示されないためコメントアウト
-  // return false;
 })
 
 // ----動的なフォーム入力のバリデーションチェック
@@ -315,7 +316,7 @@ document.getElementById('form').onsubmit = function () {
   document.getElementById('submit').setAttribute('disabled', 'disabled')
 }
 
-// modal toggle 追加
+// selector「$」宣言
 // document.getElementById、document.getElementsByClassName省略
 const $ = function (tagObjName) {
   const classNamePattern = '\\.+[a-zA-Z0-9]'
@@ -336,6 +337,7 @@ const $ = function (tagObjName) {
   })
 }
 
+// 郵便番号入力
 $('#postalNumber').addEventListener('input', function () {
   const postalNumberPatten = '^[0-9]{7}$'
   const postalNumberReg = new RegExp(postalNumberPatten)
@@ -347,6 +349,7 @@ $('#postalNumber').addEventListener('input', function () {
   $('#postalSearchBtn').removeAttribute('disabled')
 })
 
+// 郵便番号検索ボタン押下時
 $('#postalSearchBtn').addEventListener('click', function () {
   // 住所検索ボタンが非活性化の時は動作しない
   if ($('#postalSearchBtn').getAttribute('disabled') !== null) {

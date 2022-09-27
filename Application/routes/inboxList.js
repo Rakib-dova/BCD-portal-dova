@@ -14,6 +14,13 @@ const inboxController = require('../controllers/inboxController')
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
+/**
+ * 支払依頼一覧画面の表示
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 画面に設定するメッセージもしくはエラー
+ */
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
   // 認証情報取得処理
@@ -30,27 +37,10 @@ const cbGetIndex = async (req, res, next) => {
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
   if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
 
-  // DBから契約情報取得
-  // const contract = await contractController.findOne(req.user.tenantId)
-  // データベースエラーは、エラーオブジェクトが返る
-  // // 契約情報未登録の場合もエラーを上げる
-  // if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
-
   req.session.userContext = 'LoggedIn'
 
   // ユーザ権限を取得
   req.session.userRole = user.dataValues?.userRole
-  // const deleteFlag = contract.dataValues.deleteFlag
-  // const contractStatus = contract.dataValues.contractStatus
-  // const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
-
-  // if (checkContractStatus === null || checkContractStatus === 999) {
-  //   return next(errorHelper.create(500))
-  // }
-
-  // if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
-  //   return next(noticeHelper.create('cancelprocedure'))
-  // }
 
   // テナントIDに紐付いている全ての契約情報を取得
   const contracts = await contractController.findContractsBytenantId(req.user.tenantId)
@@ -62,10 +52,6 @@ const cbGetIndex = async (req, res, next) => {
 
   // 現在解約中か確認
   if (validate.isBcdCancelling(bcdContract)) return next(noticeHelper.create('cancelprocedure'))
-
-  // bcdAuthenticateを利用して、ユーザー権限確認すると決めた場合
-  // const user = req.dbUser
-  // const contracts = req.contracts
 
   let presentation = 'inboxList'
   const lightPlan = await contractController.findLightPlan(req.user.tenantId)
@@ -113,6 +99,13 @@ const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
+/**
+ * 支払依頼一覧画面の表示
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 画面に設定するメッセージもしくはエラー
+ */
 const cbGetWorkflow = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetWorkflow')
   // 認証情報取得処理
@@ -173,6 +166,13 @@ const cbGetWorkflow = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetWorkflow')
 }
 
+/**
+ * 支払依頼一覧画面の表示
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 画面に設定するメッセージもしくはエラー
+ */
 const cbGetApprovals = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetApprovals')
   // 認証情報取得処理
@@ -255,6 +255,13 @@ const cbGetApprovals = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetApprovals')
 }
 
+/**
+ * 支払依頼一覧画面の表示
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 画面に設定するメッセージもしくはエラー
+ */
 const cbSearchApprovedInvoice = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbSearchApprovedInvoice')
 
@@ -272,27 +279,10 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
   if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
 
-  // // DBから契約情報取得
-  // const contract = await contractController.findOne(req.user.tenantId)
-  // // データベースエラーは、エラーオブジェクトが返る
-  // // 契約情報未登録の場合もエラーを上げる
-  // if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
-
   req.session.userContext = 'LoggedIn'
 
   // ユーザ権限を取得
   req.session.userRole = user.dataValues?.userRole
-  // const deleteFlag = contract.dataValues.deleteFlag
-  // const contractStatus = contract.dataValues.contractStatus
-  // const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
-
-  // if (checkContractStatus === null || checkContractStatus === 999) {
-  //   return next(errorHelper.create(500))
-  // }
-
-  // if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
-  //   return next(noticeHelper.create('cancelprocedure'))
-  // }
 
   // テナントIDに紐付いている全ての契約情報を取得
   const contracts = await contractController.findContractsBytenantId(req.user.tenantId)
@@ -304,10 +294,6 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
 
   // 現在解約中か確認
   if (validate.isBcdCancelling(bcdContract)) return next(noticeHelper.create('cancelprocedure'))
-
-  // bcdAuthenticateを利用して、ユーザー権限確認すると決めた場合
-  // const user = req.dbUser
-  // const contracts = req.contracts
 
   const lightPlan = await contractController.findLightPlan(req.user.tenantId)
   if (!lightPlan) {

@@ -2,10 +2,24 @@
 const errorHelper = require('./error')
 
 module.exports = {
+  /**
+   * 引数の「status」をmessageStatusに設定する
+   * @param {int} status HTTPステータス
+   * @returns {int} メッセージステータス
+   */
   create: (status) => {
     const messageStatus = status
     return messageStatus
   },
+
+  /**
+   * 引数の「status」で設定するメッセージの内容を判定する
+   * @param {object} messageStatus メッセージステータス
+   * @param {object} req HTTPリクエストオブジェクト
+   * @param {object} res HTTPレスポンスオブジェクト
+   * @param {function} next 次の処理
+   * @returns {object} エラーもしくは、設定するメッセージ
+   */
   render: (messageStatus, req, res, next) => {
     let message, description1, description2
 

@@ -1,3 +1,8 @@
+/*
+ページ概要：支払依頼一覧
+ページ遷移：Home画面→仕訳情報管理→支払依頼一覧
+*/
+
 const modal = document.getElementById('setjounal-progress-modal')
 const searchProgressModal = document.getElementById('search-progress-modal')
 // UserAgentで判定し
@@ -28,6 +33,7 @@ Array.prototype.forEach.call(document.querySelectorAll('.linkToApproval'), (appr
   })
 })
 
+// selector「$」宣言
 // document.getElementById、document.getElementsByClassName省略
 const $ = function (tagObjName) {
   const classNamePattern = '\\.+[a-zA-Z0-9]'
@@ -49,10 +55,12 @@ const $ = function (tagObjName) {
   })
 }
 
+// 承認待ちタブ押下時
 $('#constructTab').addEventListener('click', function () {
   getWorkflow()
 })
 
+// 承認待ちタブ表示
 function getWorkflow() {
   const getWorkflow = new XMLHttpRequest()
   getWorkflow.open('GET', './getWorkflow')
@@ -214,6 +222,7 @@ function getWorkflow() {
   getWorkflow.send()
 }
 
+// 支払依頼タブ押下時
 $('#informationTab').addEventListener('click', function () {
   $(
     'body > div.max-width > div > div > div.box > div > div.tabs.is-boxed.is-medium > ul > li:nth-child(2)'
@@ -226,22 +235,27 @@ $('#informationTab').addEventListener('click', function () {
   )[0].classList.add('is-active')
 })
 
+// 要素CSS追加
 function addColumnCSS(htmlElement) {
   htmlElement.classList.add('text-center')
   htmlElement.classList.add('td-overflow')
 }
 
+// カラム追加
 function appendChilds(row, columns) {
   columns.forEach((col) => {
     row.appendChild(col)
   })
 }
 
+// 指定のCSS追加
 function addCss(htmlElement, classList) {
   classList.forEach((className) => {
     htmlElement.classList.add(className)
   })
 }
+
+// 承認待ちタブのリスト作成
 function createTable() {
   const table = document.createElement('table')
   addCss(table, ['table', 'is-fullwidth', 'is-hoverable', 'table-fixed'])

@@ -1,4 +1,8 @@
-// 一覧の更新日を出力するタイムスタンプ「yyyy/mm/dd」、データObjectではない場合''に返す
+/**
+ * 更新日を出力するタイムスタンプ「yyyy/mm/dd」に変更
+ * @param {object} timeObject 更新日付
+ * @returns {string} yyyy/mm/dd、データObjectではない場合''に返す
+ */
 const timestampForList = (timeObject) => {
   if (timeObject instanceof Date) {
     return `${timeObject.getFullYear()}/${('0' + (timeObject.getMonth() + 1)).slice(-2)}/${(

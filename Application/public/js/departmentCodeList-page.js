@@ -1,3 +1,9 @@
+/*
+ページ概要：部門データ一覧
+ページ遷移：Home画面→仕訳情報管理→部門データ設定
+*/
+
+// selector「$」宣言
 // document.getElementById、document.getElementsByClassName省略
 const $ = function (tagObjName) {
   const classNamePattern = '\\.+[a-zA-Z0-9]'

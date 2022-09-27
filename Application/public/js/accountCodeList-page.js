@@ -1,3 +1,9 @@
+/*
+ページ概要：勘定科目一覧
+ページ遷移：Home画面→仕訳情報管理→勘定科目設定
+*/
+
+// selector「$」宣言
 // document.getElementById、document.getElementsByClassName省略
 const $ = function (tagObjName) {
   const classNamePattern = '\\.+[a-zA-Z0-9]'
@@ -17,6 +23,7 @@ const $ = function (tagObjName) {
     document.addEventListener(type, event)
   })
 }
+
 // UserAgentで判定し
 // IE以外は動的にスクリプトをロード
 const ua = window.navigator.userAgent
@@ -31,6 +38,7 @@ if (ua.indexOf('MSIE ') === -1 && ua.indexOf('Trident') === -1) {
   if (elm) elm.parentNode.removeChild(elm)
 }
 
+// 勘定科目一覧表示
 window.onload = () => {
   document.querySelectorAll('.tabs').forEach((tab) => {
     tab.querySelectorAll('li').forEach((li) => {

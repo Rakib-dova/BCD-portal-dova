@@ -14,6 +14,13 @@ const departmentCodeController = require('../controllers/departmentCodeControlle
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
+/**
+ * 部門データ登録画面のルーター
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 部門データ登録画面表示、またはエラー
+ */
 const cbGetRegistDepartmentCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetRegistDepartmentCode')
 
@@ -69,6 +76,13 @@ const cbGetRegistDepartmentCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetRegistDepartmentCode')
 }
 
+/**
+ * 部門データ登録
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 部門データ一覧画面表示、またはエラー
+ */
 const cbPostRegistDepartmentCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostRegistDepartmentCode')
 

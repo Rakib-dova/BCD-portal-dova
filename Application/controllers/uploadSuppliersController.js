@@ -9,11 +9,18 @@ const { v4: uuidv4 } = require('uuid')
 const validate = require('../lib/validate')
 
 /**
- *
+ * 取引先一括アップロード
+ *  １．バリデーションチェック
+ *   ヘッダー確認
+ *   CSVファイルの件数確認
+ *   カラム数確認
+ *   メールアドレス重複確認
+ *  ２．トレシフ登録確認
+ *  ３．招待メール送信
  * @param {object} passport トレードシフトのAPIアクセス用データ
  * @param {object} contract 契約情報
  * @param {object} nominalList 読み込んだファイルデータ
- * @returns {number, object} 実行結果ステータス、データ
+ * @returns {object} アップロード対象の取引先情報
  */
 const upload = async (passport, contract, nominalList) => {
   logger.info(constantsDefine.logMessage.INF000 + 'uploadSuppliersController.upload')
@@ -252,7 +259,7 @@ const upload = async (passport, contract, nominalList) => {
  * @param {string} mailAddress メールアドレス
  * @param {string} apiName API名
  * @param {string} response API実行結果
- * @returns {object} 実行結果データ
+ * @returns {object} エラー内容
  */
 const setErrorResponse = (companyName, mailAddress, apiName, response) => {
   const result = {
@@ -265,6 +272,11 @@ const setErrorResponse = (companyName, mailAddress, apiName, response) => {
   return result
 }
 
+/**
+ * アップロードされたCSVファイル読み込みとフォーマットファイルの比較
+ * @param {string} pwdFile アップロードされたCSVファイルパス
+ * @returns {object} 読み込んだCSVデータ
+ */
 const readNominalList = (pwdFile) => {
   const formatBaseCamp = './public/html'
   const formatName = '取引先一括登録フォーマット.csv'
@@ -299,6 +311,11 @@ const readNominalList = (pwdFile) => {
   return result
 }
 
+/**
+ * アップロードされたCSVファイル読み込み
+ * @param {string} fullPath アップロードされたCSVファイルパス
+ * @returns {boolean} true（正常）、false（異常）、Error（DBエラー、システムエラーなど）
+ */
 const getReadCsvData = (fullPath) => {
   try {
     const data = fs.readFileSync(fullPath, { encoding: 'utf8', flag: 'r' })
@@ -308,7 +325,11 @@ const getReadCsvData = (fullPath) => {
   }
 }
 
-// CSVファイル削除機能
+/**
+ * アップロードされたCSVファイル削除
+ * @param {string} fullPath アップロードされたCSVファイルパス
+ * @returns {boolean} true（正常）、false（異常）、Error（DBエラー、システムエラーなど）
+ */
 const removeFile = async (fullPath) => {
   logger.info(constantsDefine.logMessage.INF000 + 'uploadSuppliersController.remove')
   if (fs.existsSync(fullPath)) {

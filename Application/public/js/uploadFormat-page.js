@@ -1,3 +1,9 @@
+/*
+ページ概要：請求書アップロードフォーマット設定
+ページ遷移：Home画面→請求書一括作成→請求書アップロードフォーマット一覧→新規登録する→次へ
+*/
+
+// selector「$」宣言
 // document.getElementById、document.getElementsByClassName省略
 const $ = function (tagObjName) {
   const classNamePattern = '\\.+[a-zA-Z0-9]'
@@ -72,6 +78,7 @@ $('#confirmBtn').addEventListener('click', function (e) {
   }
 })
 
+// 確認ボタン押下時
 $('#submit').addEventListener('click', (e) => {
   // sessionにoffcheckOnのアイテムが残っていると削除する
   if (sessionStorage.getItem('offcheckOn')) {

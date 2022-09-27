@@ -14,6 +14,13 @@ const constantsDefine = require('../constants')
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
+/**
+ * 承認ルート登録画面のルーター
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 承認ルート登録画面表示、またはエラー
+ */
 const cbGetRegistApproveRoute = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetRegistApproveRoute')
 
@@ -82,6 +89,13 @@ const cbGetRegistApproveRoute = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetRegistApproveRoute')
 }
 
+/**
+ * 承認ルート登録
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 承認ルート一覧画面表示、またはエラー
+ */
 const cbPostRegistApproveRoute = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostRegistApproveRoute')
   // 認証情報取得処理

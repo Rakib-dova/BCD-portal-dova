@@ -8,6 +8,19 @@ const TradeshiftDTO = require('../DTO/TradeshiftDTO')
 const UploadUsersDTO = require('../DTO/UploadUsersDTO')
 const validate = require('../lib/validate')
 
+/**
+ * ユーザー一括アップロード
+ *  １．バリデーションチェック
+ *   ヘッダー確認
+ *   CSVファイルの件数確認
+ *   カラム数確認
+ *   メールアドレス重複確認
+ *  ２．トレシフ登録確認
+ * @param {object} passport トレードシフトのAPIアクセス用データ
+ * @param {object} contract 契約情報
+ * @param {object} nominalList 読み込んだファイルデータ
+ * @returns {object} アップロード対象のユーザー情報
+ */
 const upload = async (passport, contract, nominalList) => {
   logger.info(constantsDefine.logMessage.INF000 + 'userUploadController.upload')
   const tradeshiftDTO = new TradeshiftDTO(passport.accessToken, passport.refreshToken, contract.tenantId)
@@ -142,6 +155,11 @@ const upload = async (passport, contract, nominalList) => {
   return [result.status, resultCreatedUser]
 }
 
+/**
+ * アップロードされたCSVファイル読み込みとフォーマットファイルの比較
+ * @param {string} pwdFile アップロードされたCSVファイルパス
+ * @returns {object} 読み込んだCSVデータ
+ */
 const readNominalList = (pwdFile) => {
   const formatBaseCamp = './public/html'
   const formatName = 'ユーザー一括登録フォーマット.csv'
@@ -176,6 +194,11 @@ const readNominalList = (pwdFile) => {
   return result
 }
 
+/**
+ * アップロードされたCSVファイル読み込み
+ * @param {string} fullPath アップロードされたCSVファイルパス
+ * @returns {boolean} true（正常）、false（異常）、Error（DBエラー、システムエラーなど）
+ */
 const getReadCsvData = (fullPath) => {
   try {
     const data = fs.readFileSync(fullPath, { encoding: 'utf8', flag: 'r' })
@@ -185,7 +208,11 @@ const getReadCsvData = (fullPath) => {
   }
 }
 
-// CSVファイル削除機能
+/**
+ * アップロードされたCSVファイル削除
+ * @param {string} fullPath アップロードされたCSVファイルパス
+ * @returns {boolean} true（正常）、false（異常）、Error（DBエラー、システムエラーなど）
+ */
 const removeFile = async (fullPath) => {
   logger.info(constantsDefine.logMessage.INF000 + 'uploadUserController.remove')
   if (fs.existsSync(fullPath)) {

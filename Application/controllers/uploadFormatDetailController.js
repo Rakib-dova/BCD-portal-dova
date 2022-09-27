@@ -5,17 +5,21 @@ const UploadDetail = db.UploadFormatDetail
 const constantsDefine = require('../constants')
 
 module.exports = {
-  // パラメータ値
-  // values = {
-  //   uploadFormatId(PK)(FK)=>UploadFormat(uploadFormatId),
-  //   serialNumber(PK),
-  //   uploadFormatItemName,
-  //   uploadFormatNumber,
-  //   defaultItemName,
-  //   defaultNumber,
-  //   createdAt,
-  //   updatedAt
-  // }
+  /**
+   * アップロードフォーマット詳細テーブル登録
+   * @param {object} values
+   * {
+   *   uploadFormatId(PK)(FK)=>UploadFormat(uploadFormatId),
+   *   serialNumber(PK),
+   *   uploadFormatItemName,
+   *   uploadFormatNumber,
+   *   defaultItemName,
+   *   defaultNumber,
+   *   createdAt,
+   *   updatedAt
+   *  }
+   * @returns {UploadFormatDetail} アップロードフォーマット詳細情報
+   */
   insert: async (values) => {
     const functionName = 'uploadFormatDetailController.insert'
     logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
@@ -56,6 +60,11 @@ module.exports = {
     logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
     return resultToInsertUploadFormatDetail
   },
+  /**
+   * アップロードフォーマット詳細情報取得
+   * @param {uuid} uploadFormatId アップロードフォーマットID
+   * @returns {UploadFormatDetail} アップロードフォーマット詳細情報（正常）、Error（DBエラー、システムエラーなど）
+   */
   findByUploadFormatId: async (uploadFormatId) => {
     try {
       return await UploadDetail.findAll({

@@ -1,3 +1,8 @@
+/*
+ページ概要：仕訳情報設定（閲覧のみ）
+ページ遷移：Home画面→仕訳情報管理→支払依頼一覧→仕訳情報設定
+*/
+
 // 依頼者メッセージ詳細表示
 Array.prototype.forEach.call(document.querySelectorAll('.moreMessage'), (item) => {
   item.addEventListener('click', () => {

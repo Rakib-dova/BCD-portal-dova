@@ -1,3 +1,8 @@
+/*
+ページ概要：勘定科目登録
+ページ遷移：Home画面→仕訳情報管理→勘定科目設定→新規登録する
+*/
+
 // 異常の場合表示されるモーダルのタイトル修正
 window.onload = () => {
   if (document.querySelector('#confirmmodify-modal > div.modal-card > header > p')) {

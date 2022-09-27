@@ -20,7 +20,8 @@ const slideUp = (el) => {
   el.style.height = 0
 }
 
-let activeIndex = null // 開いているアコーディオンのindex
+// 開いているアコーディオンのindex
+let activeIndex = null
 
 // アコーディオンコンテナ全てで実行
 const accordions = document.querySelectorAll('ul.include-accordion')

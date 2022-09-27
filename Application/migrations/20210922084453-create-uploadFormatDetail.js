@@ -1,5 +1,6 @@
 'use strict'
 
+// UploadFormatDetailテーブル作成
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable('UploadFormatDetail', {

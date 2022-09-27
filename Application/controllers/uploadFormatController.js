@@ -5,19 +5,24 @@ const Upload = db.UploadFormat
 const constantsDefine = require('../constants')
 
 module.exports = {
-  // パラメータ値
-  // values = {
-  //   uploadFormatId(PK) - フォーマットID,
-  //   contractId(FK)=>Contracts(contractIdId) - 契約ID,
-  //   setName - フォーマット名,
-  //   uploadType - フォーマットタイプ,
-  //   itemRowNo - 項目名の行番号,
-  //   dataStartRowNo - データ開始行番号,
-  //   createdAt - 作成日付,
-  //   updatedAt - 更新日付,
-  //   uploadData - アップロードファイルデータ
-  //   uploadFileName - アップロードファイル名
-  // }
+  /**
+   * アップロードフォーマットテーブル登録
+   * @param {uuid} _tenantId テナントID
+   * @param {object} values
+   * {
+   *   uploadFormatId(PK) - フォーマットID,
+   *   contractId(FK)=>Contracts(contractIdId) - 契約ID,
+   *   setName - フォーマット名,
+   *   uploadType - フォーマットタイプ,
+   *   itemRowNo - 項目名の行番号,
+   *   dataStartRowNo - データ開始行番号,
+   *   createdAt - 作成日付,
+   *   updatedAt - 更新日付,
+   *   uploadData - アップロードファイルデータ
+   *   uploadFileName - アップロードファイル名
+   *  }
+   * @returns {UploadFormat} アップロードフォーマット情報（正常）、Error（DBエラー、システムエラーなど）
+   */
   insert: async (_tenantId, values) => {
     const functionName = 'uploadFormatController.insert'
     let contractRow
@@ -60,6 +65,11 @@ module.exports = {
     logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
     return resultToInsertUpload
   },
+  /**
+   * アップロードフォーマット情報取得（アップロードフォーマットID）
+   * @param {uuid} uploadFormatId アップロードフォーマットID
+   * @returns {UploadFormat} アップロードフォーマット情報
+   */
   findUploadFormat: async (uploadFormatId) => {
     const functionName = 'uploadFormatController.findUploadFormat'
     logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
@@ -76,6 +86,11 @@ module.exports = {
     logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
     return uploadFormat
   },
+  /**
+   * アップロードフォーマット情報取得（契約番号）
+   * @param {uuid} contractId 契約番号
+   * @returns {UploadFormat} アップロードフォーマット情報（正常）、Error（DBエラー、システムエラーなど）
+   */
   findByContractId: async (contractId) => {
     try {
       return await Upload.findAll({
@@ -89,7 +104,11 @@ module.exports = {
       return error
     }
   },
-
+  /**
+   * 画面に表示するアップロードフォーマット情報取得
+   * @param {uuid} uploadFormatId アップロードフォーマットID
+   * @returns {object} アップロードフォーマット情報（正常）、Error（DBエラー、システムエラーなど）
+   */
   getDataForUploadFormat: async (uploadFormatId) => {
     try {
       // DBからuploadFormatデータ取得
@@ -204,6 +223,12 @@ module.exports = {
       return error
     }
   },
+  /**
+   * アップロードフォーマット情報更新
+   * @param {uuid} uploadFormatId アップロードフォーマットID
+   * @param {object} changeData 変更アップロードフォーマット情報
+   * @returns {int} 0（正常）、Error（DBエラー、システムエラーなど）
+   */
   changeDataForUploadFormat: async (uploadFormatId, changeData) => {
     logger.info(constantsDefine.logMessage.INF000 + 'changeDataForUploadFormat')
     try {
@@ -398,6 +423,11 @@ module.exports = {
       return error
     }
   },
+  /**
+   * アップロードフォーマット情報削除
+   * @param {uuid} uploadFormatId アップロードフォーマットID
+   * @returns {int} 1（正常）、0（DBエラー、システムエラーなど）、-1（既に削除されていた場合）
+   */
   deleteDataForUploadFormat: async (uploadFormatId) => {
     try {
       // アップロードフォーマットを検索
@@ -451,6 +481,11 @@ module.exports = {
       return 0
     }
   },
+  /**
+   * アップロードフォーマット情報存在チェック
+   * @param {uuid} uploadFormatId アップロードフォーマットID
+   * @returns {object} 1（正常）、0（DBエラー、システムエラーなど）、-1（既に削除されていた場合）
+   */
   checkDataForUploadFormat: async (uploadFormatId) => {
     try {
       // アップロードフォーマットを検索

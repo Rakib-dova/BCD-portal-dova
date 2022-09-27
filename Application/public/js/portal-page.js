@@ -1,3 +1,8 @@
+/*
+ページ概要：Home
+ページ遷移：Home画面
+*/
+
 import BconAxios from './lib/BconAxios.js'
 // UserAgentで判定し
 // IE以外は動的にスクリプトをロード
@@ -13,6 +18,7 @@ if (ua.indexOf('MSIE ') === -1 && ua.indexOf('Trident') === -1) {
   if (elm) elm.parentNode.removeChild(elm)
 }
 
+// selector「$」宣言
 // document.getElementById、document.getElementsByClassName省略
 const $ = function (tagObjName) {
   const classNamePattern = '\\.+[a-zA-Z0-9]'
@@ -52,6 +58,7 @@ window.onload = () => {
   })
 }
 
+// 承認・差し戻しの件数取得
 const config = {
   headers: {
     'Content-Type': 'application/json'
@@ -73,6 +80,7 @@ result.then((res) => {
   createNotification(data.requestNoticeCnt, data.rejectedNoticeCnt)
 })
 
+// 承認・差し戻しの件数表示（件数以降）
 function createElement(cnt, request, link) {
   const approvalNotification = document.createElement('div')
   const approvalNotificationMessage = document.createElement('div')
@@ -96,6 +104,7 @@ function createElement(cnt, request, link) {
   return approvalNotification
 }
 
+// 承認・差し戻しの件数表示（件数以前）
 function createNotification(requestNoticeCnt, rejectedNoticeCnt) {
   document.querySelector('.approvalNotification').remove()
 

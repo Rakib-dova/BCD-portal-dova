@@ -1,3 +1,4 @@
+// tradeshiftから取得した承認ユーザー情報を確認・整理するクラス
 class Approver {
   constructor(userAccount) {
     if (userAccount.memberships.length === 0 || userAccount.state === 'LOCKED') {

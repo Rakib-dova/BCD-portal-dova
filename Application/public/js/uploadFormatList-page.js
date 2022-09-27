@@ -1,3 +1,9 @@
+/*
+ページ概要：アップロードフォーマット一覧
+ページ遷移：Home画面→請求書一括作成→請求書アップロードフォーマット一覧
+*/
+
+// selector「$」宣言
 // document.getElementById、document.getElementsByClassName省略
 const $ = function (tagObjName) {
   const classNamePattern = '\\.+[a-zA-Z0-9]'

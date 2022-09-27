@@ -26,7 +26,7 @@ const logMessage = constants.logMessage
  * 解約の事前チェック
  * @param {string} tenantId テナントID
  * @param {function} next 次の処理
- * @returns スタンダードプラン契約情報
+ * @returns {object} スタンダードプラン契約情報
  */
 const checkContractStatus = async (tenantId, next) => {
   // 解約済以外スタンダードプランの契約情報を取得する
@@ -68,10 +68,10 @@ const checkContractStatus = async (tenantId, next) => {
 
 /**
  * 解約画面の表示
- * @param {object} req リクエスト
- * @param {object} res レスポンス
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
  * @param {function} next 次の処理
- * @returns
+ * @returns {object} 解約画面
  */
 const showContractCancel = async (req, res, next) => {
   logger.info(logMessage.INF000 + 'showContractCancel')
@@ -92,10 +92,10 @@ const showContractCancel = async (req, res, next) => {
 
 /**
  * 解約の実施
- * @param {object} req リクエスト
- * @param {object} res レスポンス
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
  * @param {function} next 次の処理
- * @returns
+ * @returns {object} 完了画面へ遷移、またはDBエラーの場合、エラーオブジェクトを返却
  */
 const contractCancel = async (req, res, next) => {
   logger.info(logMessage.INF000 + 'contractCancel')

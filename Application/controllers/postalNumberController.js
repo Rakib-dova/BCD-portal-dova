@@ -2,6 +2,11 @@ const logger = require('../lib/logger')
 const Address = require('../models/index').Address
 
 module.exports = {
+  /**
+   * 住所データ取得
+   * @param {string} postalNumber 郵便番号
+   * @returns {boolean} { statuscode: 200, value: [住所データ]}（正常）、{ statuscode: 500, value: []}（DBエラー、システムエラーなど）
+   */
   findOne: async (postalNumber) => {
     const resultAddressList = {
       statuscode: 200,

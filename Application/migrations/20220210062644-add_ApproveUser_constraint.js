@@ -1,13 +1,8 @@
 'use strict'
 
+// ApproveUserテーブルapproveRouteIdカラムforeign key指定・解除
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    /**
-     * Add altering commands here.
-     *
-     * Example:
-     * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
-     */
     return [
       queryInterface.addConstraint('ApproveUser', {
         fields: ['approveRouteId'],
@@ -24,12 +19,6 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    /**
-     * Add reverting commands here.
-     *
-     * Example:
-     * await queryInterface.dropTable('users');
-     */
     return [queryInterface.removeConstraint('ApproveUser', 'fk_ApproveUser_approveRoute')]
   }
 }

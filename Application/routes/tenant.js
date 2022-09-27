@@ -18,6 +18,13 @@ const newOrderTemplate = require('../orderTemplate/contractInformationnewOrder.j
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
+/**
+ * テナント利用登録画面のルーター
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} テナント利用登録画面表示、またはエラー
+ */
 const cbGetRegister = async (req, res, next) => {
   if (req.session?.userContext !== 'NotTenantRegistered') {
     return next(errorHelper.create(400))
@@ -93,6 +100,13 @@ const cbGetRegister = async (req, res, next) => {
   })
 }
 
+/**
+ * テナント利用登録
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} ポータル画面表示、またはエラー
+ */
 const cbPostRegister = async (req, res, next) => {
   if (req.session?.userContext !== 'NotTenantRegistered') {
     return next(errorHelper.create(400))

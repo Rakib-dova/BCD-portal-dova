@@ -1,7 +1,14 @@
+/*
+ページ概要：承認ルート登録
+ページ遷移：Home画面→仕訳情報管理→承認ルート一覧→新規登録する
+*/
+
 'use strict'
 
 // 承認順番
 const approveUserNumbers = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
+
+// selector「$」宣言
 // document.getElementById、document.getElementsByClassName省略
 const $ = function (tagObjName) {
   const classNamePattern = '\\.+[a-zA-Z0-9]'

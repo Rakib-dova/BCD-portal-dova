@@ -1,5 +1,6 @@
 'use strict'
 
+// ApproveRouteテーブルprevAprroveRouteIdカラム追加
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.addColumn('ApproveRoute', 'prevAprroveRouteId', {

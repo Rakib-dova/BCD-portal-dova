@@ -1,3 +1,9 @@
+/*
+ページ概要：補助科目一覧
+ページ遷移：Home画面→仕訳情報管理→補助科目設定
+*/
+
+// selector「$」宣言
 // document.getElementById、document.getElementsByClassName省略
 const $ = function (tagObjName) {
   const classNamePattern = '\\.+[a-zA-Z0-9]'
@@ -82,6 +88,7 @@ Array.prototype.forEach.call(document.querySelectorAll('.checkChangeSubAccountCo
   })
 })
 
+// 選択された勘定科目の削除
 Array.prototype.forEach.call(document.querySelectorAll('.deleteSubAccountCodeBtn'), (item) => {
   item.addEventListener('click', function () {
     const subAccountCodeId = item.getAttribute('uuid')

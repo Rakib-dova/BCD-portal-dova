@@ -1,13 +1,8 @@
 'use strict'
 
+// AccountCodeテーブルcontractIdカラムforeign key指定・解除
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    /**
-     * Add altering commands here.
-     *
-     * Example:
-     * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
-     */
     return [
       queryInterface.addConstraint('AccountCode', {
         fields: ['contractId'],
@@ -24,12 +19,6 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    /**
-     * Add reverting commands here.
-     *
-     * Example:
-     * await queryInterface.dropTable('users');
-     */
     return [queryInterface.removeConstraint('AccountCode', 'fk_accountCode_contracts')]
   }
 }

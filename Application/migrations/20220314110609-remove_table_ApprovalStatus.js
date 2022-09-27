@@ -1,5 +1,6 @@
 'use strict'
 
+// ApprovalStatusテーブル削除
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     return [

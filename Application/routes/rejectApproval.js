@@ -22,6 +22,13 @@ router.use(
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
+/**
+ * 差し戻し処理
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 支払依頼一覧画面表示、またはエラー
+ */
 const cbPostApprove = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostApprove')
 
@@ -93,7 +100,6 @@ const cbPostApprove = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostApprove')
 }
 
-// router.get('/:invoiceId', helper.isAuthenticated, cbGetIndex)
 router.post('/:invoiceId', helper.isAuthenticated, csrfProtection, cbPostApprove)
 
 module.exports = {

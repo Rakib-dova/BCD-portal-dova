@@ -1,3 +1,8 @@
+/*
+ページ概要：仕訳情報ダウンロード
+ページ遷移：Home画面→仕訳情報設定→仕訳情報ダウンロード
+*/
+
 const modal = document.getElementById('journaldownload-progress-modal')
 
 window.onload = function () {
@@ -28,6 +33,7 @@ window.onload = function () {
   })
 }
 
+// ダウンロード条件の入力値チェック
 addEvent(document, 'change', function (e, target) {
   instantValidation(target)
 })

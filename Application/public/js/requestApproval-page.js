@@ -1,3 +1,8 @@
+/*
+ページ概要：支払依頼
+ページ遷移：Home画面→仕訳情報管理→支払依頼一覧→承認待ちタブ→依頼内容確認→支払依頼へ
+*/
+
 // UserAgentで判定し
 // IE以外は動的にスクリプトをロード
 const modal = document.getElementById('request-progress-modal')
@@ -12,6 +17,8 @@ if (ua.indexOf('MSIE ') === -1 && ua.indexOf('Trident') === -1) {
   const elm = document.getElementById('copy-btn')
   if (elm) elm.parentNode.removeChild(elm)
 }
+
+// selector「$」宣言
 // document.getElementById、document.getElementsByClassName省略
 const $ = function (tagObjName) {
   const classNamePattern = '\\.+[a-zA-Z0-9]'
@@ -156,12 +163,15 @@ const displayResultForApproveRoute = function (codeArr) {
       this.classList.remove('is-selected')
     })
   })
+
+  // 承認ルート検索結果から詳細ボタン押下時
   $('.btnDetailApproveRoute').forEach((btnDetailApproveRoute) => {
     btnDetailApproveRoute.addEventListener('click', function () {
       getDetailApproveRoute(this.dataset.target, 'btnDetailApproveRoute')
     })
   })
-  //
+
+  // 承認ルート検索結果から選択ボタン押下時
   $('.btnSelectApproveRoute').forEach((btnSelected) => {
     btnSelected.addEventListener('click', function () {
       const approveRouteId = this.dataset.target
@@ -183,6 +193,7 @@ const displayNoApproveRoute = function () {
   $('#approveRouteResultDisplayInvisible').classList.remove('is-invisible')
 }
 
+// 承認ルートの情報取得
 const getDetailApproveRoute = function (_approveRouteId, btnName) {
   const getDetailApproveRoute = new XMLHttpRequest()
   const elements = document.getElementsByName('_csrf')
@@ -222,6 +233,7 @@ const getDetailApproveRoute = function (_approveRouteId, btnName) {
   )
 }
 
+// 選択した承認ルート表示
 const displayDetailApproveRoute = function (detailApproveRoute, blackboard) {
   while (blackboard.firstChild) {
     blackboard.removeChild(blackboard.firstChild)
@@ -300,6 +312,7 @@ const displayDetailApproveRoute = function (detailApproveRoute, blackboard) {
   blackboard.appendChild(cloneTemplate)
 }
 
+// 確認ボタン押下時
 $('#btn-confirm').addEventListener('click', function () {
   while ($('#journal-list').firstChild) {
     $('#journal-list').removeChild($('#journal-list').firstChild)
@@ -328,6 +341,7 @@ $('#btn-confirm').addEventListener('click', function () {
   $('#check-request-approve-route').appendChild(cloneDiplay)
 })
 
+// 確認モーダルの依頼ボタン押下時
 $('#btn-approval').addEventListener('click', (e) => {
   e.preventDefault()
   modal.classList.add('is-active')

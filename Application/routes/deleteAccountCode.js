@@ -15,6 +15,12 @@ const noticeHelper = require('./helpers/notice')
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
+/**
+ * 勘定科目一覧画面のルーター
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ */
 const cbDeleteAccountCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbDeleteAccountCode')
 
@@ -75,11 +81,13 @@ const cbDeleteAccountCode = async (req, res, next) => {
     })
   }
 
-  // 削除処理
-  // resultOfDeletedAccountCode : 削除処理結果
-  //              -1 : 削除対象の勘定科目がない場合。
-  //               1 : 正常（勘定科目・補助科目の削除成功）
-  //               0 : エラー
+  /*
+   * 削除処理
+   * resultOfDeletedAccountCode : 削除処理結果
+   * -1 : 削除対象の勘定科目がない場合。
+   *  1 : 正常（勘定科目・補助科目の削除成功）
+   *  0 : エラー
+   */
   const resultOfDeletedAccountCode = await accountCodeController.deleteForAccountCode(accountCodeId)
 
   // 結果確認（正常）
@@ -94,6 +102,12 @@ const cbDeleteAccountCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbDeleteAccountCode')
 }
 
+/**
+ * 勘定科目一覧画面のルーター
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ */
 const cbGetCheckAccountCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetCheckAccountCode')
 

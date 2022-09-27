@@ -17,7 +17,7 @@ const orderTypes = constants.orderTypes
 
 /**
  * 有料サービスの契約(複数可能)
- * @param {string} tenantId テナントID
+ * @param {uuid} tenantId テナントID
  * @param {object[]} orderDataList オーダーデータリスト
  * @returns {object[]} コントラクトリスト
  */
@@ -70,9 +70,9 @@ const applyNewOrders = async (tenantId, orderDataList) => {
 
 /**
  * 解約
- * @param {string} tenantId テナントID
+ * @param {uuid} tenantId テナントID
  * @param {object} orderData オーダーデータ
- * @returns
+ * @returns {object} なし（正常）、Error（DBエラー、システムエラーなど）
  */
 const cancelOrder = async (tenantId, orderData) => {
   try {
@@ -128,7 +128,7 @@ const cancelOrder = async (tenantId, orderData) => {
  * タグ付け処理
  * @param {object} user ユーザ情報
  * @param {date} createdAt 登録日
- * @returns
+ * @returns なし
  */
 const tagCreate = async (user, createdAt) => {
   logger.info(constantsDefine.logMessage.INF000 + 'applyOrderController.tagCreate')

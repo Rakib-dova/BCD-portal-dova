@@ -17,10 +17,10 @@ const logMessage = constants.logMessage
 
 /**
  * 印影登録画面の表示
- * @param {object} req リクエスト
- * @param {object} res レスポンス
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
  * @param {function} next 次の処理
- * @returns
+ * @returns {object} 画面に設定するメッセージもしくはエラー
  */
 const showImprintUpload = async (req, res, next) => {
   logger.info(logMessage.INF000 + 'showImprintUpload')
@@ -38,10 +38,10 @@ const showImprintUpload = async (req, res, next) => {
 
 /**
  * 印影の登録
- * @param {object} req リクエスト
- * @param {object} res レスポンス
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
  * @param {function} next 次の処理
- * @returns
+ * @returns {object} 画面に設定するメッセージもしくはエラー
  */
 const uploadImprint = async (req, res, next) => {
   logger.info(logMessage.INF000 + 'uploadImprint')
@@ -60,10 +60,10 @@ const uploadImprint = async (req, res, next) => {
 
 /**
  * 印影の削除
- * @param {object} req リクエスト
- * @param {object} res レスポンス
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
  * @param {function} next 次の処理
- * @returns
+ * @returns {object} 画面に設定するメッセージもしくはエラー
  */
 const deleteImprint = async (req, res, next) => {
   logger.info(logMessage.INF000 + 'deleteImprint')

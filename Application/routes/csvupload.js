@@ -18,6 +18,7 @@ const validate = require('../lib/validate')
 const apiManager = require('../controllers/apiManager')
 const filePath = process.env.INVOICE_UPLOAD_PATH
 const constantsDefine = require('../constants')
+const removeFile = require('../lib/removeFile')
 const { v4: uuidv4 } = require('uuid')
 
 const csrf = require('csurf')
@@ -33,6 +34,13 @@ router.use(
 const BconCsv = require('../lib/bconCsv')
 const BconCsvNoHeader = require('../lib/bconCsvNoHeader')
 
+/**
+ * 請求書一括作成画面のルーター
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 画面に設定するメッセージもしくはエラー
+ */
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
   // 認証情報取得処理
@@ -82,6 +90,13 @@ const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
+/**
+ * 請求書一括作成画面のルーター
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 画面に設定するメッセージもしくはエラー
+ */
 const cbPostUpload = async (req, res, next) => {
   const functionName = 'cbPostUpload'
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
@@ -144,7 +159,7 @@ const cbPostUpload = async (req, res, next) => {
   // ネットワークテナントID取得時エラー確認
   let getNetworkErrFlag = false
 
-  // csvアップロード
+  // CSVアップロード
   if (cbUploadCsv(filePath, filename, uploadCsvData) === false) {
     setErrorLog(req, 500)
     return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
@@ -195,18 +210,28 @@ const cbPostUpload = async (req, res, next) => {
         break
     }
   }
-  // csv削除
-  if (cbRemoveCsv(filePath, filename) === false) {
+  // アップロードファイル削除
+  const removeFilePath = path.resolve(filePath, filename)
+  try {
+    await removeFile.removeFile(removeFilePath)
+  } catch (error) {
+    logger.error({ contractId: contract.contractId, stack: error.stack, status: 0 })
     setErrorLog(req, 500)
     return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
   }
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostUpload')
-
   return res.status(200).send(errorText)
 }
 
-// csvアップロード
+/**
+ * CSVアップロード処理
+ * @param {object} _filePath ファイルパス
+ * @param {object} _filename ファイル名
+ * @param {object} _uploadCsvData アップロード用csvデータ
+ * @returns {object} ユーザディレクトリが存在する場合：true
+ * ユーザディレクトリが存在しない場合、エラー発生時：false
+ */
 const cbUploadCsv = (_filePath, _filename, _uploadCsvData) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostUploadCsv')
   let uploadPath
@@ -239,33 +264,19 @@ const cbUploadCsv = (_filePath, _filename, _uploadCsvData) => {
   }
 }
 
-// CSVファイル削除機能
-const cbRemoveCsv = (_deleteDataPath, _filename) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'cbRemoveCsv')
-  let deleteFile
-  try {
-    deleteFile = path.join(_deleteDataPath, '/' + _filename)
-  } catch (error) {
-    logger.error(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')
-    return false
-  }
-
-  if (fs.existsSync(deleteFile)) {
-    try {
-      fs.unlinkSync(deleteFile)
-      logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')
-      return true
-    } catch (error) {
-      logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')
-      return false
-    }
-  } else {
-    // 削除対象がない場合、サーバーエラー画面表示
-    logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')
-    return false
-  }
-}
-
+/**
+ * CSVからデータ抽出処理
+ * @param {object} _extractDir ファイルパス
+ * @param {object} _filename ファイル名
+ * @param {object} _user ユーザトークン
+ * @param {object} _invoices 請求書の値
+ * @param {object} _req HTTPリクエストオブジェクト
+ * @param {object} _res HTTPレスポンスオブジェクト
+ * @returns {object} 結果表示フラグ(resultFlag)が「1」の場合：102
+ * 結果表示フラグ(resultFlag)が「2」の場合：103
+ * 結果表示フラグ(resultFlag)が「3」または「4」の場合：104
+ * 結果表示フラグ(resultFlag)が「1」～「4」以外の場合：0
+ */
 const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, _res) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbExtractInvoice')
 
@@ -769,6 +780,10 @@ async function convertDataForRegist(
   }
 }
 
+/**
+ * タイムスタンプ取得処理
+ * @returns {object} 作成したタイムスタンプ
+ */
 const getTimeStamp = () => {
   logger.info(constantsDefine.logMessage.INF000 + 'getTimeStamp')
   const now = new Date()
@@ -784,7 +799,10 @@ const getTimeStamp = () => {
   return stamp
 }
 
-// 会社のネットワーク情報を取得
+/**
+ * 会社のネットワーク情報取得処理
+ * @param {object} _req HTTPリクエストオブジェクト
+ */
 const getNetwork = async (_req) => {
   const connections = []
   let numPages
@@ -831,6 +849,11 @@ const getNetwork = async (_req) => {
   return connections
 }
 
+/**
+ * エラーログ設定処理
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} errorCode エラーコード
+ */
 const setErrorLog = async (req, errorCode) => {
   const err = errorHelper.create(errorCode)
   const errorStatus = err.status
@@ -858,7 +881,6 @@ module.exports = {
   cbGetIndex: cbGetIndex,
   cbPostUpload: cbPostUpload,
   cbUploadCsv: cbUploadCsv,
-  cbRemoveCsv: cbRemoveCsv,
   cbExtractInvoice: cbExtractInvoice,
   getTimeStamp: getTimeStamp,
   getNetwork: getNetwork

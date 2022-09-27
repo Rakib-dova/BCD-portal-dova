@@ -13,6 +13,13 @@ router.use(
   })
 )
 
+/**
+ * 企業名検索
+ * @param {object} req HTTPリクエストオブジェクト
+ * @param {object} res HTTPレスポンスオブジェクト
+ * @param {function} next 次の処理
+ * @returns {object} 呼び出し元画面表示、またはエラー
+ */
 const cbSearchCompanies = async (req, res) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbSearchCompanies')
 
@@ -119,7 +126,13 @@ const cbSearchCompanies = async (req, res) => {
   return res.status(resultStatusCode).send(resultCompanies)
 }
 
-// エラー処理
+/**
+ * エラー処理
+ * @param {object} companiesResult エラー情報
+ * @param {object} _res HTTPレスポンスオブジェクト
+ * @param {object} _req HTTPリクエストオブジェクト
+ * @returns {object} 呼び出し元画面表示
+ */
 const errorHandle = (companiesResult, _res, _req) => {
   let resultStatusCode
   if (String(companiesResult.response?.status).slice(0, 1) === '4') {
