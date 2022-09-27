@@ -17,6 +17,7 @@ codeAccountDataResult.createdAt = new Date('2021-07-09T04:30:00.000Z')
 codeAccountDataResult.updatedAt = new Date('2021-07-09T04:30:00.000Z')
 const path = require('path')
 const fs = require('fs')
+const removeFile = require('../../Application/lib/removeFile')
 
 const dbAccountCodeTable = []
 const dbAccountCode100Table = []
@@ -148,14 +149,6 @@ describe('accountUploadControllerのテスト', () => {
   // 異常系8
   const accountCodeFileData9 = Buffer.from(
     fs.readFileSync('./testData/accountCodeUpload_test9.csv', {
-      encoding: 'utf-8',
-      flag: 'r'
-    })
-  ).toString('base64')
-
-  // 異常系9
-  const accountCodeFileData10 = Buffer.from(
-    fs.readFileSync('./testData/accountCodeUpload_test10.csv', {
       encoding: 'utf-8',
       flag: 'r'
     })
@@ -461,10 +454,7 @@ describe('accountUploadControllerのテスト', () => {
       // 勘定科目一括作成
       const fs = require('fs')
       const uploadFilePath = path.resolve('/home/upload/test11.csv')
-      fs.writeFileSync(
-        uploadFilePath,
-        Buffer.from(decodeURIComponent(accountCodeFileData10), 'base64').toString('utf8')
-      )
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(accountCodeFileData9), 'base64').toString('utf8'))
       pathSpy.mockReturnValue('/home/upload/test11.csv')
       accountCodeControllerInsertSpy.mockClear()
       accountCodeControllerInsertSpy.mockReturnValueOnce(false)
@@ -477,10 +467,10 @@ describe('accountUploadControllerのテスト', () => {
       expect(result).toEqual([
         { header: ['行数', '勘定科目コード', '勘定科目名', '詳細'] },
         {
-          code: 'TEST302',
+          code: 'TEST9',
           errorData: '入力した勘定科目コードは既に登録されています。',
           idx: 1,
-          name: '結合テスト12'
+          name: '結合テスト9'
         }
       ])
     })
@@ -529,7 +519,7 @@ describe('accountUploadControllerのテスト', () => {
       fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(accountCodeFileData1), 'base64').toString('utf8'))
       pathSpy.mockReturnValue('/home/upload/test1.csv')
       accountCodeControllerInsertSpy.mockImplementation(() => {
-        throw new Error('CSVファイル削除エラー')
+        throw new Error('ファイル削除エラー')
       })
 
       // // 試験実施
@@ -539,73 +529,10 @@ describe('accountUploadControllerのテスト', () => {
       // 想定したデータがReturnされていること
       expect(() => {
         throw result
-      }).toThrowError('CSVファイル削除エラー')
-    })
-  })
+      }).toThrowError('ファイル削除エラー')
 
-  describe('removeFile', () => {
-    test('正常:データ削除', async () => {
-      // 準備
-      findAllSpy.mockReturnValue(dbAccountCodeTable)
-      createSpy.mockReturnValue(codeAccountDataResult)
-      // 勘定科目一括作成
-      const fs = require('fs')
-      const uploadFilePath = path.resolve('/home/upload/test9.csv')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(accountCodeFileData9), 'base64').toString('utf8'))
-      pathSpy.mockReturnValue('/home/upload/test9.csv')
-
-      accountCodeControllerInsertSpy.mockReturnValue(true)
-
-      // 試験実施
-      const result = await accountUploadController.remove(uploadFilePath)
-
-      // 期待結果
-      expect(result).toEqual(true)
-    })
-
-    test('異常:削除エラー(存在しないデータを削除する場合)', async () => {
-      // 準備
-      findAllSpy.mockReturnValue(dbAccountCodeTable)
-      createSpy.mockReturnValue(codeAccountDataResult)
-      // 勘定科目一括作成
-      const fs = require('fs')
-      const uploadFilePath = path.resolve('/home/upload/test9.csv')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(accountCodeFileData9), 'base64').toString('utf8'))
-      pathSpy.mockReturnValue('/home/upload/test9.csv')
-
-      accountCodeControllerInsertSpy.mockReturnValue(true)
-
-      // 試験実施
-      const noUploadFilePath = '/home/upload\\/test9.csv'
-      let result
-      try {
-        result = await accountUploadController.remove(noUploadFilePath)
-      } catch (err) {
-        result = err
-      }
-      // 期待結果
-      // 削除エラーが返されること
-      expect(() => {
-        throw result
-      }).toThrowError('CSVファイル削除エラー')
-    })
-
-    test('異常:削除エラー', async () => {
-      // 準備
-      const noUploadFilePath = '/etc/resolv.conf'
-
-      // 試験実施
-      let result
-      try {
-        result = await accountUploadController.remove(noUploadFilePath)
-      } catch (err) {
-        result = err
-      }
-      // 期待結果
-      // 削除エラー（権限エラー）が返されること
-      expect(() => {
-        throw result
-      }).toThrowError('permission denied')
+      // テストファイル削除
+      await removeFile.removeFile(uploadFilePath)
     })
   })
 })

@@ -217,8 +217,6 @@ describe('uploadFormatのテスト', () => {
   const fileName = 'uploadFormatTest.csv'
   const fileNameErr = 'uploadFormatTest2.csv'
 
-  const uploadFileNameErr = dataValues.dataValues.userId + '_' + fileNameErr
-
   // ファイルデータ
   // 請求書が1つの場合
   const fileData = Buffer.from(
@@ -2237,8 +2235,6 @@ describe('uploadFormatのテスト', () => {
       // uploadFormat.jsが遷移を拒否して、前URLに戻る
       expect(response.headers.Location).toBe('/')
       expect(response.statusCode).toBe(307)
-      // テストファイル削除
-      await uploadFormat.cbRemoveCsv(filePath, uploadFileNameErr)
     })
 
     test('準正常：消費税と軽減税率が重複', async () => {
@@ -3172,10 +3168,6 @@ describe('uploadFormatのテスト', () => {
         ...fileDataSetting
       }
 
-      const fs = require('fs')
-      const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
-
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
@@ -3524,49 +3516,6 @@ describe('uploadFormatのテスト', () => {
   })
 
   // -----------------------------------------------------------------------------------------
-  // cbRemoveCsvの確認
-
-  describe('cbRemoveCsv', () => {
-    test('正常', async () => {
-      // 準備
-      request.user = user
-
-      const uploadFileName = user.userId + '_UTtest.csv'
-
-      // ファイルデータを設定
-      request.file = {
-        ...fileDataSetting
-      }
-
-      const fs = require('fs')
-      const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
-
-      // DBからの正常なユーザデータの取得を想定する
-      findOneSpy.mockReturnValue(dataValues)
-      // DBからの正常な契約情報取得を想定する
-      findOneSpyContracts.mockReturnValue(contractdataValues)
-      // ユーザ権限チェック結果設定
-      helpercheckContractStatusSpy.mockReturnValue(contractdataValues.dataValues.contractStatus)
-      // 試験実施
-      const resultRemove = await uploadFormat.cbRemoveCsv(filePath, uploadFileName)
-
-      // 期待結果
-      expect(resultRemove).toBeTruthy()
-    })
-
-    test('異常:ファイルパスが存在しない場合', async () => {
-      // 準備
-      request.user = user
-
-      // 試験実施
-      const resultRemove = await uploadFormat.cbRemoveCsv('/test', fileName)
-
-      // 期待結果
-      expect(resultRemove).toBeFalsy()
-    })
-  })
-
   describe('cbDeleteFormat', () => {
     test('正常:削除完了しました。', async () => {
       request.session = {

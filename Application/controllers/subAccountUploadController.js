@@ -6,8 +6,8 @@ const constantsDefine = require('../constants')
 const filePath = process.env.INVOICE_UPLOAD_PATH
 const subAccountCodeController = require('./subAccountCodeController')
 const accountCodeController = require('./accountCodeController')
-const constants = require('../constants')
 const validate = require('../lib/validate')
+const removeFile = require('../lib/removeFile')
 
 /**
  * 補助科目アップロード
@@ -125,7 +125,7 @@ const upload = async function (_file, contract) {
             break
           default:
             errorCheck = true
-            errorData += `${constants.codeErrMsg[checkAccountCode]}`
+            errorData += `${constantsDefine.codeErrMsg[checkAccountCode]}`
             break
         }
 
@@ -136,7 +136,9 @@ const upload = async function (_file, contract) {
             break
           default:
             errorCheck = true
-            errorData += errorData ? `,${constants.codeErrMsg[checkCode]}` : `${constants.codeErrMsg[checkCode]}`
+            errorData += errorData
+              ? `,${constantsDefine.codeErrMsg[checkCode]}`
+              : `${constantsDefine.codeErrMsg[checkCode]}`
             break
         }
 
@@ -147,7 +149,9 @@ const upload = async function (_file, contract) {
             break
           default:
             errorCheck = true
-            errorData += errorData ? `,${constants.codeErrMsg[checkName]}` : `${constants.codeErrMsg[checkName]}`
+            errorData += errorData
+              ? `,${constantsDefine.codeErrMsg[checkName]}`
+              : `${constantsDefine.codeErrMsg[checkName]}`
             break
         }
 
@@ -167,7 +171,7 @@ const upload = async function (_file, contract) {
 
           // 勘定科目検索結果がない場合
           if (searchAccountCodeResult.length === 0) {
-            errorData += `${constants.codeErrMsg.ACCOUNTCODEERR004}`
+            errorData += `${constantsDefine.codeErrMsg.ACCOUNTCODEERR004}`
           } else {
             const values = {
               accountCodeId: searchAccountCodeResult[0].accountCodeId,
@@ -187,10 +191,10 @@ const upload = async function (_file, contract) {
               case 0:
                 break
               case 1:
-                errorData += `${constants.codeErrMsg.SUBACCOUNTCODEERR003}`
+                errorData += `${constantsDefine.codeErrMsg.SUBACCOUNTCODEERR003}`
                 break
               case -1:
-                errorData += `${constants.codeErrMsg.ACCOUNTCODEERR004}`
+                errorData += `${constantsDefine.codeErrMsg.ACCOUNTCODEERR004}`
                 break
             }
           }
@@ -210,7 +214,7 @@ const upload = async function (_file, contract) {
     }
 
     // アップロードファイル削除
-    if ((await removeFile(newFilePath)) === true && result === null) {
+    if ((await removeFile.removeFile(newFilePath)) === true && result === null) {
       result = 0
     }
     logger.info(constantsDefine.logMessage.INF001 + 'subAccountUploadController.upload')
@@ -226,33 +230,6 @@ const upload = async function (_file, contract) {
   }
 }
 
-/**
- * CSVファイル削除機能
- * @param {string} deleteFilePath 削除ファイルパス
- * @returns {boolean} true（正常）、Error（DBエラー、システムエラーなど）
- */
-const removeFile = async (deleteFilePath) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'accountUploadController.remove')
-  const deleteFile = path.join(deleteFilePath)
-
-  if (fs.existsSync(deleteFile)) {
-    try {
-      fs.unlinkSync(deleteFile)
-      logger.info(constantsDefine.logMessage.INF001 + 'accountUploadController.remove')
-      return true
-    } catch (error) {
-      logger.info(constantsDefine.logMessage.INF001 + 'accountUploadController.remove')
-      throw error
-    }
-  } else {
-    // 削除対象がない場合、サーバーエラー画面表示
-    logger.info(constantsDefine.logMessage.INF001 + 'accountUploadController.remove')
-    const deleteError = new Error('CSVファイル削除エラー')
-    throw deleteError
-  }
-}
-
 module.exports = {
-  upload: upload,
-  removeFile: removeFile
+  upload: upload
 }

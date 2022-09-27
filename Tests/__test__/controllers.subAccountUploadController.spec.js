@@ -164,8 +164,8 @@ describe('subAccountUploadControllerのテスト', () => {
   ).toString('base64')
 
   // 異常系8
-  const subAccountCodeFileData9 = Buffer.from(
-    fs.readFileSync('./testData/subAccountCodeUpload_test9.csv', {
+  const accountCodeFileData9 = Buffer.from(
+    fs.readFileSync('./testData/subAccountCodeUpload_test10.csv', {
       encoding: 'utf-8',
       flag: 'r'
     })
@@ -174,14 +174,6 @@ describe('subAccountUploadControllerのテスト', () => {
   // 異常系9
   const subAccountCodeFileData10 = Buffer.from(
     fs.readFileSync('./testData/subAccountCodeUpload_test10.csv', {
-      encoding: 'utf-8',
-      flag: 'r'
-    })
-  ).toString('base64')
-
-  // 異常系10
-  const subAccountCodeFileData11 = Buffer.from(
-    fs.readFileSync('./testData/subAccountCodeUpload_test11.csv', {
       encoding: 'utf-8',
       flag: 'r'
     })
@@ -288,7 +280,7 @@ describe('subAccountUploadControllerのテスト', () => {
       const uploadFilePath = path.resolve('/home/upload/test12.csv')
       fs.writeFileSync(
         uploadFilePath,
-        Buffer.from(decodeURIComponent(subAccountCodeFileData11), 'base64').toString('utf8')
+        Buffer.from(decodeURIComponent(subAccountCodeFileData10), 'base64').toString('utf8')
       )
       pathSpy.mockReturnValue('/home/upload/test12.csv')
       const file = {
@@ -307,7 +299,7 @@ describe('subAccountUploadControllerのテスト', () => {
       expect(result).toEqual([
         { header: ['行数', '勘定科目コード', '補助科目コード', '補助科目名', '詳細'] },
         {
-          accountCode: 'TEST2',
+          accountCode: 'TEST1',
           errorData: '未登録の勘定科目コードです。事前に「勘定科目登録画面」から勘定科目コードを登録してください。',
           idx: 1,
           subjectCode: 'TEST1hoko',
@@ -739,10 +731,7 @@ describe('subAccountUploadControllerのテスト', () => {
       // 補助科目一括作成
       const fs = require('fs')
       const uploadFilePath = path.resolve('/home/upload/test10.csv')
-      fs.writeFileSync(
-        uploadFilePath,
-        Buffer.from(decodeURIComponent(subAccountCodeFileData10), 'base64').toString('utf8')
-      )
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(accountCodeFileData9), 'base64').toString('utf8'))
       pathSpy.mockReturnValue('/home/upload/test10.csv')
       const file = {
         userId: 'userId',
@@ -776,10 +765,7 @@ describe('subAccountUploadControllerのテスト', () => {
       // 補助科目一括作成
       const fs = require('fs')
       const uploadFilePath = path.resolve('/home/upload/test10.csv')
-      fs.writeFileSync(
-        uploadFilePath,
-        Buffer.from(decodeURIComponent(subAccountCodeFileData10), 'base64').toString('utf8')
-      )
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(accountCodeFileData9), 'base64').toString('utf8'))
       pathSpy.mockReturnValue('/home/upload/test10.csv')
       const file = {
         userId: 'userId',
@@ -917,7 +903,7 @@ describe('subAccountUploadControllerのテスト', () => {
       )
       pathSpy.mockReturnValue('/home/upload/test1.csv')
       subAccountCodeControllerInsertSpy.mockImplementation(() => {
-        throw new Error('CSVファイル削除エラー')
+        throw new Error('ファイル削除エラー')
       })
 
       // 試験実施
@@ -927,79 +913,7 @@ describe('subAccountUploadControllerのテスト', () => {
       // 想定したデータがReturnされていること
       expect(() => {
         throw result
-      }).toThrowError('CSVファイル削除エラー')
-    })
-  })
-
-  describe('removeFile', () => {
-    test('正常:データ削除', async () => {
-      // 準備
-      findAllSpy.mockReturnValue(dbAccountCodeTable)
-      createSpy.mockReturnValue(codeAccountDataResult)
-      // 補助科目一括作成
-      const fs = require('fs')
-      const uploadFilePath = path.resolve('/home/upload/test9.csv')
-      fs.writeFileSync(
-        uploadFilePath,
-        Buffer.from(decodeURIComponent(subAccountCodeFileData9), 'base64').toString('utf8')
-      )
-      pathSpy.mockReturnValue('/home/upload/test9.csv')
-
-      subAccountCodeControllerInsertSpy.mockReturnValue(0)
-
-      // 試験実施
-      const result = await subAccountUploadController.removeFile(uploadFilePath)
-
-      // 期待結果
-      expect(result).toEqual(true)
-    })
-
-    test('異常:削除エラー(存在しないデータを削除する場合)', async () => {
-      // 準備
-      findAllSpy.mockReturnValue(dbAccountCodeTable)
-      createSpy.mockReturnValue(codeAccountDataResult)
-      // 補助科目一括作成
-      const fs = require('fs')
-      const uploadFilePath = path.resolve('/home/upload/test9.csv')
-      fs.writeFileSync(
-        uploadFilePath,
-        Buffer.from(decodeURIComponent(subAccountCodeFileData9), 'base64').toString('utf8')
-      )
-      pathSpy.mockReturnValue('/home/upload/test9.csv')
-
-      subAccountCodeControllerInsertSpy.mockReturnValue(0)
-
-      // 試験実施
-      const noUploadFilePath = '/home/upload\\/test9.csv'
-      let result
-      try {
-        result = await subAccountUploadController.removeFile(noUploadFilePath)
-      } catch (err) {
-        result = err
-      }
-      // 期待結果
-      // 削除エラーが返されること
-      expect(() => {
-        throw result
-      }).toThrowError('CSVファイル削除エラー')
-    })
-
-    test('異常:削除エラー', async () => {
-      // 準備
-      const noUploadFilePath = '/etc/resolv.conf'
-
-      // 試験実施
-      let result
-      try {
-        result = await subAccountUploadController.removeFile(noUploadFilePath)
-      } catch (err) {
-        result = err
-      }
-      // 期待結果
-      // 削除エラー（権限エラー）が返されること
-      expect(() => {
-        throw result
-      }).toThrowError('permission denied')
+      }).toThrowError('ファイル削除エラー')
     })
   })
 })

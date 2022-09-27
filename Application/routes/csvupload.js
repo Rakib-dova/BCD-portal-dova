@@ -18,6 +18,7 @@ const validate = require('../lib/validate')
 const apiManager = require('../controllers/apiManager')
 const filePath = process.env.INVOICE_UPLOAD_PATH
 const constantsDefine = require('../constants')
+const removeFile = require('../lib/removeFile')
 const { v4: uuidv4 } = require('uuid')
 
 const csrf = require('csurf')
@@ -209,14 +210,17 @@ const cbPostUpload = async (req, res, next) => {
         break
     }
   }
-  // CSV削除
-  if (cbRemoveCsv(filePath, filename) === false) {
+  // アップロードファイル削除
+  const removeFilePath = path.resolve(filePath, filename)
+  try {
+    await removeFile.removeFile(removeFilePath)
+  } catch (error) {
+    logger.error({ contractId: contract.contractId, stack: error.stack, status: 0 })
     setErrorLog(req, 500)
     return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
   }
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostUpload')
-
   return res.status(200).send(errorText)
 }
 
@@ -256,39 +260,6 @@ const cbUploadCsv = (_filePath, _filename, _uploadCsvData) => {
       return true
     }
   } catch (error) {
-    return false
-  }
-}
-
-/**
- * CSVファイル削除処理
- * @param {object} _deleteDataPath 削除データパス
- * @param {object} _filename ファイル名
- * @returns {object} 削除データパス + ファイル名が存在する場合：true
- * 削除データパス + ファイル名が存在しない場合、エラー発生時：false
- */
-const cbRemoveCsv = (_deleteDataPath, _filename) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'cbRemoveCsv')
-  let deleteFile
-  try {
-    deleteFile = path.join(_deleteDataPath, '/' + _filename)
-  } catch (error) {
-    logger.error(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')
-    return false
-  }
-
-  if (fs.existsSync(deleteFile)) {
-    try {
-      fs.unlinkSync(deleteFile)
-      logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')
-      return true
-    } catch (error) {
-      logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')
-      return false
-    }
-  } else {
-    // 削除対象がない場合、サーバーエラー画面表示
-    logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')
     return false
   }
 }
@@ -910,7 +881,6 @@ module.exports = {
   cbGetIndex: cbGetIndex,
   cbPostUpload: cbPostUpload,
   cbUploadCsv: cbUploadCsv,
-  cbRemoveCsv: cbRemoveCsv,
   cbExtractInvoice: cbExtractInvoice,
   getTimeStamp: getTimeStamp,
   getNetwork: getNetwork
