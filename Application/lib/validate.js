@@ -607,7 +607,7 @@ const isDepartmentCode = function (code, prefix) {
   const regex = new RegExp(inputPatternEngNum)
   if (code.length < 1) {
     return `${prefix}CODEERR000`
-  } else if (code.length > constantsDefine.codeValidDefine.CODE_LENGTH) {
+  } else if (code.length > constantsDefine.codeValidDefine.DEPARTMENTCODE_LENGTH) {
     return `${prefix}CODEERR001`
   } else if (!regex.test(code)) {
     return `${prefix}CODEERR002`
