@@ -6,6 +6,7 @@ const uploadUserController = require('../../Application/controllers/uploadUsersC
 const logger = require('../../Application/lib/logger')
 const Contract = require('../../Application/models').Contract
 const TradeshiftDTO = require('../../Application/DTO/TradeshiftDTO')
+const removeFile = require('../../Application/lib/removeFile')
 
 // DBのuploadData、バイナリ表示のため、EsLintチェック除外
 const fs = require('fs')
@@ -58,16 +59,6 @@ const returnGetUserInformationByEmailValue = {
   Username: '',
   Visible: true
 }
-const returnGetUserInformationByEmailValue404 = new Error()
-returnGetUserInformationByEmailValue404.response = {
-  status: 404,
-  data: {
-    ErrorCode: 'ResourceNotFound',
-    ErrorDetail: [],
-    RequestId: 'df591fa0-37df-4447-b8df-59597d4ab56a',
-    ValidationError: []
-  }
-}
 
 const returnGetUserInformationByEmailValue401 = new Error()
 returnGetUserInformationByEmailValue401.response = {
@@ -85,12 +76,8 @@ returnInviteUserValue401.response = {
   status: 401,
   data: ''
 }
-const returnInviteUserValue403 = new Error()
-returnInviteUserValue403.response = {
-  status: 403,
-  data: ''
-}
-let errorSpy, infoSpy, fsUnlinkSyncSpy, fsExistsSyncSpy
+
+let errorSpy, infoSpy, removeFileSpy
 
 describe('uploadUsersControllerのテスト', () => {
   beforeEach(() => {
@@ -100,17 +87,15 @@ describe('uploadUsersControllerのテスト', () => {
     TradeshiftDTO.prototype.registUser = jest.fn()
     TradeshiftDTO.prototype.inviteUser = jest.fn()
     fs.unlinkSync = jest.fn()
-    fsUnlinkSyncSpy = jest.spyOn(fs, 'unlinkSync')
-    fsExistsSyncSpy = jest.spyOn(fs, 'existsSync')
+    removeFileSpy = jest.spyOn(removeFile, 'removeFile')
   })
   afterEach(() => {
     errorSpy.mockRestore()
     infoSpy.mockRestore()
-    fsUnlinkSyncSpy.mockRestore()
-    fsExistsSyncSpy.mockRestore()
     TradeshiftDTO.prototype.getUserInformationByEmail.mockRestore()
     TradeshiftDTO.prototype.registUser.mockRestore()
     TradeshiftDTO.prototype.inviteUser.mockRestore()
+    removeFileSpy.mockRestore()
   })
 
   describe('upload', () => {
@@ -319,7 +304,7 @@ describe('uploadUsersControllerのテスト', () => {
       testNominal.filename = 'usersUpload_test1.csv'
       returnGetUserInformationByEmailDuplicate.CompanyAccountId = '11367bd9-9710-4772-bdf7-10be2085976a'
       TradeshiftDTO.prototype.getUserInformationByEmail.mockReturnValueOnce(returnGetUserInformationByEmailDuplicate)
-      TradeshiftDTO.prototype.inviteUser.mockReturnValueOnce('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      TradeshiftDTO.prototype.inviteUser.mockReturnValueOnce(returnInviteUser)
       const invitedUser = {
         username: 'test1@test.com',
         role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
@@ -358,42 +343,23 @@ describe('uploadUsersControllerのテスト', () => {
       ])
     })
 
-    test('準正常:ファイル削除の時、ファイルがない場合', async () => {
+    test('準正常:ファイル削除の時、エラーが発生した場合', async () => {
       // 準備
       const testNominal = { ...nominalListTemplate }
       testNominal.filename = 'usersUpload_test1.csv'
       returnGetUserInformationByEmailDuplicate.CompanyAccountId = contract.tenantId
-      TradeshiftDTO.prototype.getUserInformationByEmail.mockReturnValueOnce(returnGetUserInformationByEmailValue404)
+      TradeshiftDTO.prototype.getUserInformationByEmail.mockReturnValueOnce(returnGetUserInformationByEmailDuplicate)
       TradeshiftDTO.prototype.inviteUser.mockReturnValueOnce(returnInviteUser)
-      fsExistsSyncSpy.mockReturnValueOnce(false)
-      const deleteError = new Error('削除対象を見つかれませんでした。')
-
-      // 試験実施
-      const [status, createdUser] = await uploadUserController.upload(passport, contract, testNominal)
-
-      // 期待結果
-      expect(status).toMatchObject(deleteError)
-      expect(createdUser).toEqual(null)
-    })
-
-    test('準正常:ファイル削除の時、unlinkSyncエラーの場合', async () => {
-      // 準備
-      const testNominal = { ...nominalListTemplate }
-      testNominal.filename = 'usersUpload_test1.csv'
-      returnGetUserInformationByEmailDuplicate.CompanyAccountId = contract.tenantId
-      TradeshiftDTO.prototype.getUserInformationByEmail.mockReturnValueOnce(returnGetUserInformationByEmailValue404)
-      TradeshiftDTO.prototype.inviteUser.mockReturnValueOnce(returnInviteUser)
-      fsExistsSyncSpy.mockReturnValueOnce(true)
-      const fileError = new Error('file unlink error')
-      fsUnlinkSyncSpy.mockImplementationOnce(() => {
-        throw fileError
+      const deleteError = new Error('ファイル削除エラー')
+      removeFileSpy.mockImplementationOnce(() => {
+        throw deleteError
       })
 
       // 試験実施
       const [status, createdUser] = await uploadUserController.upload(passport, contract, testNominal)
 
       // 期待結果
-      expect(status).toMatchObject(fileError)
+      expect(status).toMatchObject(deleteError)
       expect(createdUser).toEqual(null)
     })
   })
