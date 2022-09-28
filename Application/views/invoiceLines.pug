@@ -7,7 +7,7 @@
 if invoiceLine.length !== 0
   each item, idx in invoiceLine
     if '明細-項目ID' in item
-      .box
+      .box.invoiceLineInBox
         .columns.m-0.invoiceLine(id=`invoiceLine${idx + 1}`)
           - for (var [key,value] of Object.entries(item))
             if key === 'id' && value.length !== 0
@@ -310,7 +310,7 @@ if invoiceLine.length !== 0
                           p.control
 
     else
-      .box
+      .box#invoiceCharge
         - for (var [key,value] of Object.entries(item))
           - var jdx = 0
           each subitem in value

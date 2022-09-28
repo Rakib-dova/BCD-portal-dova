@@ -2,7 +2,6 @@ const webdriverUtils = require('../utils/webdriver-utils');
 const chai = require('chai');
 const chaiWithReporting = require('../utils/chai-with-reporting').chaiWithReporting;
 const comment = require('../utils/chai-with-reporting').comment;
-const config = require('../autotest-script-config');
 const path = require('path');
 const common = require('./common');
 
@@ -51,19 +50,11 @@ describe('リグレッションテスト', function () {
       }
 
       // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, uploadInvoiceMenuPage, uploadFormatTopPage, uploadFormatCreatePage, uploadFormatSettingPage }
+      const { topPage, uploadInvoiceMenuPage, uploadFormatTopPage, uploadFormatCreatePage, uploadFormatSettingPage }
         = common.getPageObject(browser, page);
 
-      // 指定したURLに遷移する
-      await page.goto(config.baseUrl);
-
-      // ログインを行う
-      await loginPage.doLogin(account.id, account.password);
-      await tradeShiftTopPage.waitForLoading();
-
-      // デジタルトレードアプリをクリックする
-      await tradeShiftTopPage.clickBcdApp();
-      await topPage.waitForLoading();
+      // デジタルトレードアプリのトップページを表示する
+      await common.gotoTop(page, account);
 
       // 請求書一括作成メニューを表示する
       await topPage.openUploadInvoiceMenu();
@@ -94,13 +85,13 @@ describe('リグレッションテスト', function () {
       // 項目名を取得
       headers = await uploadFormatSettingPage.getHeaders();
       headerTexts = JSON.stringify(headers);
-      expectedVal = '["","","","","","","","","","","","","","","","","","",""]';
+      expectedVal = '["","","","","","","","","","","","","","","","","","","",""]';
       expect(headerTexts).to.equal(expectedVal, 'CSVのヘッダーが空であること');
 
       // データ内容を取得
       datas = await uploadFormatSettingPage.getDatas();
       dataTexts = JSON.stringify(datas);
-      expectedVal = '["2022/10/8","A0000125","fcde4039-8d4d-4e3e-8b5c-43fca9d6e113","2022/11/8","2022/9/8","備考あああ","銀行名あああ","支店名あああ","当座","1423123","口座名義あああ","その他特記事項あああ","1","明細１","2","個","10000","消費税","備考あああ"]'
+      expectedVal = '["2022/10/8","A0000125","fcde4039-8d4d-4e3e-8b5c-43fca9d6e113","2022/11/8","2022/9/8","備考あああ","aaa@example.com","銀行名あああ","支店名あああ","当座","1423123","口座名義あああ","その他特記事項あああ","1","明細１","2","個","10000","消費税","備考あああ"]'
       expect(dataTexts).to.equal(expectedVal, '取り込んだCSVのデータが正しいこと');
 
       await page.waitForTimeout(1000);

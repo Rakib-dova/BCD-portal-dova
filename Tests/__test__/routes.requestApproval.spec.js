@@ -384,6 +384,7 @@ describe('requestApprovalのテスト', () => {
         requestApproval: { message: 'test', approveRouteId: '', isSaved: true },
         isSaved: true
       }
+      request.headers = { referer: '/inbox/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904' }
       request.user = { ...user[0] }
       request.params = {
         invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
@@ -433,6 +434,7 @@ describe('requestApprovalのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session, isSaved: false }
       request.user = { ...user[0] }
+      request.headers = { referer: '/inbox/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904' }
       request.params = {
         invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
       }
@@ -483,6 +485,7 @@ describe('requestApprovalのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session, isSaved: false }
       request.user = { ...user[3] }
+      request.headers = { referer: '/inbox/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904' }
       request.params = {
         invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
       }
@@ -532,6 +535,10 @@ describe('requestApprovalのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[1] }
+      request.headers = { referer: '/inbox/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904' }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[1])
@@ -560,6 +567,7 @@ describe('requestApprovalのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session, isSaved: false }
       request.user = { ...user[3] }
+      request.headers = { referer: '/inbox/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904' }
       request.params = {
         invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
       }
@@ -591,6 +599,10 @@ describe('requestApprovalのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...notLoggedInsession }
       request.user = { ...user[1] }
+      request.headers = { referer: '/inbox/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904' }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[1])
@@ -608,11 +620,31 @@ describe('requestApprovalのテスト', () => {
       expect(next).toHaveBeenCalledWith(errorHelper.create(400))
     })
 
+    test('400エラー:inboxページから移動しなかった場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...notLoggedInsession }
+      request.user = { ...user[1] }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
+
+      await requestApproval.cbGetRequestApproval(request, response, next)
+
+      // 結果確認
+      // 404エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(error404)
+    })
+
     test('500エラー:不正なContractデータの場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[1] }
+      request.headers = { referer: '/inbox/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904' }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[1])
@@ -648,6 +680,10 @@ describe('requestApprovalのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[2] }
+      request.headers = { referer: '/inbox/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904' }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       const userDbError = new Error('User Table Error')
@@ -668,6 +704,10 @@ describe('requestApprovalのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[2] }
+      request.headers = { referer: '/inbox/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904' }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[8])
@@ -684,6 +724,10 @@ describe('requestApprovalのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.headers = { referer: '/inbox/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904' }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -702,6 +746,10 @@ describe('requestApprovalのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.headers = { referer: '/inbox/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904' }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[1])
@@ -725,6 +773,10 @@ describe('requestApprovalのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.headers = { referer: '/inbox/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904' }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[1])
@@ -748,6 +800,10 @@ describe('requestApprovalのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.headers = { referer: '/inbox/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904' }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])

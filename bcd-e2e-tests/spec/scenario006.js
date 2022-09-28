@@ -2,7 +2,6 @@ const webdriverUtils = require('../utils/webdriver-utils');
 const chai = require('chai');
 const chaiWithReporting = require('../utils/chai-with-reporting').chaiWithReporting;
 const comment = require('../utils/chai-with-reporting').comment;
-const config = require('../autotest-script-config');
 const path = require('path');
 const common = require('./common');
 
@@ -51,19 +50,10 @@ describe('リグレッションテスト', function () {
       }
 
       // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, uploadInvoiceMenuPage, uploadInvoicePage, uploadListPage }
-        = common.getPageObject(browser, page);
+      const { topPage, uploadInvoiceMenuPage, uploadInvoicePage, uploadListPage } = common.getPageObject(browser, page);
 
-      // 指定したURLに遷移する
-      await page.goto(config.baseUrl);
-
-      // ログインを行う
-      await loginPage.doLogin(account.id, account.password);
-      await tradeShiftTopPage.waitForLoading();
-
-      // デジタルトレードアプリをクリックする
-      await tradeShiftTopPage.clickBcdApp();
-      await topPage.waitForLoading();
+      // デジタルトレードアプリのトップページを表示する
+      await common.gotoTop(page, account);
 
       const testPattern = [true, false];
       for (const hasHeader of testPattern) {

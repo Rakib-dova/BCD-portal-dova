@@ -1,0 +1,74 @@
+#termBox h3{
+  font-size: 18px;
+  font-weight: bold;
+}
+#termBox .serviceBox h3{
+  background-color: #ededed;
+  padding: .25rem .5rem;
+  background-color:#044484 ;
+  color: #fff;
+}
+#termBox h3 span{
+  color: #FF0000;
+}
+#termBox h4{
+  font-weight: bold;
+  margin: .5rem auto;
+}
+#termBox .serviceBox table th,#termBox .serviceBox table td{
+  border: 1px solid #ccc;
+  padding:.5rem  1rem;
+  text-align: center;
+  vertical-align: middle;
+  width: 50%;
+}
+#termBox .serviceBox table th{
+  background-color: #ededed;
+}
+
+#termBox .serviceBox table{
+  width: 100%;
+}
+
+#termBox ul li{
+  list-style-type: disc;
+  margin-left: 1.5rem;
+}
+
+.termWrap{
+  margin: 1rem .5rem 0; 
+}
+
+.termCheck{
+  display: inline-block;
+  margin-right: 2rem;
+  margin-left: .5rem;
+}
+
+.termText{
+  text-align: center;
+}
+
+.searchResultBox {
+  overflow-y: scroll;
+  text-overflow: ellipsis;
+  height: 600px;
+}
+#termBox button#next-btn[disabled]{
+  background-color: #ccc;
+  color: #fff;
+  border-color: #dbdbdb;
+}
+
+#termBox .serviceTitle{
+  background-color: #3298dc;
+  padding:.5rem;
+  margin: .5rem 0;
+}
+#termBox .serviceTitle span{
+  padding: 0 .5em;
+  color:#fff ;
+  font-weight: bold;
+  font-size: 18px;
+  border-left: solid 8px #fff;
+}

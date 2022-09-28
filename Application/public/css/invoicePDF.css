@@ -1,0 +1,95 @@
+.pdf-image-size {
+  width: 180px;
+  height: 180px;
+}
+
+.p {
+  color: #363636;
+  font-size: 1rem;
+  height: 2.5em;
+  padding-bottom: calc(0.5em - 1px);
+  padding-left: calc(0.75em - 1px);
+  padding-right: calc(0.75em - 1px);
+  padding-top: calc(0.5em - 1px);
+}
+
+input.width-120px {
+  width: 140px;
+}
+
+.tax-type {
+  font-size: 15px !important;
+}
+
+.width-250px {
+  width: 250px;
+}
+input.width-330px {
+  width: 330px;
+}
+.mr-r-10px {
+  margin-right: 20px;
+}
+
+.input-comment-size {
+  height: 15rem;
+  margin-top: 0 !important;
+}
+
+#file-sealImp {
+  display: none;
+}
+
+#sealImp {
+  cursor: pointer;
+}
+
+.items {
+  display: flex;
+  flex-wrap: wrap;
+}
+.item {
+  width: 100px;
+  margin: auto 0;
+}
+.align-middle {
+  vertical-align: middle !important;
+}
+
+.select {
+  box-shadow: inset 0 0.0625em 0.125em rgb(10 10 10 / 5%);
+  max-width: 100%;
+  width: 100%;
+  background-color: white;
+  border-color: #dbdbdb;
+  border-radius: 4px;
+  color: #363636;
+  font-size: 1rem;
+}
+
+.table td,
+.table th {
+  padding: 0.25em !important;
+}
+
+.placeholder-min::placeholder {
+  font-size: 0.7em;
+}
+
+.red-color {
+  color: red !important;
+}
+
+.discount-table {
+  border: 0px none;
+  width: 100%;
+} 
+
+.discount-table td,
+.discount-table th {
+  padding: 0.25em !important;
+}
+
+pre {
+  white-space: pre-wrap;
+}

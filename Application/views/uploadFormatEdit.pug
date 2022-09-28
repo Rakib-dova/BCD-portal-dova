@@ -2,7 +2,7 @@ extends layout
 
 block content
   form#form(method="POST")
-    input(type='hidden' name='_csrf' value=csrfToken)
+    input(type="hidden" name="_csrf" value=csrfToken)
     .max-width  
       section.hero.is-small.is-com
         .hero-body-noImage
@@ -42,7 +42,7 @@ block content
                     th 
                       label.input-label.standardHeader 発行日
                       p.input-label-required.input-label （必須）
-                      p.errormessage.input-label-required 　
+                      p.errorMessage.input-label-required 　
                     td.text-center
                       select.is-11.requiredItem#issueDate(name="formatData")
                         option(value='') 選択してください
@@ -58,7 +58,7 @@ block content
                     th
                       label.input-label.standardHeader 請求書番号
                       p.input-label-required.input-label （必須）
-                      p.errormessage.input-label-required
+                      p.errorMessage.input-label-required
                     td.text-center
                       select.is-11.requiredItem#invoiceNumber(name="formatData")
                         option(value='') 選択してください
@@ -74,7 +74,7 @@ block content
                     th
                       label.input-label.standardHeader テナントID
                       p.input-label-required.input-label （必須）
-                      p.errormessage.input-label-required                  
+                      p.errorMessage.input-label-required                  
                     td.text-center
                       select.is-11.requiredItem#tenantId(name="formatData")
                         option(value='') 選択してください
@@ -89,7 +89,7 @@ block content
                   tr
                     th
                       label.input-label.standardHeader 支払期日
-                      p.errormessage.input-label-required 
+                      p.errorMessage.input-label-required 
                     td.text-center
                       select.is-11#paymentDate(name="formatData")
                         option(value='') 選択してください
@@ -104,7 +104,7 @@ block content
                   tr
                     th 
                       label.input-label.standardHeader 納品日
-                      p.errormessage.input-label-required 
+                      p.errorMessage.input-label-required 
                     td.text-center
                       select.is-11#deliveryDate(name="formatData")
                         option(value='') 選択してください
@@ -120,7 +120,7 @@ block content
                   tr
                     th 
                       label.input-label.standardHeader 備考
-                      p.errormessage.input-label-required 
+                      p.errorMessage.input-label-required 
                     td.text-center
                       select.is-11#documentDescription(name="formatData")
                         option(value='') 選択してください
@@ -133,16 +133,33 @@ block content
                           else
                             option(value= index)= index+1    
 
+                  tr 
+                    th 
+                      label.input-label.standardHeader 取引先メールアドレス
+                      p.input-label-required.input-label （必須）
+                      p.errormessage.input-label-required
+                    td.text-center 
+                      select.is-11.requiredItem#mailaddress(name="formatData")
+                        option(value='') 選択してください
+                        each content, index in headerItems 
+                          if selectedFormatData[6].length !== 0
+                            if ~~selectedFormatData[6] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
+
                   tr
                     th
                       label.input-label.standardHeader 銀行名
-                      p.errormessage.input-label-required
+                      p.errorMessage.input-label-required
                     td.text-center
                       select.is-11#bankName(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          if selectedFormatData[6].length !== 0
-                            if ~~selectedFormatData[6] === index
+                          if selectedFormatData[7].length !== 0
+                            if ~~selectedFormatData[7] === index
                               option(value= index selected)= index+1
                             else
                               option(value= index)= index+1                                
@@ -152,25 +169,9 @@ block content
                   tr
                     th
                       label.input-label.standardHeader 支店名
-                      p.errormessage.input-label-required
+                      p.errorMessage.input-label-required
                     td.text-center
                       select.is-11#financialName(name="formatData")
-                        option(value='') 選択してください
-                        each content, index in headerItems
-                          if selectedFormatData[7].length !== 0
-                            if ~~selectedFormatData[7] === index
-                              option(value= index selected)= index+1
-                            else
-                              option(value= index)= index+1                                
-                          else
-                            option(value= index)= index+1    
-
-                  tr
-                    th
-                      label.input-label.standardHeader 科目
-                      p.errormessage.input-label-required
-                    td.text-center
-                      select.is-11#accountType(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
                           if selectedFormatData[8].length !== 0
@@ -182,11 +183,11 @@ block content
                             option(value= index)= index+1    
 
                   tr
-                    th 
-                      label.input-label.standardHeader 口座番号
-                      p.errormessage.input-label-required
+                    th
+                      label.input-label.standardHeader 科目
+                      p.errorMessage.input-label-required
                     td.text-center
-                      select.is-11#accountId(name="formatData")
+                      select.is-11#accountType(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
                           if selectedFormatData[9].length !== 0
@@ -199,10 +200,10 @@ block content
 
                   tr
                     th 
-                      label.input-label.standardHeader 口座名義
-                      p.errormessage.input-label-required
+                      label.input-label.standardHeader 口座番号
+                      p.errorMessage.input-label-required
                     td.text-center
-                      select.is-11#accountName(name="formatData")
+                      select.is-11#accountId(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
                           if selectedFormatData[10].length !== 0
@@ -214,11 +215,11 @@ block content
                             option(value= index)= index+1    
 
                   tr
-                    th
-                      label.input-label.standardHeader その他特記事項
-                      p.errormessage.input-label-required
+                    th 
+                      label.input-label.standardHeader 口座名義
+                      p.errorMessage.input-label-required
                     td.text-center
-                      select.is-11#note(name="formatData")
+                      select.is-11#accountName(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
                           if selectedFormatData[11].length !== 0
@@ -231,11 +232,10 @@ block content
 
                   tr
                     th
-                      label.input-label.standardHeader 明細-項目ID
-                      p.input-label-required.input-label （必須）
-                      p.errormessage.input-label-required
+                      label.input-label.standardHeader その他特記事項
+                      p.errorMessage.input-label-required
                     td.text-center
-                      select.is-11.requiredItem#sellersItemNum(name="formatData")
+                      select.is-11#note(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
                           if selectedFormatData[12].length !== 0
@@ -248,11 +248,11 @@ block content
 
                   tr
                     th
-                      label.input-label.standardHeader 明細-内容
+                      label.input-label.standardHeader 明細-項目ID
                       p.input-label-required.input-label （必須）
-                      p.errormessage.input-label-required
+                      p.errorMessage.input-label-required
                     td.text-center
-                      select.is-11.requiredItem#itemName(name="formatData")
+                      select.is-11.requiredItem#sellersItemNum(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
                           if selectedFormatData[13].length !== 0
@@ -264,12 +264,12 @@ block content
                             option(value= index)= index+1    
 
                   tr
-                    th 
-                      label.input-label.standardHeader 明細-数量
+                    th
+                      label.input-label.standardHeader 明細-内容
                       p.input-label-required.input-label （必須）
-                      p.errormessage.input-label-required
+                      p.errorMessage.input-label-required
                     td.text-center
-                      select.is-11.requiredItem#quantityValue(name="formatData")
+                      select.is-11.requiredItem#itemName(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
                           if selectedFormatData[14].length !== 0
@@ -281,12 +281,12 @@ block content
                             option(value= index)= index+1    
 
                   tr
-                    th
-                      label.input-label.standardHeader 明細-単位
+                    th 
+                      label.input-label.standardHeader 明細-数量
                       p.input-label-required.input-label （必須）
-                      p.errormessage.input-label-required                  
+                      p.errorMessage.input-label-required
                     td.text-center
-                      select.is-11.requiredItem#quantityUnitCode(name="formatData")
+                      select.is-11.requiredItem#quantityValue(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
                           if selectedFormatData[15].length !== 0
@@ -299,11 +299,11 @@ block content
 
                   tr
                     th
-                      label.input-label.standardHeader 明細-単価
+                      label.input-label.standardHeader 明細-単位
                       p.input-label-required.input-label （必須）
-                      p.errormessage.input-label-required 
+                      p.errorMessage.input-label-required                  
                     td.text-center
-                      select.is-11.requiredItem#priceValue(name="formatData")
+                      select.is-11.requiredItem#quantityUnitCode(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
                           if selectedFormatData[16].length !== 0
@@ -315,17 +315,34 @@ block content
                             option(value= index)= index+1    
 
                   tr
+                    th
+                      label.input-label.standardHeader 明細-単価
+                      p.input-label-required.input-label （必須）
+                      p.errorMessage.input-label-required 
+                    td.text-center
+                      select.is-11.requiredItem#priceValue(name="formatData")
+                        option(value='') 選択してください
+                        each content, index in headerItems
+                          if selectedFormatData[17].length !== 0
+                            if ~~selectedFormatData[17] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
+
+                  tr
                     th 
                       label.input-label.standardHeader 明細-税
                       p.input-label-required.input-label （必須）
-                      p.errormessage.input-label-required 　
+                      p.errorMessage.input-label-required 　
                       p （消費税／軽減税率／不課税／免税／非課税）
                     td.text-center
                       select.is-11.requiredItem#taxRate(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          if selectedFormatData[17].length !== 0
-                            if ~~selectedFormatData[17] === index
+                          if selectedFormatData[18].length !== 0
+                            if ~~selectedFormatData[18] === index
                               option(value= index selected)= index+1
                             else
                               option(value= index)= index+1                            
@@ -335,13 +352,13 @@ block content
                   tr
                     th 
                       label.input-label.standardHeader 明細-備考
-                      p.errormessage.input-label-required
+                      p.errorMessage.input-label-required
                     td.text-center
                       select.is-11#description(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          if selectedFormatData[18].length !== 0
-                            if ~~selectedFormatData[18] === index
+                          if selectedFormatData[19].length !== 0
+                            if ~~selectedFormatData[19] === index
                               option(value= index selected)= index+1
                             else
                               option(value= index)= index+1

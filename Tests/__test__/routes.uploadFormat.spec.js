@@ -222,55 +222,55 @@ describe('uploadFormatのテスト', () => {
   // ファイルデータ
   // 請求書が1つの場合
   const fileData = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
-2021-06-14,UT_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,取引先メールアドレス,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
+2021-06-14,UT_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,aaa@bbb.ccc,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
   const fileDataHeaderErr = Buffer.from(
     `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
-2021-06-14,UT_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
+2021-06-14,UT_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,aaa@bbb.ccc,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
   const fileDataMesai = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,取引先メールアドレス,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-14,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
   const fileDataDataStartRowNo5 = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
-2021-06-14,UT_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
-2021-06-14,UT_TEST_INVOICE_1_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test112,testsiten,testbank,普通,2222222,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
-2021-06-14,UT_TEST_INVOICE_1_3,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test113,testsiten,testbank,普通,3333333,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
-2021-06-14,UT_TEST_INVOICE_1_4,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test114,testsiten,testbank,普通,4444444,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,取引先メールアドレス,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
+2021-06-14,UT_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,aaa@bbb.ccc,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
+2021-06-14,UT_TEST_INVOICE_1_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test112,aaa@bbb.ccc,testsiten,testbank,普通,2222222,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
+2021-06-14,UT_TEST_INVOICE_1_3,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test113,aaa@bbb.ccc,testsiten,testbank,普通,3333333,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
+2021-06-14,UT_TEST_INVOICE_1_4,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test114,aaa@bbb.ccc,testsiten,testbank,普通,4444444,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
   const fileDataItemRowNo3DataStartRowNo4 = Buffer.from(
-    `2021-06-14,UT_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
-2021-06-14,UT_TEST_INVOICE_1_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test112,testsiten,testbank,普通,2222222,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
-発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
-2021-06-14,UT_TEST_INVOICE_1_3,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test113,testsiten,testbank,普通,3333333,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
+    `2021-06-14,UT_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,aaa@bbb.ccc,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
+2021-06-14,UT_TEST_INVOICE_1_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test112,aaa@bbb.ccc,testsiten,testbank,普通,2222222,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
+発行日,請求書番号,テナントID,支払期日,納品日,備考,取引先メールアドレス,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
+2021-06-14,UT_TEST_INVOICE_1_3,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test113,aaa@bbb.ccc,testsiten,testbank,普通,3333333,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
   const fileDataItemRowNo4DataStartRowNo3 = Buffer.from(
-    `2021-06-14,UT_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
-2021-06-14,UT_TEST_INVOICE_1_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test112,testsiten,testbank,普通,2222222,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
-2021-06-14,UT_TEST_INVOICE_1_3,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test113,testsiten,testbank,普通,3333333,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
-発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
+    `2021-06-14,UT_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,aaa@bbb.ccc,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
+2021-06-14,UT_TEST_INVOICE_1_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test112,aaa@bbb.ccc,testsiten,testbank,普通,2222222,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
+2021-06-14,UT_TEST_INVOICE_1_3,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test113,aaa@bbb.ccc,testsiten,testbank,普通,3333333,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
+発行日,請求書番号,テナントID,支払期日,納品日,備考,取引先メールアドレス,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
   ).toString('base64')
 
   const fileDataItemRowNo5DataStartRowNo1 = Buffer.from(
-    `2021-06-14,UT_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
-2021-06-14,UT_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
-2021-06-14,UT_TEST_INVOICE_1_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test112,testsiten,testbank,普通,2222222,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
-2021-06-14,UT_TEST_INVOICE_1_3,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test113,testsiten,testbank,普通,3333333,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
-発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
+    `2021-06-14,UT_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,aaa@bbb.ccc,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
+2021-06-14,UT_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,aaa@bbb.ccc,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
+2021-06-14,UT_TEST_INVOICE_1_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test112,aaa@bbb.ccc,testsiten,testbank,普通,2222222,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
+2021-06-14,UT_TEST_INVOICE_1_3,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test113,aaa@bbb.ccc,testsiten,testbank,普通,3333333,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
+発行日,請求書番号,テナントID,支払期日,納品日,備考,取引先メールアドレス,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
   ).toString('base64')
 
   const fileDataBlankItemRowNo2DataStartRowNo4 = Buffer.from(
     `
-発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
+発行日,請求書番号,テナントID,支払期日,納品日,備考,取引先メールアドレス,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 
-2021-06-14,UT_TEST_INVOICE_1_3,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test113,testsiten,testbank,普通,3333333,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
+2021-06-14,UT_TEST_INVOICE_1_3,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test113,aaa@bbb.ccc,testsiten,testbank,普通,3333333,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
   const taxIds = {
@@ -605,7 +605,8 @@ describe('uploadFormatのテスト', () => {
       '16',
       '17',
       '18',
-      '19'
+      '19',
+      '20'
     ],
     headerItems: [
       'テスト',
@@ -615,6 +616,7 @@ describe('uploadFormatのテスト', () => {
       '支払期日',
       '納品日',
       '備考',
+      '取引先メールアドレス',
       '銀行名',
       '支店名',
       '科目',
@@ -701,7 +703,8 @@ describe('uploadFormatのテスト', () => {
       '16',
       '17',
       '18',
-      '19'
+      '19',
+      '20'
     ],
     headerItems: [
       'テスト',
@@ -711,6 +714,7 @@ describe('uploadFormatのテスト', () => {
       '支払期日',
       '納品日',
       '備考',
+      '取引先メールアドレス',
       '銀行名',
       '支店名',
       '科目',
@@ -1297,6 +1301,7 @@ describe('uploadFormatのテスト', () => {
     { item: '支払期日', value: '2021-03-31' },
     { item: '納品日', value: '2021-03-17' },
     { item: '備考', value: 'test111' },
+    { item: '取引先メールアドレス', value: 'aaa@bbb.ccc' },
     { item: '銀行名', value: 'testsiten' },
     { item: '支店名', value: 'testbank' },
     { item: '科目', value: '普通' },
@@ -1319,6 +1324,7 @@ describe('uploadFormatのテスト', () => {
     { columnName: '支払期日', item: '', value: '' },
     { columnName: '納品日', item: '', value: '' },
     { columnName: '備考', item: '', value: '' },
+    { columnName: '取引先メールアドレス', item: '', value: '' },
     { columnName: '銀行名', item: '', value: '' },
     { columnName: '支店名', item: '', value: '' },
     { columnName: '科目', item: '', value: '' },
@@ -1832,7 +1838,7 @@ describe('uploadFormatのテスト', () => {
         uploadFileName: fileName,
         headerItems: headerItems,
         columnArr: columnArr,
-        selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+        selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
         taxIds: taxIdsUndefined,
         unitIds: unitIds,
         uploadGeneral: uploadGeneral,
@@ -1896,7 +1902,7 @@ describe('uploadFormatのテスト', () => {
         uploadFileName: fileName,
         headerItems: headerItems,
         columnArr: columnArr,
-        selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+        selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
         taxIds: taxIds,
         unitIds: unitIdsUndefined,
         uploadGeneral: uploadGeneral,
@@ -2810,7 +2816,7 @@ describe('uploadFormatのテスト', () => {
         uploadFileName: fileName,
         headerItems: headerItems,
         columnArr: columnArr,
-        selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+        selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
         taxIds: taxIds100,
         unitIds: unitIds,
         uploadGeneral: uploadGeneral,
@@ -2974,7 +2980,7 @@ describe('uploadFormatのテスト', () => {
         uploadFileName: fileName,
         headerItems: headerItems,
         columnArr: columnArr,
-        selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+        selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
         taxIds: taxIds,
         unitIds: unitIds100,
         uploadGeneral: uploadGeneral,
@@ -3317,8 +3323,8 @@ describe('uploadFormatのテスト', () => {
         }
       })
       expect(checkUploadFormatData.uploadData).toBe(
-        '発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考\n' +
-          '2021-06-14,UT_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト'
+        '発行日,請求書番号,テナントID,支払期日,納品日,備考,取引先メールアドレス,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考\n' +
+          '2021-06-14,UT_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,aaa@bbb.ccc,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト'
       )
     })
 
@@ -3481,7 +3487,8 @@ describe('uploadFormatのテスト', () => {
           '16',
           '17',
           '18',
-          '19'
+          '19',
+          '20'
         ],
         headerItems: headerItems,
         keyConsumptionTax: '',

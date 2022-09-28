@@ -1,0 +1,95 @@
+﻿extends layout
+
+block content
+  .max-width
+    section.hero.is-small.is-com
+      .hero-body-noImage
+        .title.is-family-noto-sans 取込結果一覧
+        .subtitle.is-family-noto-sans Result LIST
+    
+    .columns.is-centered
+      .column.is-11
+        .box.csvuploadResultBox
+          table.table.is-fullwidth.is-hoverable.table-fixed
+            thead
+              tr
+                th.width-5.text-center No
+                th.width-13.text-center アップロード日時
+                th.width-25 ファイル名
+                th.width-10.text-center ステータス
+                th.width-10.text-center 取込件数
+                th.width-10.text-center 請求書作成数
+                th.width-10.text-center 作成完了
+                th.width-10.text-center スキップ
+                th.width-10.text-center 作成失敗
+            tbody
+              - var list = resultArr
+              each item in list
+                tr
+                  th.text-center= item.index
+                  td.text-center= item.date
+                  td.td-overflow= item.filename
+                  td.text-center
+                    if item.status === true
+                      button.button.is-success.show-modal.btnDetail(data-target="csvuploadDetails-modal") OK
+                    else
+                      button.button.is-danger.show-modal.btnDetail(data-target="csvuploadDetails-modal") NG
+                  td.text-center= item.invoicesAll
+                  td.text-center= item.invoicesCount
+                  td.text-center= item.invoicesSuccess
+                  td.text-center= item.invoicesSkip
+                  td.text-center= item.invoicesFail
+                  input(type="hidden" value= item.historyId)
+
+        .mt-1.has-text-left
+          a.button.is-link.is-light(href="/pdfInvoiceCsvUpload") ← PDF請求書一括作成
+
+    .modal#csvuploadDetails-modal
+      .modal-background.cancel-button(data-target='csvuploadDetails-modal')
+      .modal-card.is-family-noto-sans.width-60
+        header.modal-card-head
+          p.modal-card-title 取込結果詳細
+          button.delete(data-target="csvuploadDetails-modal")
+        section.modal-card-body#detailsModalBody
+          p#errorMessage
+          table.table.is-bordered.width-50
+            thead
+              tr
+                th.width-8.text-center.m-0.p-0 取込件数
+                th.width-8.text-center.m-0.p-0 請求書作成数
+                th.width-8.text-center.is-success.m-0.p-0 作成完了
+                th.width-8.text-center.is-info.m-0.p-0 スキップ
+                th.width-8.text-center.is-danger.m-0.p-0 作成失敗
+            tbody
+              tr
+                td#invoicesAll.text-center
+                td#invoicesCount.text-center
+                td#invoicesSuccess.text-center
+                td#invoicesSkip.text-center
+                td#invoicesFail.text-center
+
+          div#tabs.is-invisible
+            button#btnTabAll.button.tag.is-centerd 全体
+            button#btnTabSuccess.button.tag.is-centerd.is-success 成功
+            button#btnTabSkip.button.tag.is-centerd.is-info スキップ
+            button#btnTabFail.button.tag.is-centerd.is-danger 失敗
+
+          table.table.is-fullwidth.is-hoverable.table-fixed.is-invisible#detailTable
+            thead
+              tr
+                th.width-8.text-center 行数
+                th.width-13.text-center 請求書番号
+                th.width-10.text-center 取込結果
+                th.width-35.text-center 詳細
+            tbody#resultDetail
+        footer.modal-card-foot
+           a.button.cancel-button(data-target='csvuploadDetails-modal') 閉じる
+           p ※作成失敗に該当する行のみの修正で、再アップロード可能です。
+
+    include footer
+
+block append scripts
+  script(src="/js/portal-page.js")
+  // End of DigitalTrade Portal Page
+  script(src="/js/pdfInvoiceUploadResultDetail-page.js")
+  // ResultDetail

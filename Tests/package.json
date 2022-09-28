@@ -5,7 +5,9 @@
   "dependencies": {
     "csv-parse": "^4.15.3",
     "csv-writer": "^1.6.0",
+    "dom-parser": "^0.1.6",
     "dotenv": "^8.2.0",
+    "encoding-japanese": "^2.0.0",
     "jest": "^26.6.3",
     "jest-express": "^1.12.0",
     "jest-puppeteer": "^4.4.0",
@@ -15,11 +17,11 @@
     "multer": "^1.4.3",
     "puppeteer": "^5.5.0",
     "rss-parser": "^3.12.0",
-    "supertest": "^6.0.1",
-    "dom-parser": "^0.1.6"
+    "supertest": "^6.0.1"
   },
   "scripts": {
     "test": "cross-env LOCALLY_HOSTED=true NODE_ENV=development INVOICE_UPLOAD_PATH=/home/upload jest --silent=false --verbose",
+    "test:IT": "cross-env LOCALLY_HOSTED=true NODE_ENV=development jest --silent=false --verbose --forceExit --config jest.config.IT.js",
     "test:coverage": "cross-env LOCALLY_HOSTED=true NODE_ENV=development INVOICE_UPLOAD_PATH=/home/upload jest --silent=false --verbose --coverage",
     "test:integration": "cross-env LOCALLY_HOSTED=true NODE_ENV=development jest --silent=false --verbose --config jest.config.integration.js",
     "test:tools": "cross-env LOCALLY_HOSTED=true NODE_ENV=development jest --silent=false --verbose --config jest.config.tools.js",

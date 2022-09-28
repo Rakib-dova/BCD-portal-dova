@@ -1,0 +1,415 @@
+﻿extends layout
+
+block content
+  .max-width
+    section.hero.is-small.is-com
+      .hero-body-noImage
+        .title.is-family-noto-sans #{title}
+        .subtitle.is-family-noto-sans #{engTitle}
+
+    .columns.is-centered
+      .column.is-11
+        .container.is-max-widescreen.is-family-noto-sans
+          - var standard = '030' // スタンダードプラン
+          input.is-hidden#serviceList-json(value=serviceList)
+          form#form(action="#")
+            article.panel.is-info
+              h2.panel-heading お申し込み内容入力
+              .panel-block
+                .container
+                  p.ml-4 必要項目を入力後、「内容確認」ボタンを押してください。
+
+                    .columns.is-centered: .column.is-four-fifths
+                      .field.card
+                        .card-content
+                          .title.is-4 契約者名
+                          .field
+                            label(for="contractorName").input-label 契約者名（企業名）
+                            p#contractorNameRequired.input-label-required.input-label （必須）
+                            p#contractorNameMessage.input-label-required.input-label
+                            .control
+                              input.input#contractorName(type="text" name="contractorName" value="" pattern=inputPattarnZenkaku required maxlength=80 placeholder='全角80文字まで')
+                          .field
+                            label(for="contractorKanaName").input-label 契約者カナ名（企業名）
+                            p#contractorKanaNameRequired.input-label-required.input-label （必須）
+                            p#contractorKanaNameMessage.input-label-required.input-label
+                            .control
+                              input.input#contractorKanaName(type="text" name="contractorKanaName" value="" pattern=inputPattarnZenkakuKatakana required maxlength=80 placeholder='全角カタカナ80文字まで')
+
+                      .field.card
+                        .card-content
+                          .title.is-4 契約者住所
+                          .field
+                            label(for="postalNumber").input-label 郵便番号
+                            p#postalNumberRequired.input-label-required.input-label （必須）
+                            p.input-label ※数字7桁
+                            p#postalNumberMessage.input-label-required.input-label
+                            .control
+                              .columns.ml-0.pl-0
+                                .column.is-one-third.pl-0
+                                  input.input#postalNumber(type="text" name="postalNumber" value="" pattern=inputPattarnHankakuNumber required maxlength=7 placeholder='例：1234567')
+                                .column
+                                  button.button.is-link.mr-3#postalSearchBtn(type="button" data-toggle="modal" data-target="#searchPostalNumber-modal" disabled) 検索
+                                  button.button.is-danger#postalClearBtn(type="button" disabled) クリア
+                          .field
+                            label(for="contractAddressVal").input-label 住所
+                            p#contractAddressValRequired.input-label-required.input-label （必須）
+                            p#contractAddressValMessage.input-label-required.input-label
+                            .control
+                              input.input#contractAddressVal(type="text" name="contractAddressVal" value readonly required)
+                          .field
+                            label(for="banch1").input-label 番地
+                            p#banch1Required.input-label-required.input-label （必須）
+                            p#banch1Message.input-label-required.input-label
+                            .control
+                              input.input#banch1(type="text" name="banch1" value="" pattern=inputPattarnZenkaku maxlength=20 required placeholder='全角20文字まで')
+                          .field
+                            label(for="tatemono1").input-label 建物等　
+                            p#tatemono1Message.input-label-required.input-label
+                            .control
+                              input.input#tatemono1(type="text" name="tatemono1" value="" pattern=inputPattarnZenkaku maxlength=16 placeholder='全角16文字まで')
+
+                      .field.card
+                        .card-content
+                          .title.is-4 契約者連絡先
+                          .field
+                            label(for="contactPersonName").input-label 連絡先担当者名
+                            p#contactPersonNameRequired.input-label-required.input-label （必須）
+                            p#contactPersonNameMessage.input-label-required.input-label
+                            .control
+                              input.input#contactPersonName(type="text" name="contactPersonName" value="" pattern=inputPattarnZenkaku required maxlength=10 placeholder='全角10文字まで')
+                          .field
+                            label(for="contactPhoneNumber").input-label 連絡先電話番号
+                            p#contactPhoneNumberRequired.input-label-required.input-label （必須）
+                            p.input-label ※ハイフン含む13桁まで　
+                            p#contactPhoneNumberMessage.input-label-required.input-label
+                            .control
+                              input.input#contactPhoneNumber(type="text" name="contactPhoneNumber" value="" pattern=inputPattarnTellNumber required maxlength=13 placeholder='例：000-0000-0000')
+                          .field
+                            label(for="contactMail").input-label 連絡先メールアドレス
+                            p#contactMailRequired.input-label-required.input-label （必須）
+                            p.input-label ※メールアドレス　
+                            p#contactMailMessage.input-label-required.input-label
+                            .control
+                              input.input#contactMail(type="text" name="contactMail" value="" pattern=inputPattarnMailAddress required maxlength=82 placeholder='例：bcd@gma.com')
+
+                      .field.card
+                        .card-content
+                          .title.is-4 請求情報
+                          .field
+                            label(for="billMailingPostalNumber").input-label 請求書送付先郵便番号
+                            p#billMailingPostalNumberRequired.input-label-required.input-label （必須）
+                            p.input-label ※数字7桁
+                            p#billMailingPostalNumberMessage.input-label-required.input-label
+                            .control
+                              .columns.ml-0.pl-0
+                                .column.is-one-third.pl-0
+                                  input.input#billMailingPostalNumber(type="text" name="billMailingPostalNumber" value="" pattern=inputPattarnHankakuNumber required maxlength=7 placeholder='例：1234567')
+                                .column
+                                  button.button.is-link.mr-3#billMailingSearchBtn(type="button" data-toggle="modal" data-target="#searchPostalNumber-modal" disabled) 検索
+                                  button.button.is-danger#billMailingClearBtn(type="button" disabled) クリア
+                          .field
+                            label(for="billMailingAddress").input-label 請求書送付先住所
+                            p#billMailingAddressRequired.input-label-required.input-label （必須）
+                            p#billMailingAddressMessage.input-label-required.input-label
+                            .control
+                              input.input#billMailingAddress(type="text" name="billMailingAddress" value readonly required)
+                          .field
+                            label(for="billMailingAddressBanchi1").input-label 請求書送付先番地
+                            p#billMailingAddressBanchi1Required.input-label-required.input-label （必須）
+                            p#billMailingAddressBanchi1Message.input-label-required.input-label
+                            .control
+                              input.input#billMailingAddressBanchi1(type="text" name="billMailingAddressBanchi1" value="" pattern=inputPattarnZenkaku maxlength=20 required placeholder='全角20文字まで')
+                          .field
+                            label(for="billMailingAddressBuilding1").input-label 請求書送付先建物等
+                            p#billMailingAddressBuilding1Message.input-label-required.input-label
+                            .control
+                              input.input#billMailingAddressBuilding1(type="text" name="billMailingAddressBuilding1" value="" pattern=inputPattarnZenkaku maxlength=16 placeholder='全角16文字まで')
+                          .field
+                            label(for="billMailingName").input-label 請求書送付先宛名（企業名+部課名）
+                            p#billMailingNameRequired.input-label-required.input-label （必須）
+                            p#billMailingNameMessage.input-label-required.input-label
+                            .control
+                              input.input#billMailingName(type="text" name="billMailingName" value="" pattern=inputPattarnZenkaku maxlength=40 required placeholder='全角40文字まで')
+                          .field
+                            label(for="billMailingKanaName").input-label 請求書送付先カナ宛名（企業名+部課名）
+                            p#billMailingKanaNameRequired.input-label-required.input-label （必須）
+                            p#billMailingKanaNameMessage.input-label-required.input-label
+                            .control
+                              input.input#billMailingKanaName(type="text" name="billMailingKanaName" value="" pattern=inputPattarnZenkakuKatakana maxlength=35 required placeholder='全角カタカナ35文字まで')
+
+                      .field.card
+                        .card-content
+                          .title.is-4 請求連絡先
+                          .field
+                            label(for="billMailingPersonName").input-label 担当者氏名
+                            p#billMailingPersonNameRequired.input-label-required.input-label （必須）
+                            p#billMailingPersonNameMessage.input-label-required.input-label
+                            .control
+                              input.input#billMailingPersonName(type="text" name="billMailingPersonName" value="" pattern=inputPattarnZenkaku maxlength=10 required placeholder='全角10文字まで')
+                          .field
+                            label(for="billMailingPhoneNumber").input-label 担当者電話番号
+                            p#billMailingPhoneNumberRequired.input-label-required.input-label （必須）
+                            p.input-label ※ハイフン含む13桁まで
+                            p#billMailingPhoneNumberMessage.input-label-required.input-label
+                            .control
+                              input.input#billMailingPhoneNumber(type="text" name="billMailingPhoneNumber" value="" pattern=inputPattarnTellNumber maxlength=13 required placeholder='例：000-0000-0000')
+                          .field
+                            label(for="billMailingMailAddress").input-label 担当者メールアドレス
+                            p#billMailingMailAddressRequired.input-label-required.input-label （必須）
+                            p.input-label ※メールアドレス　
+                            p#billMailingMailAddressMessage.input-label-required.input-label
+                            .control
+                              input.input#billMailingMailAddress(type="text" name="billMailingMailAddress" value="" pattern=inputPattarnMailAddress maxlength=82 required placeholder='例：bcd@gma.com')
+
+                      .field.card
+                        .card-content
+                          .title.is-4 パスワード
+                          .field
+                            label(for="password").input-label パスワード
+                            p#passwordRequired.input-label-required.input-label （必須）
+                            p.input-label ※半角英数8~10桁（大・小文字数字必須）
+                            p#passwordMessage.input-label-required.input-label
+                            .control
+                              input.input#password.form-control(type="password" name="password" value="" pattern=inputPatternKaituPW required maxlength=10 placeholder='例：Abcd1234')
+                          .field
+                            label(for="passwordConfirm").input-label パスワード確認
+                            p#passwordConfirmRequired.input-label-required.input-label （必須）
+                            p.input-label ※半角英数8~10桁（大・小文字数字必須）
+                            p#passwordConfirmMessage.input-label-required.input-label
+                            .control
+                              input.input#passwordConfirm.form-control(type="password" name="passwordConfirm" value="" pattern=inputPatternKaituPW required maxlength=10 placeholder='例：Abcd1234')
+
+                      if serviceList.some((i) =>i === standard)
+                        .field.card
+                          .card-content
+                            .title.is-4 スタンダードプラン利用開始日
+                            p ※導入支援サービスをお申し込みいただいた場合は、利用開始日が変更になる可能性があります。
+                            br
+                            .field
+                              label(for="openingDate").input-label 利用開始日
+                              p#openingDateMessage.input-label-required.input-label
+                              .control
+                                input.input#openingDate.itemForSearch(type="date" name="openingDate" max="2100-12-31" pattern=inputPatternDate)
+
+                      .field.card
+                        .card-content
+                          .title.is-4.rectangle お客様担当情報
+                          p 販売店よりご紹介いただいたお客様は、
+                          p 販売チャネルコード・担当者名をご記入ください。
+                          br
+                          .field
+                            label(for="salesChannelCode").input-label 販売チャネルコード
+                            p#salesChannelCodeMessage.input-label-required.input-label
+                            .control
+                              input.input#salesChannelCode(type="text" name="salesChannelCode" value="" pattern=inputPatternEngNumSign maxlength=8 placeholder='半角英数記号8桁まで')
+                          .field
+                            label(for="salesChannelName").input-label 販売チャネル名
+                            p#salesChannelNameMessage.input-label-required.input-label
+                            .control
+                              input.input#salesChannelName(type="text" name="salesChannelName" value="" pattern=inputPattarnZenkaku maxlength=16 placeholder='全角16桁まで')
+                          .field
+                            label(for="commonCustomerId").input-label 共通顧客ID
+                            p#commonCustomerIdMessage.input-label-required.input-label
+                            .control
+                              input.input#commonCustomerId(type="text" name="commonCustomerId" value="" pattern=inputPatternEngNum minlength=11 maxlength=11 placeholder='半角英数11桁')
+                          .field
+                            label(for="salesChannelDeptName").input-label 部課名
+                            p#salesChannelDeptNameMessage.input-label-required.input-label
+                            .control
+                              input.input#salesChannelDeptName(type="text" name="salesChannelDeptName" value="" pattern=inputPattarnZenkaku maxlength=16 placeholder='全角16桁まで')
+                          .field
+                            label(for="salesChannelEmplyeeCode").input-label 社員コード
+                            p#salesChannelEmplyeeCodeMessage.input-label-required.input-label
+                            .control
+                              input.input#salesChannelEmplyeeCode(type="text" name="salesChannelEmplyeeCode" value="" pattern=inputPatternEngNumKana maxlength=8 placeholder='半角8桁まで')
+                          .field
+                            label(for="salesChannelPersonName").input-label 担当者名
+                            p#salesChannelPersonNameMessage.input-label-required.input-label
+                            .control
+                              input.input#salesChannelPersonName(type="text" name="salesChannelPersonName" value="" pattern=inputPattarnZenkaku maxlength=10 placeholder='全角10桁まで')
+                          .field
+                            label(for="salesChannelDeptType").input-label 組織区分
+                            .control
+                              .select.is-fullwidth
+                                select#salesChannelDeptType(name="salesChannelDeptType")
+                                  option(value= '')= '選択してください'
+                                  if salesChannelDeptList && salesChannelDeptList.length > 0
+                                    for salesChannelDept of salesChannelDeptList
+                                      option(value= salesChannelDept.code)= salesChannelDept.name 
+                          .field
+                            label(for="salesChannelPhoneNumber").input-label 電話番号
+                            p#salesChannelPhoneNumberRequired.input-label
+                            p.input-label ※ハイフン含む13桁まで　
+                            p#salesChannelPhoneNumberMessage.input-label-required.input-label
+                            .control
+                              input.input#salesChannelPhoneNumber(type="text" name="salesChannelPhoneNumber" value="" pattern=inputPattarnTellNumber maxlength=13 placeholder='例：000-0000-0000')
+                          .field
+                            label(for="salesChannelMailAddress").input-label メールアドレス
+                            p#salesChannelMailAddressMessage.input-label-required.input-label
+                            .control
+                              input.input#salesChannelMailAddress(type="text" name="salesChannelMailAddress" value="" pattern=inputPattarnMailAddress maxlength=82 placeholder='例：bcd@gma.com')
+
+                  .columns.is-centered: .column.is-four-fifths
+                    .field.is-grouped.is-grouped-centered
+                      .control
+                          //- CSRF対策
+                          input.is-hidden(name="_csrf" value=csrfToken)
+                          a.button.mr-6(href="/paidServiceRegister/") 戻る
+                          button.button.is-link.btn-contract.show-modal#next-btn(type="submit") 内容確認
+
+            .modal.modal-fx-fadeInScale#confirmregister-modal
+              .modal-background.cancel-button(data-target='confirmregister-modal')
+
+              .modal-card
+                header.modal-card-head
+                  p.modal-card-title 以下の内容で利用登録します。
+                  button.delete(type="button" data-target="confirmregister-modal")
+                section.modal-card-body
+                  table.table.is-fullwidth.is-bordered
+                    tbody
+                      tr
+                        th(colspan="3") 契約者名
+
+                      tr
+                        td.confirmation-item(colspan="2") 契約者名（企業名）
+                        td#recontractorName.checkData
+                      tr
+                        td.confirmation-item(colspan="2")  契約者カナ名（企業名）
+                        td#recontractorKanaName.checkData
+
+                  table.table.is-fullwidth.is-bordered
+                    tbody
+                      tr
+                        th(colspan="3") 契約者住所
+                      tr
+                        td.confirmation-item(colspan="2") 郵便番号
+                        td#repostalNumber.checkData
+                      tr
+                        td(colspan="3") 住所
+                      tr
+                        td#recontractAddressVal.checkData.confirmation-content(colspan="3")
+                  
+                  table.table.is-fullwidth.is-bordered
+                    tbody
+                      tr
+                        th(colspan="3") 契約者連絡先
+                      tr
+                        td.confirmation-item(colspan="2") 連絡先担当者名
+                        td#recontactPersonName.checkData
+                      tr
+                        td.confirmation-item(colspan="2") 連絡先電話番号
+                        td#recontactPhoneNumber.checkData
+                      tr
+                        td.confirmation-item(colspan="2") 連絡先メールアドレス
+                        td#recontactMail.checkData
+
+                  table.table.is-fullwidth.is-bordered
+                    tbody
+                      tr
+                        th(colspan="3") 請求情報
+                      tr
+                        td.confirmation-item(colspan="2") 請求書送付先郵便番号
+                        td#rebillMailingPostalNumber.checkData
+                      tr
+                        td(colspan="3") 請求書送付先住所
+                      tr
+                        td#rebillMailingAddress.checkData.confirmation-content(colspan="3")
+                      tr
+                        td(colspan="2") 請求書送付先宛名
+                        td#rebillMailingName.checkData.confirmation-content(colspan="3")
+                      tr
+                        td(colspan="2") 請求書送付先宛カナ名
+                        td#rebillMailingKanaName.checkData.confirmation-content(colspan="3")
+
+                  table.table.is-fullwidth.is-bordered
+                    tbody
+                      tr
+                        th(colspan="3") 請求連絡先
+                      tr
+                        td.confirmation-item(colspan="2") 担当者氏名
+                        td#rebillMailingPersonName.checkData
+                      tr
+                        td.confirmation-item(colspan="2") 担当者電話番号
+                        td#rebillMailingPhoneNumber.checkData
+                      tr
+                        td.confirmation-item(colspan="2") 担当者メールアドレス
+                        td#rebillMailingMailAddress.checkData
+                  
+                  table.table.is-fullwidth.is-bordered
+                    tbody
+                      tr
+                        th(colspan="3") 契約者パスワード
+                      tr
+                        td.confirmation-item(colspan="2") パスワード
+                        td#repassword.confirmation-content.hidetext.checkData
+
+                  table.table.is-fullwidth.is-bordered
+                    tbody
+                      tr
+                        th(colspan="3") スタンダードプラン利用開始日
+                      tr
+                        td.confirmation-item(colspan="2") 利用開始日
+                        td#reopeningDate.checkData
+
+                  table.table.is-fullwidth.is-bordered
+                    tbody
+                      tr
+                        th(colspan="3") お客様担当情報
+                      tr
+                        td.confirmation-item(colspan="2") 販売チャネルコード
+                        td#resalesChannelCode.checkData
+                      tr
+                        td.confirmation-item(colspan="2") 販売チャネル名
+                        td#resalesChannelName.checkData
+                      tr
+                        td.confirmation-item(colspan="2") 共通顧客ID
+                        td#recommonCustomerId.checkData
+                      tr
+                        td.confirmation-item(colspan="2") 部課名
+                        td#resalesChannelDeptName.checkData
+                      tr
+                          td.confirmation-item(colspan="2") 社員コード
+                          td#resalesChannelEmplyeeCode.checkData
+                      tr
+                          td.confirmation-item(colspan="2") 担当者名
+                          td#resalesChannelPersonName.checkData
+                      tr
+                          td.confirmation-item(colspan="2") 組織区分
+                          td#resalesChannelDeptType.checkData
+                      tr
+                          td.confirmation-item(colspan="2") 電話番号
+                          td#resalesChannelPhoneNumber.checkData
+                      tr
+                          td.confirmation-item(colspan="2") メールアドレス
+                          td#resalesChannelMailAddress.checkData
+
+                  table.table.is-fullwidth.is-bordered
+                    tbody
+                      tr
+                        th.confirmation-item(colspan="2") 利用規約
+                        td#termsCheck.confirmation-content 同意する
+
+                footer.modal-card-foot
+                  div.button-area
+                    span.checkboxtext 「申し込む」ボタン押下することで、<a href='/html/terms-of-service_20220419.pdf' target="_blank" rel="noopener noreferrer">利用規約</a>に同意したものとします。
+                    .columns.is-centered: .column.is-four-fifths
+                      .field.is-grouped.is-grouped-centered
+                        .control
+                          a.button.cancel-button.mr-6(data-target='confirmregister-modal') キャンセル
+                          button.button.is-success.is-link(type="submit" formaction="/paidServiceRegister/apply" formmethod="POST") 申し込む
+
+            .modal.modal-fx-fadeInscale#searchPostalNumber-modal
+              .modal-background.cancel-button(data-target="searchPostalNumber-modal")
+              .modal-card
+                header.modal-card-head
+                  p.modal-card-title 住所の検索結果
+                  button.delete(type="button" data-target="searchPostalNumber-modal")
+                section.modal-card-body
+                  p.modal-card-result#modal-card-result
+                footer.modal-card-foot.modal-address-foot
+  include footer
+
+block append scripts
+  script(src="/js/common/common.js")
+  script(src="/js/paidServiceRegister-page.js")
